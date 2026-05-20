@@ -1,0 +1,12 @@
+# PinnacleIQ Research Topics
+# Format: Topic | Specialty | Therapy Area
+# Lines starting with # are comments. Edit freely before each demo run.
+
+GLP-1 Receptor Agonists in Type 2 Diabetes Management | Diabetology | GLP-1 Therapy
+SGLT2 Inhibitors and Cardiovascular Outcomes in Heart Failure | Cardiology | Heart Failure
+PCOS Management: Latest Evidence on Inositol vs Metformin | Gynaecology | PCOS
+Dyslipidaemia Treatment Updates: 2025 ESC Guidelines | Cardiology | Dyslipidaemia
+Paediatric Nutrition and Immunity: Recent Evidence | Paediatrics | Paediatric Nutrition
+Hypertension Management in South Asian Populations | Cardiology | Hypertension
+Acne Vulgaris: New Biologics and Combination Therapies | Dermatology | Acne & Skin
+Insulin Resistance in Metabolic Syndrome: 2025 Consensus | Diabetology | GLP-1 Therapy

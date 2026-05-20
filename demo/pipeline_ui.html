@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PinnacleIQ — Research Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0D1F3C; --navy2:#162E56; --navy3:#1E3A6E;
+  --gold:#B8912A; --gold2:#D4A843; --gold-bg:rgba(184,145,42,.10); --gold-bd:rgba(184,145,42,.22);
+  --surface:#fff; --surface2:#F6F8FC; --surface3:#EDF0F7;
+  --border:#E3E8F2; --border2:#C8D2E4;
+  --text1:#0D1B2A; --text2:#374151; --text3:#6B7280; --text4:#9CA3AF;
+  --green:#047857; --green-bg:#ECFDF5; --green-bd:#A7F3D0;
+  --amber:#B45309; --amber-bg:#FFFBEB; --amber-bd:#FCD34D;
+  --red:#B91C1C; --red-bg:#FEF2F2; --red-bd:#FCA5A5;
+  --blue:#1D4ED8; --blue-bg:#EFF6FF; --blue-bd:#BFDBFE;
+  --purple:#6D28D9; --purple-bg:#F5F3FF; --purple-bd:#DDD6FE;
+  --r:10px; --rlg:14px;
+  --s1:0 1px 4px rgba(13,31,60,.07); --s2:0 4px 16px rgba(13,31,60,.10); --s3:0 20px 60px rgba(13,31,60,.20);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--text1);min-height:100vh;font-size:13px;}
+
+/* ── HEADER ── */
+.hdr{background:var(--navy);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.25);}
+.hdr-logo{display:flex;align-items:center;gap:14px;}
+.hdr-wm{font-size:9px;font-weight:700;letter-spacing:2.5px;color:var(--gold2);text-transform:uppercase;}
+.hdr-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:900;color:#fff;}
+.hdr-title span{color:var(--gold2);}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.3);}
+.hdr-badge{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px;}
+
+/* ── LAYOUT ── */
+.page{max-width:1200px;margin:0 auto;padding:28px 24px;}
+.grid-main{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--s1);}
+.card-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.card-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;color:var(--navy);}
+.card-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.card-body{padding:16px 20px;}
+
+/* ── TOPIC PICKER ── */
+.topic-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;margin-bottom:6px;}
+.topic-item:hover{background:var(--surface2);border-color:var(--border);}
+.topic-item.selected{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-color:var(--navy);}
+.topic-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0;margin-top:5px;transition:background .15s;}
+.topic-item.selected .topic-dot{background:var(--navy);}
+.topic-text{font-size:12.5px;font-weight:600;color:var(--text1);line-height:1.4;}
+.topic-meta{font-size:10.5px;color:var(--text3);margin-top:2px;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:600;}
+.b-blue{background:var(--blue-bg);color:var(--blue);}
+.b-purple{background:var(--purple-bg);color:var(--purple);}
+.b-green{background:var(--green-bg);color:var(--green);}
+.b-gold{background:var(--gold-bg);color:var(--gold);}
+.b-gray{background:var(--surface3);color:var(--text3);}
+
+/* ── PIPELINE PANEL ── */
+.pipeline-empty{text-align:center;padding:60px 20px;}
+.pe-icon{width:72px;height:72px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+
+/* Agent steps */
+.agent-steps{display:flex;flex-direction:column;gap:0;}
+.agent-step{display:flex;gap:16px;padding:18px 20px;border-bottom:1px solid var(--border);position:relative;}
+.agent-step:last-child{border-bottom:none;}
+.as-connector{position:absolute;left:39px;top:52px;bottom:0;width:2px;background:var(--border);z-index:0;}
+.agent-step:last-child .as-connector{display:none;}
+.as-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;position:relative;z-index:1;transition:all .3s;}
+.as-icon-idle{background:var(--surface2);border:2px solid var(--border);}
+.as-icon-running{background:linear-gradient(135deg,var(--purple-bg),var(--purple-bd));border:2px solid var(--purple-bd);animation:pulse-border 1.2s infinite;}
+.as-icon-done{background:var(--green-bg);border:2px solid var(--green-bd);}
+@keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(109,40,217,.25);}50%{box-shadow:0 0 0 6px rgba(109,40,217,.0);}}
+.as-body{flex:1;}
+.as-label{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--text1);margin-bottom:3px;}
+.as-desc{font-size:12px;color:var(--text3);}
+.as-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;margin-top:5px;padding:3px 10px;border-radius:20px;}
+.as-status-idle{background:var(--surface3);color:var(--text4);}
+.as-status-running{background:var(--purple-bg);color:var(--purple);}
+.as-status-done{background:var(--green-bg);color:var(--green);}
+.spinner{width:10px;height:10px;border-radius:50%;border:2px solid var(--purple-bd);border-top-color:var(--purple);animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Progress bar */
+.prog-wrap{padding:16px 20px;border-bottom:1px solid var(--border);}
+.prog-track{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--gold2));border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.prog-lbl{display:flex;justify-content:space-between;margin-bottom:6px;}
+.prog-pct{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:var(--navy);}
+.prog-msg{font-size:11px;color:var(--text3);}
+
+/* ── RUN BUTTON ── */
+.btn-run{width:100%;padding:14px;background:linear-gradient(135deg,var(--navy),var(--navy3));color:#fff;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;box-shadow:0 4px 16px rgba(13,31,60,.25);}
+.btn-run:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(13,31,60,.32);}
+.btn-run:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+.btn-run-secondary{background:transparent;color:var(--text2);border:1.5px solid var(--border2);padding:10px 18px;border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-run-secondary:hover{border-color:var(--navy);color:var(--navy);}
+
+/* ── RESULTS ── */
+.result-section{padding:20px;border-bottom:1px solid var(--border);}
+.result-section:last-child{border-bottom:none;}
+.rs-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.rs-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--navy);line-height:1.4;margin-bottom:12px;}
+.rs-summary{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:12.5px;line-height:1.75;color:var(--text2);}
+.rs-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.rs-list li{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.55;color:var(--text2);}
+.rs-list li::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:6px;}
+.ai-pill{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:4px;background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#5B21B6;}
+.wa-bubble{background:#E8F5E9;border-radius:12px;padding:14px;border:1px solid #C8E6C9;}
+.wa-inner{background:#fff;border-radius:10px 10px 10px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;white-space:pre-line;color:var(--text1);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.tags-row{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{padding:3px 9px;border-radius:5px;font-size:10.5px;font-weight:600;background:var(--surface3);color:var(--text2);border:1px solid var(--border);}
+
+/* ── SUCCESS STATE ── */
+.success-banner{background:linear-gradient(135deg,var(--green-bg),#D1FAE5);border:1.5px solid var(--green-bd);border-radius:12px;padding:18px 20px;display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;}
+.sb-icon{width:44px;height:44px;border-radius:12px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:20px;}
+.sb-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:var(--green);margin-bottom:3px;}
+.sb-sub{font-size:12px;color:var(--text2);}
+
+/* ── PORTAL BUTTON ── */
+.btn-portal{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(184,145,42,.28);transition:all .18s;}
+.btn-portal:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(184,145,42,.38);}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:13px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:var(--s3);transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);z-index:999;display:flex;align-items:center;gap:10px;min-width:260px;}
+#toast.on{transform:translateY(0);opacity:1;}
+
+/* ── STATUS PILLS ── */
+.status-bar{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:10px;padding:12px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sb-stat{text-align:center;}
+.sb-val{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:900;color:var(--gold2);}
+.sb-lbl{font-size:9px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.5px;}
+.sb-divider{width:1px;background:rgba(255,255,255,.1);height:28px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:#10B981;animation:sdpulse 2s infinite;flex-shrink:0;}
+@keyframes sdpulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;width:fit-content;margin-bottom:18px;}
+.tab{padding:6px 16px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);transition:all .15s;}
+.tab.on{background:var(--surface);color:var(--navy);box-shadow:var(--s1);}
+
+@media (max-width:900px){.grid-main{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">
+    <div>
+      <div class="hdr-wm">Mankind Pharma</div>
+      <div class="hdr-title">Pinnacle<span>IQ</span> <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,.4);">· Research Pipeline</span></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="font-size:11px;color:rgba(255,255,255,.38);">Powered by LangChain Agents</div>
+    <div class="hdr-badge">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 .5l1.1 3.3H11L8.3 5.7l1.1 3.3-2.9-2-2.9 2 1.1-3.3L2 3.8h3.4L6.5.5z" fill="currentColor"/></svg>
+      AI-Powered
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Status bar (loaded from API) -->
+  <div class="status-bar" id="status-bar" style="display:none;">
+    <div class="sdot"></div>
+    <div class="sb-stat"><div class="sb-val" id="sb-total">0</div><div class="sb-lbl">Total</div></div>
+    <div class="sb-divider"></div>
+    <div class="sb-stat"><div class="sb-val" id="sb-pending" style="color:#FCD34D;">0</div><div class="sb-lbl">Pending Review</div></div>
+    <div class="sb-divider"></div>
+    <div class="sb-stat"><div class="sb-val" id="sb-approved" style="color:#6EE7B7;">0</div><div class="sb-lbl">Approved</div></div>
+    <div class="sb-divider"></div>
+    <div class="sb-stat"><div class="sb-val" id="sb-rejected" style="color:#FCA5A5;">0</div><div class="sb-lbl">Rejected</div></div>
+    <div style="flex:1;"></div>
+    <button onclick="openPortal()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;padding:7px 14px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="1" y="1" width="10" height="10" rx="2"/><path d="M4 4h4M4 6.5h4M4 9h2"/></svg>
+      Open PinnacleIQ Portal →
+    </button>
+  </div>
+
+  <div class="grid-main">
+
+    <!-- LEFT: TOPIC PICKER -->
+    <div>
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-icon" style="background:var(--blue-bg);">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round"><path d="M4 4h10M4 7.5h10M4 11h7"/><circle cx="14" cy="13" r="3"/><path d="M12.8 13h2.4M14 11.8v2.4"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Research Topics</div>
+            <div class="card-sub">From <code style="font-size:10px;background:var(--surface3);padding:1px 5px;border-radius:4px;">topics.txt</code></div>
+          </div>
+          <button onclick="loadTopics()" style="margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;" title="Refresh from file">↺ Refresh</button>
+        </div>
+        <div class="card-body" style="padding:12px;">
+          <div id="topics-list">
+            <div style="text-align:center;padding:24px;color:var(--text4);">
+              <div style="font-size:24px;margin-bottom:8px;">📄</div>
+              Loading topics...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected topic summary -->
+      <div class="card" style="margin-top:16px;" id="selected-card" style="display:none;">
+        <div class="card-hdr">
+          <div class="card-icon" style="background:var(--gold-bg);">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round"><path d="M9 1.5l1.5 4.5H15l-3.9 2.9 1.5 4.5L9 10.5l-3.6 2.9 1.5-4.5L3 6h4.5L9 1.5z"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Selected Topic</div>
+            <div class="card-sub" id="sel-specialty-lbl">—</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="sel-topic-text" style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;line-height:1.5;">—</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="sel-badges"></div>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid var(--border);">
+          <button class="btn-run" id="run-btn" onclick="runPipeline()" disabled>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l11 6-11 6V2z"/></svg>
+            Run Research Pipeline
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PIPELINE PANEL -->
+    <div id="right-panel">
+
+      <!-- Empty state -->
+      <div class="card" id="empty-state">
+        <div style="padding:60px 20px;text-align:center;">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--surface2),var(--surface3));display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px;">🔬</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:var(--navy);margin-bottom:8px;">Ready to Research</div>
+          <div style="font-size:13px;color:var(--text3);max-width:340px;margin:0 auto;">
+            Select a topic from the left panel, then click <strong>Run Research Pipeline</strong> to start the 4-agent AI research process.
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px;max-width:380px;margin-left:auto;margin-right:auto;text-align:left;">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;">
+              <div style="font-size:20px;margin-bottom:5px;">🌐</div>
+              <div style="font-size:11.5px;font-weight:700;color:var(--navy);">Agent Alpha</div>
+              <div style="font-size:10.5px;color:var(--text3);">Web search + file research</div>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;">
+              <div style="font-size:20px;margin-bottom:5px;">🧠</div>
+              <div style="font-size:11.5px;font-weight:700;color:var(--navy);">Agent Beta</div>
+              <div style="font-size:10.5px;color:var(--text3);">Insights & analysis</div>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;">
+              <div style="font-size:20px;margin-bottom:5px;">✍️</div>
+              <div style="font-size:11.5px;font-weight:700;color:var(--navy);">Agent Gamma</div>
+              <div style="font-size:10.5px;color:var(--text3);">Doctor-friendly article</div>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;">
+              <div style="font-size:20px;margin-bottom:5px;">🗂️</div>
+              <div style="font-size:11.5px;font-weight:700;color:var(--navy);">Agent Delta</div>
+              <div style="font-size:10.5px;color:var(--text3);">JSON report for portal</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Running state -->
+      <div class="card" id="running-state" style="display:none;">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px;" id="run-topic-lbl">Researching...</div>
+          <div style="font-size:11px;color:var(--text3);">AI agent pipeline in progress</div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="prog-wrap">
+          <div class="prog-lbl">
+            <span class="prog-msg" id="prog-msg">Starting...</span>
+            <span class="prog-pct"><span id="prog-pct">0</span>%</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%;"></div></div>
+        </div>
+
+        <!-- Agent steps -->
+        <div class="agent-steps">
+          <div class="agent-step" id="as-alpha">
+            <div class="as-connector"></div>
+            <div class="as-icon as-icon-idle" id="as-alpha-icon">🌐</div>
+            <div class="as-body">
+              <div class="as-label">Agent Alpha — Research</div>
+              <div class="as-desc">Searches internet (Tavily) and reads OneDrive documents on the topic</div>
+              <div class="as-status as-status-idle" id="as-alpha-status">Waiting</div>
+            </div>
+          </div>
+          <div class="agent-step" id="as-beta">
+            <div class="as-connector"></div>
+            <div class="as-icon as-icon-idle" id="as-beta-icon">🧠</div>
+            <div class="as-body">
+              <div class="as-label">Agent Beta — Insights</div>
+              <div class="as-desc">Extracts key findings, clinical insights, and recommendations</div>
+              <div class="as-status as-status-idle" id="as-beta-status">Waiting</div>
+            </div>
+          </div>
+          <div class="agent-step" id="as-gamma">
+            <div class="as-connector"></div>
+            <div class="as-icon as-icon-idle" id="as-gamma-icon">✍️</div>
+            <div class="as-body">
+              <div class="as-label">Agent Gamma — Article Writer</div>
+              <div class="as-desc">Writes a short, doctor-friendly article for WhatsApp / email delivery</div>
+              <div class="as-status as-status-idle" id="as-gamma-status">Waiting</div>
+            </div>
+          </div>
+          <div class="agent-step">
+            <div class="as-icon as-icon-idle" id="as-delta-icon">🗂️</div>
+            <div class="as-body">
+              <div class="as-label">Agent Delta — JSON Report</div>
+              <div class="as-desc">Structures everything into the Pinnacle portal JSON format</div>
+              <div class="as-status as-status-idle" id="as-delta-status">Waiting</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed state -->
+      <div id="result-state" style="display:none;">
+        <div class="success-banner">
+          <div class="sb-icon">✅</div>
+          <div>
+            <div class="sb-title">Pipeline Complete</div>
+            <div class="sb-sub">Content is now in the <strong>Pending Review</strong> queue. Open the PinnacleIQ portal for Medical Affairs to review and approve.</div>
+          </div>
+          <button class="btn-portal" onclick="openPortal()" style="margin-left:auto;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="1" width="12" height="12" rx="2"/><path d="M4 5h6M4 7.5h6M4 10h4"/></svg>
+            Open Portal →
+          </button>
+        </div>
+
+        <div class="card">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:var(--navy);">Generated Content</div>
+              <div style="font-size:11px;color:var(--text3);">Status: <span class="badge b-gold">⏳ Pending MA Review</span></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="resetPipeline()" class="btn-run-secondary" style="font-size:11.5px;padding:7px 14px;">↩ Run Another</button>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div style="padding:14px 20px 0;">
+            <div class="tabs">
+              <div class="tab on" onclick="showTab('summary',this)">Summary</div>
+              <div class="tab" onclick="showTab('insights',this)">Key Findings</div>
+              <div class="tab" onclick="showTab('article',this)">Short Article</div>
+              <div class="tab" onclick="showTab('json',this)">JSON Report</div>
+            </div>
+          </div>
+
+          <!-- Tab: Summary -->
+          <div id="tab-summary" class="result-section">
+            <div class="rs-label">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 .4l.8 2.5H9.6L7.4 4.5l.8 2.5L6 5.6l-2.2 1.4.8-2.5L2.4 2.9H5.2L6 .4z" fill="#7C3AED" opacity=".85"/></svg>
+              AI-Generated Clinical Summary <span class="ai-pill">AI</span>
+            </div>
+            <div class="rs-title" id="res-title">—</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="res-badges"></div>
+            <div class="rs-summary" id="res-summary">—</div>
+            <div style="margin-top:12px;" id="res-tags-wrap">
+              <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">Tags</div>
+              <div class="tags-row" id="res-tags"></div>
+            </div>
+          </div>
+
+          <!-- Tab: Key Findings -->
+          <div id="tab-insights" class="result-section" style="display:none;">
+            <div class="rs-label">Key Findings</div>
+            <ul class="rs-list" id="res-findings"></ul>
+            <div style="margin-top:16px;">
+              <div class="rs-label" style="margin-bottom:8px;">Clinical Insights</div>
+              <div class="rs-summary" id="res-clinical">—</div>
+            </div>
+            <div style="margin-top:16px;">
+              <div class="rs-label" style="margin-bottom:8px;">Recommendations</div>
+              <ul class="rs-list" id="res-recs"></ul>
+            </div>
+            <div style="margin-top:16px;">
+              <div class="rs-label" style="margin-bottom:8px;">Emerging Trends</div>
+              <ul class="rs-list" id="res-trends"></ul>
+            </div>
+          </div>
+
+          <!-- Tab: Short Article -->
+          <div id="tab-article" class="result-section" style="display:none;">
+            <div class="rs-label">WhatsApp / Email Preview</div>
+            <div class="wa-bubble"><div class="wa-inner" id="res-article">—</div></div>
+            <div style="margin-top:12px;font-size:11px;color:var(--text3);">💬 This article will be personalised with the doctor's name before sending.</div>
+          </div>
+
+          <!-- Tab: JSON -->
+          <div id="tab-json" class="result-section" style="display:none;">
+            <div class="rs-label">Pinnacle Portal JSON Payload</div>
+            <pre id="res-json" style="background:var(--navy);color:#A7F3D0;border-radius:10px;padding:16px;font-size:11px;overflow-x:auto;line-height:1.7;max-height:400px;overflow-y:auto;"></pre>
+          </div>
+
+        </div><!-- /card -->
+      </div><!-- /result-state -->
+
+    </div><!-- /right-panel -->
+  </div><!-- /grid-main -->
+</div>
+
+<div id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg">Done</span>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let selectedTopic = null;
+let currentRunId = null;
+let pollTimer = null;
+let currentContent = null;
+
+// ── Toast ──────────────────────────────────────────────────────
+function toast(icon, msg, dur = 3000) {
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), dur);
+}
+
+// ── Load topics from API ───────────────────────────────────────
+async function loadTopics() {
+  const container = document.getElementById('topics-list');
+  try {
+    const r = await fetch(`${API}/topics`);
+    if (!r.ok) throw new Error(await r.text());
+    const data = await r.json();
+    if (!data.topics.length) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text4);">No topics found in topics.txt</div>';
+      return;
+    }
+    container.innerHTML = data.topics.map((t, i) =>
+      `<div class="topic-item" onclick="selectTopic(${i})" id="ti-${i}" data-topic='${JSON.stringify(t)}'>
+        <div class="topic-dot"></div>
+        <div>
+          <div class="topic-text">${t.topic}</div>
+          <div class="topic-meta">${t.specialty} · ${t.therapy_area}</div>
+        </div>
+      </div>`
+    ).join('');
+    loadStats();
+  } catch(e) {
+    container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--red);">
+      <div style="font-size:20px;margin-bottom:6px;">⚠️</div>
+      <div style="font-weight:700;margin-bottom:4px;">Cannot reach API</div>
+      <div style="font-size:11px;color:var(--text3);">Make sure the backend is running:<br><code>python backend/app.py</code></div>
+    </div>`;
+  }
+}
+
+function selectTopic(idx) {
+  document.querySelectorAll('.topic-item').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById(`ti-${idx}`);
+  el.classList.add('selected');
+  selectedTopic = JSON.parse(el.dataset.topic);
+
+  // Update selected card
+  document.getElementById('selected-card').style.display = 'block';
+  document.getElementById('sel-topic-text').textContent = selectedTopic.topic;
+  document.getElementById('sel-specialty-lbl').textContent = `${selectedTopic.specialty} · ${selectedTopic.therapy_area}`;
+  document.getElementById('sel-badges').innerHTML =
+    `<span class="badge b-blue">${selectedTopic.specialty}</span>
+     <span class="badge b-purple">${selectedTopic.therapy_area}</span>`;
+  document.getElementById('run-btn').disabled = false;
+
+  // Reset right panel to empty state
+  document.getElementById('empty-state').style.display = 'block';
+  document.getElementById('running-state').style.display = 'none';
+  document.getElementById('result-state').style.display = 'none';
+}
+
+// ── Run pipeline ───────────────────────────────────────────────
+async function runPipeline() {
+  if (!selectedTopic) return;
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('run-btn').innerHTML = `
+    <div style="width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;"></div>
+    Pipeline Running...`;
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('result-state').style.display = 'none';
+  document.getElementById('running-state').style.display = 'block';
+  document.getElementById('run-topic-lbl').textContent = selectedTopic.topic;
+
+  // Reset agent icons
+  ['alpha','beta','gamma','delta'].forEach(a => {
+    document.getElementById(`as-${a}-icon`).className = 'as-icon as-icon-idle';
+    document.getElementById(`as-${a}-status`).className = 'as-status as-status-idle';
+    document.getElementById(`as-${a}-status`).textContent = 'Waiting';
+  });
+  setProgress(0, 'Starting pipeline...');
+
+  try {
+    const r = await fetch(`${API}/pipeline/run`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        topic: selectedTopic.topic,
+        specialty: selectedTopic.specialty,
+        therapy_area: selectedTopic.therapy_area
+      })
+    });
+    if (!r.ok) throw new Error(await r.text());
+    const data = await r.json();
+    currentRunId = data.run_id;
+    startPolling();
+  } catch(e) {
+    toast('❌', 'Failed to start pipeline: ' + e.message, 4000);
+    resetRunBtn();
+  }
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(pollStatus, 1800);
+}
+
+async function pollStatus() {
+  if (!currentRunId) return;
+  try {
+    const r = await fetch(`${API}/pipeline/status/${currentRunId}`);
+    const data = await r.json();
+    updatePipelineUI(data);
+    if (data.status === 'completed') {
+      clearInterval(pollTimer);
+      await showResults(data.content_id);
+    } else if (data.status === 'failed') {
+      clearInterval(pollTimer);
+      toast('❌', 'Pipeline failed. Check backend logs.', 5000);
+      resetRunBtn();
+    }
+  } catch(e) { /* network glitch, keep polling */ }
+}
+
+function updatePipelineUI(data) {
+  setProgress(data.progress, data.status_msg);
+  const agent = data.current_agent;
+  const order = ['alpha','beta','gamma','delta'];
+  const idx = order.indexOf(agent);
+  order.forEach((a, i) => {
+    const icon = document.getElementById(`as-${a}-icon`);
+    const status = document.getElementById(`as-${a}-status`);
+    if (i < idx) {
+      icon.className = 'as-icon as-icon-done';
+      status.className = 'as-status as-status-done';
+      status.innerHTML = '✓ Complete';
+    } else if (i === idx) {
+      icon.className = 'as-icon as-icon-running';
+      status.className = 'as-status as-status-running';
+      status.innerHTML = `<div class="spinner"></div> Running...`;
+    } else {
+      icon.className = 'as-icon as-icon-idle';
+      status.className = 'as-status as-status-idle';
+      status.textContent = 'Waiting';
+    }
+  });
+  if (data.status === 'completed') {
+    order.forEach(a => {
+      document.getElementById(`as-${a}-icon`).className = 'as-icon as-icon-done';
+      document.getElementById(`as-${a}-status`).className = 'as-status as-status-done';
+      document.getElementById(`as-${a}-status`).innerHTML = '✓ Complete';
+    });
+  }
+}
+
+function setProgress(pct, msg) {
+  document.getElementById('prog-pct').textContent = pct;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-msg').textContent = msg;
+}
+
+// ── Show results ───────────────────────────────────────────────
+async function showResults(contentId) {
+  const r = await fetch(`${API}/content/${contentId}`);
+  const c = await r.json();
+  currentContent = c;
+
+  document.getElementById('running-state').style.display = 'none';
+  document.getElementById('result-state').style.display = 'block';
+
+  // Summary tab
+  document.getElementById('res-title').textContent = c.title;
+  document.getElementById('res-summary').textContent = c.summary;
+  document.getElementById('res-badges').innerHTML =
+    `<span class="badge b-blue">${c.specialty}</span>
+     <span class="badge b-purple">${c.therapy_area}</span>
+     <span class="badge b-gray">${c.sub_category}</span>
+     <span class="badge b-gold">⏳ Pending Review</span>`;
+  document.getElementById('res-tags').innerHTML =
+    (c.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
+
+  // Insights tab
+  document.getElementById('res-findings').innerHTML =
+    (c.key_findings || []).map(f => `<li>${f}</li>`).join('');
+  document.getElementById('res-clinical').textContent = c.clinical_insights;
+  document.getElementById('res-recs').innerHTML =
+    (c.recommendations || []).map(r => `<li>${r}</li>`).join('');
+  document.getElementById('res-trends').innerHTML =
+    (c.emerging_trends || []).map(t => `<li>${t}</li>`).join('');
+
+  // Article tab
+  document.getElementById('res-article').textContent = c.short_article;
+
+  // JSON tab
+  document.getElementById('res-json').textContent = JSON.stringify(c, null, 2);
+
+  resetRunBtn();
+  loadStats();
+  toast('✅', 'Pipeline complete! Content ready for MA review.', 4000);
+}
+
+// ── Tabs ───────────────────────────────────────────────────────
+function showTab(name, el) {
+  ['summary','insights','article','json'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ── Stats ──────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/content`);
+    const data = await r.json();
+    document.getElementById('sb-total').textContent = data.counts.total;
+    document.getElementById('sb-pending').textContent = data.counts.pending;
+    document.getElementById('sb-approved').textContent = data.counts.approved;
+    document.getElementById('sb-rejected').textContent = data.counts.rejected;
+    document.getElementById('status-bar').style.display = data.counts.total > 0 ? 'flex' : 'none';
+  } catch(e) {}
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+function resetRunBtn() {
+  const btn = document.getElementById('run-btn');
+  btn.disabled = false;
+  btn.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l11 6-11 6V2z"/></svg>
+    Run Research Pipeline`;
+}
+
+function resetPipeline() {
+  currentRunId = null;
+  currentContent = null;
+  document.getElementById('result-state').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'block';
+  resetRunBtn();
+}
+
+function openPortal() {
+  window.open('../pinnacleiq_v13.html', '_blank');
+}
+
+// ── Init ───────────────────────────────────────────────────────
+loadTopics();
+</script>
+</body>
+</html>
