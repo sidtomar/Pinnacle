@@ -3,52 +3,38 @@ Agent Alpha — Research Agent
 
 Searches the internet (Tavily) and OneDrive files for the given topic,
 then consolidates everything into a structured research article.
+
+Uses LangGraph's create_react_agent (LangChain 1.x / LangGraph 1.x API).
 """
-from langchain.agents import AgentExecutor, create_react_agent
-from langchain_core.prompts import PromptTemplate
+from langgraph.prebuilt import create_react_agent
 
 from config import get_llm
 from tools import build_tavily_tool, read_onedrive_files
 
-_SYSTEM_PROMPT = PromptTemplate.from_template("""
-You are Agent Alpha, a meticulous research assistant.
+_SYSTEM_PROMPT = """\
+You are Agent Alpha, a meticulous medical research assistant for Mankind Pharma.
+
 Your job is to gather comprehensive information on the given topic from two sources:
-1. The internet (use the internet_search tool)
-2. Internal documents on OneDrive (use the read_onedrive_files tool)
+1. The internet — use the internet_search tool (run at least 3 searches with different angles:
+   latest news, clinical studies, expert opinions, Indian population data)
+2. Internal documents — use the read_onedrive_files tool to find relevant internal papers
 
-For every topic/keyword:
-- Run at least 3 internet searches with different angles (latest news, clinical studies, expert opinions)
-- Search OneDrive for relevant internal documents
-- Combine all findings into one coherent, well-structured research article
+After gathering all information, produce a single consolidated research article in this format:
 
-Output format:
 ## Topic: <topic>
+
 ## Internet Findings
-<findings from web searches>
+<summarised findings from each web search>
 
 ## Internal Document Findings
-<findings from OneDrive files>
+<content from any matching OneDrive files, or "No internal documents found" if none>
 
 ## Consolidated Research Article
-<a comprehensive, readable article merging all sources, citing them inline>
+<a comprehensive, readable article (500-800 words) merging all sources,
+ with inline source citations, written for a medical professional audience>
 
-Tools available: {tools}
-Tool names: {tool_names}
-
-Use the ReAct format:
-Thought: <reasoning>
-Action: <tool name>
-Action Input: <input>
-Observation: <result>
-... (repeat as needed)
-Thought: I have enough information.
-Final Answer: <the consolidated research article>
-
-Begin!
-
-Topic/Keywords: {input}
-{agent_scratchpad}
-""")
+Be thorough, accurate, and clinically focused.
+"""
 
 
 def run_alpha(topic: str) -> str:
@@ -56,14 +42,16 @@ def run_alpha(topic: str) -> str:
     llm = get_llm(temperature=0.1)
     tools = [build_tavily_tool(), read_onedrive_files]
 
-    agent = create_react_agent(llm=llm, tools=tools, prompt=_SYSTEM_PROMPT)
-    executor = AgentExecutor(
-        agent=agent,
+    # LangGraph prebuilt ReAct agent (replaces langchain AgentExecutor)
+    agent = create_react_agent(
+        model=llm,
         tools=tools,
-        verbose=True,
-        max_iterations=12,
-        handle_parsing_errors=True,
+        prompt=_SYSTEM_PROMPT,
     )
 
-    result = executor.invoke({"input": topic})
-    return result["output"]
+    result = agent.invoke({
+        "messages": [("human", f"Research this topic thoroughly: {topic}")]
+    })
+
+    # The final answer is the last AI message in the messages list
+    return result["messages"][-1].content
