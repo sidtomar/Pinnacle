@@ -156,72 +156,129 @@ print("✅ All packages installed!")
 md("""\
 ## 🔑 Step 1 — Configure API Keys
 
-In **Google Colab**, go to the 🔒 **Secrets** tab (left sidebar, key icon)
-and add each key there. Then run the cell below to load them into environment variables.
+### Why OpenRouter?
+Instead of managing separate API keys for Claude, GPT-4o, Gemini etc.,
+we use **[OpenRouter](https://openrouter.ai)** — a single API key that routes to 100+ models.
+Just change one env variable (`OPENROUTER_MODEL`) to switch models instantly.
 
-If you're running **locally**, create a `.env` file instead (see `.env.example` in the repo).
+In **Google Colab**, go to the 🔒 **Secrets** tab (left sidebar, key icon) and add each key.
+Then run the cell below to load them.
 
-| Secret Name | Where to get it |
+If running **locally**, copy `.env.example` → `.env` and fill in the values.
+
+### Required Keys
+
+| Secret Name | Where to get it | Required? |
+|---|---|---|
+| `OPENROUTER_API_KEY` | https://openrouter.ai/keys | ✅ Yes (for real pipeline) |
+| `TAVILY_API_KEY` | https://app.tavily.com | ✅ Yes (for web search) |
+
+### Optional Keys (pipeline skips gracefully if missing)
+
+| Secret Name | Purpose |
 |---|---|
-| `ANTHROPIC_API_KEY` | https://console.anthropic.com |
-| `OPENAI_API_KEY` | https://platform.openai.com (optional, if using GPT-4o) |
-| `TAVILY_API_KEY` | https://app.tavily.com |
-| `ONEDRIVE_CLIENT_ID` | Azure App Registration |
-| `ONEDRIVE_CLIENT_SECRET` | Azure App Registration |
-| `ONEDRIVE_TENANT_ID` | Azure Active Directory |
-| `TWILIO_ACCOUNT_SID` | https://console.twilio.com |
-| `TWILIO_AUTH_TOKEN` | https://console.twilio.com |
-| `TWILIO_WHATSAPP_FROM` | e.g. `whatsapp:+14155238886` |
-| `SENDGRID_API_KEY` | https://app.sendgrid.com |
-| `EMAIL_FROM` | your verified sender email |
+| `ONEDRIVE_CLIENT_ID/SECRET/TENANT_ID` | Read internal Azure/OneDrive documents |
+| `TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` | WhatsApp delivery |
+| `SENDGRID_API_KEY` | Email delivery |
 
-> 💡 **For the demo / mock sections at the bottom, no keys are needed.**
+### Available Models via OpenRouter
+| Model slug (set as `OPENROUTER_MODEL`) | Provider |
+|---|---|
+| `anthropic/claude-sonnet-4-5` ⭐ | Anthropic |
+| `anthropic/claude-opus-4` | Anthropic |
+| `openai/gpt-4o` | OpenAI |
+| `openai/gpt-4o-mini` | OpenAI |
+| `google/gemini-pro-1.5` | Google |
+| `google/gemini-flash-1.5` | Google |
+| `meta-llama/llama-3.1-405b-instruct` | Meta |
+| `deepseek/deepseek-r1` | DeepSeek |
+| `mistralai/mistral-large` | Mistral |
+
+> 💡 **For the demo / mock sections at the bottom, NO keys are needed at all.**
 """)
 
 code("""\
 import os
 
-# ── Try loading from Colab Secrets first, fall back to empty string ────────
+# ── Helper: load from Colab Secrets → env var → default ──────────────────────
 def _secret(name: str, default: str = "") -> str:
-    \"\"\"Load from Colab Secrets if available, else return default.\"\"\"
+    \"\"\"
+    Load a secret value in priority order:
+    1. Google Colab Secrets (if running in Colab)
+    2. Environment variable (if running locally with .env loaded)
+    3. The default value
+    \"\"\"
     try:
         from google.colab import userdata
-        return userdata.get(name) or default
+        val = userdata.get(name)
+        if val:
+            return val
     except Exception:
-        return os.getenv(name, default)
+        pass
+    return os.getenv(name, default)
 
-# ── Required for the real LLM pipeline ─────────────────────────────────────
-os.environ["LLM_PROVIDER"]        = "claude"           # or "openai"
-os.environ["ANTHROPIC_API_KEY"]   = _secret("ANTHROPIC_API_KEY")
-os.environ["OPENAI_API_KEY"]      = _secret("OPENAI_API_KEY")
-os.environ["TAVILY_API_KEY"]      = _secret("TAVILY_API_KEY")
 
-# ── OneDrive (Microsoft Graph API) ─────────────────────────────────────────
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  CHANGE THESE TO SWITCH MODELS — no other code changes needed!  ║
+# ╚══════════════════════════════════════════════════════════════════╝
+
+# Provider: always "openrouter" (routes to any model via one API key)
+os.environ["LLM_PROVIDER"]      = "openrouter"
+
+# Your OpenRouter API key — get one free at https://openrouter.ai/keys
+os.environ["OPENROUTER_API_KEY"] = _secret("OPENROUTER_API_KEY")
+
+# Pick any model from https://openrouter.ai/models
+# Just change this one line to try a different model!
+os.environ["OPENROUTER_MODEL"]  = "anthropic/claude-sonnet-4-5"
+# os.environ["OPENROUTER_MODEL"] = "openai/gpt-4o"
+# os.environ["OPENROUTER_MODEL"] = "google/gemini-pro-1.5"
+# os.environ["OPENROUTER_MODEL"] = "meta-llama/llama-3.1-70b-instruct"
+# os.environ["OPENROUTER_MODEL"] = "deepseek/deepseek-r1"
+# os.environ["OPENROUTER_MODEL"] = "mistralai/mistral-large"
+
+
+# ── Tavily Search (required for Agent Alpha web searches) ─────────────────────
+os.environ["TAVILY_API_KEY"]    = _secret("TAVILY_API_KEY")
+
+# ── OneDrive / Microsoft Graph API (optional) ─────────────────────────────────
 os.environ["ONEDRIVE_CLIENT_ID"]     = _secret("ONEDRIVE_CLIENT_ID")
 os.environ["ONEDRIVE_CLIENT_SECRET"] = _secret("ONEDRIVE_CLIENT_SECRET")
 os.environ["ONEDRIVE_TENANT_ID"]     = _secret("ONEDRIVE_TENANT_ID")
-os.environ["ONEDRIVE_FOLDER_PATH"]   = "Research"   # folder name in OneDrive
+os.environ["ONEDRIVE_FOLDER_PATH"]   = "Research"
 
-# ── WhatsApp via Twilio ─────────────────────────────────────────────────────
-os.environ["TWILIO_ACCOUNT_SID"]    = _secret("TWILIO_ACCOUNT_SID")
-os.environ["TWILIO_AUTH_TOKEN"]     = _secret("TWILIO_AUTH_TOKEN")
-os.environ["TWILIO_WHATSAPP_FROM"]  = _secret("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
-os.environ["WHATSAPP_RECIPIENTS"]   = "+919999999999"   # comma-separated numbers
+# ── WhatsApp via Twilio (optional) ────────────────────────────────────────────
+os.environ["TWILIO_ACCOUNT_SID"]   = _secret("TWILIO_ACCOUNT_SID")
+os.environ["TWILIO_AUTH_TOKEN"]    = _secret("TWILIO_AUTH_TOKEN")
+os.environ["TWILIO_WHATSAPP_FROM"] = _secret("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+os.environ["WHATSAPP_RECIPIENTS"]  = "whatsapp:+91XXXXXXXXXX"  # your number
 
-# ── Email via SendGrid ──────────────────────────────────────────────────────
-os.environ["SENDGRID_API_KEY"]   = _secret("SENDGRID_API_KEY")
-os.environ["EMAIL_FROM"]         = _secret("EMAIL_FROM", "research@mankind.com")
-os.environ["EMAIL_FROM_NAME"]    = "Pinnacle Research Team"
-os.environ["EMAIL_RECIPIENTS"]   = "doctor@example.com"  # comma-separated
+# ── Email via SendGrid (optional) ─────────────────────────────────────────────
+os.environ["SENDGRID_API_KEY"]  = _secret("SENDGRID_API_KEY")
+os.environ["EMAIL_FROM"]        = _secret("EMAIL_FROM", "research@mankind.com")
+os.environ["EMAIL_FROM_NAME"]   = "Pinnacle Research Team"
+os.environ["EMAIL_RECIPIENTS"]  = "doctor@example.com"
 
-# ── Pinnacle Portal (optional — Delta posts the JSON report here) ───────────
-os.environ["PINNACLE_API_URL"] = ""   # leave blank if not running the portal
+# ── Pinnacle Portal (optional — Delta POSTs the JSON report here) ──────────────
+os.environ["PINNACLE_API_URL"] = ""
 os.environ["PINNACLE_API_KEY"] = ""
 
-print("✅ Environment configured.")
-print(f"   LLM Provider : {os.environ['LLM_PROVIDER'].upper()}")
-print(f"   Anthropic key: {'set' if os.environ['ANTHROPIC_API_KEY'] else 'NOT SET'}")
-print(f"   Tavily key   : {'set' if os.environ['TAVILY_API_KEY'] else 'NOT SET'}")
+# ── Status check ──────────────────────────────────────────────────────────────
+model   = os.environ.get("OPENROUTER_MODEL", "not set")
+or_key  = os.environ.get("OPENROUTER_API_KEY", "")
+tav_key = os.environ.get("TAVILY_API_KEY", "")
+
+print("=" * 55)
+print("  PINNACLEIQ — Environment Status")
+print("=" * 55)
+print(f"  Provider      : {os.environ['LLM_PROVIDER'].upper()} (OpenRouter)")
+print(f"  Model         : {model}")
+print(f"  OpenRouter key: {'SET ✅' if or_key else 'NOT SET ⚠️  (needed for real pipeline)'}")
+print(f"  Tavily key    : {'SET ✅' if tav_key else 'NOT SET ⚠️  (needed for web search)'}")
+print("=" * 55)
+print()
+print("  To switch models, just change OPENROUTER_MODEL above")
+print("  and re-run this cell. No other changes needed!")
 """)
 
 
@@ -235,73 +292,120 @@ md("""\
 This is the **LLM factory** — the single place that decides which AI model to use.
 
 **Why a factory?**
-- You swap between Claude and GPT-4o by changing one env variable (`LLM_PROVIDER`)
-- No agent needs to know *which* model it's using — they all just call `get_llm()`
-- Temperature can be tuned per-agent (Alpha: 0.1 for factual research, Gamma: 0.3 for creative writing)
+- Every agent calls `get_llm()` — none of them care which model is behind it
+- Change `OPENROUTER_MODEL` in Step 1 to instantly swap between 100+ models
+- Temperature is tuned per-agent (Alpha: 0.1 factual, Gamma: 0.3 creative writing)
+
+**Why OpenRouter?**
+- One API key works for Claude, GPT-4o, Gemini, Llama, DeepSeek, Mistral — all of them
+- OpenRouter exposes an OpenAI-compatible API, so LangChain's `ChatOpenAI` class works with it
+- No code changes needed to switch models — just change the model slug string
 """)
 
 code("""\
 # ─── config.py ────────────────────────────────────────────────────────────────
-# The LLM factory. Every agent imports get_llm() from here.
+# LLM factory — returns a chat model for the configured provider.
+# Default: OpenRouter (one key → any of 100+ models).
+# Legacy: direct Claude / OpenAI (kept for backward compatibility).
 # ─────────────────────────────────────────────────────────────────────────────
 
 import os
 from enum import Enum
-
-# We import BaseChatModel just for type hints — it's the common base class
-# for both ChatAnthropic and ChatOpenAI
 from langchain_core.language_models import BaseChatModel
 
 
 class LLMProvider(str, Enum):
-    \"\"\"Supported LLM providers. Using str+Enum means we can compare
-    with plain strings like: provider == 'claude'
-    \"\"\"
-    CLAUDE = "claude"
-    OPENAI = "openai"
+    OPENROUTER = "openrouter"   # ← default: single key, any model
+    CLAUDE     = "claude"       # direct Anthropic API (legacy)
+    OPENAI     = "openai"       # direct OpenAI API (legacy)
+
+
+# ── Quick-reference model slugs for OpenRouter ────────────────────────────────
+# Pass any of these as OPENROUTER_MODEL env var, or as model= arg to get_llm()
+OPENROUTER_MODELS = {
+    # Anthropic
+    "claude-sonnet":  "anthropic/claude-sonnet-4-5",
+    "claude-opus":    "anthropic/claude-opus-4",
+    "claude-haiku":   "anthropic/claude-haiku-3-5",
+    # OpenAI
+    "gpt-4o":         "openai/gpt-4o",
+    "gpt-4o-mini":    "openai/gpt-4o-mini",
+    "o3-mini":        "openai/o3-mini",
+    # Google
+    "gemini-pro":     "google/gemini-pro-1.5",
+    "gemini-flash":   "google/gemini-flash-1.5",
+    # Meta
+    "llama-405b":     "meta-llama/llama-3.1-405b-instruct",
+    "llama-70b":      "meta-llama/llama-3.1-70b-instruct",
+    # Mistral
+    "mistral-large":  "mistralai/mistral-large",
+    "mixtral-8x7b":   "mistralai/mixtral-8x7b-instruct",
+    # DeepSeek
+    "deepseek-r1":    "deepseek/deepseek-r1",
+    "deepseek-v3":    "deepseek/deepseek-chat",
+}
 
 
 def get_llm(
     provider: LLMProvider | None = None,
     temperature: float = 0.2,
-    **kwargs,                        # any extra params pass straight to the model
+    model: str | None = None,   # optional model override (OpenRouter slug or native name)
+    **kwargs,
 ) -> BaseChatModel:
     \"\"\"
-    Return a chat model instance for the requested provider.
+    Return a configured chat model.
 
     Args:
-        provider: 'claude' or 'openai'. If None, reads LLM_PROVIDER env var.
-                  Defaults to 'claude' if the env var is also missing.
-        temperature: Controls creativity/randomness.
-                     0.0 = deterministic, 1.0 = very creative.
-                     Agents use different values:
-                       Alpha  0.1  → needs accurate facts, low creativity
-                       Beta   0.15 → structured analysis, stay factual
-                       Gamma  0.3  → writing needs some creativity/flow
-                       Delta  0.0  → must produce exact JSON, no creativity
+        provider   : 'openrouter' (default) | 'claude' | 'openai'
+                     Reads LLM_PROVIDER env var if None.
+        temperature: 0.0 = deterministic JSON, 0.1 = factual research,
+                     0.15 = analysis, 0.3 = creative writing.
+        model      : Override the model name/slug. If None, reads env var.
 
     Returns:
-        A LangChain chat model (BaseChatModel subclass).
-        All agents talk to this via the same .invoke() / pipe (|) interface.
+        BaseChatModel — same .invoke() interface regardless of provider.
+        Agents never need to know which model is behind the factory.
     \"\"\"
     if provider is None:
-        # Read the env var, default to 'claude' if not set
-        provider = LLMProvider(os.getenv("LLM_PROVIDER", "claude").lower())
+        provider = LLMProvider(os.getenv("LLM_PROVIDER", "openrouter").lower())
 
+    # ── OpenRouter (recommended) ───────────────────────────────────────────────
+    # OpenRouter's API is 100% OpenAI-compatible, so we just use ChatOpenAI
+    # with a different base_url and api_key. No special library needed.
+    if provider == LLMProvider.OPENROUTER:
+        from langchain_openai import ChatOpenAI
+
+        model_name = model or os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-5")
+
+        return ChatOpenAI(
+            model=model_name,
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            base_url="https://openrouter.ai/api/v1",   # ← the only OpenRouter-specific line
+            temperature=temperature,
+            # Recommended headers — OpenRouter uses them for analytics and model rankings
+            default_headers={
+                "HTTP-Referer": "https://pinnacleiq.mankind.com",
+                "X-Title": "PinnacleIQ Research Pipeline",
+            },
+            **kwargs,
+        )
+
+    # ── Direct Anthropic API (legacy) ──────────────────────────────────────────
+    # Use this only if you specifically need Anthropic-only features (e.g. extended thinking)
     if provider == LLMProvider.CLAUDE:
-        # Lazy import — only loads the Anthropic library when actually needed
         from langchain_anthropic import ChatAnthropic
         return ChatAnthropic(
-            model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6"),
+            model=model or os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5"),
             api_key=os.getenv("ANTHROPIC_API_KEY"),
             temperature=temperature,
             **kwargs,
         )
 
+    # ── Direct OpenAI API (legacy) ─────────────────────────────────────────────
     if provider == LLMProvider.OPENAI:
         from langchain_openai import ChatOpenAI
         return ChatOpenAI(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o"),
+            model=model or os.getenv("OPENAI_MODEL", "gpt-4o"),
             api_key=os.getenv("OPENAI_API_KEY"),
             temperature=temperature,
             **kwargs,
@@ -310,10 +414,12 @@ def get_llm(
     raise ValueError(f"Unknown LLM provider: {provider}")
 
 
-# ── Quick test ────────────────────────────────────────────────────────────────
-# Uncomment to verify your API key works:
+# ── Quick connectivity test ───────────────────────────────────────────────────
+# Uncomment to verify your OpenRouter key + model work before running the pipeline:
 # llm = get_llm(temperature=0)
-# print(llm.invoke("Say hello in one word.").content)
+# response = llm.invoke("Reply with exactly: PINNACLEIQ READY")
+# print(response.content)
+# Expected: "PINNACLEIQ READY"
 """)
 
 
@@ -2502,18 +2608,21 @@ code("""\
 # ── Full pipeline run (requires API keys set in Step 1) ──────────────────────
 #
 # Uncomment and run this cell once you have:
-#   - ANTHROPIC_API_KEY (or OPENAI_API_KEY)
-#   - TAVILY_API_KEY
+#   - OPENROUTER_API_KEY  (get free at https://openrouter.ai/keys)
+#   - TAVILY_API_KEY      (get free at https://app.tavily.com)
 #
 # Optional (pipeline skips gracefully if missing):
-#   - ONEDRIVE keys (reads internal documents)
-#   - TWILIO keys (WhatsApp delivery)
-#   - SENDGRID key (email delivery)
+#   - ONEDRIVE keys (reads internal documents from OneDrive)
+#   - TWILIO keys   (WhatsApp delivery)
+#   - SENDGRID key  (email delivery)
+#
+# To try a different model — just change OPENROUTER_MODEL in Step 1
+# and re-run. No other code changes needed!
 
 # import os
 # # Make sure keys are loaded (from Step 1)
-# assert os.environ.get("ANTHROPIC_API_KEY"), "Set ANTHROPIC_API_KEY first!"
-# assert os.environ.get("TAVILY_API_KEY"), "Set TAVILY_API_KEY first!"
+# assert os.environ.get("OPENROUTER_API_KEY"), "Set OPENROUTER_API_KEY in Step 1 first!"
+# assert os.environ.get("TAVILY_API_KEY"), "Set TAVILY_API_KEY in Step 1 first!"
 
 # # Run the full pipeline
 # result = run_pipeline(
