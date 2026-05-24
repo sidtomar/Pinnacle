@@ -226,8 +226,8 @@ def run_delta(
     except Exception as exc:
         print(f"[Delta] Warning — card schema validation failed: {exc}")
 
-    # ── Persist to Databricks ─────────────────────────────────────────────────
-    _save_to_databricks(card)
+    # ── Persist via store (SQLite for demo, Databricks for production) ───────
+    _save_to_store(card)
 
     # ── Also POST to portal API if configured ─────────────────────────────────
     _post_to_portal(card)
@@ -239,34 +239,26 @@ def run_delta(
 # Storage: Databricks Delta Lake
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _save_to_databricks(card: dict) -> None:
+def _save_to_store(card: dict) -> None:
     """
-    Save the content card to Azure Databricks Delta Lake.
+    Save the content card using whichever backend is configured.
 
-    Requires DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN in env.
-    If any of these are missing, skips silently (so local dev still works).
+    Reads STORE_BACKEND env var via get_store() factory:
+      STORE_BACKEND=sqlite       → saves to local SQLite file (demo default)
+      STORE_BACKEND=databricks   → saves to Azure Databricks Delta Lake (production)
 
-    The DatabricksStore.setup() call ensures tables exist before writing.
-    In production, call store.setup() once at app startup instead of every run.
+    No code change needed when switching backends — just change the env var.
     """
-    host       = os.getenv("DATABRICKS_HOST")
-    http_path  = os.getenv("DATABRICKS_HTTP_PATH")
-    token      = os.getenv("DATABRICKS_TOKEN")
-
-    if not all([host, http_path, token]):
-        print("[Delta] Databricks env vars not set — skipping Delta Lake save.")
-        print("        Set DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN")
-        return
-
     try:
-        from store.databricks_store import DatabricksStore
-        store = DatabricksStore()
-        store.setup()                   # creates tables if they don't exist
+        from store import get_store
+        store = get_store()
+        store.setup()                       # idempotent — creates tables if needed
         content_id = store.save_content_card(card)
-        print(f"[Delta] ✓ Content card saved to Databricks → id: {content_id}")
+        backend = __import__("os").getenv("STORE_BACKEND", "sqlite")
+        print(f"[Delta] ✓ Content card saved to {backend.upper()} → id: {content_id}")
     except Exception as exc:
-        # Non-fatal — don't crash the pipeline if Databricks is unavailable
-        print(f"[Delta] Warning — Databricks save failed: {exc}")
+        # Non-fatal — pipeline output still returned even if storage fails
+        print(f"[Delta] Warning — store save failed: {exc}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

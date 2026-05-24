@@ -1,92 +1,52 @@
 """
 PinnacleIQ Demo Backend
-FastAPI + SQLite — reads topics from topics.txt, runs mock pipeline,
-stores content for MA review and BU Head sharing.
+========================
+FastAPI server for the management demo.
+
+Storage backend is configured via STORE_BACKEND env var:
+  STORE_BACKEND=sqlite       ← default for demo (zero setup)
+  STORE_BACKEND=databricks   ← production (after management approval)
+
+The API code never touches SQLite or Databricks directly —
+it only calls the store abstraction. So migration = one env var change.
 """
-import json, sqlite3, threading, uuid
-from datetime import datetime, timezone
-from pathlib import Path
+import sys, os
+
+# Allow importing from research_agent_system/store/
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "research_agent_system"))
+
+import threading
+import uuid
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from store import get_store
 from mock_runner import run_mock_pipeline
 
-# ── App setup ────────────────────────────────────────────────────────────────
+# ── App setup ─────────────────────────────────────────────────────────────────
 app = FastAPI(title="PinnacleIQ Research API", version="1.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"],
-                   allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-BASE = Path(__file__).parent
-DB_PATH = BASE / "pinnacleiq.db"
-TOPICS_FILE = BASE.parent / "topics.txt"
+from pathlib import Path
+TOPICS_FILE = Path(__file__).parent.parent / "topics.txt"
 
-# In-memory store for pipeline run status (no DB needed for transient state)
+# ── Initialise store on startup ───────────────────────────────────────────────
+# get_store() reads STORE_BACKEND env var → returns SQLiteStore or DatabricksStore
+# setup() creates tables if they don't exist (idempotent)
+store = get_store()
+store.setup()
+
+# In-memory pipeline run status (transient — doesn't need persistence)
 pipeline_runs: dict = {}
 _lock = threading.Lock()
-
-# ── Database ─────────────────────────────────────────────────────────────────
-def get_db():
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def init_db():
-    conn = get_db()
-    conn.executescript("""
-        CREATE TABLE IF NOT EXISTS content_items (
-            id              TEXT PRIMARY KEY,
-            topic           TEXT NOT NULL,
-            title           TEXT NOT NULL,
-            specialty       TEXT,
-            therapy_area    TEXT,
-            sub_category    TEXT,
-            tags            TEXT,         -- JSON array
-            summary         TEXT,
-            key_findings    TEXT,         -- JSON array
-            clinical_insights TEXT,
-            recommendations TEXT,         -- JSON array
-            emerging_trends TEXT,         -- JSON array
-            short_article   TEXT,
-            full_research   TEXT,
-            evidence_quality TEXT,
-            status          TEXT DEFAULT 'pending_review',
-            rejection_reason TEXT,
-            created_at      TEXT,
-            reviewed_at     TEXT,
-            source          TEXT DEFAULT 'ai_agent'
-        );
-
-        CREATE TABLE IF NOT EXISTS share_logs (
-            id          TEXT PRIMARY KEY,
-            content_id  TEXT NOT NULL,
-            doctor_id   TEXT,
-            doctor_name TEXT,
-            channel     TEXT,
-            shared_at   TEXT,
-            shared_by   TEXT
-        );
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# ── Helpers ──────────────────────────────────────────────────────────────────
-def row_to_dict(row) -> dict:
-    d = dict(row)
-    for field in ("tags", "key_findings", "recommendations", "emerging_trends"):
-        if d.get(field) and isinstance(d[field], str):
-            try:
-                d[field] = json.loads(d[field])
-            except Exception:
-                d[field] = []
-    return d
-
-def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 # ── Pydantic schemas ──────────────────────────────────────────────────────────
 class RunRequest(BaseModel):
@@ -102,19 +62,21 @@ class RejectRequest(BaseModel):
     reviewer: Optional[str] = "Dr. Prashant Agarwal (MA)"
 
 class ShareRequest(BaseModel):
-    doctor_id: Optional[str] = "doc_001"
-    doctor_name: Optional[str] = "Demo Doctor"
-    channel: Optional[str] = "whatsapp"
-    shared_by: Optional[str] = "Jijo (BU Head · PMT)"
+    doctor_id:    Optional[str] = "doc_001"
+    doctor_name:  Optional[str] = "Demo Doctor"
+    specialty:    Optional[str] = "General Medicine"
+    channel:      Optional[str] = "whatsapp"
+    shared_by:    Optional[str] = "Jijo (BU Head · PMT)"
+
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.get("/")
 def health():
-    return {"status": "ok", "service": "PinnacleIQ Research API"}
+    backend = os.getenv("STORE_BACKEND", "sqlite")
+    return {"status": "ok", "service": "PinnacleIQ Research API", "store": backend}
 
 
-# ── Topics ────────────────────────────────────────────────────────────────────
 @app.get("/topics")
 def get_topics():
     """Read research topics from topics.txt."""
@@ -127,30 +89,25 @@ def get_topics():
             continue
         parts = [p.strip() for p in line.split("|")]
         topics.append({
-            "topic":       parts[0] if len(parts) > 0 else line,
-            "specialty":   parts[1] if len(parts) > 1 else "General Medicine",
+            "topic":        parts[0] if len(parts) > 0 else line,
+            "specialty":    parts[1] if len(parts) > 1 else "General Medicine",
             "therapy_area": parts[2] if len(parts) > 2 else "General",
         })
     return {"topics": topics, "count": len(topics)}
 
 
-# ── Pipeline ──────────────────────────────────────────────────────────────────
 @app.post("/pipeline/run")
 def start_pipeline(req: RunRequest, bg: BackgroundTasks):
-    """Trigger the research pipeline for a topic. Returns a run_id for polling."""
+    """Start mock pipeline in background. Returns run_id for polling."""
     run_id = str(uuid.uuid4())
     with _lock:
         pipeline_runs[run_id] = {
-            "status":       "running",
-            "topic":        req.topic,
-            "specialty":    req.specialty,
-            "therapy_area": req.therapy_area,
-            "progress":     0,
+            "status":        "running",
+            "topic":         req.topic,
+            "progress":      0,
             "current_agent": "alpha",
-            "status_msg":   "Starting pipeline...",
-            "content":      None,
-            "content_id":   None,
-            "started_at":   now_iso(),
+            "status_msg":    "Starting pipeline...",
+            "content_id":    None,
         }
 
     def _run():
@@ -161,42 +118,11 @@ def start_pipeline(req: RunRequest, bg: BackgroundTasks):
             run_store=pipeline_runs,
             run_id=run_id,
         )
-        # Persist to DB once complete
+        # Persist completed content via the store abstraction
         run = pipeline_runs.get(run_id, {})
         if run.get("status") == "completed" and run.get("content"):
-            c = run["content"]
-            cid = str(uuid.uuid4())
-            conn = get_db()
-            conn.execute(
-                """INSERT INTO content_items
-                   (id, topic, title, specialty, therapy_area, sub_category,
-                    tags, summary, key_findings, clinical_insights,
-                    recommendations, emerging_trends, short_article,
-                    evidence_quality, status, created_at, source)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (
-                    cid,
-                    c.get("topic", req.topic),
-                    c.get("title", ""),
-                    c.get("specialty", req.specialty),
-                    c.get("therapy_area", req.therapy_area),
-                    c.get("sub_category", "Review Article"),
-                    json.dumps(c.get("tags", [])),
-                    c.get("summary", ""),
-                    json.dumps(c.get("key_findings", [])),
-                    c.get("clinical_insights", ""),
-                    json.dumps(c.get("recommendations", [])),
-                    json.dumps(c.get("emerging_trends", [])),
-                    c.get("short_article", ""),
-                    c.get("evidence_quality", ""),
-                    "pending_review",
-                    now_iso(),
-                    "ai_agent",
-                ),
-            )
-            conn.commit()
-            conn.close()
-            pipeline_runs[run_id]["content_id"] = cid
+            content_id = store.save_content_card(run["content"])
+            pipeline_runs[run_id]["content_id"] = content_id
 
     bg.add_task(_run)
     return {"run_id": run_id, "status": "running"}
@@ -204,7 +130,7 @@ def start_pipeline(req: RunRequest, bg: BackgroundTasks):
 
 @app.get("/pipeline/status/{run_id}")
 def pipeline_status(run_id: str):
-    """Poll for pipeline run progress."""
+    """Poll for pipeline progress (0-100%)."""
     run = pipeline_runs.get(run_id)
     if not run:
         raise HTTPException(404, "Run not found")
@@ -218,137 +144,82 @@ def pipeline_status(run_id: str):
     }
 
 
-# ── Content Library ───────────────────────────────────────────────────────────
 @app.get("/content")
-def list_content(status: Optional[str] = None):
-    """List all content items (optionally filtered by status)."""
-    conn = get_db()
-    if status:
-        rows = conn.execute(
-            "SELECT * FROM content_items WHERE status=? ORDER BY created_at DESC",
-            (status,)
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            "SELECT * FROM content_items ORDER BY created_at DESC"
-        ).fetchall()
-    conn.close()
-    items = [row_to_dict(r) for r in rows]
+def list_content(status: Optional[str] = None, specialty: Optional[str] = None):
+    """List all content items with optional filters."""
+    items = store.list_content(status=status, specialty=specialty)
     return {
         "items": items,
         "counts": {
-            "total": len(items),
-            "pending": sum(1 for i in items if i["status"] == "pending_review"),
-            "approved": sum(1 for i in items if i["status"] == "approved"),
-            "rejected": sum(1 for i in items if i["status"] == "rejected"),
-        }
+            "total":    len(items),
+            "pending":  sum(1 for i in items if i.get("status") == "pending_review"),
+            "approved": sum(1 for i in items if i.get("status") == "approved"),
+            "rejected": sum(1 for i in items if i.get("status") == "rejected"),
+        },
     }
 
 
 @app.get("/content/{content_id}")
 def get_content(content_id: str):
     """Get a single content item."""
-    conn = get_db()
-    row = conn.execute(
-        "SELECT * FROM content_items WHERE id=?", (content_id,)
-    ).fetchone()
-    conn.close()
-    if not row:
+    item = store.get_content(content_id)
+    if not item:
         raise HTTPException(404, "Content not found")
-    return row_to_dict(row)
+    return item
 
 
 @app.post("/content/{content_id}/approve")
 def approve_content(content_id: str, req: ApproveRequest):
-    """MA approves a content item."""
-    conn = get_db()
-    row = conn.execute("SELECT status FROM content_items WHERE id=?", (content_id,)).fetchone()
-    if not row:
-        conn.close()
+    """MA approves a content card."""
+    item = store.get_content(content_id)
+    if not item:
         raise HTTPException(404, "Content not found")
-    if row["status"] != "pending_review":
-        conn.close()
-        raise HTTPException(400, f"Content is already '{row['status']}'")
-    conn.execute(
-        "UPDATE content_items SET status='approved', reviewed_at=? WHERE id=?",
-        (now_iso(), content_id)
-    )
-    conn.commit()
-    conn.close()
+    if item.get("status") != "pending_review":
+        raise HTTPException(400, f"Content is already '{item.get('status')}'")
+    store.approve(content_id, reviewer=req.reviewer)
     return {"message": "Content approved. Now available for BU Head to share.", "content_id": content_id}
 
 
 @app.post("/content/{content_id}/reject")
 def reject_content(content_id: str, req: RejectRequest):
-    """MA rejects a content item with a reason."""
+    """MA rejects a content card with a reason."""
     if not req.reason.strip():
         raise HTTPException(400, "Rejection reason is required")
-    conn = get_db()
-    row = conn.execute("SELECT status FROM content_items WHERE id=?", (content_id,)).fetchone()
-    if not row:
-        conn.close()
+    item = store.get_content(content_id)
+    if not item:
         raise HTTPException(404, "Content not found")
-    conn.execute(
-        "UPDATE content_items SET status='rejected', rejection_reason=?, reviewed_at=? WHERE id=?",
-        (req.reason, now_iso(), content_id)
-    )
-    conn.commit()
-    conn.close()
+    store.reject(content_id, reason=req.reason, reviewer=req.reviewer)
     return {"message": "Content rejected.", "content_id": content_id}
 
 
 @app.post("/content/{content_id}/share")
 def share_content(content_id: str, req: ShareRequest):
-    """BU Head shares approved content with a doctor (with 30-day frequency check)."""
-    conn = get_db()
-
-    # Check content exists and is approved
-    row = conn.execute("SELECT status, title FROM content_items WHERE id=?", (content_id,)).fetchone()
-    if not row:
-        conn.close()
+    """BU Head shares approved content with a doctor."""
+    item = store.get_content(content_id)
+    if not item:
         raise HTTPException(404, "Content not found")
-    if row["status"] != "approved":
-        conn.close()
+    if item.get("status") != "approved":
         raise HTTPException(400, "Content must be approved before sharing")
 
-    # 30-day frequency check
-    recent = conn.execute(
-        """SELECT COUNT(*) as cnt FROM share_logs
-           WHERE doctor_id=? AND shared_at > datetime('now','-30 days')""",
-        (req.doctor_id,)
-    ).fetchone()
-    warning = None
-    if recent and recent["cnt"] > 0:
-        warning = (
-            f"⚠️ You have already shared {recent['cnt']} article(s) with this doctor "
-            f"in the last 30 days. Recommended frequency is 1–2/month."
-        )
-
-    # Log the share
-    log_id = str(uuid.uuid4())
-    conn.execute(
-        """INSERT INTO share_logs (id, content_id, doctor_id, doctor_name, channel, shared_at, shared_by)
-           VALUES (?,?,?,?,?,?,?)""",
-        (log_id, content_id, req.doctor_id, req.doctor_name,
-         req.channel, now_iso(), req.shared_by)
+    result = store.log_share(
+        content_id=content_id,
+        doctor_id=req.doctor_id,
+        doctor_name=req.doctor_name,
+        doctor_specialty=req.specialty,
+        channel=req.channel,
+        shared_by=req.shared_by,
     )
-    conn.commit()
-    conn.close()
-
     return {
         "message": f"Content shared via {req.channel} with {req.doctor_name}.",
-        "log_id": log_id,
-        "warning": warning,
+        "log_id":  result["log_id"],
+        "warning": result["warning"],
     }
 
 
 @app.get("/share-logs")
-def get_share_logs():
+def get_share_logs(content_id: Optional[str] = None):
     """Return sharing history."""
-    conn = get_db()
-    rows = conn.execute("SELECT * FROM share_logs ORDER BY shared_at DESC").fetchall()
-    conn.close()
-    return {"logs": [dict(r) for r in rows]}
+    return {"logs": store.get_share_logs(content_id=content_id)}
 
 
 if __name__ == "__main__":
