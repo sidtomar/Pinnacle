@@ -9,15 +9,17 @@ Uses LangGraph's create_react_agent (LangChain 1.x / LangGraph 1.x API).
 from langgraph.prebuilt import create_react_agent
 
 from config import get_llm
-from tools import build_tavily_tool, read_onedrive_files
+from tools import build_tavily_tool, read_onedrive_files, read_local_docs
 
 _SYSTEM_PROMPT = """\
 You are Agent Alpha, a meticulous medical research assistant for Mankind Pharma.
 
-Your job is to gather comprehensive information on the given topic from two sources:
+Your job is to gather comprehensive information on the given topic from three sources:
 1. The internet — use the internet_search tool (run at least 3 searches with different angles:
    latest news, clinical studies, expert opinions, Indian population data)
-2. Internal documents — use the read_onedrive_files tool to find relevant internal papers
+2. OneDrive internal documents — use the read_onedrive_files tool to search for internal papers
+3. Local internal documents — use the read_local_docs tool to search the local Research folder
+   for internal company documents, clinical protocols, and real-world data reports
 
 After gathering all information, produce a single consolidated research article in this format:
 
@@ -27,7 +29,7 @@ After gathering all information, produce a single consolidated research article 
 <summarised findings from each web search>
 
 ## Internal Document Findings
-<content from any matching OneDrive files, or "No internal documents found" if none>
+<content from OneDrive and/or local Research folder files, or "No internal documents found" if none>
 
 ## Consolidated Research Article
 <a comprehensive, readable article (500-800 words) merging all sources,
@@ -40,7 +42,7 @@ Be thorough, accurate, and clinically focused.
 def run_alpha(topic: str) -> str:
     """Run Agent Alpha and return the consolidated research article."""
     llm = get_llm(temperature=0.1)
-    tools = [build_tavily_tool(), read_onedrive_files]
+    tools = [build_tavily_tool(), read_onedrive_files, read_local_docs]
 
     # LangGraph prebuilt ReAct agent (replaces langchain AgentExecutor)
     agent = create_react_agent(

@@ -1,0 +1,64 @@
+{
+  "folders": [
+    {
+      "name": "🏥 PinnacleIQ — Mankind Pharma",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "pinnacleiq_v13.html": "pipeline_ui.html",
+      "README.md": "generate_notebook.py, PinnacleIQ_Research_Pipeline.ipynb",
+      "START_DEMO.bat": "run_demo.bat",
+      "requirements.txt": ".env, .env.example"
+    },
+    "explorer.sortOrder": "type",
+    "workbench.colorTheme": "Dark+",
+    "editor.fontSize": 14,
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": true,
+    "breadcrumbs.enabled": true
+  },
+  "launch": {
+    "configurations": [
+      {
+        "name": "🚀 Start Pipeline API",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/demo/backend/app.py",
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}/demo/backend"
+      },
+      {
+        "name": "🤖 Run Pipeline (SGLT2)",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/research_agent_system/main.py",
+        "args": ["SGLT2 Inhibitors and Cardiovascular Outcomes in Heart Failure", "--specialty", "Cardiology", "--therapy", "Heart Failure"],
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}/research_agent_system",
+        "envFile": "${workspaceFolder}/research_agent_system/.env"
+      },
+      {
+        "name": "🤖 Run Pipeline (GLP-1)",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/research_agent_system/main.py",
+        "args": ["GLP-1 Receptor Agonists in Type 2 Diabetes Management", "--specialty", "Diabetology", "--therapy", "GLP-1 Therapy"],
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}/research_agent_system",
+        "envFile": "${workspaceFolder}/research_agent_system/.env"
+      }
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ritwickdey.liveserver",
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss"
+    ]
+  }
+}

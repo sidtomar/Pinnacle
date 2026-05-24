@@ -10,9 +10,10 @@
 ```
 Pinnacle/
 │
-├── 📓 PinnacleIQ_Research_Pipeline.ipynb   ← Annotated Colab notebook (start here)
+├── 🚀 START_DEMO.bat                       ← ONE CLICK: starts API + opens portal
+├── 🌐 pinnacleiq_v13.html                  ← MAIN PORTAL — pipeline fully integrated
+├── 📓 PinnacleIQ_Research_Pipeline.ipynb   ← Annotated Colab notebook
 ├── 📄 generate_notebook.py                 ← Script that builds the notebook
-├── 🌐 pinnacleiq_v13.html                  ← Portal UI design (open in browser)
 │
 ├── research_agent_system/                  ← ✅ Production 4-agent pipeline
 │   ├── config.py                           ← LLM factory (OpenRouter / Claude / OpenAI)
@@ -26,19 +27,23 @@ Pinnacle/
 │   │   ├── beta.py                         ← LCEL chain: insights extractor
 │   │   ├── gamma.py                        ← LCEL chain: article writer + delivery
 │   │   └── delta.py                        ← LCEL chain: JSON report generator
+│   ├── store/
+│   │   ├── base.py                         ← Abstract store interface
+│   │   ├── sqlite_store.py                 ← Demo / dev (SQLite)
+│   │   ├── databricks_store.py             ← Production (Azure Databricks)
+│   │   └── factory.py                      ← Switched via STORE_BACKEND env-var
 │   └── tools/
 │       ├── search.py                       ← Tavily internet search
 │       ├── onedrive.py                     ← Microsoft Graph API file reader
 │       ├── whatsapp.py                     ← Twilio WhatsApp sender
 │       └── email_tool.py                   ← SendGrid email sender
 │
-└── demo/                                   ← 🎬 Management demo (no API keys needed)
-    ├── topics.txt                           ← Edit to add research topics
-    ├── run_demo.bat                         ← Double-click to start demo
-    ├── pipeline_ui.html                     ← Browser UI
+└── demo/                                   ← 🎬 Management demo backend
+    ├── topics.txt                           ← Edit to add / remove research topics
+    ├── run_demo.bat                         ← Legacy launcher (use START_DEMO.bat)
     └── backend/
-        ├── app.py                           ← FastAPI REST server
-        └── mock_runner.py                   ← Pre-built content, simulated delays
+        ├── app.py                           ← FastAPI REST server (localhost:8000)
+        └── mock_runner.py                   ← Pre-built content, realistic delays
 ```
 
 ---
@@ -109,11 +114,23 @@ python main.py "GLP-1 receptor agonists in Type 2 Diabetes"
 
 ## 🎬 Management Demo (No API Keys)
 
-```bash
-cd demo
-run_demo.bat          # starts FastAPI server on http://localhost:8000
 ```
-Then open `demo/pipeline_ui.html` in Chrome.
+START_DEMO.bat        ← double-click from project root
+```
+
+That's it. The script:
+1. Clears port 8000
+2. Starts the FastAPI backend (`demo/backend/app.py`)
+3. Opens **`pinnacleiq_v13.html`** in Chrome automatically
+
+**Demo flow inside the portal:**
+1. Switch to **PMT** role → click **Research Pipeline** in the sidebar
+2. Select a topic (SGLT2, GLP-1, or PCOS for best results)
+3. Click **Run Pipeline** → watch all 4 agents animate live
+4. Browse results: Summary · Key Findings · Short Article · Full JSON
+5. Click **Review in Library →** → switches to MA role, card appears for approval
+
+**API explorer** (live endpoint testing): http://localhost:8000/docs
 
 ---
 

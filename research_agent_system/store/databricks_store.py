@@ -44,6 +44,8 @@ from typing import Optional
 # Install: pip install databricks-sql-connector
 from databricks import sql
 
+from .base import BaseStore
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Connection helper
@@ -70,7 +72,7 @@ def _get_connection():
 # DatabricksStore class
 # ─────────────────────────────────────────────────────────────────────────────
 
-class DatabricksStore:
+class DatabricksStore(BaseStore):
     """
     Manages all PinnacleIQ data in Azure Databricks Delta Lake.
 
@@ -87,8 +89,9 @@ class DatabricksStore:
         # Full table paths using Unity Catalog: catalog.schema.table
         catalog = os.getenv("DATABRICKS_CATALOG", "pinnacleiq")
         schema  = os.getenv("DATABRICKS_SCHEMA", "medical_content")
-        self.content_table   = f"`{catalog}`.`{schema}`.`content_items`"
-        self.share_log_table = f"`{catalog}`.`{schema}`.`share_logs`"
+        self.content_table        = f"`{catalog}`.`{schema}`.`content_items`"
+        self.share_log_table      = f"`{catalog}`.`{schema}`.`share_logs`"
+        self.notifications_table  = f"`{catalog}`.`{schema}`.`notifications`"
 
     # ── Setup ─────────────────────────────────────────────────────────────────
 
@@ -130,9 +133,18 @@ class DatabricksStore:
                         short_article    STRING,
                         evidence_quality STRING,
 
-                        -- Workflow status: pending_review → approved / rejected
+                        -- Workflow status: pending_review → approved / rejected / improvement_requested
                         status           STRING        DEFAULT 'pending_review',
                         rejection_reason STRING,
+
+                        -- Content versioning fields (HITL improvement loop)
+                        version          INT           DEFAULT 1,
+                        parent_id        STRING,       -- NULL for originals; root content_id for revisions
+                        improvement_notes STRING,      -- MA's written feedback that triggered this version
+                        reviewer         STRING,       -- who reviewed it
+
+                        -- Division assignment
+                        division         STRING,
 
                         created_at       TIMESTAMP,
                         reviewed_at      TIMESTAMP,
@@ -161,6 +173,22 @@ class DatabricksStore:
                     )
                     USING DELTA
                     COMMENT 'PinnacleIQ content sharing history'
+                """)
+
+                # ── notifications table ───────────────────────────────────────
+                cursor.execute(f"""
+                    CREATE TABLE IF NOT EXISTS {self.notifications_table} (
+                        id          STRING    NOT NULL,
+                        type        STRING    NOT NULL,  -- 'new_content', 'content_approved', 'improvement_ready'
+                        content_id  STRING,
+                        title       STRING,
+                        message     STRING,
+                        division    STRING,
+                        created_at  TIMESTAMP,
+                        read_at     TIMESTAMP             -- NULL = unread
+                    )
+                    USING DELTA
+                    COMMENT 'PinnacleIQ in-app notifications'
                 """)
 
         print("[DatabricksStore] Tables ready ✓")
@@ -192,12 +220,14 @@ class DatabricksStore:
                     (id, topic, title, specialty, therapy_area, sub_category,
                      tags, key_findings, recommendations, emerging_trends,
                      summary, clinical_insights, short_article, evidence_quality,
-                     status, created_at, source, llm_provider, pipeline)
+                     status, created_at, source, llm_provider, pipeline,
+                     version, parent_id, improvement_notes, reviewer, division)
                     VALUES
                     (?, ?, ?, ?, ?, ?,
                      ?, ?, ?, ?,
                      ?, ?, ?, ?,
-                     'pending_review', ?, 'ai_agent', ?, ?)
+                     'pending_review', ?, 'ai_agent', ?, ?,
+                     ?, ?, ?, ?, ?)
                     """,
                     (
                         content_id,
@@ -221,6 +251,12 @@ class DatabricksStore:
                         now,
                         card.get("llm_provider", "openrouter"),
                         card.get("pipeline", "Alpha→Beta→Gamma→Delta"),
+
+                        card.get("version", 1),
+                        card.get("parent_id", None),
+                        card.get("improvement_notes", None),
+                        card.get("reviewer", None),
+                        card.get("division", None),
                     )
                 )
 
@@ -307,10 +343,10 @@ class DatabricksStore:
                 cursor.execute(
                     f"""
                     UPDATE {self.content_table}
-                    SET status = 'approved', reviewed_at = ?
-                    WHERE id = ? AND status = 'pending_review'
+                    SET status = 'approved', reviewed_at = ?, reviewer = ?
+                    WHERE id = ?
                     """,
-                    (now, content_id)
+                    (now, reviewer, content_id)
                 )
         print(f"[DatabricksStore] Content {content_id} approved by {reviewer}")
 
@@ -322,12 +358,103 @@ class DatabricksStore:
                 cursor.execute(
                     f"""
                     UPDATE {self.content_table}
-                    SET status = 'rejected', rejection_reason = ?, reviewed_at = ?
+                    SET status = 'rejected', rejection_reason = ?,
+                        reviewed_at = ?, reviewer = ?
                     WHERE id = ?
                     """,
-                    (reason, now, content_id)
+                    (reason, now, reviewer, content_id)
                 )
         print(f"[DatabricksStore] Content {content_id} rejected: {reason}")
+
+    def request_improvement(
+        self,
+        content_id: str,
+        notes: str,
+        reviewer: str = "MA Reviewer",
+    ) -> None:
+        """Set status to improvement_requested and store MA notes."""
+        now = datetime.now(timezone.utc)
+        with _get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    UPDATE {self.content_table}
+                    SET status = 'improvement_requested',
+                        improvement_notes = ?,
+                        reviewer = ?,
+                        reviewed_at = ?
+                    WHERE id = ?
+                    """,
+                    (notes, reviewer, now, content_id)
+                )
+        print(f"[DatabricksStore] Improvement requested for {content_id} by {reviewer}")
+
+    def save_improved_content(self, card: dict, parent_id: str, version: int) -> str:
+        """Save a new version of a content card, linked to parent_id."""
+        content_id = card.get("id") or str(uuid.uuid4())
+        now = datetime.now(timezone.utc)
+
+        with _get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    INSERT INTO {self.content_table}
+                    (id, topic, title, specialty, therapy_area, sub_category,
+                     tags, key_findings, recommendations, emerging_trends,
+                     summary, clinical_insights, short_article, evidence_quality,
+                     status, created_at, source, llm_provider, pipeline,
+                     version, parent_id, improvement_notes, reviewer, division)
+                    VALUES
+                    (?, ?, ?, ?, ?, ?,
+                     ?, ?, ?, ?,
+                     ?, ?, ?, ?,
+                     'pending_review', ?, 'ai_agent', ?, ?,
+                     ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        content_id,
+                        card.get("topic", ""),
+                        card.get("title", ""),
+                        card.get("specialty", "General Medicine"),
+                        card.get("therapy_area", "General"),
+                        card.get("sub_category", "Review Article"),
+                        card.get("tags", []),
+                        card.get("key_findings", []),
+                        card.get("recommendations", []),
+                        card.get("emerging_trends", []),
+                        card.get("summary", ""),
+                        card.get("clinical_insights", ""),
+                        card.get("short_article", ""),
+                        card.get("evidence_quality", ""),
+                        now,
+                        card.get("llm_provider", "openrouter"),
+                        card.get("pipeline", f"Improvement v{version} · Beta+Gamma re-run"),
+                        version,
+                        parent_id,
+                        card.get("improvement_notes", None),
+                        card.get("reviewer", None),
+                        card.get("division", None),
+                    )
+                )
+
+        print(f"[DatabricksStore] Improved content saved → {content_id} (v{version}, parent={parent_id})")
+        return content_id
+
+    def get_content_versions(self, root_id: str) -> list[dict]:
+        """Return all versions of a content card (original + all improvements)."""
+        with _get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    SELECT * FROM {self.content_table}
+                    WHERE id = ? OR parent_id = ?
+                    ORDER BY version ASC, created_at ASC
+                    """,
+                    (root_id, root_id)
+                )
+                rows = cursor.fetchall()
+                columns = [desc[0] for desc in cursor.description]
+        return [dict(zip(columns, row)) for row in rows]
 
     # ── Workflow: share with doctor ───────────────────────────────────────────
 
@@ -461,3 +588,77 @@ class DatabricksStore:
                 rows = cursor.fetchall()
                 columns = [desc[0] for desc in cursor.description]
         return [dict(zip(columns, row)) for row in rows]
+
+    # ── Notifications ─────────────────────────────────────────────────────────
+
+    def add_notification(
+        self,
+        type: str,
+        content_id: str,
+        title: str,
+        message: str,
+        division: str,
+    ) -> str:
+        """Create a new in-app notification. Returns the notification ID."""
+        notification_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc)
+
+        with _get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    INSERT INTO {self.notifications_table}
+                    (id, type, content_id, title, message, division, created_at, read_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
+                    """,
+                    (notification_id, type, content_id, title, message, division, now)
+                )
+
+        print(f"[DatabricksStore] Notification created → {notification_id} ({type})")
+        return notification_id
+
+    def get_notifications(
+        self,
+        division: Optional[str] = None,
+        unread_only: bool = False,
+    ) -> list[dict]:
+        """Retrieve notifications, optionally filtered by division or unread status."""
+        conditions = []
+        params = []
+
+        if division:
+            conditions.append("division = ?")
+            params.append(division)
+        if unread_only:
+            conditions.append("read_at IS NULL")
+
+        where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+        with _get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    SELECT * FROM {self.notifications_table}
+                    {where}
+                    ORDER BY created_at DESC
+                    """,
+                    params or None,
+                )
+                rows = cursor.fetchall()
+                columns = [desc[0] for desc in cursor.description]
+
+        return [dict(zip(columns, row)) for row in rows]
+
+    def mark_notification_read(self, notification_id: str) -> None:
+        """Mark a notification as read by setting read_at to now."""
+        now = datetime.now(timezone.utc)
+        with _get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    f"""
+                    UPDATE {self.notifications_table}
+                    SET read_at = ?
+                    WHERE id = ?
+                    """,
+                    (now, notification_id)
+                )

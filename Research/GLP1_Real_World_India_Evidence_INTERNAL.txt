@@ -1,0 +1,80 @@
+MANKIND PHARMA -- INTERNAL REPORT
+GLP-1 Receptor Agonists: Real-World Evidence from Indian Diabetology Centres
+Prepared by: Medical Affairs & HEOR Team  |  November 2024  |  STRICTLY CONFIDENTIAL
+==================================================================================
+
+EXECUTIVE SUMMARY
+-----------------
+24-month real-world data from 14 tertiary-care diabetology centres across India
+(n=3,240 T2DM patients initiated on GLP-1 receptor agonists, Jan 2022 - Dec 2023).
+Molecules covered: semaglutide (oral + injectable), dulaglutide, liraglutide, exenatide.
+
+PATIENT DEMOGRAPHICS
+--------------------
+  Mean age                : 52.4 +/- 9.8 years
+  Gender (M/F)            : 58% / 42%
+  Mean BMI                : 29.6 +/- 5.2 kg/m2
+  Mean baseline HbA1c     : 9.1 +/- 1.4%
+  Mean T2DM duration      : 8.3 years
+  Concomitant CVD         : 34%
+  CKD (eGFR 30-60)        : 18%
+  Top cities              : Mumbai (21%), Delhi (18%), Bangalore (14%), Chennai (11%)
+
+EFFICACY AT 12 MONTHS
+----------------------
+  HbA1c reduction         : -1.6% semaglutide inj  |  -1.1% dulaglutide
+  Body weight change      : -4.2 kg semaglutide inj  |  -3.1 kg dulaglutide
+  Responders (HbA1c <7%)  : 48% semaglutide  |  38% dulaglutide  |  29% liraglutide
+  Systolic BP reduction   : -5.1 mmHg (all GLP-1 RAs combined)
+  LDL-C reduction         : -8.2 mg/dL (semaglutide inj)
+  MACE (CVD sub-group)    : 22% reduction vs matched SoC cohort
+
+SAFETY PROFILE (INDIA)
+-----------------------
+  GI side effects (nausea/vomiting)  : 28% -- mostly transient, weeks 1-8
+  Discontinuation due to GI AE       : 6.8%
+  Hypoglycaemia, mild                 : 4.2% monotherapy; 14.1% with sulphonylurea
+  Injection-site reactions            : 2.1%
+  Pancreatitis (confirmed)            : 0.04% (4 cases in 3,240 -- baseline rate)
+  No DKA, no thyroid C-cell tumours (ongoing surveillance)
+
+KOL INSIGHTS -- 48 INTERVIEWS
+-------------------------------
+Top reasons for initiating GLP-1 RA:
+  1. High HbA1c despite dual OAD therapy            (82% KOLs)
+  2. Weight management alongside glucose control     (74%)
+  3. CVD/ASCVD risk reduction                        (68%)
+  4. Patient request after media coverage of Ozempic (31%)
+
+Top prescribing barriers:
+  1. Cost (semaglutide inj: INR 3,500-5,200/month)  (91% KOLs)
+  2. Patient preference for oral route               (44%)
+  3. GI tolerability concerns                        (38%)
+  4. Lack of awareness on renal-dosing flexibility   (22%)
+
+MANKIND MARKET OPPORTUNITY
+---------------------------
+  Internal data: 12-14% market share opportunity in GLP-1 RA segment by 2026
+  Key target segments:
+    - T2DM + BMI >27 kg/m2 (weight-loss narrative)
+    - T2DM + CVD (CV protection narrative)
+    - High-HbA1c patients in Tier-B cities (lower competitive density)
+  Flagship: MANKIND-SEMA (semaglutide 0.5 mg / 1 mg inj) -- Phase III expected Q2 2025
+
+MSL RECOMMENDATIONS
+--------------------
+  1. Lead with weight + CV benefit -- not just HbA1c
+  2. Use SUSTAIN-6 and SELECT trial data for cardiologist targeting
+  3. Patient support programme to address cost barrier
+  4. Emphasise oral semaglutide (Rybelsus equivalent) for injection-averse
+  5. GLP-1 + SGLT2i combination pitch for CKD/HF patients
+
+KEY REFERENCES
+--------------
+  SUSTAIN-6 Trial, NEJM 2016; Marso et al.
+  SELECT Cardiovascular Outcomes Trial, NEJM 2023; Lincoff et al.
+  STEP-5 Extension, Diabetes Care 2024; Garvey et al.
+  India Real-World HEOR Study -- Mankind Pharma Internal Data 2024 (unpublished)
+  ADA Standards of Care in Diabetes, Diabetes Care 2024
+
+[END OF REPORT -- DO NOT DISTRIBUTE EXTERNALLY]

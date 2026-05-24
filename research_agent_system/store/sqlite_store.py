@@ -87,8 +87,36 @@ class SQLiteStore(BaseStore):
                 shared_at    TEXT,
                 shared_by    TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS notifications (
+                id          TEXT PRIMARY KEY,
+                type        TEXT NOT NULL,
+                content_id  TEXT,
+                title       TEXT,
+                message     TEXT,
+                division    TEXT,
+                created_at  TEXT,
+                read_at     TEXT
+            );
         """)
         conn.commit()
+
+        # ── Schema migrations: add new columns to existing content_items table ──
+        # Uses try/except so it's safe to run against an existing DB.
+        migrations = [
+            "ALTER TABLE content_items ADD COLUMN version INTEGER DEFAULT 1",
+            "ALTER TABLE content_items ADD COLUMN parent_id TEXT",
+            "ALTER TABLE content_items ADD COLUMN improvement_notes TEXT",
+            "ALTER TABLE content_items ADD COLUMN reviewer TEXT",
+            "ALTER TABLE content_items ADD COLUMN division TEXT",
+        ]
+        for sql in migrations:
+            try:
+                conn.execute(sql)
+                conn.commit()
+            except Exception:
+                pass  # column already exists — safe to ignore
+
         conn.close()
         print(f"[SQLiteStore] Ready — {self.db_path}")
 
@@ -124,8 +152,9 @@ class SQLiteStore(BaseStore):
                (id, topic, title, specialty, therapy_area, sub_category,
                 tags, summary, key_findings, clinical_insights,
                 recommendations, emerging_trends, short_article,
-                evidence_quality, status, created_at, source, llm_provider, pipeline)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_review',?,?,?,?)""",
+                evidence_quality, status, created_at, source, llm_provider, pipeline,
+                version, parent_id, improvement_notes, reviewer, division)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_review',?,?,?,?,?,?,?,?,?)""",
             (
                 content_id,
                 card.get("topic", ""),
@@ -145,6 +174,11 @@ class SQLiteStore(BaseStore):
                 "ai_agent",
                 card.get("llm_provider", "openrouter"),
                 card.get("pipeline", "Alpha→Beta→Gamma→Delta"),
+                card.get("version", 1),
+                card.get("parent_id", None),
+                card.get("improvement_notes", None),
+                card.get("reviewer", None),
+                card.get("division", None),
             ),
         )
         conn.commit()
@@ -204,11 +238,86 @@ class SQLiteStore(BaseStore):
     def reject(self, content_id: str, reason: str, reviewer: str = "MA Reviewer") -> None:
         conn = self._conn()
         conn.execute(
-            "UPDATE content_items SET status='rejected', rejection_reason=?, reviewed_at=? WHERE id=?",
-            (reason, self._now(), content_id)
+            "UPDATE content_items SET status='rejected', rejection_reason=?, reviewed_at=?, reviewer=? WHERE id=?",
+            (reason, self._now(), reviewer, content_id)
         )
         conn.commit()
         conn.close()
+
+    def request_improvement(
+        self,
+        content_id: str,
+        notes: str,
+        reviewer: str = "MA Reviewer",
+    ) -> None:
+        """Set status to improvement_requested and store MA notes."""
+        conn = self._conn()
+        conn.execute(
+            """UPDATE content_items
+               SET status='improvement_requested', improvement_notes=?,
+                   reviewer=?, reviewed_at=?
+               WHERE id=?""",
+            (notes, reviewer, self._now(), content_id)
+        )
+        conn.commit()
+        conn.close()
+        print(f"[SQLiteStore] Improvement requested for {content_id} by {reviewer}")
+
+    def save_improved_content(self, card: dict, parent_id: str, version: int) -> str:
+        """Save a new version of a content card, linked to parent_id."""
+        content_id = card.get("id") or str(uuid.uuid4())
+        conn = self._conn()
+        conn.execute(
+            """INSERT INTO content_items
+               (id, topic, title, specialty, therapy_area, sub_category,
+                tags, summary, key_findings, clinical_insights,
+                recommendations, emerging_trends, short_article,
+                evidence_quality, status, created_at, source, llm_provider, pipeline,
+                version, parent_id, improvement_notes, reviewer, division)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_review',?,?,?,?,?,?,?,?,?)""",
+            (
+                content_id,
+                card.get("topic", ""),
+                card.get("title", ""),
+                card.get("specialty", "General Medicine"),
+                card.get("therapy_area", "General"),
+                card.get("sub_category", "Review Article"),
+                self._serialize(card.get("tags", [])),
+                card.get("summary", ""),
+                self._serialize(card.get("key_findings", [])),
+                card.get("clinical_insights", ""),
+                self._serialize(card.get("recommendations", [])),
+                self._serialize(card.get("emerging_trends", [])),
+                card.get("short_article", ""),
+                card.get("evidence_quality", ""),
+                self._now(),
+                "ai_agent",
+                card.get("llm_provider", "openrouter"),
+                card.get("pipeline", f"Improvement v{version} · Beta+Gamma re-run"),
+                version,
+                parent_id,
+                card.get("improvement_notes", None),
+                card.get("reviewer", None),
+                card.get("division", None),
+            ),
+        )
+        conn.commit()
+        conn.close()
+        print(f"[SQLiteStore] Improved content saved → {content_id} (v{version}, parent={parent_id})")
+        return content_id
+
+    def get_content_versions(self, root_id: str) -> list[dict]:
+        """Return all versions of a content card (original + all improvements)."""
+        conn = self._conn()
+        # The original card has id=root_id; improved cards have parent_id=root_id
+        rows = conn.execute(
+            """SELECT * FROM content_items
+               WHERE id=? OR parent_id=?
+               ORDER BY version ASC, created_at ASC""",
+            (root_id, root_id)
+        ).fetchall()
+        conn.close()
+        return [self._deserialize(r) for r in rows]
 
     # ── Sharing ───────────────────────────────────────────────────────────────
 
@@ -263,3 +372,61 @@ class SQLiteStore(BaseStore):
             ).fetchall()
         conn.close()
         return [dict(r) for r in rows]
+
+    # ── Notifications ─────────────────────────────────────────────────────────
+
+    def add_notification(
+        self,
+        type: str,
+        content_id: str,
+        title: str,
+        message: str,
+        division: str,
+    ) -> str:
+        """Create a new in-app notification. Returns the notification ID."""
+        notification_id = str(uuid.uuid4())
+        conn = self._conn()
+        conn.execute(
+            """INSERT INTO notifications
+               (id, type, content_id, title, message, division, created_at, read_at)
+               VALUES (?,?,?,?,?,?,?,NULL)""",
+            (notification_id, type, content_id, title, message, division, self._now())
+        )
+        conn.commit()
+        conn.close()
+        print(f"[SQLiteStore] Notification created → {notification_id} ({type})")
+        return notification_id
+
+    def get_notifications(
+        self,
+        division: Optional[str] = None,
+        unread_only: bool = False,
+    ) -> list[dict]:
+        """Retrieve notifications, optionally filtered by division or unread status."""
+        conn = self._conn()
+        conditions = []
+        params = []
+
+        if division:
+            conditions.append("division=?")
+            params.append(division)
+        if unread_only:
+            conditions.append("read_at IS NULL")
+
+        where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+        rows = conn.execute(
+            f"SELECT * FROM notifications {where} ORDER BY created_at DESC",
+            params
+        ).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def mark_notification_read(self, notification_id: str) -> None:
+        """Mark a notification as read by setting read_at to now."""
+        conn = self._conn()
+        conn.execute(
+            "UPDATE notifications SET read_at=? WHERE id=?",
+            (self._now(), notification_id)
+        )
+        conn.commit()
+        conn.close()

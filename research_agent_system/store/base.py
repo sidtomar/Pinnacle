@@ -66,7 +66,8 @@ class BaseStore(ABC):
         List content cards with optional filters.
 
         Args:
-            status:    'pending_review' | 'approved' | 'rejected' | None (all)
+            status:    'pending_review' | 'approved' | 'rejected' |
+                       'improvement_requested' | None (all)
             specialty: Filter by medical specialty. None = all specialties.
             limit:     Max number of rows to return.
 
@@ -103,6 +104,54 @@ class BaseStore(ABC):
         """
         ...
 
+    @abstractmethod
+    def request_improvement(
+        self,
+        content_id: str,
+        notes: str,
+        reviewer: str = "MA Reviewer",
+    ) -> None:
+        """
+        Medical Affairs requests improvement on a content card.
+        Sets status='improvement_requested' and saves improvement_notes.
+
+        Args:
+            content_id: ID of the content card to improve.
+            notes:      Free-text feedback from MA (e.g. "Fix empagliflozin dose").
+            reviewer:   Name of the MA reviewer requesting improvement.
+        """
+        ...
+
+    @abstractmethod
+    def save_improved_content(self, card: dict, parent_id: str, version: int) -> str:
+        """
+        Save a new revised version of a content card, linking it back to the
+        original (or root) card via parent_id.
+
+        Args:
+            card:      Content dict for the improved version.
+            parent_id: ID of the original (root) content card.
+            version:   Version number (2, 3, ...).
+
+        Returns:
+            The content ID of the newly saved improved card.
+        """
+        ...
+
+    @abstractmethod
+    def get_content_versions(self, root_id: str) -> list[dict]:
+        """
+        Return all versions of a content card — the original plus all
+        improvement revisions — ordered by version ascending.
+
+        Args:
+            root_id: The ID of the original (v1) content card.
+
+        Returns:
+            List of content card dicts with version/parent_id populated.
+        """
+        ...
+
     # ── Sharing ───────────────────────────────────────────────────────────────
 
     @abstractmethod
@@ -128,5 +177,60 @@ class BaseStore(ABC):
     def get_share_logs(self, content_id: Optional[str] = None) -> list[dict]:
         """
         Return sharing history, optionally filtered by content_id.
+        """
+        ...
+
+    # ── Notifications ─────────────────────────────────────────────────────────
+
+    @abstractmethod
+    def add_notification(
+        self,
+        type: str,
+        content_id: str,
+        title: str,
+        message: str,
+        division: str,
+    ) -> str:
+        """
+        Create a new in-app notification.
+
+        Args:
+            type:       Notification type e.g. 'new_content', 'content_approved',
+                        'improvement_ready'.
+            content_id: Related content card ID.
+            title:      Short notification title.
+            message:    Full notification message body.
+            division:   Division this notification is relevant to.
+
+        Returns:
+            The notification ID (UUID string).
+        """
+        ...
+
+    @abstractmethod
+    def get_notifications(
+        self,
+        division: Optional[str] = None,
+        unread_only: bool = False,
+    ) -> list[dict]:
+        """
+        Retrieve notifications, optionally filtered.
+
+        Args:
+            division:    Filter by division. None = all divisions.
+            unread_only: If True, only return notifications where read_at IS NULL.
+
+        Returns:
+            List of notification dicts, newest first.
+        """
+        ...
+
+    @abstractmethod
+    def mark_notification_read(self, notification_id: str) -> None:
+        """
+        Mark a notification as read by setting read_at to now.
+
+        Args:
+            notification_id: The notification UUID to mark as read.
         """
         ...
