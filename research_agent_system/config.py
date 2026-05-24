@@ -9,7 +9,11 @@ Set LLM_PROVIDER=openrouter in your .env and pick any model via OPENROUTER_MODEL
 import os
 from enum import Enum
 
+from dotenv import load_dotenv
 from langchain_core.language_models import BaseChatModel
+
+# Load .env file into environment variables on first import
+load_dotenv()
 
 
 class LLMProvider(str, Enum):
@@ -72,7 +76,7 @@ def get_llm(
 
         model_name = (
             model
-            or os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-5")
+            or os.getenv("OPENROUTER_MODEL", "anthropic/claude-3.5-haiku")
         )
 
         return ChatOpenAI(

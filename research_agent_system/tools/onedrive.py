@@ -78,6 +78,14 @@ def read_onedrive_files(query: str) -> str:
     Input: a topic or keyword to match against file names.
     Output: concatenated text content of all matched files.
     """
+    # Gracefully skip if OneDrive credentials are not configured
+    if not all([
+        os.getenv("ONEDRIVE_CLIENT_ID"),
+        os.getenv("ONEDRIVE_CLIENT_SECRET"),
+        os.getenv("ONEDRIVE_TENANT_ID"),
+    ]):
+        return "OneDrive not configured — no internal documents searched."
+
     folder_path = os.getenv("ONEDRIVE_FOLDER_PATH", "Research")
     token = _get_access_token()
 

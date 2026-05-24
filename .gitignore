@@ -1,0 +1,30 @@
+# API keys and secrets — NEVER commit these
+.env
+*.env
+
+# Database files
+*.db
+*.sqlite
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Pipeline outputs
+research_agent_system/outputs/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
