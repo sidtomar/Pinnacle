@@ -3,6 +3,12 @@ Pipeline Orchestrator
 
 Chains Alpha → Beta → Gamma → Delta in sequence,
 passing outputs downstream at each stage.
+
+Each agent receives exactly what it needs:
+  Alpha  : topic
+  Beta   : Alpha's research article
+  Gamma  : topic + Beta's insights
+  Delta  : topic + specialty + therapy_area + Beta's insights + Gamma's article
 """
 import json
 import os
@@ -15,40 +21,55 @@ from agents import run_alpha, run_beta, run_gamma, run_delta
 
 @dataclass
 class PipelineResult:
-    topic: str
-    research_article: str = ""
-    insights: str = ""
-    article: str = ""
-    report: dict = field(default_factory=dict)
-    whatsapp_status: dict = field(default_factory=dict)
-    email_status: dict = field(default_factory=dict)
+    """Holds all outputs from a complete pipeline run."""
+    topic:            str
+    specialty:        str = ""
+    therapy_area:     str = ""
+    research_article: str = ""    # Alpha output
+    insights:         str = ""    # Beta output
+    article:          str = ""    # Gamma output
+    content_card:     dict = field(default_factory=dict)   # Delta output (portal card)
+    whatsapp_status:  dict = field(default_factory=dict)
+    email_status:     dict = field(default_factory=dict)
     duration_seconds: float = 0.0
-    errors: list[str] = field(default_factory=list)
+    errors:           list = field(default_factory=list)
 
 
-def run_pipeline(topic: str, save_outputs: bool = True) -> PipelineResult:
+def run_pipeline(
+    topic: str,
+    specialty: str = "General Medicine",
+    therapy_area: str = "General",
+    save_outputs: bool = True,
+) -> PipelineResult:
     """
     Execute the full 4-agent research pipeline for the given topic.
 
     Args:
-        topic: The research topic or keywords to investigate.
+        topic:        The research topic or keywords to investigate.
+        specialty:    Medical specialty (e.g. 'Diabetology'). Used by Delta
+                      to correctly categorise the portal content card.
+        therapy_area: Therapy area (e.g. 'GLP-1 Therapy'). Used by Delta.
         save_outputs: If True, save each agent's output to ./outputs/.
 
     Returns:
         PipelineResult with all agent outputs and delivery status.
     """
     start = time.time()
-    result = PipelineResult(topic=topic)
-    provider = os.getenv("LLM_PROVIDER", "claude")
+    result = PipelineResult(topic=topic, specialty=specialty, therapy_area=therapy_area)
+    provider = os.getenv("LLM_PROVIDER", "openrouter")
 
     print(f"\n{'='*60}")
     print(f"  PINNACLE RESEARCH PIPELINE")
-    print(f"  Topic : {topic}")
-    print(f"  LLM   : {provider.upper()}")
-    print(f"  Start : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"  Topic        : {topic}")
+    print(f"  Specialty    : {specialty}")
+    print(f"  Therapy Area : {therapy_area}")
+    print(f"  LLM Provider : {provider.upper()}")
+    print(f"  Start        : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*60}\n")
 
-    # ── Agent Alpha ───────────────────────────────────────────────
+    # ── Agent Alpha — Research ────────────────────────────────────────────────
+    # Input : topic string
+    # Output: structured markdown research article (~1000 words)
     print("[1/4] Agent Alpha — Researching...")
     try:
         result.research_article = run_alpha(topic)
@@ -58,9 +79,11 @@ def run_pipeline(topic: str, save_outputs: bool = True) -> PipelineResult:
         result.errors.append(f"Alpha: {exc}")
         print(f"[1/4] Alpha ERROR: {exc}\n")
         result.duration_seconds = time.time() - start
-        return result
+        return result   # Alpha failure is fatal — nothing to pass downstream
 
-    # ── Agent Beta ────────────────────────────────────────────────
+    # ── Agent Beta — Insights ─────────────────────────────────────────────────
+    # Input : Alpha's research article
+    # Output: structured insights (Executive Summary, Key Findings, Recommendations...)
     print("[2/4] Agent Beta — Generating insights...")
     try:
         result.insights = run_beta(result.research_article)
@@ -70,33 +93,39 @@ def run_pipeline(topic: str, save_outputs: bool = True) -> PipelineResult:
         result.errors.append(f"Beta: {exc}")
         print(f"[2/4] Beta ERROR: {exc}\n")
         result.duration_seconds = time.time() - start
-        return result
+        return result   # Beta failure is fatal — no insights for Gamma/Delta
 
-    # ── Agent Gamma ───────────────────────────────────────────────
+    # ── Agent Gamma — Article Writing & Delivery ──────────────────────────────
+    # Input : topic + Beta's insights
+    # Output: short plain-text article + HTML version → sent via WhatsApp + email
     print("[3/4] Agent Gamma — Writing article and delivering...")
     try:
         gamma_out = run_gamma(topic=topic, insights=result.insights)
-        result.article = gamma_out["article"]
+        result.article         = gamma_out["article"]
         result.whatsapp_status = gamma_out["whatsapp_status"]
-        result.email_status = gamma_out["email_status"]
+        result.email_status    = gamma_out["email_status"]
         print("[3/4] Gamma complete.\n")
         _save(result.article, "gamma_article.txt", save_outputs)
     except Exception as exc:
         result.errors.append(f"Gamma: {exc}")
         print(f"[3/4] Gamma ERROR: {exc}\n")
+        # Non-fatal: Delta can still produce the portal card without the article
 
-    # ── Agent Delta ───────────────────────────────────────────────
-    print("[4/4] Agent Delta — Generating JSON report...")
+    # ── Agent Delta — Portal Content Card ────────────────────────────────────
+    # Input : topic + specialty + therapy_area + Beta insights + Gamma article
+    # Output: PinnacleContentCard dict (1:1 with portal DB schema)
+    print("[4/4] Agent Delta — Building Pinnacle content card...")
     try:
-        result.report = run_delta(
+        result.content_card = run_delta(
             topic=topic,
-            research_article=result.research_article,
+            specialty=specialty,
+            therapy_area=therapy_area,
             insights=result.insights,
             article=result.article,
             llm_provider=provider,
         )
         print("[4/4] Delta complete.\n")
-        _save(json.dumps(result.report, indent=2), "delta_report.json", save_outputs)
+        _save(json.dumps(result.content_card, indent=2), "delta_content_card.json", save_outputs)
     except Exception as exc:
         result.errors.append(f"Delta: {exc}")
         print(f"[4/4] Delta ERROR: {exc}\n")
@@ -113,6 +142,7 @@ def run_pipeline(topic: str, save_outputs: bool = True) -> PipelineResult:
 
 
 def _save(content: str, filename: str, enabled: bool) -> None:
+    """Save content to ./outputs/<filename>. No-op if enabled=False."""
     if not enabled:
         return
     out_dir = "outputs"
