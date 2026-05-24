@@ -20,7 +20,7 @@ if not exist "D:\venv\pinnacle\Scripts\activate.bat" (
 call D:\venv\pinnacle\Scripts\activate.bat
 
 echo  [2/3] Installing backend dependencies...
-pip install -q fastapi uvicorn python-multipart
+pip install -q fastapi uvicorn python-multipart apscheduler
 
 echo  [3/3] Starting API server on http://localhost:8000
 echo.

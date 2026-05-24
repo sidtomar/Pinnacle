@@ -183,7 +183,7 @@ class SQLiteStore(BaseStore):
         )
         conn.commit()
         conn.close()
-        print(f"[SQLiteStore] Content card saved → {content_id}")
+        print(f"[SQLiteStore] Content card saved: {content_id}")
         return content_id
 
     def list_content(
@@ -303,7 +303,7 @@ class SQLiteStore(BaseStore):
         )
         conn.commit()
         conn.close()
-        print(f"[SQLiteStore] Improved content saved → {content_id} (v{version}, parent={parent_id})")
+        print(f"[SQLiteStore] Improved content saved: {content_id} (v{version}, parent={parent_id})")
         return content_id
 
     def get_content_versions(self, root_id: str) -> list[dict]:
@@ -394,7 +394,7 @@ class SQLiteStore(BaseStore):
         )
         conn.commit()
         conn.close()
-        print(f"[SQLiteStore] Notification created → {notification_id} ({type})")
+        print(f"[SQLiteStore] Notification created: {notification_id} ({type})")
         return notification_id
 
     def get_notifications(
