@@ -21,6 +21,10 @@ twilio>=9.0.0
 # Email
 sendgrid>=6.11.0
 
+# Azure Databricks — primary data store
+# Connects to Databricks SQL Warehouses via the official Python driver
+databricks-sql-connector>=3.0.0
+
 # Utilities
 python-dotenv>=1.0.0
 pydantic>=2.0.0

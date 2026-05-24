@@ -226,20 +226,60 @@ def run_delta(
     except Exception as exc:
         print(f"[Delta] Warning — card schema validation failed: {exc}")
 
-    # Post to portal if configured
+    # ── Persist to Databricks ─────────────────────────────────────────────────
+    _save_to_databricks(card)
+
+    # ── Also POST to portal API if configured ─────────────────────────────────
     _post_to_portal(card)
 
     return card
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Portal delivery
+# Storage: Databricks Delta Lake
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _save_to_databricks(card: dict) -> None:
+    """
+    Save the content card to Azure Databricks Delta Lake.
+
+    Requires DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN in env.
+    If any of these are missing, skips silently (so local dev still works).
+
+    The DatabricksStore.setup() call ensures tables exist before writing.
+    In production, call store.setup() once at app startup instead of every run.
+    """
+    host       = os.getenv("DATABRICKS_HOST")
+    http_path  = os.getenv("DATABRICKS_HTTP_PATH")
+    token      = os.getenv("DATABRICKS_TOKEN")
+
+    if not all([host, http_path, token]):
+        print("[Delta] Databricks env vars not set — skipping Delta Lake save.")
+        print("        Set DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_TOKEN")
+        return
+
+    try:
+        from store.databricks_store import DatabricksStore
+        store = DatabricksStore()
+        store.setup()                   # creates tables if they don't exist
+        content_id = store.save_content_card(card)
+        print(f"[Delta] ✓ Content card saved to Databricks → id: {content_id}")
+    except Exception as exc:
+        # Non-fatal — don't crash the pipeline if Databricks is unavailable
+        print(f"[Delta] Warning — Databricks save failed: {exc}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Storage: Pinnacle Portal API (optional, secondary)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _post_to_portal(card: dict) -> None:
     """
     POST the content card to the Pinnacle portal API.
     If PINNACLE_API_URL is not set, skips silently (useful for local dev/testing).
+
+    Note: When the production portal's .NET backend reads from Databricks directly,
+    this POST becomes unnecessary. Keep it for now during the demo/transition phase.
     """
     url = os.getenv("PINNACLE_API_URL")
     api_key = os.getenv("PINNACLE_API_KEY")
