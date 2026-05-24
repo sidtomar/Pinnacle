@@ -25,6 +25,13 @@ sendgrid>=6.11.0
 # Connects to Databricks SQL Warehouses via the official Python driver
 databricks-sql-connector>=3.0.0
 
+# Databricks Vector Search — semantic search over MA document library
+# Manages ANN index, embedding generation, and Unity Catalog governance
+databricks-vectorsearch>=0.40
+
+# LangChain × Databricks integration (embeddings + chat models via FMAPI)
+langchain-databricks>=0.1.0
+
 # Utilities
 python-dotenv>=1.0.0
 pydantic>=2.0.0
