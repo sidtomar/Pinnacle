@@ -2863,37 +2863,48 @@ function renderCL(){
 function clCardHTML(p){
   const cc=CAT_COL[p.cat]||'b-gray', tc=TH_COL[p.therapy]||'b-gray';
   const isMA=ROLE==='ma';
+  const v = p.version || 1;
+  // Handle both numeric (static) and string (API) IDs safely in onclick
+  const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
+  const improveBtn = (isMA && p.status==='pending' && p._apiSource)
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request AI improvement">Improve</button>`
+    : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${p.id})">✓ Approve</button>`:''}
-       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${p.id})">Open →</button>`
-    : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${p.id})">View</button>
-       <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${p.id})">Share</button>`;
-  return`<div class="pc pc-${p.status}" onclick="${isMA?`openMADetail(${p.id})`:`openCVModal(${p.id})`}">
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>${improveBtn}`:''}
+       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
+    : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
+       <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
+  return`<div class="pc pc-${p.status}" onclick="${isMA?`openMADetail(${idArg})`:`openCVModal(${idArg})`}">
     <div class="pc-accent"></div>
     <div class="pc-body">
-      <div style="display:flex;align-items:center;justify-content:space-between;">${srcPill(p.src)}${stBadge(p.status)}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">${srcPill(p.src)}${stBadge(p.status)}${v>1?`<span class="ver-badge ver-latest">v${v}</span>`:''}</div>
       <div class="pc-title">${p.title}</div>
       <div class="pc-j">${p.journal} · ${p.month} ${p.year}</div>
       <div class="pc-sum">${p.sum}</div>
       <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span>${relBadge(p.rel)}</div>
     </div>
-    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);">${fmtDate(p.date)}</div><div style="display:flex;gap:5px;">${actions}</div></div>
+    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);">${fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;">${actions}</div></div>
   </div>`;
 }
 
 function clRowHTML(p){
   const cc=CAT_COL[p.cat]||'b-gray', tc=TH_COL[p.therapy]||'b-gray';
   const isMA=ROLE==='ma';
+  const v = p.version || 1;
+  const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const accClass=p.status==='approved'?'pr-acc-approved':p.status==='pending'?'pr-acc-pending':'pr-acc-rejected';
+  const improveBtn = (isMA && p.status==='pending' && p._apiSource)
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request AI improvement">Improve</button>`
+    : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${p.id})">Approve</button>`:''}
-       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${p.id})">Open →</button>`
-    : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${p.id})">View</button>
-       <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${p.id})">Share</button>`;
-  return`<div class="pr" onclick="${isMA?`openMADetail(${p.id})`:`openCVModal(${p.id})`}">
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>${improveBtn}`:''}
+       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
+    : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
+       <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
+  return`<div class="pr" onclick="${isMA?`openMADetail(${idArg})`:`openCVModal(${idArg})`}">
     <div class="pr-acc ${accClass}"></div>
     <div class="pr-body">
-      <div class="pr-title">${p.title}</div>
+      <div class="pr-title">${p.title}${v>1?` <span class="ver-badge ver-latest">v${v}</span>`:''}</div>
       <div class="pr-meta"><span>${p.journal}</span><span>${p.authors.split(',')[0]} et al.</span><span>${p.month} ${p.year}</span>${p.pmid?`<span>PMID ${p.pmid}</span>`:''}</div>
       <div class="pr-sum">${p.sum}</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span></div>
@@ -2927,13 +2938,18 @@ function openMADetail(id){
   document.querySelectorAll('#ma-rel-opts .rel-opt').forEach(o=>{o.className='rel-opt';if(o.textContent.trim()===p.rel)o.classList.add(p.rel==='High'?'rel-h':p.rel==='Medium'?'rel-m':'rel-l');});
   renderTags();
   const n=document.getElementById('ma-notice');
-  if(p.status==='approved'){n.innerHTML=`<div class="notice-green">${svgCheck()}Approved by ${p.rev} on ${fmtDate(p.revDate)}</div>`;}
-  else if(p.status==='rejected'){n.innerHTML=`<div class="notice-red"><div class="notice-red-t">Rejected by ${p.rev} on ${fmtDate(p.revDate)}</div><div class="notice-red-r">"${p.rejNote}"</div></div>`;}
+  if(p.status==='approved'){n.innerHTML=`<div class="notice-green">${svgCheck()}Approved by ${p.rev||'MA'} on ${fmtDate(p.revDate)}</div>`;}
+  else if(p.status==='rejected'){n.innerHTML=`<div class="notice-red"><div class="notice-red-t">Rejected by ${p.rev||'MA'} on ${fmtDate(p.revDate)}</div><div class="notice-red-r">"${p.rejNote}"</div></div>`;}
+  else if(p.improvement_notes){n.innerHTML=`<div style="background:var(--amber-bg);border-left:3px solid var(--amber);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--text2);"><strong style="color:var(--amber);">MA Improvement Notes:</strong> ${_esc(p.improvement_notes)}</div>`;}
   else n.innerHTML='';
+  // Improve button shown for pending API items
+  const improveHtml = (p._apiSource && p.status !== 'approved')
+    ? `<button class="btn btn-sm" style="background:var(--amber);color:#fff;" onclick="openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request AI improvement with MA notes"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 2.5L5.5 6M9 2.5H6.5M9 2.5V5"/><circle cx="4" cy="7" r="3" stroke-dasharray="2 1"/></svg> Improve</button>`
+    : '';
   const btns=document.getElementById('ma-action-btns');
   if(p.status==='approved'){btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button><button class="btn btn-sm" style="background:var(--blue);color:#fff;" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6.5h9M7 3l4 3.5L7 10" stroke-linejoin="round"/></svg>Save Changes</button>`;}
-  else if(p.status==='rejected'){btns.innerHTML=`<button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Re-Approve</button>`;}
-  else{btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button><button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Approve &amp; Save</button>`;}
+  else if(p.status==='rejected'){btns.innerHTML=`${improveHtml}<button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Re-Approve</button>`;}
+  else{btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button>${improveHtml}<button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Approve &amp; Save</button>`;}
   document.getElementById('rej-wrap').classList.remove('show');
   openOv('ma-ov');
 }
@@ -2948,15 +2964,41 @@ function setRel(r,el){CUR_REL=r;document.querySelectorAll('#ma-rel-opts .rel-opt
 
 function doApprove(){
   const p=ALL_PAPERS.find(x=>x.id===CUR_ID); if(!p) return;
+  if(p._apiSource){
+    // API-sourced item: persist approval to backend
+    fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})})
+    .then(r=>{if(!r.ok)throw new Error('API error');p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);})
+    .catch(()=>toast('❌','Approval failed — check API connection'));
+    return;
+  }
   p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);
   p.sum=document.getElementById('ma-summary').value;
   p.cat=document.getElementById('ma-cat').value;p.therapy=document.getElementById('ma-therapy').value;
   p.sub=document.getElementById('ma-sub').value;p.rel=CUR_REL||p.rel;p.tags=[...CUR_TAGS];
   updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);
 }
-function quickApprove(id){const p=ALL_PAPERS.find(x=>x.id===id);if(!p)return;p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();toast('✅','Approved — now live for PMT!');}
+function quickApprove(id){
+  const p=ALL_PAPERS.find(x=>x.id===id);if(!p)return;
+  if(p._apiSource){
+    fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})})
+    .then(r=>{if(!r.ok)throw new Error();p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();toast('✅','Approved — now live for PMT!');})
+    .catch(()=>toast('❌','Approval failed — check API connection'));
+    return;
+  }
+  p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();toast('✅','Approved — now live for PMT!');
+}
 function toggleReject(){const w=document.getElementById('rej-wrap');w.classList.toggle('show');if(w.classList.contains('show')){const b=document.getElementById('btn-rej');if(b){b.innerHTML='<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Confirm Rejection';b.onclick=confirmReject;}}}
-function confirmReject(){const p=ALL_PAPERS.find(x=>x.id===CUR_ID);if(!p)return;const n=document.getElementById('rej-note').value.trim();if(!n){toast('⚠️','Please provide a rejection reason.');return;}p.status='rejected';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);p.rejNote=n;updCounts();renderCL();closeOv('ma-ov');toast('❌','Content rejected — removed from PMT library.');}
+function confirmReject(){
+  const p=ALL_PAPERS.find(x=>x.id===CUR_ID);if(!p)return;
+  const n=document.getElementById('rej-note').value.trim();if(!n){toast('⚠️','Please provide a rejection reason.');return;}
+  if(p._apiSource){
+    fetch(PL_API+'/content/'+p._apiId+'/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason:n,reviewer:'Dr. Prashant Agarwal (MA)'})})
+    .then(r=>{if(!r.ok)throw new Error();p.status='rejected';p.rejNote=n;updCounts();renderCL();closeOv('ma-ov');toast('❌','Content rejected.');})
+    .catch(()=>toast('❌','Rejection failed — check API connection'));
+    return;
+  }
+  p.status='rejected';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);p.rejNote=n;updCounts();renderCL();closeOv('ma-ov');toast('❌','Content rejected — removed from PMT library.');
+}
 function regenSummary(){const ta=document.getElementById('ma-summary');ta.style.opacity='.4';ta.value='Regenerating…';setTimeout(()=>{const p=ALL_PAPERS.find(x=>x.id===CUR_ID);ta.value=p?p.sum:'';ta.style.opacity='1';toast('✨','Summary regenerated by AI');},1400);}
 
 function updCounts(){
@@ -5459,7 +5501,47 @@ function versionsLinkHtml(item) {
   return `<button class="ver-link" onclick="event.stopPropagation();openVersionHistory('${item.id||''}','${(item.title||'').replace(/'/g,'\\\'').slice(0,60)}')" title="View all versions">versions</button>`;
 }
 
-/* ══ LOAD CONTENT FROM API (real data) ══ */
+/* ══ MAP API ITEM → ALL_PAPERS FORMAT ══ */
+function mapAPIItemToPaper(item) {
+  // Map backend status strings to the ALL_PAPERS status vocabulary
+  const statusMap = {pending_review:'pending', approved:'approved', rejected:'rejected', improvement_requested:'pending'};
+  const d = item.created_at ? new Date(item.created_at) : new Date();
+  // Extract a readable summary from the AI-generated content
+  const rawContent = item.content || item.article || '';
+  const summary = rawContent.replace(/#+\s*/g,'').slice(0,220).trim() || item.topic || '';
+  return {
+    // String ID prefixed with 'api-' to avoid collisions with static numeric IDs
+    id: 'api-' + (item.id||'').slice(0,8),
+    _apiSource: true,          // flag so action fns know to call the backend
+    _apiId: item.id,           // real UUID for API calls (approve/reject/improve)
+    title: item.title || item.topic || 'AI Generated Article',
+    journal: 'PinnacleIQ Research Pipeline (AI-Generated)',
+    authors: 'AI Pipeline · Alpha · Delta · et al.',
+    month: d.toLocaleString('en-IN',{month:'long'}),
+    year: d.getFullYear(),
+    date: (item.created_at||'').slice(0,10),
+    sum: summary,
+    abstract: rawContent || summary,
+    cat: item.specialty || 'General',
+    therapy: item.therapy_area || item.topic || '',
+    sub: item.specialty || '',
+    rec: 'All Specialists',
+    rel: 'High',
+    tags: [item.specialty, item.therapy_area, 'AI Pipeline'].filter(Boolean),
+    src: 'AI Pipeline',
+    status: statusMap[item.status] || 'pending',
+    rev: item.reviewer || '',
+    revDate: '',
+    rejNote: item.reason || '',
+    pmid: null, pdf: null,
+    version: item.version || 1,
+    parent_id: item.parent_id || null,
+    improvement_notes: item.improvement_notes || '',
+    division: item.division || '',
+  };
+}
+
+/* ══ LOAD CONTENT FROM API — merges into ALL_PAPERS ══ */
 let _apiContent = [];
 
 async function loadContentFromAPI() {
@@ -5468,52 +5550,29 @@ async function loadContentFromAPI() {
     if (!res.ok) return;
     const data = await res.json();
     _apiContent = data.items || [];
-    renderAPIContent();
+
+    // Remove any previously merged API items to prevent duplicates on re-fetch
+    ALL_PAPERS = ALL_PAPERS.filter(p => !p._apiSource);
+
+    // Convert and prepend so pipeline content appears at the top
+    const mapped = _apiContent.map(mapAPIItemToPaper);
+    ALL_PAPERS = [...mapped, ...ALL_PAPERS];
+
+    // Clear the now-redundant separate section div (kept for compatibility)
+    const sep = document.getElementById('cl-api-items');
+    if (sep) sep.innerHTML = '';
+
+    // Refresh counts, tabs and the full card list
+    buildCLTabs();
+    buildCLKpis();
+    renderCL();
   } catch (e) {
-    // Silent fail — static demo data still renders
+    // Silent fail — static demo data still renders when API is down
   }
 }
 
 function renderAPIContent() {
-  const container = document.getElementById('cl-api-items');
-  if (!container) return;
-  if (!_apiContent.length) { container.innerHTML = ''; return; }
-
-  const statusColors = {
-    pending_review: 'b-amber',
-    approved: 'b-green',
-    rejected: 'b-red',
-    improvement_requested: 'b-amber',
-  };
-
-  container.innerHTML = `<div style="margin-bottom:16px;">
-    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 .4l.8 2.5H9.6L7.4 4.5l.8 2.5L6 5.6l-2.2 1.4.8-2.5L2.4 2.9H5.2L6 .4z" fill="#7C3AED" opacity=".8"/></svg>
-      Live from API (${_apiContent.length} items)
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      ${_apiContent.map(item => {
-        const st = statusColors[item.status] || 'b-gray';
-        const v = item.version || 1;
-        return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
-              <span class="badge ${st}" style="font-size:9.5px;">${(item.status||'').replace(/_/g,' ')}</span>
-              ${v>1?`<span class="ver-badge ver-latest">v${v}</span>`:''}
-              <span class="badge b-navy" style="font-size:9px;">${item.specialty||''}</span>
-            </div>
-            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:3px;line-height:1.4;">${_esc(item.title||item.topic||'')}</div>
-            <div style="font-size:11px;color:var(--text3);">${item.therapy_area||''} · ${item.created_at?new Date(item.created_at).toLocaleDateString('en-IN'):''} ${item.division?'· '+item.division:''}</div>
-            ${item.improvement_notes?`<div style="font-size:11px;color:var(--amber);margin-top:4px;"><strong>MA Notes:</strong> ${_esc(item.improvement_notes.slice(0,100))}</div>`:''}
-          </div>
-          <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;">
-            ${improvementBtnHtml(item)}
-            ${v>1||item.parent_id?`<button class="btn btn-ghost btn-xs" onclick="openVersionHistory('${item.id}','${(item.title||'').replace(/'/g,'\\\'').slice(0,50)}')" style="font-size:10px;">View Versions</button>`:''}
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-  </div>`;
+  // No-op: API content is now merged into ALL_PAPERS and rendered by renderCL()
 }
 
 /* ══ STARTUP CALLS ══ */
