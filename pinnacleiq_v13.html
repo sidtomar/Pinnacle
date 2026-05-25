@@ -5558,10 +5558,6 @@ async function loadContentFromAPI() {
     const mapped = _apiContent.map(mapAPIItemToPaper);
     ALL_PAPERS = [...mapped, ...ALL_PAPERS];
 
-    // Clear the now-redundant separate section div (kept for compatibility)
-    const sep = document.getElementById('cl-api-items');
-    if (sep) sep.innerHTML = '';
-
     // Refresh counts, tabs and the full card list
     buildCLTabs();
     buildCLKpis();
@@ -5583,15 +5579,7 @@ setTimeout(() => {
   loadContentFromAPI();
 }, 1500);
 
-// Inject API content container into content library page
-(function injectAPIContentContainer(){
-  const clContainer = document.getElementById('cl-container');
-  if (clContainer) {
-    const apiDiv = document.createElement('div');
-    apiDiv.id = 'cl-api-items';
-    clContainer.parentNode.insertBefore(apiDiv, clContainer);
-  }
-})();
+// API content is merged directly into ALL_PAPERS — no separate container needed
 
 switchRole('pmt');
 </script>
