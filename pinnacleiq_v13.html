@@ -647,17 +647,25 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
       <!-- Filters -->
       <div class="fr">
-        <div class="sbox"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><line x1="8.5" y1="8.5" x2="12" y2="12"/></svg><input type="text" placeholder="Search title, journal, author…" id="cl-q" oninput="renderCL()"></div>
+        <div class="sbox"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><line x1="8.5" y1="8.5" x2="12" y2="12"/></svg><input type="text" placeholder="Search title, journal, author…" id="cl-q" onkeydown="if(event.key==='Enter')renderCL()"></div>
         <div style="display:flex;align-items:center;gap:5px;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:6px 12px;">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#9CA3AF" stroke-width="1.4" stroke-linecap="round"><rect x="1" y="1.5" width="10" height="9.5" rx="1.5"/><line x1="1" y1="4.5" x2="11" y2="4.5"/><line x1="3.5" y1="0.5" x2="3.5" y2="2.5"/><line x1="8.5" y1="0.5" x2="8.5" y2="2.5"/></svg>
-          <input type="date" id="cl-from" onchange="renderCL()" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="From date">
+          <input type="date" id="cl-from" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="From date">
           <span style="color:var(--border2);">–</span>
-          <input type="date" id="cl-to" onchange="renderCL()" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="To date">
+          <input type="date" id="cl-to" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="To date">
         </div>
-        <select class="fsel" id="cl-cat" onchange="renderCL()"><option value="">All Specialties</option><option>Gynaecology</option><option>Cardiology</option><option>Paediatrics</option><option>Oncology</option><option>Dermatology</option><option>Diabetology</option></select>
-        <select class="fsel" id="cl-th" onchange="renderCL()"><option value="">All Therapy Areas</option><option>PCOS</option><option>Heart Failure</option><option>Paediatric Nutrition</option><option>Dyslipidaemia</option><option>GLP-1 Therapy</option><option>Acne &amp; Skin</option><option>Hypertension</option><option>Immunisation</option></select>
-        <select class="fsel" id="cl-src" onchange="renderCL()"><option value="">All Sources</option><option value="pubmed">PubMed</option><option value="upload">MA Upload</option><option value="link">Link</option></select>
-        <button class="btn btn-ghost btn-sm" onclick="clearCLFilters()" style="color:var(--blue);font-size:12px;"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="10" y2="10"/><line x1="10" y1="1" x2="1" y2="10"/></svg> Clear</button>
+        <select class="fsel" id="cl-cat"><option value="">All Specialties</option><option>Gynaecology</option><option>Cardiology</option><option>Paediatrics</option><option>Oncology</option><option>Dermatology</option><option>Diabetology</option></select>
+        <select class="fsel" id="cl-th"><option value="">All Therapy Areas</option><option>PCOS</option><option>Heart Failure</option><option>Paediatric Nutrition</option><option>Dyslipidaemia</option><option>GLP-1 Therapy</option><option>Acne &amp; Skin</option><option>Hypertension</option><option>Immunisation</option></select>
+        <select class="fsel" id="cl-src"><option value="">All Sources</option><option value="pubmed">PubMed</option><option value="AI Pipeline">AI Pipeline</option><option value="upload">MA Upload</option><option value="link">Link</option></select>
+        <select class="fsel" id="cl-sort" style="min-width:130px;">
+          <option value="new">&#8595; Newest First</option>
+          <option value="old">&#8593; Oldest First</option>
+        </select>
+        <button class="btn btn-navy btn-sm" onclick="renderCL()" style="font-size:12px;padding:7px 14px;white-space:nowrap;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><line x1="8.5" y1="8.5" x2="11.5" y2="11.5"/></svg>
+          Apply
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="clearCLFilters()" style="color:var(--text3);font-size:12px;"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="10" y2="10"/><line x1="10" y1="1" x2="1" y2="10"/></svg> Clear</button>
       </div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:14px;" id="cl-cnt"></div>
       <div id="cl-container"></div>
@@ -1432,6 +1440,24 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
           </div>
         </div><!-- /right column -->
       </div><!-- /two-column -->
+
+      <!-- ── Recent Pipeline Activity ─────────────────────────────────── -->
+      <div style="margin-top:20px;" id="recent-runs-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="6"/><polyline points="7.5,4.5 7.5,7.5 9.5,9.5"/></svg>
+            Recent Pipeline Activity
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadRecentRuns()" style="font-size:11px;color:var(--text3);">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9.5 5.5a4 4 0 10-1.2 2.8"/><polyline points="9.5,2.5 9.5,5.5 6.5,5.5"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div id="recent-runs-list">
+          <div style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">Loading activity...</div>
+        </div>
+      </div>
+
     </div><!-- /pg-pipeline -->
 
   </div><!-- /content-area -->
@@ -1522,7 +1548,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="padding:20px 24px;flex:1;overflow-y:auto;">
     <div class="impr-hint">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7"/><circle cx="7" cy="9.5" r=".6" fill="currentColor"/></svg>
-      <div>The AI will skip Alpha (research already done) and re-run <strong>Beta + Gamma</strong> only — incorporating your notes. A new version (v2, v3…) will be saved for re-review.</div>
+      <div>Agent Beta will revise the content using your notes, then Gamma will reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval. Alpha is skipped — research is already done.</div>
     </div>
     <label class="fl">Your Improvement Notes</label>
     <textarea class="impr-ta" id="impr-notes" placeholder="e.g. Fix the empagliflozin dose to 10mg. Reference ESC 2023 HF guidelines specifically. Remove any competitor drug mentions not in our portfolio."></textarea>
@@ -1534,10 +1560,12 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
       <div class="impr-prog-bar-wrap"><div class="impr-prog-bar" id="impr-prog-bar"></div></div>
       <div class="impr-prog-msg" id="impr-prog-msg">Initialising...</div>
       <div style="margin-top:8px;font-size:11px;color:var(--text4);" id="impr-agent-status"></div>
+      <!-- Live agent output -->
+      <div id="impr-agent-outputs" style="margin-top:12px;"></div>
     </div>
   </div>
   <div class="mf">
-    <div style="font-size:11.5px;color:var(--text3);">Alpha skipped · Beta + Gamma re-run only</div>
+    <div style="font-size:11.5px;color:var(--text3);">Alpha skipped · Beta rewrites · Gamma reformats · New version → Pending Review</div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
       <button class="btn btn-sm" id="impr-submit-btn"
@@ -2819,6 +2847,7 @@ function setCLView(v){
 }
 function clearCLFilters(){
   ['cl-q','cl-cat','cl-th','cl-src','cl-from','cl-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const sort=document.getElementById('cl-sort'); if(sort) sort.value='new';
   renderCL();
 }
 
@@ -2829,7 +2858,9 @@ function getCLFiltered(){
   const src=document.getElementById('cl-src').value;
   const from=document.getElementById('cl-from').value;
   const to=document.getElementById('cl-to').value;
-  return ALL_PAPERS.filter(p=>{
+  const sort=(document.getElementById('cl-sort')||{}).value||'new';
+
+  let list = ALL_PAPERS.filter(p=>{
     // For PMT: only approved
     if(ROLE==='pmt' && p.status!=='approved') return false;
     // Tab filter
@@ -2841,7 +2872,7 @@ function getCLFiltered(){
         if(CL_TAB!=='other' && p.cat!==CL_TAB) return false;
       }
     }
-    if(q && !p.title.toLowerCase().includes(q) && !p.journal.toLowerCase().includes(q) && !p.authors.toLowerCase().includes(q)) return false;
+    if(q && !p.title.toLowerCase().includes(q) && !p.journal.toLowerCase().includes(q) && !(p.authors||'').toLowerCase().includes(q)) return false;
     if(cat && p.cat!==cat) return false;
     if(th && p.therapy!==th) return false;
     if(src && p.src!==src) return false;
@@ -2849,6 +2880,14 @@ function getCLFiltered(){
     if(to && p.date>to) return false;
     return true;
   });
+
+  // Sort: newest first (desc) or oldest first (asc) by date
+  list.sort((a,b)=>{
+    const da = a.date||'', db = b.date||'';
+    return sort==='old' ? da.localeCompare(db) : db.localeCompare(da);
+  });
+
+  return list;
 }
 
 function renderCL(){
@@ -2866,11 +2905,11 @@ function clCardHTML(p){
   const v = p.version || 1;
   // Handle both numeric (static) and string (API) IDs safely in onclick
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
-  const improveBtn = (isMA && p.status==='pending' && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request AI improvement">Improve</button>`
+  const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
     : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>${improveBtn}`:''}
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
        <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
@@ -2893,11 +2932,11 @@ function clRowHTML(p){
   const v = p.version || 1;
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const accClass=p.status==='approved'?'pr-acc-approved':p.status==='pending'?'pr-acc-pending':'pr-acc-rejected';
-  const improveBtn = (isMA && p.status==='pending' && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request AI improvement">Improve</button>`
+  const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
     : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>${improveBtn}`:''}
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
        <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
@@ -2948,7 +2987,7 @@ function openMADetail(id){
     : '';
   const btns=document.getElementById('ma-action-btns');
   if(p.status==='approved'){btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button><button class="btn btn-sm" style="background:var(--blue);color:#fff;" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6.5h9M7 3l4 3.5L7 10" stroke-linejoin="round"/></svg>Save Changes</button>`;}
-  else if(p.status==='rejected'){btns.innerHTML=`${improveHtml}<button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Re-Approve</button>`;}
+  else if(p.status==='rejected'){btns.innerHTML=`${improveHtml}<button class="btn btn-green btn-sm" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Approve</button>`;}
   else{btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button>${improveHtml}<button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Approve &amp; Save</button>`;}
   document.getElementById('rej-wrap').classList.remove('show');
   openOv('ma-ov');
@@ -2993,11 +3032,47 @@ function confirmReject(){
   const n=document.getElementById('rej-note').value.trim();if(!n){toast('⚠️','Please provide a rejection reason.');return;}
   if(p._apiSource){
     fetch(PL_API+'/content/'+p._apiId+'/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason:n,reviewer:'Dr. Prashant Agarwal (MA)'})})
-    .then(r=>{if(!r.ok)throw new Error();p.status='rejected';p.rejNote=n;updCounts();renderCL();closeOv('ma-ov');toast('❌','Content rejected.');})
+    .then(r=>{
+      if(!r.ok)throw new Error();
+      p.status='rejected';p.rejNote=n;updCounts();renderCL();closeOv('ma-ov');
+      _showSendToAgentsPrompt(p._apiId, p.title, n);
+    })
     .catch(()=>toast('❌','Rejection failed — check API connection'));
     return;
   }
-  p.status='rejected';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);p.rejNote=n;updCounts();renderCL();closeOv('ma-ov');toast('❌','Content rejected — removed from PMT library.');
+  p.status='rejected';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);p.rejNote=n;updCounts();renderCL();closeOv('ma-ov');toast('❌','Content rejected.');
+}
+
+/* After rejection: offer to send feedback to agents for a revised version */
+function _showSendToAgentsPrompt(apiId, title, rejectionNotes) {
+  const banner = document.createElement('div');
+  banner.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1E293B;color:#fff;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:9999;max-width:540px;font-size:13px;';
+  banner.innerHTML=`
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="8.5"/><line x1="10" y1="6.5" x2="10" y2="11"/><circle cx="10" cy="13.5" r=".8" fill="#F59E0B" stroke="none"/></svg>
+    <div style="flex:1;line-height:1.5;">
+      <div style="font-weight:700;color:#F8FAFC;margin-bottom:2px;">Content rejected.</div>
+      <div style="color:#94A3B8;font-size:12px;">Send your feedback to Beta &amp; Gamma agents for a revised version?</div>
+    </div>
+    <button id="_improve-yes-btn" style="background:#F59E0B;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">⟳ Yes, Revise It</button>
+    <button onclick="this.closest('div').remove()" style="background:transparent;border:none;color:#64748B;font-size:20px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;">×</button>`;
+  document.body.appendChild(banner);
+  banner.querySelector('#_improve-yes-btn').onclick = () => {
+    banner.remove();
+    _triggerImprovementFromReject(apiId, rejectionNotes);
+  };
+  setTimeout(()=>{ if(banner.parentNode) banner.remove(); }, 15000);
+}
+
+async function _triggerImprovementFromReject(apiId, notes) {
+  try {
+    const res = await fetch(PL_API+'/content/'+apiId+'/request-improvement',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({notes: notes, reviewer:'Dr. Prashant Agarwal (MA)'})
+    });
+    if(!res.ok) throw new Error();
+    toast('⟳','Agents are working on a revised version — check Research Pipeline');
+    if(typeof loadRecentRuns==='function') setTimeout(loadRecentRuns, 2000);
+  } catch(e){ toast('❌','Could not trigger agents — check API connection'); }
 }
 function regenSummary(){const ta=document.getElementById('ma-summary');ta.style.opacity='.4';ta.value='Regenerating…';setTimeout(()=>{const p=ALL_PAPERS.find(x=>x.id===CUR_ID);ta.value=p?p.sum:'';ta.style.opacity='1';toast('✨','Summary regenerated by AI');},1400);}
 
@@ -4742,6 +4817,7 @@ let PL_OUTPUT_SHOWN = new Set(); // agents whose rich output panel has been rend
 function plInitPage() {
   plRefreshTopics();
   plResetAgents();
+  loadRecentRuns();
   const rc = document.getElementById('pl-results-card');
   const im = document.getElementById('pl-idle-msg');
   const pw = document.getElementById('pl-prog-wrap');
@@ -5291,6 +5367,7 @@ function openImprovementModal(contentId, title) {
   document.getElementById('impr-prog-bar').style.width = '0%';
   document.getElementById('impr-prog-msg').textContent = 'Initialising...';
   document.getElementById('impr-agent-status').textContent = '';
+  document.getElementById('impr-agent-outputs').innerHTML = '';
   const btn = document.getElementById('impr-submit-btn');
   btn.disabled = false;
   btn.textContent = '';
@@ -5334,6 +5411,65 @@ async function submitImprovementRequest() {
   }
 }
 
+function _renderImprOutputs(outputs, currentAgent) {
+  if (!outputs || !Object.keys(outputs).length) return '';
+  const agentMeta = {
+    alpha: {label:'Alpha · Research', color:'var(--text4)'},
+    beta:  {label:'Beta · Content Writer', color:'var(--blue)'},
+    gamma: {label:'Gamma · Formatter', color:'var(--purple, #7C3AED)'},
+    delta: {label:'Delta · Publisher', color:'var(--green)'},
+  };
+  let html = '<div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:8px;">';
+  ['alpha','beta','gamma','delta'].forEach(agent => {
+    const out = outputs[agent];
+    if (!out && agent !== currentAgent) return; // don't show future agents
+    const meta = agentMeta[agent] || {label:agent, color:'var(--text3)'};
+    const isCurrent = currentAgent === agent && !out;
+    const isSkipped = out && out.skipped;
+    const isDone = out && !isCurrent;
+    const icon = isSkipped ? '⏭' : isDone ? '✅' : '⏳';
+    const statusText = isSkipped ? 'Skipped' : isDone ? out.summary || 'Complete' : 'Running…';
+    const statusColor = isSkipped ? 'var(--text4)' : isDone ? meta.color : 'var(--amber)';
+
+    html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:${(agent==='beta'||agent==='gamma')&&isDone?'8':'0'}px;">
+        <span style="font-size:13px;">${icon}</span>
+        <span style="font-size:11px;font-weight:700;color:${meta.color};">${meta.label}</span>
+        <span style="font-size:10.5px;color:${statusColor};margin-left:auto;text-align:right;">${_esc(statusText)}</span>
+      </div>`;
+
+    // Beta: show corrections applied + key findings
+    if (agent === 'beta' && isDone && out.findings) {
+      const corrections = out.findings.filter(f => /^(CORRECTED|REVISED|UPDATED|ENHANCED)/i.test(f));
+      const regular = out.findings.filter(f => !/^(CORRECTED|REVISED|UPDATED|ENHANCED)/i.test(f));
+      if (corrections.length) {
+        html += '<div style="margin-bottom:5px;">';
+        corrections.forEach(c => {
+          html += `<div style="font-size:11px;color:var(--amber);display:flex;gap:5px;margin-bottom:3px;"><span>⚡</span><span>${_esc(c)}</span></div>`;
+        });
+        html += '</div>';
+      }
+      if (regular.length) {
+        html += '<div style="border-top:1px solid var(--border);padding-top:6px;">';
+        regular.slice(0,3).forEach(f => {
+          html += `<div style="font-size:11px;color:var(--text3);display:flex;gap:5px;margin-bottom:3px;"><span style="color:var(--text4);">•</span><span>${_esc(f)}</span></div>`;
+        });
+        if (regular.length > 3) html += `<div style="font-size:10.5px;color:var(--text4);margin-top:3px;">+${regular.length-3} more findings included</div>`;
+        html += '</div>';
+      }
+    }
+
+    // Gamma: show article excerpt
+    if (agent === 'gamma' && isDone && out.article_excerpt) {
+      html += `<div style="border-top:1px solid var(--border);padding-top:6px;font-size:11px;color:var(--text3);font-style:italic;line-height:1.6;">"${_esc(out.article_excerpt.slice(0,200))}…"</div>`;
+    }
+
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function pollImprovementProgress() {
   if (!_imprRunId) return;
   _imprPollTimer = setInterval(async () => {
@@ -5345,13 +5481,15 @@ function pollImprovementProgress() {
       document.getElementById('impr-prog-bar').style.width = pct + '%';
       document.getElementById('impr-prog-msg').textContent = data.status_msg || '';
       document.getElementById('impr-agent-status').textContent =
-        data.current_agent ? 'Agent: ' + data.current_agent.charAt(0).toUpperCase() + data.current_agent.slice(1) : '';
+        data.current_agent ? 'Agent running: ' + data.current_agent.charAt(0).toUpperCase() + data.current_agent.slice(1) : '';
+      // Render live agent outputs
+      const outEl = document.getElementById('impr-agent-outputs');
+      if (outEl) outEl.innerHTML = _renderImprOutputs(data.agent_outputs || {}, data.current_agent || '');
 
       if (data.status === 'completed') {
         clearInterval(_imprPollTimer);
-        document.getElementById('impr-submit-btn').innerHTML = 'Done!';
+        document.getElementById('impr-submit-btn').innerHTML = '✅ Done — View in Pending Review';
         toast('✅', 'Improvement complete — new version pending MA review');
-        // Refresh content library
         if (typeof loadContentFromAPI === 'function') loadContentFromAPI();
         loadNotifications();
       } else if (data.status === 'error') {
@@ -5396,6 +5534,86 @@ async function openVersionHistory(contentId, title) {
   } catch (e) {
     document.getElementById('ver-list').innerHTML = '<div style="padding:20px;text-align:center;color:var(--red);font-size:12px;">Failed to load versions.</div>';
   }
+}
+
+/* ══ RECENT PIPELINE ACTIVITY ══ */
+async function loadRecentRuns() {
+  const el = document.getElementById('recent-runs-list');
+  if (!el) return;
+  try {
+    const res = await fetch(PL_API + '/pipeline/runs');
+    if (!res.ok) throw new Error('API unavailable');
+    const data = await res.json();
+    const runs = data.runs || [];
+    if (!runs.length) {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">No pipeline runs yet — run a topic above to get started.</div>';
+      return;
+    }
+    el.innerHTML = runs.map(r => {
+      const isImprovement = r.type === 'improvement';
+      const statusColor = r.status==='completed'?'var(--green)':r.status==='running'?'var(--blue)':'var(--red)';
+      const statusBg    = r.status==='completed'?'var(--green-bg)':r.status==='running'?'var(--blue-bg)':'var(--red-bg)';
+      const statusLabel = r.status==='completed'?'Completed':r.status==='running'?'Running…':'Failed';
+      const typeBadge   = isImprovement
+        ? `<span style="background:#FEF3C7;color:#92400E;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.4px;">⟳ IMPROVEMENT</span>`
+        : `<span style="background:var(--blue-bg);color:var(--navy);font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.4px;">▶ NEW RESEARCH</span>`;
+      const agentLine   = r.status==='running'
+        ? `<div style="font-size:11px;color:var(--blue);margin-top:3px;">● ${r.current_agent?.toUpperCase() || 'ALPHA'} running — ${r.status_msg||''}</div>`
+        : r.status_msg ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${r.status_msg}</div>` : '';
+      const progressBar = r.status==='running'
+        ? `<div style="height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;"><div style="height:100%;width:${r.progress||0}%;background:var(--blue);border-radius:2px;transition:width .5s;"></div></div>`
+        : '';
+      const timeAgo = r.started_at ? _timeAgo(r.started_at) : '';
+      const viewBtn = r.run_id
+        ? `<button class="btn btn-outline btn-xs" onclick="plWatchRun('${r.run_id}')" style="font-size:10px;margin-top:6px;">View Details</button>`
+        : '';
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0;margin-top:5px;${r.status==='running'?'animation:pulse 1.2s infinite;':''}"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:4px;">
+            ${typeBadge}
+            <span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:${statusBg};color:${statusColor};">${statusLabel}</span>
+            ${r.specialty?`<span style="font-size:10px;color:var(--text3);">${r.specialty}</span>`:''}
+            <span style="font-size:10px;color:var(--text4);margin-left:auto;">${timeAgo}</span>
+          </div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--navy);line-height:1.35;">${_esc(r.topic||'Unknown topic')}</div>
+          ${agentLine}
+          ${progressBar}
+          ${viewBtn}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Could not load activity — is the backend running?</div>';
+  }
+}
+
+// Watch a specific run — switches to pipeline page and polls that run_id
+function plWatchRun(runId) {
+  showPage('pipeline');
+  // Brief delay so page renders, then poll
+  setTimeout(async () => {
+    try {
+      const res = await fetch(PL_API + '/pipeline/status/' + runId);
+      if (!res.ok) return;
+      const d = await res.json();
+      // Render whatever outputs exist
+      ['alpha','beta','gamma','delta'].forEach(a => {
+        if (d.agent_outputs && d.agent_outputs[a]) plRenderAgentOutput(a, d.agent_outputs[a]);
+      });
+      // Show results card
+      const rc = document.getElementById('pl-results-card');
+      const im = document.getElementById('pl-idle-msg');
+      if (rc) rc.style.display = 'block';
+      if (im) im.style.display = 'none';
+      if (d.status === 'running') {
+        // Start polling if still in progress
+        const btn = document.getElementById('pl-run-btn');
+        if (btn) btn.textContent = 'Pipeline running...';
+        window.PL_POLL = setInterval(() => plPoll(runId, btn), 2000);
+      }
+    } catch(e) {}
+  }, 400);
 }
 
 /* ══ SCHEDULER STATUS ══ */

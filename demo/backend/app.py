@@ -169,15 +169,19 @@ def get_topics():
 @app.post("/pipeline/run")
 def start_pipeline(req: RunRequest, bg: BackgroundTasks):
     """Start mock pipeline in background. Returns run_id for polling."""
+    from datetime import datetime, timezone
     run_id = str(uuid.uuid4())
     with _lock:
         pipeline_runs[run_id] = {
             "status":        "running",
             "topic":         req.topic,
+            "specialty":     req.specialty,
             "progress":      0,
             "current_agent": "alpha",
             "status_msg":    "Starting pipeline...",
             "content_id":    None,
+            "improvement":   False,
+            "started_at":    datetime.now(timezone.utc).isoformat(),
         }
 
     def _run():
@@ -223,8 +227,35 @@ def pipeline_status(run_id: str):
         "current_agent":  run["current_agent"],
         "status_msg":     run["status_msg"],
         "content_id":     run.get("content_id"),
-        "agent_outputs":  run.get("agent_outputs", {}),  # per-agent output for live UI display
+        "agent_outputs":  run.get("agent_outputs", {}),
     }
+
+
+@app.get("/pipeline/runs")
+def get_pipeline_runs(limit: int = 30):
+    """
+    Return recent pipeline runs — both new research runs and improvement re-runs.
+    Used by the Research Pipeline page to show activity history.
+    """
+    runs = []
+    for run_id, run in pipeline_runs.items():
+        runs.append({
+            "run_id":        run_id,
+            "type":          "improvement" if run.get("improvement") else "new",
+            "topic":         run.get("topic", "Unknown"),
+            "specialty":     run.get("specialty", ""),
+            "status":        run.get("status", "unknown"),
+            "progress":      run.get("progress", 0),
+            "current_agent": run.get("current_agent", ""),
+            "status_msg":    run.get("status_msg", ""),
+            "content_id":    run.get("content_id"),
+            "original_id":   run.get("original_id"),
+            "version":       run.get("version"),
+            "started_at":    run.get("started_at", ""),
+        })
+    # Most recent first (insertion order reversed)
+    runs.reverse()
+    return {"runs": runs[:limit], "total": len(runs)}
 
 
 @app.get("/content")
@@ -330,24 +361,28 @@ def request_improvement(content_id: str, req: ImprovementRequest, bg: Background
     item = store.get_content(content_id)
     if not item:
         raise HTTPException(404, "Content not found")
-    if item.get("status") not in ("pending_review", "improvement_requested"):
-        raise HTTPException(400, f"Content status is '{item.get('status')}' — improvement can only be requested on pending_review content")
+    # Allow improvement on pending_review, improvement_requested, AND rejected content
+    if item.get("status") not in ("pending_review", "improvement_requested", "rejected"):
+        raise HTTPException(400, f"Content status is '{item.get('status')}' — cannot request improvement")
 
     # Mark as improvement_requested in the DB
     store.request_improvement(content_id, notes=req.notes, reviewer=req.reviewer)
 
     # Start improvement pipeline in background
+    from datetime import datetime, timezone
     run_id = str(uuid.uuid4())
     with _lock:
         pipeline_runs[run_id] = {
             "status":        "running",
             "topic":         item.get("topic", ""),
+            "specialty":     item.get("specialty", ""),
             "progress":      0,
             "current_agent": "alpha",
             "status_msg":    "Starting improvement pipeline...",
             "content_id":    None,
             "improvement":   True,
             "original_id":   content_id,
+            "started_at":    datetime.now(timezone.utc).isoformat(),
         }
 
     def _run_improvement():
