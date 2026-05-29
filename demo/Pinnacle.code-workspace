@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"explorer.sortOrder": "type",
+		"files.associations": {
+			"*.html": "html",
+			"*.py": "python",
+			"*.bat": "bat",
+			"*.env": "dotenv",
+			"*.env.example": "dotenv"
+		},
+		"workbench.colorTheme": "Dark+",
+		"workbench.iconTheme": "vs-seti",
+		"breadcrumbs.enabled": true
+	}
+}

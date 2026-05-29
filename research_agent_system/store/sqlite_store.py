@@ -109,6 +109,15 @@ class SQLiteStore(BaseStore):
             "ALTER TABLE content_items ADD COLUMN improvement_notes TEXT",
             "ALTER TABLE content_items ADD COLUMN reviewer TEXT",
             "ALTER TABLE content_items ADD COLUMN division TEXT",
+            "ALTER TABLE content_items ADD COLUMN source_journals TEXT",
+            "ALTER TABLE content_items ADD COLUMN pmid TEXT",
+            "ALTER TABLE content_items ADD COLUMN doi TEXT",
+            "ALTER TABLE content_items ADD COLUMN authors TEXT",
+            "ALTER TABLE content_items ADD COLUMN relevant_doctor_specialties TEXT",
+            "ALTER TABLE content_items ADD COLUMN whatsapp_summary TEXT",
+            "ALTER TABLE content_items ADD COLUMN pubmed_link TEXT",
+            "ALTER TABLE content_items ADD COLUMN full_text_link TEXT",
+            "ALTER TABLE content_items ADD COLUMN publication_date TEXT",
         ]
         for sql in migrations:
             try:
@@ -146,6 +155,8 @@ class SQLiteStore(BaseStore):
 
     def save_content_card(self, card: dict) -> str:
         content_id = card.get("id") or str(uuid.uuid4())
+
+
         conn = self._conn()
         conn.execute(
             """INSERT INTO content_items
@@ -153,8 +164,10 @@ class SQLiteStore(BaseStore):
                 tags, summary, key_findings, clinical_insights,
                 recommendations, emerging_trends, short_article,
                 evidence_quality, status, created_at, source, llm_provider, pipeline,
-                version, parent_id, improvement_notes, reviewer, division)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_review',?,?,?,?,?,?,?,?,?)""",
+                version, parent_id, improvement_notes, reviewer, division, source_journals,
+                pmid, doi, authors, relevant_doctor_specialties, whatsapp_summary,
+                pubmed_link, full_text_link, publication_date)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_review',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 content_id,
                 card.get("topic", ""),
@@ -179,6 +192,15 @@ class SQLiteStore(BaseStore):
                 card.get("improvement_notes", None),
                 card.get("reviewer", None),
                 card.get("division", None),
+                card.get("source_journals", None),
+                card.get("pmid", None),
+                card.get("doi", None),
+                card.get("authors", None),
+                card.get("relevant_doctor_specialties", None),
+                card.get("whatsapp_summary", None),
+                card.get("pubmed_link", None),
+                card.get("full_text_link", None),
+                card.get("publication_date", None),
             ),
         )
         conn.commit()
@@ -273,8 +295,10 @@ class SQLiteStore(BaseStore):
                 tags, summary, key_findings, clinical_insights,
                 recommendations, emerging_trends, short_article,
                 evidence_quality, status, created_at, source, llm_provider, pipeline,
-                version, parent_id, improvement_notes, reviewer, division)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_review',?,?,?,?,?,?,?,?,?)""",
+                version, parent_id, improvement_notes, reviewer, division, source_journals,
+                pmid, doi, authors, relevant_doctor_specialties, whatsapp_summary,
+                pubmed_link, full_text_link, publication_date)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending_review',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 content_id,
                 card.get("topic", ""),
@@ -299,6 +323,15 @@ class SQLiteStore(BaseStore):
                 card.get("improvement_notes", None),
                 card.get("reviewer", None),
                 card.get("division", None),
+                card.get("source_journals", None),
+                card.get("pmid", None),
+                card.get("doi", None),
+                card.get("authors", None),
+                card.get("relevant_doctor_specialties", None),
+                card.get("whatsapp_summary", None),
+                card.get("pubmed_link", None),
+                card.get("full_text_link", None),
+                card.get("publication_date", None),
             ),
         )
         conn.commit()

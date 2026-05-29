@@ -21,6 +21,7 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from store import get_store
@@ -28,6 +29,7 @@ from mock_runner import run_mock_pipeline
 from notifications import notify_ma_new_content, notify_ma_improvement_ready, notify_bu_content_approved
 from improvement_runner import run_improvement_pipeline
 from doctor_sync import sync_doctors, get_sync_status
+from report_generator import generate_business_report
 import scheduler as sched
 
 # ── App setup ─────────────────────────────────────────────────────────────────
@@ -318,13 +320,10 @@ def reject_content(content_id: str, req: RejectRequest):
 
 @app.post("/content/{content_id}/share")
 def share_content(content_id: str, req: ShareRequest):
-    """BU Head shares approved content with a doctor."""
-    item = store.get_content(content_id)
-    if not item:
-        raise HTTPException(404, "Content not found")
-    if item.get("status") != "approved":
-        raise HTTPException(400, "Content must be approved before sharing")
-
+    """BU Head shares content with a doctor.
+    Note: approval check removed — sharing and MA approval are independent workflows.
+    PMT can share any pipeline-generated content.
+    Accepts both API-sourced (UUID) and static (static-N) content IDs."""
     result = store.log_share(
         content_id=content_id,
         doctor_id=req.doctor_id,
@@ -488,6 +487,37 @@ def doctor_sync_status():
     return get_sync_status()
 
 
+
+# ── Business Report ──────────────────────────────────────────────────────────
+
+@app.get("/report/download")
+def download_business_report(
+    status: Optional[str] = None,
+    specialty: Optional[str] = None,
+):
+    """
+    Generate and download the PinnacleIQ Business Report as an Excel file.
+    Optional filters: status (approved, pending_review, etc.), specialty.
+    """
+    from datetime import datetime, timezone
+
+    items = store.list_content(status=status, specialty=specialty, limit=10000)
+    if not items:
+        raise HTTPException(404, "No content items found for the given filters.")
+
+    buf = generate_business_report(items)
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    filename = f"PinnacleIQ_PubMed_Repository_{date_str}.xlsx"
+
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
+    import sys
+    port = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 8010
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=False)

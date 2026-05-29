@@ -188,6 +188,14 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 .pc-j{font-size:11px;color:var(--text3);}
 .pc-sum{font-size:11.5px;color:var(--text2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .pc-tags{display:flex;gap:5px;flex-wrap:wrap;}
+/* Publication details block inside mini card */
+.pc-pub{padding:10px 0 0;border-top:1px solid var(--border);margin-top:2px;}
+.pc-pub-hdr{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text4);margin-bottom:6px;}
+.pc-pub-row{display:grid;grid-template-columns:68px 1fr;gap:4px;font-size:10.5px;line-height:1.45;margin-bottom:3px;}
+.pc-pub-lbl{color:var(--text4);font-weight:600;padding-top:0;}
+.pc-pub-val{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pc-pub-val a{color:var(--navy);text-decoration:none;}
+.pc-pub-val a:hover{text-decoration:underline;}
 .pc-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2);}
 
 /* LIST VIEW */
@@ -454,6 +462,118 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 .sched-val{font-weight:600;color:var(--navy);}
 .sched-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
 .sched-sep{width:1px;height:20px;background:var(--border);}
+
+/* ══ HAMBURGER BUTTON (hidden on desktop) ══ */
+#sb-hamburger{display:none;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;}
+#sb-hamburger:hover{border-color:var(--navy);background:var(--surface2);}
+#sb-hamburger svg{color:var(--navy);}
+/* Sidebar mobile overlay backdrop */
+#sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:199;backdrop-filter:blur(2px);}
+#sb-overlay.on{display:block;}
+
+/* ══ MOBILE RESPONSIVENESS ══ */
+@media (max-width:768px){
+  /* Show hamburger, hide desktop sidebar */
+  #sb-hamburger{display:flex;}
+  body{overflow:auto;}
+
+  /* Sidebar becomes a fixed overlay drawer on mobile */
+  #sb{position:fixed;top:0;left:0;height:100%;width:260px;z-index:200;
+      transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+      box-shadow:var(--s3);}
+  #sb.sb-open{transform:translateX(0);}
+
+  /* Main takes full width */
+  #main{width:100%;min-width:0;}
+
+  /* Topbar adjustments */
+  #topbar{padding:0 12px;gap:8px;}
+  .tb-bc .tb-sep{display:none;}
+  .tb-bc span:first-child{display:none;}
+  .tb-cur{font-size:13px;}
+
+  /* Content area padding reduced */
+  #content-area{padding:14px 12px;}
+
+  /* KPI grids — 2 cols on mobile */
+  .k4,.k5{grid-template-columns:repeat(2,1fr)!important;}
+  .kpi-row{gap:8px;}
+
+  /* Papers grid — 1 col on mobile */
+  .papers-grid{grid-template-columns:1fr!important;}
+
+  /* Occasion grid — 1 col */
+  #occ-grid{grid-template-columns:1fr!important;}
+
+  /* Tables scroll horizontally */
+  .tbl-wrap,.sr-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .sr-table{min-width:680px;}
+  .dm-det-table{min-width:560px;}
+
+  /* Modals — full width with small margin */
+  .ov{padding:10px;}
+  .modal{width:100%!important;max-width:none!important;min-width:0!important;border-radius:14px;}
+
+  /* Send modal */
+  .send-modal{width:100%!important;}
+
+  /* MA modal split layout — stack on mobile */
+  .mbody{flex-direction:column;}
+  .ml{border-right:none!important;border-bottom:1px solid var(--border);}
+  .mr{width:100%!important;border-radius:0 0 var(--rxl) var(--rxl)!important;}
+  .ma-modal,.cv-modal{max-height:95vh!important;}
+
+  /* Detail panel full width */
+  .ma-detail-wrap,.ma-detail-inner{width:100%!important;min-width:0!important;}
+
+  /* Notification dropdown narrower */
+  .notif-dropdown{width:calc(100vw - 32px);right:-16px;}
+
+  /* Role dropdown narrower */
+  .role-dropdown{min-width:240px!important;}
+
+  /* Dashboard — KPI strip + table */
+  #sr-kpi-row{grid-template-columns:repeat(2,1fr)!important;}
+  #sr-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+
+  /* Send / share wizard adjustments */
+  .src-cards{grid-template-columns:1fr!important;}
+  .frow2{grid-template-columns:1fr!important;}
+  .rec-doc-grid{grid-template-columns:1fr!important;}
+  .wz-body{padding:14px 16px!important;}
+  .wz-foot{padding:10px 16px!important;}
+  .sh-steps{padding:12px 16px!important;}
+
+  /* Dashboard report KPIs */
+  .dm-kpi-row{grid-template-columns:repeat(2,1fr)!important;}
+  .dm-grid{grid-template-columns:1fr!important;}
+
+  /* Analytics KPIs */
+  #pg-analytics .an-kpis{grid-template-columns:repeat(2,1fr)!important;}
+
+  /* Topbar: hide "PinnacleIQ ›" breadcrumb, show role switcher smaller */
+  .rs-label{display:none;}
+  .role-switcher{padding:5px 8px;}
+
+  /* Sidebar stats & footer on mobile */
+  .sb-stats{gap:5px;}
+
+  /* Pipeline page — stack 2-col layout */
+  #pl-two-col{grid-template-columns:1fr!important;}
+  .pl-agents-grid{grid-template-columns:1fr!important;}
+
+  /* Engagement calendar */
+  .eng-cal-grid{gap:2px!important;padding:6px!important;}
+  .eng-cal-day{min-height:56px!important;padding:4px 4px!important;}
+}
+
+/* Tablet (769px - 1024px) */
+@media (min-width:769px) and (max-width:1024px){
+  #sb{width:200px;}
+  .papers-grid{grid-template-columns:repeat(2,1fr)!important;}
+  .k4,.k5{grid-template-columns:repeat(2,1fr)!important;}
+  #content-area{padding:16px 18px;}
+}
 </style>
 </head>
 <body>
@@ -477,10 +597,19 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div class="sb-foot" id="sb-foot"><!-- filled by JS --></div>
 </div>
 
+<!-- Mobile sidebar overlay backdrop -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
 <!-- ══════ MAIN ══════ -->
 <div id="main">
   <!-- TOPBAR -->
   <div id="topbar">
+    <!-- Hamburger (mobile only) -->
+    <button id="sb-hamburger" onclick="toggleSidebar()" aria-label="Open menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+        <line x1="2" y1="4.5" x2="16" y2="4.5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13.5" x2="16" y2="13.5"/>
+      </svg>
+    </button>
     <div class="tb-bc">
       <span>PinnacleIQ</span>
       <span class="tb-sep">›</span>
@@ -1224,8 +1353,10 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .pl-out-hdr{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
         .pl-src-item{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;margin-bottom:5px;}
         .pl-src-title{font-size:11.5px;font-weight:600;color:var(--navy);margin-bottom:2px;line-height:1.35;}
+        .pl-src-authors{font-size:10.5px;color:var(--text3);font-weight:600;margin-bottom:3px;display:flex;align-items:flex-start;gap:4px;line-height:1.4;}
+        .pl-src-authors-icon{flex-shrink:0;opacity:.7;}
         .pl-src-snip{font-size:10.5px;color:var(--text2);font-style:italic;margin-bottom:4px;line-height:1.45;}
-        .pl-src-link{font-size:10px;color:var(--blue);text-decoration:none;}.pl-src-link:hover{text-decoration:underline;}
+        .pl-src-link{font-size:10px;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;}.pl-src-link:hover{text-decoration:underline;}
         .pl-ins-row{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--text1);line-height:1.5;margin-bottom:5px;}
         .pl-ins-dot{color:var(--green);font-weight:900;flex-shrink:0;margin-top:1px;font-size:13px;line-height:1.2;}
         .pl-art-preview{font-size:11.5px;color:var(--text1);line-height:1.7;border-left:3px solid var(--green);padding-left:10px;font-style:italic;}
@@ -1268,7 +1399,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
       </div>
 
       <!-- Two-column layout -->
-      <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;">
+      <div id="pl-two-col" style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;">
 
         <!-- LEFT: Topics + Config -->
         <div>
@@ -1460,6 +1591,258 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
     </div><!-- /pg-pipeline -->
 
+    <!-- ════ PAGE: DASHBOARD ════ -->
+    <div class="pg" id="pg-dashboard">
+      <style>
+        /* ── Dashboard page styles ── */
+        .demo-banner{background:linear-gradient(135deg,var(--navy) 0%,#1E3A5F 60%,#0F2847 100%);border-radius:var(--rxl);padding:28px 32px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden;}
+        .demo-banner::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,42,.18) 0%,transparent 70%);}
+        /* Sharing report table styles */
+        .sr-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+        .sr-table th{background:var(--surface2);border-bottom:2px solid var(--border);padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+        .sr-table td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+        .sr-table tr:hover td{background:var(--surface2);}
+        .sr-frow td{padding:6px 8px;background:var(--surface2);border-bottom:2px solid var(--border);}
+        .sr-finp{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:11.5px;background:var(--surface);color:var(--text1);outline:none;font-family:'DM Sans',sans-serif;}
+        .sr-finp:focus{border-color:var(--blue);}
+        .sr-ch-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;}
+        .sr-ch-wa{background:#E7F8F0;color:#10B981;}
+        .sr-ch-em{background:#EFF6FF;color:#3B82F6;}
+        .dm-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+        .dm-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:18px 20px;position:relative;overflow:hidden;transition:box-shadow .15s,transform .15s,border-color .15s;cursor:pointer;user-select:none;}
+        .dm-kpi:hover{box-shadow:var(--s2);transform:translateY(-2px);}
+        .dm-kpi.dm-active{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+        .dm-kpi .dm-click-hint{position:absolute;bottom:8px;right:10px;font-size:9.5px;color:var(--text4);opacity:0;transition:opacity .15s;}
+        .dm-kpi:hover .dm-click-hint{opacity:1;}
+        .dm-detail{background:var(--surface);border:1.5px solid var(--blue);border-radius:var(--rlg);overflow:hidden;margin-bottom:18px;display:none;}
+        .dm-detail.show{display:block;}
+        .dm-detail-hdr{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #BFDBFE;}
+        .dm-det-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+        .dm-det-table th{background:var(--surface2);border-bottom:2px solid var(--border);padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+        .dm-det-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+        .dm-det-table tr:last-child td{border-bottom:none;}
+        .dm-det-table tr:hover td{background:var(--surface2);}
+        .dm-kpi-accent{position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px;}
+        .dm-kv{font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;color:var(--navy);line-height:1;}
+        .dm-kl{font-size:11px;color:var(--text3);font-weight:600;margin-top:5px;}
+        .dm-ksub{font-size:10.5px;color:var(--text4);margin-top:3px;}
+        .dm-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+        .dm-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:20px 22px;}
+        .dm-card-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .dm-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+        .dm-bar-label{font-size:12px;color:var(--text2);min-width:130px;}
+        .dm-bar-track{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+        .dm-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+        .dm-bar-pct{font-size:11px;color:var(--text3);min-width:36px;text-align:right;}
+        .dm-bar-count{font-size:11px;font-weight:700;color:var(--navy);min-width:28px;text-align:right;}
+        .dm-timeline{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:20px 22px;}
+        .dm-tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+        .dm-tl-item:last-child{border-bottom:none;padding-bottom:0;}
+        .dm-tl-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px;}
+        .dm-stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+        .dm-stat-row:last-child{border-bottom:none;}
+        @media(max-width:1100px){.dm-kpi-row{grid-template-columns:repeat(3,1fr);}.dm-grid{grid-template-columns:1fr;}}
+      </style>
+
+      <!-- Header banner -->
+      <div class="demo-banner">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:5px;">PinnacleIQ · Dashboard</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.6);">AI-Powered Doctor Intelligence Platform · Mankind Pharma</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;display:flex;align-items:center;gap:8px;">
+            <button id="btn-download-report" class="btn btn-sm" style="background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;color:var(--navy);font-weight:700;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(184,145,42,.3);transition:all .15s;" onclick="downloadExcelReport()" title="Download full report as Excel">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h8M8 2v8M5 7l3 3 3-3"/></svg>
+              Download Report
+            </button>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px);" onclick="loadDemoReport()">⟳ Refresh Data</button>
+            <div style="font-size:10.5px;color:rgba(255,255,255,.35);margin-top:6px;position:absolute;right:0;bottom:-16px;" id="dm-last-refresh">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI strip — each card is clickable -->
+      <div class="dm-kpi-row" id="dm-kpi-row">
+        <div class="dm-kpi" id="dm-card-total" onclick="showDMDetail('total')">
+          <div class="dm-kpi-accent" style="background:var(--blue);"></div>
+          <div class="dm-kv" id="dm-k-total">—</div>
+          <div class="dm-kl">Articles Created</div>
+          <div class="dm-ksub">Total in library</div>
+          <span class="dm-click-hint">Click to view ↓</span>
+        </div>
+        <div class="dm-kpi" id="dm-card-ai" onclick="showDMDetail('ai')">
+          <div class="dm-kpi-accent" style="background:var(--purple,#7C3AED);"></div>
+          <div class="dm-kv" id="dm-k-ai">—</div>
+          <div class="dm-kl">AI-Generated</div>
+          <div class="dm-ksub" id="dm-k-ai-pct">% of total</div>
+          <span class="dm-click-hint">Click to view ↓</span>
+        </div>
+        <div class="dm-kpi" id="dm-card-approved" onclick="showDMDetail('approved')">
+          <div class="dm-kpi-accent" style="background:var(--green);"></div>
+          <div class="dm-kv" id="dm-k-approved">—</div>
+          <div class="dm-kl">MA Approved</div>
+          <div class="dm-ksub" id="dm-k-appr-rate">Approval rate</div>
+          <span class="dm-click-hint">Click to view ↓</span>
+        </div>
+        <div class="dm-kpi" id="dm-card-doctors" onclick="showDMDetail('doctors')">
+          <div class="dm-kpi-accent" style="background:var(--amber);"></div>
+          <div class="dm-kv" id="dm-k-doctors">—</div>
+          <div class="dm-kl">Doctors Reached</div>
+          <div class="dm-ksub">Unique HCPs</div>
+          <span class="dm-click-hint">Click to view ↓</span>
+        </div>
+        <div class="dm-kpi" id="dm-card-shares" onclick="showDMDetail('shares')">
+          <div class="dm-kpi-accent" style="background:var(--navy);"></div>
+          <div class="dm-kv" id="dm-k-shares">—</div>
+          <div class="dm-kl">Total Shares</div>
+          <div class="dm-ksub" id="dm-k-shares-sub">via WhatsApp &amp; Email</div>
+          <span class="dm-click-hint">Click to view ↓</span>
+        </div>
+      </div>
+
+      <!-- Detail table (shown when a KPI card is clicked) -->
+      <div class="dm-detail" id="dm-detail">
+        <div class="dm-detail-hdr">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:13px;font-weight:800;color:var(--navy);" id="dm-detail-title">Detail</span>
+            <span style="font-size:11px;color:var(--text3);" id="dm-detail-count"></span>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="closeDMDetail()">✕ Close</button>
+        </div>
+        <div style="overflow-x:auto;"><table class="dm-det-table"><thead id="dm-det-head"></thead><tbody id="dm-det-body"></tbody></table></div>
+        <div style="padding:10px 14px;font-size:11px;color:var(--text4);border-top:1px solid var(--border);">Sorted by most recent first</div>
+      </div>
+
+      <!-- Two-column grid -->
+      <div class="dm-grid">
+
+        <!-- Content Pipeline Status -->
+        <div class="dm-card">
+          <div class="dm-card-title">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round"><rect x="1" y="3" width="13" height="9" rx="1.5"/><line x1="4" y1="6" x2="11" y2="6"/><line x1="4" y1="9" x2="8" y2="9"/></svg>
+            Content Pipeline Status
+          </div>
+          <div id="dm-pipeline-bars">
+            <div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Loading…</div>
+          </div>
+        </div>
+
+        <!-- Sharing Channels -->
+        <div class="dm-card">
+          <div class="dm-card-title">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="3" r="1.5"/><circle cx="3" cy="7.5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><line x1="4.4" y1="6.7" x2="10.7" y2="3.8"/><line x1="4.4" y1="8.3" x2="10.7" y2="11.2"/></svg>
+            Sharing Activity
+          </div>
+          <div id="dm-channel-bars">
+            <div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Loading…</div>
+          </div>
+        </div>
+
+        <!-- AI Pipeline Performance -->
+        <div class="dm-card">
+          <div class="dm-card-title">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--amber)" stroke-width="1.6" stroke-linecap="round"><rect x="1" y="5" width="3" height="4" rx=".8"/><rect x="6" y="5" width="3" height="4" rx=".8"/><rect x="11" y="5" width="3" height="4" rx=".8"/><line x1="4" y1="7" x2="6" y2="7"/><line x1="9" y1="7" x2="11" y2="7"/></svg>
+            AI Pipeline Performance
+          </div>
+          <div id="dm-pipeline-stats">
+            <div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Loading…</div>
+          </div>
+        </div>
+
+        <!-- Doctor Coverage by Specialty -->
+        <div class="dm-card">
+          <div class="dm-card-title">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--navy)" stroke-width="1.6" stroke-linecap="round"><circle cx="7.5" cy="5" r="2.5"/><path d="M2.5 13c0-3 10-3 10 0"/></svg>
+            Doctor Coverage by Specialty
+          </div>
+          <div id="dm-specialty-bars">
+            <div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Sharing Report Section ── -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:800;color:var(--navy);">Sharing Report</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;">Track all content distributed to doctors · filter by any column</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="loadSharingReport()">⟳ Refresh</button>
+          <button class="btn btn-navy btn-sm" onclick="exportSharingReport()">↓ Export CSV</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;" id="sr-kpi-row">
+        <div class="dm-kpi" style="padding:14px 16px;cursor:default;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--navy);line-height:1;" id="sr-kpi-total">—</div>
+          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-top:4px;">Total Shares</div>
+        </div>
+        <div class="dm-kpi" style="padding:14px 16px;cursor:default;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--navy);line-height:1;" id="sr-kpi-articles">—</div>
+          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-top:4px;">Unique Articles</div>
+        </div>
+        <div class="dm-kpi" style="padding:14px 16px;cursor:default;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--navy);line-height:1;" id="sr-kpi-doctors">—</div>
+          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-top:4px;">Unique Doctors</div>
+        </div>
+        <div class="dm-kpi" style="padding:14px 16px;cursor:default;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;color:var(--navy);line-height:1;" id="sr-kpi-month">—</div>
+          <div style="font-size:11px;color:var(--text3);font-weight:600;margin-top:4px;">Shared This Month</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-bottom:20px;">
+        <div style="overflow-x:auto;">
+          <table class="sr-table">
+            <thead>
+              <tr>
+                <th style="width:52px;">S.No</th>
+                <th>Article Title</th>
+                <th style="width:120px;">Creation Date</th>
+                <th style="width:120px;">Review Date</th>
+                <th style="width:120px;">Shared Date</th>
+                <th>Party Details</th>
+              </tr>
+              <!-- Filter row -->
+              <tr class="sr-frow">
+                <td></td>
+                <td><input class="sr-finp" id="sr-f-article" placeholder="Search title…" oninput="renderSharingReport()"></td>
+                <td><input class="sr-finp" type="date" id="sr-f-created" title="Filter by creation date (on or after)" oninput="renderSharingReport()"></td>
+                <td><input class="sr-finp" type="date" id="sr-f-reviewed" title="Filter by review date (on or after)" oninput="renderSharingReport()"></td>
+                <td><input class="sr-finp" type="date" id="sr-f-shared" title="Filter by shared date (on or after)" oninput="renderSharingReport()"></td>
+                <td style="display:flex;gap:4px;align-items:center;">
+                  <input class="sr-finp" id="sr-f-party" placeholder="Doctor / specialty…" style="flex:1;" oninput="renderSharingReport()">
+                  <select class="sr-finp" id="sr-f-channel" style="width:100px;" onchange="renderSharingReport()">
+                    <option value="">All Channels</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="email">Email</option>
+                  </select>
+                  <button class="btn btn-ghost btn-sm" style="white-space:nowrap;padding:5px 10px;font-size:11px;" onclick="clearSRFilters()">Clear</button>
+                </td>
+              </tr>
+            </thead>
+            <tbody id="sr-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text4);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="sr-footer" style="padding:10px 14px;font-size:11px;color:var(--text4);border-top:1px solid var(--border);display:flex;justify-content:space-between;"></div>
+      </div>
+
+      <!-- Recent Activity Timeline -->
+      <div class="dm-timeline">
+        <div class="dm-card-title" style="margin-bottom:10px;">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="6"/><polyline points="7.5,4 7.5,7.5 10,9"/></svg>
+          Recent Activity
+          <span style="font-size:10px;color:var(--text4);font-weight:400;margin-left:4px;">Last 10 events across all platform actions</span>
+        </div>
+        <div id="dm-timeline">
+          <div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Loading…</div>
+        </div>
+      </div>
+
+    </div><!-- /pg-dashboard -->
+
   </div><!-- /content-area -->
 </div><!-- /main -->
 
@@ -1528,7 +1911,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;">Publication Details</div>
     <div class="irows" id="cv-info"></div>
   </div>
-  <div class="mf"><div style="font-size:12px;color:var(--text3);" id="cv-rec"></div><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="closeOv('cv-ov')">Close</button><button class="btn btn-navy" onclick="closeOv('cv-ov');openSend()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>Share with Doctors</button></div></div>
+  <div class="mf"><div style="font-size:12px;color:var(--text3);" id="cv-rec"></div><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="closeOv('cv-ov')">Close</button><button class="btn btn-navy" onclick="closeOv('cv-ov');openSend(CV_PAPER_ID)"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>Share with Doctors</button></div></div>
 </div>
 </div>
 
@@ -2576,7 +2959,7 @@ async function loadDoctorsFromAPI() {
 
   try {
     // Cache-bust so browsers never serve stale data
-    const resp = await fetch('http://localhost:8000/doctors?_t=' + Date.now());
+    const resp = await fetch('http://localhost:8010/doctors?_t=' + Date.now());
     if (!resp.ok) throw new Error('API returned ' + resp.status);
     const data = await resp.json();
     DOCTORS = (data.doctors || []).map(mapAPIDoctor);
@@ -2655,7 +3038,22 @@ function toggleRoleDropdown(e){
 }
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
-function switchRole(role){
+// Valid page IDs for each role — used to validate hash on load/switch
+const PAGES_MA  = ['content','pipeline','dashboard'];
+const PAGES_PMT = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline'];
+
+function _getHashPage(){
+  const h = location.hash.replace('#','');
+  const parts = h.split('/');
+  return parts[1] || '';
+}
+function _getHashRole(){
+  const h = location.hash.replace('#','');
+  const parts = h.split('/');
+  return (parts[0]==='ma'||parts[0]==='pmt') ? parts[0] : '';
+}
+
+function switchRole(role, skipHash){
   ROLE=role;
   document.getElementById('role-switcher').classList.remove('open');
   document.getElementById('rd-pmt').classList.toggle('selected',role==='pmt');
@@ -2681,14 +3079,17 @@ function switchRole(role){
     document.getElementById('sb-badge').className='sb-role-badge rb-pmt';
   }
   buildSidebar();
-  // Default page: Today for PMT, Content Library for MA
-  showPage(role==='pmt' ? 'today' : 'content');
+  // Restore page from URL hash if available, otherwise default
+  const hashPage = _getHashPage();
+  const validPages = role==='ma' ? PAGES_MA : PAGES_PMT;
+  const targetPage = (hashPage && validPages.includes(hashPage)) ? hashPage : (role==='pmt' ? 'today' : 'content');
+  showPage(targetPage, skipHash);
   buildCLKpis();
   buildCLTabs();
   buildSidebarFooter();
   buildTopbarActions();
   renderCL();
-  if(role==='pmt') renderToday();
+  if(role==='pmt' && targetPage==='today') renderToday();
 }
 
 function buildSidebar(){
@@ -2706,6 +3107,10 @@ function buildSidebar(){
       <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
+      </div>
+      <div class="ni" id="ni-dashboard" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="6" height="6" rx="1.5"/><rect x="10" y="2" width="6" height="6" rx="1.5"/><rect x="2" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
+        Dashboard
       </div>
       <div class="ng" style="margin-top:8px;">Access Level</div>
       <div style="background:rgba(255,255,255,.04);border-radius:9px;padding:12px;margin:0 8px;border:1px solid rgba(255,255,255,.06);">
@@ -2745,6 +3150,10 @@ function buildSidebar(){
       <div class="ni" id="ni-analytics" onclick="showPage('analytics')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,14 6,8 9,11 13,5 16,8"/><line x1="2" y1="16" x2="16" y2="16"/></svg>
         Analytics
+      </div>
+      <div class="ni" id="ni-dashboard" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="6" height="6" rx="1.5"/><rect x="10" y="2" width="6" height="6" rx="1.5"/><rect x="2" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
+        Dashboard
       </div>
       <div class="ng" style="margin-top:8px;">AI Pipeline</div>
       <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
@@ -2807,11 +3216,13 @@ function buildCLTabs(){
   }
 }
 
-/* ══ PAGE NAVIGATION ══ */
-function showPage(id){
+/* ══ PAGE NAVIGATION (hash-based routing) ══ */
+function showPage(id, skipHash){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  document.getElementById('pg-'+id).classList.add('on');
-  const T={content:'Content Library',doctors:'Doctor Directory','360':'Doctor 360°',today:"Today's Tasks",occasions:'Occasion Hub',analytics:'Analytics',pipeline:'Research Pipeline'};
+  const pgEl = document.getElementById('pg-'+id);
+  if(!pgEl) { id = ROLE==='pmt'?'today':'content'; document.getElementById('pg-'+id).classList.add('on'); }
+  else pgEl.classList.add('on');
+  const T={content:'Content Library',doctors:'Doctor Directory','360':'Doctor 360°',today:"Today's Tasks",occasions:'Occasion Hub',analytics:'Analytics',pipeline:'Research Pipeline',dashboard:'Dashboard'};
   document.getElementById('tb-cur').textContent=T[id]||'PinnacleIQ';
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active-ma','active-pmt'));
   const activeClass = ROLE==='ma'?'active-ma':'active-pmt';
@@ -2824,7 +3235,22 @@ function showPage(id){
   if(id==='analytics' && typeof renderAnalytics==='function') renderAnalytics();
   if(id==='pipeline' && typeof plInitPage==='function') plInitPage();
   if(id==='doctors') loadDoctorsFromAPI();
+  if(id==='dashboard') { loadDemoReport(); loadSharingReport(); }
+  // Close sidebar on mobile after navigation
+  if(window.innerWidth <= 768) closeSidebar();
+  // Update URL hash so browser refresh returns here
+  if(!skipHash) location.hash = ROLE + '/' + id;
 }
+
+// Listen for browser back / forward
+window.addEventListener('hashchange', function(){
+  const parts = location.hash.replace('#','').split('/');
+  const hashRole = parts[0] || 'pmt';
+  const hashPage = parts[1] || '';
+  if(hashRole !== ROLE) switchRole(hashRole, true);
+  if(hashPage && hashPage !== _currentPage()) showPage(hashPage, true);
+});
+function _currentPage(){ const on=document.querySelector('.pg.on'); return on ? on.id.replace('pg-','') : ''; }
 
 // Open Doctor 360 from sidebar — uses last-viewed doctor or first doctor
 function openCurrentDoc360(){
@@ -2913,6 +3339,29 @@ function clCardHTML(p){
        <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
+  // ── Publication details block ──────────────────────────────────────────────
+  let pubBlock = '';
+  if(p._apiSource){
+    // AI pipeline article — show source journals + generated date
+    const sj = p.sourceJournals || _deriveJournals(p);
+    pubBlock = `<div class="pc-pub">
+      <div class="pc-pub-hdr">Publication Details</div>
+      <div class="pc-pub-row"><span class="pc-pub-lbl">Journal</span><span class="pc-pub-val" title="PinnacleIQ Research Pipeline">PinnacleIQ Research Pipeline</span></div>
+      ${sj?`<div class="pc-pub-row"><span class="pc-pub-lbl">Based on</span><span class="pc-pub-val" title="${sj}">${sj}</span></div>`:''}
+      <div class="pc-pub-row"><span class="pc-pub-lbl">Generated</span><span class="pc-pub-val">${p.month} ${p.year}</span></div>
+    </div>`;
+  } else {
+    // Static / PubMed / uploaded article — show real publication details
+    const authTrunc = p.authors ? (p.authors.length > 62 ? p.authors.slice(0,62)+'…' : p.authors) : '';
+    const jrnlTrunc = p.journal ? (p.journal.length > 62 ? p.journal.slice(0,62)+'…' : p.journal) : '';
+    pubBlock = `<div class="pc-pub">
+      <div class="pc-pub-hdr">Publication Details</div>
+      ${jrnlTrunc?`<div class="pc-pub-row"><span class="pc-pub-lbl">Journal</span><span class="pc-pub-val" title="${p.journal}">${jrnlTrunc}</span></div>`:''}
+      ${authTrunc?`<div class="pc-pub-row"><span class="pc-pub-lbl">Authors</span><span class="pc-pub-val" title="${p.authors}">${authTrunc}</span></div>`:''}
+      <div class="pc-pub-row"><span class="pc-pub-lbl">Published</span><span class="pc-pub-val">${p.month} ${p.year}</span></div>
+      ${p.pmid?`<div class="pc-pub-row"><span class="pc-pub-lbl">PubMed ID</span><span class="pc-pub-val"><a href="https://pubmed.ncbi.nlm.nih.gov/${p.pmid}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${p.pmid} ↗</a></span></div>`:''}
+    </div>`;
+  }
   return`<div class="pc pc-${p.status}" onclick="${isMA?`openMADetail(${idArg})`:`openCVModal(${idArg})`}">
     <div class="pc-accent"></div>
     <div class="pc-body">
@@ -2921,6 +3370,7 @@ function clCardHTML(p){
       <div class="pc-j">${p.journal} · ${p.month} ${p.year}</div>
       <div class="pc-sum">${p.sum}</div>
       <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span>${relBadge(p.rel)}</div>
+      ${pubBlock}
     </div>
     <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);">${fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;">${actions}</div></div>
   </div>`;
@@ -3085,8 +3535,10 @@ function updCounts(){
 }
 
 /* ══ PMT CONTENT VIEW (read-only) ══ */
+let CV_PAPER_ID = null; // tracks which paper is open in the CV modal
 function openCVModal(id){
   const p=ALL_PAPERS.find(x=>x.id===id); if(!p) return;
+  CV_PAPER_ID = id; // store so the "Share with Doctors" button inside CV modal can pass it
   const cc=CAT_COL[p.cat]||'b-gray', tc=TH_COL[p.therapy]||'b-gray';
   const icon=document.getElementById('cv-icon');
   icon.style.background=ICON_BG[p.cat]||'var(--surface3)';
@@ -3663,12 +4115,66 @@ function goShStep(n){
   if(n===2) buildMsgPreview();
   updShSummary();
 }
+function _logShareToBackend() {
+  const paper = SH_PAPER_ID ? ALL_PAPERS.find(x => x.id === SH_PAPER_ID) : null;
+  if (!paper) return;
+  // Use API id for pipeline articles, fallback to 'static-{id}' for hardcoded papers
+  const backendId = paper._apiId || ('static-' + paper.id);
+
+  // Detect selected channel from the active .mcb button
+  const activeMcb = document.querySelector('.msg-channel-btns .mcb.on');
+  const lbl = activeMcb ? (activeMcb.querySelector('.mcb-lbl')?.textContent || '').toLowerCase().trim() : 'whatsapp';
+  const channel = lbl === 'email' ? 'email' : 'whatsapp'; // "Both" logs as whatsapp primary
+  const sharedBy = ROLE === 'pmt' ? 'Jijo (BU Head · PMT)' : 'Dr. Prashant Agarwal (MA)';
+
+  // Only count doctors that actually resolve — avoids successCount never reaching total
+  const docsToShare = [...SH_SEL_IDS]
+    .map(docId => DOCTORS.find(d => d.id === docId))
+    .filter(Boolean);
+  let successCount = 0;
+  const total = docsToShare.length;
+  if (total === 0) return; // nothing to log
+
+  docsToShare.forEach(doc => {
+    fetch(PL_API + '/content/' + backendId + '/share', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        doctor_id:   String(doc.id),
+        doctor_name: doc.name,
+        specialty:   doc.spec || doc.specialty || 'General Medicine',
+        channel:     channel,
+        shared_by:   sharedBy,
+      })
+    })
+    .then(r => {
+      if (!r.ok) {
+        return r.json().then(err => {
+          console.warn('[Share] Backend error:', r.status, err);
+          toast('⚠️', `Share log failed: ${(err.detail || 'Backend error').slice(0,80)}`);
+        });
+      }
+      return r.json().then(data => {
+        if (data.warning) toast('⚠️', (data.warning||'').slice(0, 90));
+        successCount++;
+        // Once ALL shares logged, refresh ALL report surfaces regardless of which page is active
+        if (successCount === total) {
+          // Always refresh the in-memory share count so KPI tiles are up to date
+          if (typeof loadDemoReport === 'function') setTimeout(loadDemoReport, 600);
+          if (typeof loadSharingReport === 'function') setTimeout(loadSharingReport, 400);
+        }
+      });
+    })
+    .catch(e => console.warn('[Share] Backend log failed:', e));
+  });
+}
+
 function shNext(){
   if(SH_STEP===1){
     if(SH_SEL_IDS.size===0){toast('⚠️','Please select at least one doctor.');return;}
     goShStep(2);
   } else {
-    // Send!
+    _logShareToBackend(); // ← persist share to backend DB
     const n=SH_SEL_IDS.size;
     const names=[...SH_SEL_IDS].slice(0,2).map(id=>DOCTORS.find(d=>d.id===id)?.name.replace('Dr.','')).filter(Boolean).join(', ');
     closeSend();
@@ -3678,6 +4184,26 @@ function shNext(){
 }
 function shBack(){if(SH_STEP>1)goShStep(SH_STEP-1);}
 
+/* Lookup for deriving source journals from topic when DB field is empty (existing records) */
+const _TOPIC_JOURNALS = {
+  'SGLT2':        'New England Journal of Medicine · The Lancet · European Heart Journal (ESC) · JACC',
+  'GLP':          'New England Journal of Medicine · The Lancet · Diabetes Care (ADA)',
+  'GLP-1':        'New England Journal of Medicine · The Lancet · Diabetes Care (ADA)',
+  'PCOS':         'Fertility and Sterility · Human Reproduction · Cochrane Reviews',
+  'INOSITOL':     'Fertility and Sterility · Human Reproduction · Cochrane Reviews',
+  'DIABETES':     'Diabetes Care (ADA) · The Lancet · New England Journal of Medicine',
+  'HEART FAILURE':'European Heart Journal (ESC) · The Lancet · JACC',
+};
+function _deriveJournals(p){
+  if(p.sourceJournals) return p.sourceJournals;
+  if(!p._apiSource && p.journal && !p.journal.includes('AI-Generated')) return p.journal;
+  const haystack = ((p.title||'')+(p.therapy||'')+(p.cat||'')).toUpperCase();
+  for(const [key, jrnl] of Object.entries(_TOPIC_JOURNALS)){
+    if(haystack.includes(key)) return jrnl;
+  }
+  return null;
+}
+
 function buildMsgPreview(){
   const p = SH_PAPER_ID ? ALL_PAPERS.find(x=>x.id===SH_PAPER_ID) : null;
   const sel=[...SH_SEL_IDS].map(id=>DOCTORS.find(d=>d.id===id)).filter(Boolean);
@@ -3685,12 +4211,30 @@ function buildMsgPreview(){
   document.getElementById('sh-recip-pills').innerHTML=sel.map(d=>
     `<div class="recip-pill">${d.init} ${d.name}<button onclick="SH_SEL_IDS.delete(${d.id});buildMsgPreview()">×</button></div>`
   ).join('');
-  // Message
+  // Build message
   const firstName = sel.length===1 ? sel[0].name.replace('Dr. ','').split(' ')[0] : 'Doctor';
-  const paperLine = p ? `\n\nI came across a recent publication that I believe is highly relevant to your work:\n\n📄 "${p.title}"\n${p.journal} · ${p.month} ${p.year}\n\n${p.sum.slice(0,120)}…` : '';
-  const msg = `Dear Dr. ${firstName},\n\nHope this message finds you well!${paperLine}\n\nWould love to hear your thoughts.\n\n— Jijo, Team Life · Mankind Pharma`;
+  let paperSection = '';
+  if(p){
+    const specialty = p.cat || p.therapy || 'clinical';
+    paperSection += `\n\nI wanted to share a recent research update relevant to your ${specialty} practice:\n\n📄 ${p.title}`;
+    // Key highlights: use keyFindings for API papers, summary for static
+    const findings = (p.keyFindings && p.keyFindings.length > 0) ? p.keyFindings : null;
+    if(findings){
+      const f1 = findings[0] || '';
+      const f2 = findings[1] || '';
+      paperSection += `\n\nKey highlights:`;
+      if(f1) paperSection += `\n• ${f1}`;
+      if(f2) paperSection += `\n• ${f2}`;
+    } else if(p.sum){
+      paperSection += `\n\n${p.sum.slice(0,130)}…`;
+    }
+    // Source journals — always shown for credibility
+    const journals = _deriveJournals(p);
+    if(journals) paperSection += `\n\n📚 Based on: ${journals}`;
+  }
+  const msg = `Dear Dr. ${firstName},\n\nHope this message finds you well!${paperSection}\n\nWould love to hear your thoughts.\n\n— Jijo, Team Life · Mankind Pharma`;
   document.getElementById('sh-msg-ta').value = msg;
-  document.getElementById('sh-preview-bbl').innerHTML = msg.replace(/\n/g,'<br>').replace('📄','📄').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  document.getElementById('sh-preview-bbl').innerHTML = msg.replace(/\n/g,'<br>');
 }
 function selMCh(el){el.closest('.msg-channel-btns').querySelectorAll('.mcb').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
 
@@ -4138,6 +4682,23 @@ function pkrContinue(){
 }
 
 
+/* ══ MOBILE SIDEBAR TOGGLE ══ */
+function toggleSidebar(){
+  const sb = document.getElementById('sb');
+  const ov = document.getElementById('sb-overlay');
+  if (sb.classList.contains('sb-open')) {
+    sb.classList.remove('sb-open');
+    ov.classList.remove('on');
+  } else {
+    sb.classList.add('sb-open');
+    ov.classList.add('on');
+  }
+}
+function closeSidebar(){
+  document.getElementById('sb').classList.remove('sb-open');
+  document.getElementById('sb-overlay').classList.remove('on');
+}
+
 /* ══ TOAST ══ */
 function toast(icon,msg){const t=document.getElementById('toast');document.getElementById('ti').textContent=icon;document.getElementById('tm').textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3500);}
 
@@ -4164,9 +4725,9 @@ function triggerDocAction(docId){
 /* ══ QUICK WISH MODAL ══ */
 function openQuickWish(doc, type){
   const msgs = {
-    birthday: `Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]} 🎂,\n\nWishing you a very Happy Birthday! Your dedication and commitment to your patients is truly inspiring.\n\nMay this year bring you good health, happiness and continued success!\n\n— Jijo, Team Life · Mankind Pharma`,
-    anniversary: `Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]} 💍,\n\nWarmest congratulations on your Wedding Anniversary! Wishing you and your family a beautiful celebration.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
-    congratulate: `Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]} 🏆,\n\nHeartfelt congratulations on your recently published paper! Your contribution to clinical research is truly remarkable.\n\nVery proud to collaborate with such a dedicated clinician.\n\n— Jijo, Team Life · Mankind Pharma`,
+    birthday: `Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]},\n\nWishing you a very Happy Birthday! 🎂\n\nYour dedication and commitment to your patients is truly inspiring. May this year bring you great joy, good health and every success you deserve.\n\n— Jijo, Team Life · Mankind Pharma`,
+    anniversary: `Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]},\n\nWarmest congratulations on your Wedding Anniversary! 💍\n\nWishing you and your family a beautiful celebration filled with love and happiness.\n\n— Jijo, Team Life · Mankind Pharma`,
+    congratulate: `Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]},\n\nHeartfelt congratulations on your recently published paper! 🏆\n\nYour contribution to clinical research is truly remarkable. Very proud to collaborate with such a dedicated clinician.\n\n— Jijo, Team Life · Mankind Pharma`,
   };
   const titles = {birthday:'Birthday Wish', anniversary:'Anniversary Wish', congratulate:'Congratulations'};
   const icons = {birthday:'🎂', anniversary:'💍', congratulate:'🏆'};
@@ -4440,9 +5001,9 @@ function snoozeTodayTask(taskId){
 /* ══ QUICK WISH MODAL (from Today page) ══ */
 function openQuickWish(doc, type){
   const msgs={
-    birthday:`Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]} 🎂,\n\nWishing you a very Happy Birthday! Your dedication to your patients is truly inspiring.\n\nMay this year bring you joy, good health and all the success you deserve!\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
-    anniversary:`Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]} 💍,\n\nWarmest congratulations on your Wedding Anniversary! Wishing you and your family a beautiful celebration.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
-    congratulate:`Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]} 🏆,\n\nHeartfelt congratulations on your recently published paper! Your contribution to clinical research is truly remarkable. Very proud to collaborate with such a dedicated clinician.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
+    birthday:`Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]},\n\nWishing you a very Happy Birthday! 🎂\n\nYour dedication and commitment to your patients is truly inspiring. May this year bring you great joy, good health and every success you deserve.\n\n— Jijo, Team Life · Mankind Pharma`,
+    anniversary:`Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]},\n\nWarmest congratulations on your Wedding Anniversary! 💍\n\nWishing you and your family a beautiful celebration filled with love and happiness.\n\n— Jijo, Team Life · Mankind Pharma`,
+    congratulate:`Dear Dr. ${doc.name.replace('Dr.','').trim().split(' ')[0]},\n\nHeartfelt congratulations on your recently published paper! 🏆\n\nYour contribution to clinical research is truly remarkable. Very proud to collaborate with such a dedicated clinician.\n\n— Jijo, Team Life · Mankind Pharma`,
   };
   const titles={birthday:'Birthday Wish',anniversary:'Anniversary Wish',congratulate:'Congratulations'};
   const icons={birthday:'🎂',anniversary:'💍',congratulate:'🏆'};
@@ -4597,6 +5158,7 @@ shNext = function(){
 };
 // Override the send confirmation to also complete task
 function confirmSendAndComplete(){
+  _logShareToBackend(); // ← persist share to backend DB
   const n=SH_SEL_IDS.size;
   const names=[...SH_SEL_IDS].slice(0,2).map(id=>DOCTORS.find(d=>d.id===id)?.name.replace('Dr.','')).filter(Boolean).join(', ');
   closeSend();
@@ -4807,7 +5369,7 @@ function sendBroadcast(){
 // showPage already handles occasions inline
 
 /* ══════════════════════ RESEARCH PIPELINE ══════════════════════ */
-const PL_API = 'http://localhost:8000';
+const PL_API = 'http://localhost:8010';
 let PL_TOPICS = [];          // [{topic, specialty, therapy_area}, ...]
 let PL_SEL_IDX = -1;         // selected topic index
 let PL_POLL = null;           // polling interval ID
@@ -4958,8 +5520,9 @@ function plRenderAgentOutput(agent, output) {
           + output.sources.map(s => `
           <div class="pl-src-item">
             <div class="pl-src-title">${s.title}</div>
+            ${s.authors ? `<div class="pl-src-authors"><span class="pl-src-authors-icon">👤</span><span>${s.authors}</span></div>` : ''}
             <div class="pl-src-snip">"${s.snippet}"</div>
-            <a href="${s.url}" target="_blank" rel="noopener" class="pl-src-link">${s.journal} ↗</a>
+            <a href="${s.url}" target="_blank" rel="noopener" class="pl-src-link">📖 ${s.journal} ↗</a>
           </div>`).join('')
       : '';
     // ── Internal documents ──
@@ -5502,6 +6065,551 @@ function pollImprovementProgress() {
   }, 2000);
 }
 
+/* ══ DASHBOARD ══ */
+let DM_ITEMS = [], DM_LOGS = [], DM_RUNS = [];
+
+function showDMDetail(type) {
+  // Toggle: clicking the active card again closes the panel
+  const panel = document.getElementById('dm-detail');
+  const wasActive = document.getElementById('dm-card-'+type)?.classList.contains('dm-active');
+  // Clear all active states
+  ['total','ai','approved','doctors','shares'].forEach(t => {
+    document.getElementById('dm-card-'+t)?.classList.remove('dm-active');
+  });
+  if (wasActive) { panel.classList.remove('show'); return; }
+
+  document.getElementById('dm-card-'+type).classList.add('dm-active');
+  panel.classList.add('show');
+
+  const cfg = {
+    total:    { title:'All Articles Created',          accentColor:'var(--blue)' },
+    ai:       { title:'AI-Generated Articles',         accentColor:'#7C3AED' },
+    approved: { title:'MA Approved Articles',          accentColor:'var(--green)' },
+    doctors:  { title:'Doctors Reached',               accentColor:'var(--amber)' },
+    shares:   { title:'Sharing Activity (All Shares)', accentColor:'var(--navy)' },
+  };
+  document.getElementById('dm-detail-title').textContent = cfg[type].title;
+  document.getElementById('dm-detail-title').style.color = cfg[type].accentColor;
+
+  let rows = [], head = '';
+
+  if (type === 'total' || type === 'ai' || type === 'approved') {
+    let data = [...DM_ITEMS];
+    if (type === 'ai')       data = data.filter(i => i.pipeline || i.source === 'ai_agent');
+    if (type === 'approved') data = data.filter(i => i.status === 'approved');
+    // Sort by created_at desc (most recent first)
+    data.sort((a,b) => (b.created_at||'').localeCompare(a.created_at||''));
+    document.getElementById('dm-detail-count').textContent = data.length + ' records';
+    head = `<tr>
+      <th style="width:44px;">S.No</th>
+      <th>Article Title</th>
+      <th>Specialty</th>
+      <th>Source</th>
+      <th>Status</th>
+      <th>${type==='approved'?'Reviewed Date':'Created Date'}</th>
+    </tr>`;
+    const stBadge = s => s==='approved'?`<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">✅ Approved</span>`
+      :s==='rejected'?`<span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">❌ Rejected</span>`
+      :`<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">⏳ Pending</span>`;
+    rows = data.map((item, i) => `<tr>
+      <td style="text-align:center;color:var(--text4);font-weight:600;">${i+1}</td>
+      <td><div style="font-weight:600;color:var(--navy);max-width:300px;line-height:1.4;">${_esc(item.title||item.topic||'—')}</div></td>
+      <td style="font-size:12px;color:var(--text2);">${_esc(item.specialty||'—')}</td>
+      <td style="font-size:11.5px;color:var(--text3);">${item.pipeline?'AI Pipeline':'Manual'}</td>
+      <td>${stBadge(item.status)}</td>
+      <td style="font-size:12px;white-space:nowrap;color:var(--text2);">${(type==='approved'?item.reviewed_at:item.created_at)||'—'}</td>
+    </tr>`);
+
+  } else if (type === 'doctors') {
+    // Aggregate unique doctors from share logs, sort by most recent share
+    const docMap = {};
+    [...DM_LOGS].forEach(l => {
+      const key = l.doctor_id || l.doctor_name;
+      if (!docMap[key]) docMap[key] = {name:l.doctor_name||'—', specialty:l.specialty||'—', channel:l.channel||'—', lastShared:l.shared_at||'', count:0};
+      docMap[key].count++;
+      if ((l.shared_at||'') > docMap[key].lastShared) { docMap[key].lastShared=l.shared_at||''; docMap[key].channel=l.channel||'—'; }
+    });
+    const data = Object.values(docMap).sort((a,b)=>b.lastShared.localeCompare(a.lastShared));
+    document.getElementById('dm-detail-count').textContent = data.length + ' unique doctors';
+    head = `<tr>
+      <th style="width:44px;">S.No</th>
+      <th>Doctor Name</th>
+      <th>Specialty</th>
+      <th>Last Shared</th>
+      <th>Channel</th>
+      <th style="text-align:center;">Total Shares</th>
+    </tr>`;
+    const chBadge = ch => ch==='whatsapp'
+      ? `<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">WhatsApp</span>`
+      : `<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">Email</span>`;
+    rows = data.map((d, i) => `<tr>
+      <td style="text-align:center;color:var(--text4);font-weight:600;">${i+1}</td>
+      <td style="font-weight:600;color:var(--navy);">${_esc(d.name)}</td>
+      <td style="font-size:12px;color:var(--text2);">${_esc(d.specialty)}</td>
+      <td style="font-size:12px;white-space:nowrap;color:var(--text2);">${d.lastShared?d.lastShared.slice(0,10):'—'}</td>
+      <td>${chBadge(d.channel)}</td>
+      <td style="text-align:center;font-weight:700;color:var(--navy);">${d.count}</td>
+    </tr>`);
+
+  } else if (type === 'shares') {
+    const data = [...DM_LOGS].sort((a,b)=>(b.shared_at||'').localeCompare(a.shared_at||''));
+    document.getElementById('dm-detail-count').textContent = data.length + ' records';
+    head = `<tr>
+      <th style="width:44px;">S.No</th>
+      <th>Article</th>
+      <th>Doctor</th>
+      <th>Specialty</th>
+      <th>Channel</th>
+      <th>Shared Date</th>
+      <th>Shared By</th>
+    </tr>`;
+    const itemMap = {};
+    DM_ITEMS.forEach(i => { itemMap[i.id] = i; });
+    // Also index static papers so 'static-N' content IDs resolve to titles
+    if (typeof ALL_PAPERS !== 'undefined') {
+      ALL_PAPERS.forEach(p => {
+        const sk = 'static-' + p.id;
+        if (!itemMap[sk]) itemMap[sk] = { title: p.title };
+        if (p._apiId && !itemMap[p._apiId]) itemMap[p._apiId] = { title: p.title };
+      });
+    }
+    const chBadge = ch => ch==='whatsapp'
+      ? `<span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">WhatsApp</span>`
+      : `<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;">Email</span>`;
+    rows = data.map((l, i) => {
+      const item = itemMap[l.content_id] || {};
+      return `<tr>
+        <td style="text-align:center;color:var(--text4);font-weight:600;">${i+1}</td>
+        <td style="max-width:240px;"><div style="font-weight:600;color:var(--navy);line-height:1.4;">${_esc(item.title||l.content_id)}</div></td>
+        <td style="font-weight:600;color:var(--navy);">${_esc(l.doctor_name||'—')}</td>
+        <td style="font-size:12px;color:var(--text2);">${_esc(l.specialty||'—')}</td>
+        <td>${chBadge(l.channel)}</td>
+        <td style="font-size:12px;white-space:nowrap;color:var(--text2);">${l.shared_at?l.shared_at.slice(0,10):'—'}</td>
+        <td style="font-size:12px;color:var(--text3);">${_esc(l.shared_by||'—')}</td>
+      </tr>`;
+    });
+  }
+
+  document.getElementById('dm-det-head').innerHTML = head;
+  document.getElementById('dm-det-body').innerHTML = rows.length
+    ? rows.join('')
+    : `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text4);">No records found.</td></tr>`;
+
+  // Scroll to detail panel
+  setTimeout(() => document.getElementById('dm-detail').scrollIntoView({behavior:'smooth', block:'start'}), 80);
+}
+
+function closeDMDetail() {
+  document.getElementById('dm-detail').classList.remove('show');
+  ['total','ai','approved','doctors','shares'].forEach(t => {
+    document.getElementById('dm-card-'+t)?.classList.remove('dm-active');
+  });
+}
+
+async function downloadExcelReport() {
+  const btn = document.getElementById('btn-download-report');
+  if (!btn) return;
+  const origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-dasharray="30" stroke-dashoffset="10"><animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/></circle></svg> Generating...';
+
+  try {
+    const resp = await fetch('http://localhost:8010/report/download');
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.detail || 'Server returned ' + resp.status);
+    }
+
+    const blob = await resp.blob();
+    const cd = resp.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'PinnacleIQ_Business_Report.xlsx';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    toast('📊', 'Business Report downloaded successfully');
+  } catch (e) {
+    console.error('Report download failed:', e);
+    toast('❌', e.message || 'Failed to generate report');
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.innerHTML = origHTML;
+  }
+}
+
+async function loadDemoReport() {
+  const setLoading = id => { const el=document.getElementById(id); if(el) el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Loading…</div>'; };
+  ['dm-pipeline-bars','dm-channel-bars','dm-pipeline-stats','dm-specialty-bars','dm-timeline'].forEach(setLoading);
+
+  try {
+    const [contentRes, logsRes, runsRes] = await Promise.all([
+      fetch(PL_API + '/content'),
+      fetch(PL_API + '/share-logs'),
+      fetch(PL_API + '/pipeline/runs'),
+    ]);
+    const contentData = await contentRes.json();
+    const logsData    = await logsRes.json();
+    const runsData    = await runsRes.json();
+
+    const items = contentData.items || [];
+    const logs  = logsData.logs    || [];
+    const runs  = runsData.runs    || [];
+    // Store globally so KPI card click detail views can use them without re-fetching
+    DM_ITEMS = items; DM_LOGS = logs; DM_RUNS = runs;
+    closeDMDetail(); // reset any open detail panel on refresh
+
+    /* ── KPIs ── */
+    const total    = items.length;
+    const aiMade   = items.filter(i => i.source === 'ai_agent' || i.pipeline).length;
+    const approved = items.filter(i => i.status === 'approved').length;
+    const rejected = items.filter(i => i.status === 'rejected').length;
+    const pending  = items.filter(i => i.status === 'pending_review' || i.status === 'improvement_requested').length;
+    const doctorsReached = new Set(logs.map(l => l.doctor_id).filter(Boolean)).size;
+    const totalShares    = logs.length;
+    const approvalRate   = (approved + rejected) > 0 ? Math.round(approved / (approved + rejected) * 100) : 0;
+    const aiPct          = total > 0 ? Math.round(aiMade / total * 100) : 0;
+    const waMade = logs.filter(l => l.channel === 'whatsapp').length;
+    const emMade = logs.filter(l => l.channel === 'email').length;
+
+    document.getElementById('dm-k-total').textContent    = total;
+    document.getElementById('dm-k-ai').textContent       = aiMade;
+    document.getElementById('dm-k-ai-pct').textContent   = aiPct + '% of total';
+    document.getElementById('dm-k-approved').textContent = approved;
+    document.getElementById('dm-k-appr-rate').textContent= approvalRate + '% approval rate';
+    document.getElementById('dm-k-doctors').textContent  = doctorsReached || logs.length > 0 ? (doctorsReached || '—') : '—';
+    document.getElementById('dm-k-shares').textContent   = totalShares;
+    document.getElementById('dm-k-shares-sub').textContent = `${waMade} WhatsApp · ${emMade} Email`;
+
+    /* ── Content Pipeline Bars ── */
+    const pipeColors = {Pending:'var(--amber)',Approved:'var(--green)',Rejected:'var(--red)'};
+    const pipeData = [
+      {label:'Pending Review', count:pending,  color:'var(--amber)'},
+      {label:'Approved',       count:approved, color:'var(--green)'},
+      {label:'Rejected',       count:rejected, color:'var(--red)'},
+    ];
+    document.getElementById('dm-pipeline-bars').innerHTML = total === 0
+      ? '<div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">No content yet — run the AI pipeline first.</div>'
+      : pipeData.map(d => {
+          const pct = total > 0 ? Math.round(d.count / total * 100) : 0;
+          return `<div class="dm-bar-row">
+            <span class="dm-bar-label">${d.label}</span>
+            <div class="dm-bar-track"><div class="dm-bar-fill" style="width:${pct}%;background:${d.color};"></div></div>
+            <span class="dm-bar-count">${d.count}</span>
+            <span class="dm-bar-pct">${pct}%</span>
+          </div>`;
+        }).join('') + `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:20px;">
+          <div style="font-size:11.5px;color:var(--text3);">Approval Rate <strong style="color:var(--green);">${approvalRate}%</strong></div>
+          <div style="font-size:11.5px;color:var(--text3);">AI-Generated <strong style="color:var(--blue);">${aiPct}%</strong></div>
+          <div style="font-size:11.5px;color:var(--text3);">Total <strong style="color:var(--navy);">${total}</strong></div>
+        </div>`;
+
+    /* ── Sharing Channel Bars ── */
+    const chTotal = waMade + emMade || 1;
+    document.getElementById('dm-channel-bars').innerHTML = totalShares === 0
+      ? '<div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">No shares yet — approve content and share with doctors.</div>'
+      : [
+          {label:'WhatsApp', count:waMade, color:'#10B981'},
+          {label:'Email',    count:emMade, color:'#3B82F6'},
+        ].map(d => {
+          const pct = Math.round(d.count / chTotal * 100);
+          return `<div class="dm-bar-row">
+            <span class="dm-bar-label">${d.label}</span>
+            <div class="dm-bar-track"><div class="dm-bar-fill" style="width:${pct}%;background:${d.color};"></div></div>
+            <span class="dm-bar-count">${d.count}</span>
+            <span class="dm-bar-pct">${pct}%</span>
+          </div>`;
+        }).join('') + (() => {
+          // Specialties shared with
+          const specMap = {};
+          logs.forEach(l => { if(l.specialty) specMap[l.specialty] = (specMap[l.specialty]||0)+1; });
+          const top = Object.entries(specMap).sort((a,b)=>b[1]-a[1]).slice(0,3);
+          if (!top.length) return '';
+          const mx = top[0][1];
+          return `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+            <div style="font-size:10.5px;color:var(--text4);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Top Specialties Reached</div>
+            ${top.map(([sp,cnt]) => `<div class="dm-bar-row" style="margin-bottom:6px;">
+              <span class="dm-bar-label" style="font-size:11.5px;">${sp}</span>
+              <div class="dm-bar-track"><div class="dm-bar-fill" style="width:${Math.round(cnt/mx*100)}%;background:var(--navy);"></div></div>
+              <span class="dm-bar-count">${cnt}</span>
+            </div>`).join('')}
+          </div>`;
+        })();
+
+    /* ── AI Pipeline Stats ── */
+    const completed   = runs.filter(r => r.status === 'completed').length;
+    const improvements= runs.filter(r => r.type === 'improvement').length;
+    const newRuns     = runs.filter(r => r.type === 'new').length;
+    const running     = runs.filter(r => r.status === 'running').length;
+    document.getElementById('dm-pipeline-stats').innerHTML = `
+      ${[
+        {label:'Pipeline Runs Completed',   val:completed,    color:'var(--green)'},
+        {label:'New Research Runs',          val:newRuns,      color:'var(--blue)'},
+        {label:'Improvement (HITL) Cycles',  val:improvements, color:'var(--amber)'},
+        {label:'Currently Running',          val:running,      color:running?'var(--amber)':'var(--text4)'},
+        {label:'Agents per Run',             val:'4 (Alpha→Beta→Gamma→Delta)', color:'var(--navy)'},
+        {label:'Est. Time Saved vs Manual',  val:`~${completed*4} hrs`, color:'var(--green)'},
+      ].map(s => `<div class="dm-stat-row">
+        <span style="font-size:12px;color:var(--text2);">${s.label}</span>
+        <span style="font-size:13px;font-weight:700;color:${s.color};">${s.val}</span>
+      </div>`).join('')}`;
+
+    /* ── Doctor Coverage by Specialty ── */
+    const specCount = {};
+    logs.forEach(l => { if(l.specialty) specCount[l.specialty] = (specCount[l.specialty]||0)+1; });
+    // Also count from content items
+    items.forEach(i => { if(i.specialty && i.status==='approved') specCount[i.specialty] = (specCount[i.specialty]||0); });
+    const specEntries = Object.entries(specCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const specMax = specEntries.length ? specEntries[0][1] : 1;
+    const specColors = ['var(--blue)','var(--green)','var(--amber)','var(--red)','var(--navy)','var(--purple,#7C3AED)'];
+    document.getElementById('dm-specialty-bars').innerHTML = specEntries.length === 0
+      ? '<div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">Share content with doctors to see coverage.</div>'
+      : specEntries.map(([sp,cnt],i) => `<div class="dm-bar-row">
+          <span class="dm-bar-label" style="font-size:11.5px;">${sp}</span>
+          <div class="dm-bar-track"><div class="dm-bar-fill" style="width:${Math.round(cnt/specMax*100)}%;background:${specColors[i%specColors.length]};"></div></div>
+          <span class="dm-bar-count">${cnt}</span>
+        </div>`).join('');
+
+    /* ── Recent Activity Timeline ── */
+    const events = [];
+    // Share events — resolve title from API items or static papers
+    const _findTitle = cid => {
+      const api = items.find(i=>i.id===cid);
+      if (api) return api.title || '';
+      if (cid && cid.startsWith('static-') && typeof ALL_PAPERS !== 'undefined') {
+        const numId = parseInt(cid.replace('static-',''),10);
+        const p = ALL_PAPERS.find(x=>x.id===numId);
+        if (p) return p.title || '';
+      }
+      return '';
+    };
+    logs.slice(0,5).forEach(l => {
+      const title = _findTitle(l.content_id);
+      events.push({
+        time: l.shared_at || '',
+        dot: {bg:'#D1FAE5',color:'#10B981'},
+        icon: '↗',
+        text: `Shared with <strong>${_esc(l.doctor_name||'Doctor')}</strong> (${_esc(l.specialty||'')}) via ${l.channel||''}`,
+        sub:  title ? `"${_esc(title.slice(0,50))}"` : '',
+      });
+    });
+    // Pipeline run events
+    runs.filter(r=>r.status==='completed').slice(0,5).forEach(r => {
+      events.push({
+        time: r.started_at || '',
+        dot: {bg:'#EDE9FE',color:'#7C3AED'},
+        icon: '▶',
+        text: r.type==='improvement'
+          ? `<strong>Improvement cycle</strong> completed by Beta+Gamma agents`
+          : `<strong>AI Pipeline</strong> completed — new article ready for MA review`,
+        sub:  `"${_esc((r.topic||'').slice(0,55))}"`,
+      });
+    });
+    // Approved items
+    items.filter(i=>i.status==='approved').slice(0,3).forEach(i => {
+      events.push({
+        time: i.reviewed_at || i.created_at || '',
+        dot: {bg:'#DBEAFE',color:'#3B82F6'},
+        icon: '✓',
+        text: `MA <strong>approved</strong> content for distribution`,
+        sub:  `"${_esc((i.title||'').slice(0,55))}"`,
+      });
+    });
+    // Sort by time desc
+    events.sort((a,b)=>b.time.localeCompare(a.time));
+    const top10 = events.slice(0,10);
+
+    const fmtRelTime = iso => {
+      if (!iso) return '—';
+      const diff = Date.now() - new Date(iso).getTime();
+      const h = Math.floor(diff/3600000);
+      if (h < 1) return 'Just now';
+      if (h < 24) return `${h}h ago`;
+      const d = Math.floor(h/24);
+      if (d === 1) return 'Yesterday';
+      return `${d}d ago`;
+    };
+
+    document.getElementById('dm-timeline').innerHTML = top10.length === 0
+      ? '<div style="text-align:center;padding:20px;color:var(--text4);font-size:12px;">No activity yet. Run the AI pipeline and share some content to see events here.</div>'
+      : top10.map(e => `<div class="dm-tl-item">
+          <div class="dm-tl-dot" style="background:${e.dot.bg};color:${e.dot.color};font-weight:700;">${e.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12.5px;color:var(--text1);line-height:1.5;">${e.text}</div>
+            ${e.sub ? `<div style="font-size:11px;color:var(--text3);font-style:italic;margin-top:2px;">${e.sub}</div>` : ''}
+          </div>
+          <div style="font-size:11px;color:var(--text4);white-space:nowrap;padding-left:12px;">${fmtRelTime(e.time)}</div>
+        </div>`).join('');
+
+    document.getElementById('dm-last-refresh').textContent = 'Refreshed: ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    ['dm-pipeline-bars','dm-channel-bars','dm-pipeline-stats','dm-specialty-bars','dm-timeline'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--red);font-size:12px;">Failed to load — is the backend running?</div>';
+    });
+  }
+}
+
+/* ══ SHARING REPORT ══ */
+let SR_DATA = [];
+
+async function loadSharingReport() {
+  const tbody = document.getElementById('sr-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text4);">Loading…</td></tr>';
+  try {
+    const [logsRes, contentRes] = await Promise.all([
+      fetch(PL_API + '/share-logs'),
+      fetch(PL_API + '/content'),
+    ]);
+    if (!logsRes.ok || !contentRes.ok) throw new Error('API error');
+    const logsData  = await logsRes.json();
+    const contentData = await contentRes.json();
+    const logs   = logsData.logs  || [];
+    const items  = contentData.items || [];
+    // Build content lookup by id (API items + static papers)
+    const cmap = {};
+    items.forEach(item => { cmap[item.id] = item; });
+    // Also index static papers so share logs with 'static-N' IDs resolve titles
+    if (typeof ALL_PAPERS !== 'undefined') {
+      ALL_PAPERS.forEach(p => {
+        const staticKey = 'static-' + p.id;
+        if (!cmap[staticKey]) cmap[staticKey] = { title: p.title, created_at: p.date || '', reviewed_at: p.revDate || '' };
+        // Also map API-sourced papers by their _apiId
+        if (p._apiId && !cmap[p._apiId]) cmap[p._apiId] = { title: p.title, created_at: p.date || '', reviewed_at: p.revDate || '' };
+      });
+    }
+    // Join share logs with content details
+    SR_DATA = logs.map(log => {
+      const c = cmap[log.content_id] || {};
+      return {
+        title:       c.title || log.content_id,
+        created_at:  (c.created_at  || '').slice(0, 10),
+        reviewed_at: (c.reviewed_at || '').slice(0, 10),
+        shared_at:   (log.shared_at || '').slice(0, 10),
+        doctor_name: log.doctor_name  || '',
+        specialty:   log.specialty    || '',
+        channel:     log.channel      || '',
+        shared_by:   log.shared_by    || '',
+        content_id:  log.content_id,
+        doctor_id:   log.doctor_id    || '',
+      };
+    });
+    _srUpdateKpis();
+    renderSharingReport();
+  } catch(e) {
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--red);">Failed to load — is the backend running at localhost:8010?</td></tr>';
+  }
+}
+
+function _srUpdateKpis() {
+  const total    = SR_DATA.length;
+  const articles = new Set(SR_DATA.map(r => r.content_id)).size;
+  const doctors  = new Set(SR_DATA.map(r => r.doctor_id)).size;
+  const ym       = new Date().toISOString().slice(0, 7);
+  const month    = SR_DATA.filter(r => r.shared_at.startsWith(ym)).length;
+  const ids = ['sr-kpi-total','sr-kpi-articles','sr-kpi-doctors','sr-kpi-month'];
+  [total, articles, doctors, month].forEach((v,i) => {
+    const el = document.getElementById(ids[i]);
+    if (el) el.textContent = v;
+  });
+}
+
+function renderSharingReport() {
+  const q       = (document.getElementById('sr-f-article')?.value  || '').toLowerCase();
+  const created = document.getElementById('sr-f-created')?.value  || '';
+  const reviewed= document.getElementById('sr-f-reviewed')?.value || '';
+  const shared  = document.getElementById('sr-f-shared')?.value   || '';
+  const party   = (document.getElementById('sr-f-party')?.value   || '').toLowerCase();
+  const channel = document.getElementById('sr-f-channel')?.value  || '';
+
+  const filtered = SR_DATA.filter(r => {
+    if (q       && !r.title.toLowerCase().includes(q))                       return false;
+    if (created  && r.created_at  && r.created_at  < created)                return false;
+    if (reviewed && r.reviewed_at && r.reviewed_at < reviewed)                return false;
+    if (shared   && r.shared_at   && r.shared_at   < shared)                 return false;
+    if (channel  && r.channel !== channel)                                    return false;
+    if (party    && !r.doctor_name.toLowerCase().includes(party)
+                 && !r.specialty.toLowerCase().includes(party))               return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('sr-tbody');
+  if (!tbody) return;
+
+  if (!filtered.length) {
+    const hasFilters = q || created || reviewed || shared || party || channel;
+    const emptyMsg = hasFilters
+      ? 'No records match the selected filters. <a href="#" onclick="clearSRFilters();return false;" style="color:var(--blue);text-decoration:underline;">Clear filters</a>'
+      : SR_DATA.length === 0
+        ? 'No sharing records yet. Share an AI Pipeline article (from Research Pipeline → ✅ Approved) to see it here.'
+        : 'No records match the selected filters.';
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text4);">${emptyMsg}</td></tr>`;
+    const foot = document.getElementById('sr-footer');
+    if (foot) foot.innerHTML = '<span>0 records</span>';
+    return;
+  }
+
+  const chBadge = ch => ch === 'whatsapp'
+    ? `<span class="sr-ch-badge sr-ch-wa"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.138.564 4.14 1.544 5.874L.057 23.776l6.054-1.457A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.956 0-3.792-.5-5.394-1.373l-.39-.225-4.027.97.997-3.929-.25-.404A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg> WhatsApp</span>`
+    : `<span class="sr-ch-badge sr-ch-em"><svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg> Email</span>`;
+
+  tbody.innerHTML = filtered.map((r, i) => `
+    <tr>
+      <td style="text-align:center;color:var(--text4);font-size:11.5px;font-weight:600;">${i + 1}</td>
+      <td>
+        <div style="font-weight:600;font-size:12.5px;color:var(--navy);line-height:1.4;max-width:280px;">${_esc(r.title)}</div>
+      </td>
+      <td style="font-size:12px;white-space:nowrap;color:var(--text2);">${r.created_at  ? fmtDate(r.created_at)  : '<span style="color:var(--text4);">—</span>'}</td>
+      <td style="font-size:12px;white-space:nowrap;color:var(--text2);">${r.reviewed_at ? fmtDate(r.reviewed_at) : '<span style="color:var(--text4);">—</span>'}</td>
+      <td style="font-size:12px;white-space:nowrap;color:var(--text2);">${r.shared_at   ? fmtDate(r.shared_at)   : '<span style="color:var(--text4);">—</span>'}</td>
+      <td>
+        <div style="font-weight:600;font-size:12.5px;color:var(--navy);">${_esc(r.doctor_name)}</div>
+        <div style="font-size:11px;color:var(--text3);margin:2px 0;">${_esc(r.specialty)}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px;">
+          ${chBadge(r.channel)}
+          <span style="font-size:10.5px;color:var(--text4);">by ${_esc(r.shared_by)}</span>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  const foot = document.getElementById('sr-footer');
+  if (foot) foot.innerHTML = `<span>${filtered.length} record${filtered.length!==1?'s':''} ${filtered.length < SR_DATA.length ? `(filtered from ${SR_DATA.length} total)`:''}</span><span>Last refreshed: ${new Date().toLocaleTimeString()}</span>`;
+}
+
+function clearSRFilters() {
+  ['sr-f-article','sr-f-created','sr-f-reviewed','sr-f-shared','sr-f-party','sr-f-channel']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  renderSharingReport();
+}
+
+function exportSharingReport() {
+  if (!SR_DATA.length) { toast('⚠️','No data to export'); return; }
+  const hdr = ['S.No','Article Title','Creation Date','Review Date','Shared Date','Doctor Name','Specialty','Channel','Shared By'];
+  const rows = SR_DATA.map((r,i) => [
+    i+1, r.title,
+    r.created_at  || '',
+    r.reviewed_at || '',
+    r.shared_at   || '',
+    r.doctor_name, r.specialty, r.channel, r.shared_by,
+  ]);
+  const csv = [hdr, ...rows].map(row =>
+    row.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')
+  ).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = `PinnacleIQ_SharingReport_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('✅','CSV downloaded');
+}
+
 /* ══ VERSION HISTORY ══ */
 async function openVersionHistory(contentId, title) {
   document.getElementById('ver-subtitle').textContent = title ? title.slice(0,70) : contentId;
@@ -5756,6 +6864,8 @@ function mapAPIItemToPaper(item) {
     parent_id: item.parent_id || null,
     improvement_notes: item.improvement_notes || '',
     division: item.division || '',
+    sourceJournals: item.source_journals || '',
+    keyFindings: Array.isArray(item.key_findings) ? item.key_findings : [],
   };
 }
 
@@ -5799,7 +6909,8 @@ setTimeout(() => {
 
 // API content is merged directly into ALL_PAPERS — no separate container needed
 
-switchRole('pmt');
+// Restore role+page from URL hash, default to PMT
+switchRole(_getHashRole() || 'pmt');
 </script>
 </body>
 </html>

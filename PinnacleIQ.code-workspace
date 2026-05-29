@@ -3,6 +3,9 @@
     {
       "name": "🏥 PinnacleIQ — Mankind Pharma",
       "path": "."
+    },
+    {
+      "path": "../Jira_agent"
     }
   ],
   "settings": {

@@ -197,7 +197,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--tex
             <div class="card-title">Research Topics</div>
             <div class="card-sub">From <code style="font-size:10px;background:var(--surface3);padding:1px 5px;border-radius:4px;">topics.txt</code></div>
           </div>
-          <button onclick="loadTopics()" style="margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;" title="Refresh from file">↺ Refresh</button>
+          <button onclick="downloadBusinessReport()" style="margin-left:auto;background:linear-gradient(135deg,var(--navy),var(--navy3));border:none;color:#fff;padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;" title="Download Business Report as Excel">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 12h8M8 2v8M5 7l3 3 3-3"/></svg>
+            Business Report
+          </button>
+          <button onclick="loadTopics()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;" title="Refresh from file">↺ Refresh</button>
         </div>
         <div class="card-body" style="padding:12px;">
           <div id="topics-list">
@@ -419,7 +423,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface2);color:var(--tex
 </div>
 
 <script>
-const API = 'http://localhost:8000';
+const API = 'http://localhost:8010';
 let selectedTopic = null;
 let currentRunId = null;
 let pollTimer = null;
@@ -666,6 +670,44 @@ function resetPipeline() {
 
 function openPortal() {
   window.open('../pinnacleiq_v13.html', '_blank');
+}
+
+// ── Business Report Download ──────────────────────────────────
+async function downloadBusinessReport() {
+  const btn = event.currentTarget;
+  const origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-dasharray="30" stroke-dashoffset="10"><animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/></circle></svg> Generating...`;
+
+  try {
+    const resp = await fetch(`${API}/report/download`);
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.detail || `Server returned ${resp.status}`);
+    }
+
+    const blob = await resp.blob();
+    const cd = resp.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'PinnacleIQ_Business_Report.xlsx';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    toast('📊', 'Business Report downloaded successfully');
+  } catch (e) {
+    console.error('Report download failed:', e);
+    toast('❌', e.message || 'Failed to generate report');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origHTML;
+  }
 }
 
 // ── Init ───────────────────────────────────────────────────────
