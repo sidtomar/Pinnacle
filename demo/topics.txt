@@ -10,4 +10,6 @@ Paediatric Nutrition and Immunity: Recent Evidence | Paediatrics | Paediatric Nu
 Hypertension Management in South Asian Populations | Cardiology | Hypertension
 Acne Vulgaris: New Biologics and Combination Therapies | Dermatology | Acne & Skin
 Insulin Resistance in Metabolic Syndrome: 2025 Consensus | Diabetology | GLP-1 Therapy
-Antibiotic Resistance 
+Antibiotic Resistance in ICU Settings: Emerging Strategies | Infectious Disease | Antibiotic Resistance
+Ebola Virus Disease: Latest Treatment and Vaccine Evidence | Infectious Disease | Ebola
+Hanta Virus Infection: Diagnosis, Treatment and Prevention | Infectious Disease | Hanta Virus
