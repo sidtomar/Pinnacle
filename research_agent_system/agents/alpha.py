@@ -1,26 +1,21 @@
 """
-Agent Alpha — PubMed Research & Paper Discovery Agent
-======================================================
+Agent Alpha — Research Paper Discovery Agent
+=============================================
 Responsibility:
-  Given a topic (derived from a doctor's specialty/interests via Databricks),
-  Agent Alpha scrapes PubMed for relevant research papers AND searches the
-  internal MA Content Library (Databricks Vector Search or local fallback).
+  Given a topic (derived from a doctor's specialty/interests via Databricks,
+  or read from topics.txt for demo), Agent Alpha finds the BEST matching
+  research paper/article from:
 
-  It returns a STRUCTURED LIST of papers with full metadata so that:
-    • Agent Beta can summarise each paper
-    • Agent Gamma can format shareable content with the correct PubMed links
+    1. PubMed  — peer-reviewed literature via NCBI E-utilities (primary)
+    2. MA Content Library — internal documents curated by Medical Affairs
+       (Databricks Vector Search or local Azure repo fallback)
 
-Sources searched (in priority order):
-  1. PubMed  — peer-reviewed literature via NCBI E-utilities (primary source)
-  2. MA Content Library — internal clinical summaries curated by Medical Affairs
-                          (Databricks Vector Search → local keyword fallback)
+  Alpha returns a SINGLE best-match paper with full metadata so that:
+    • Agent Beta can create a presentable summary article
+    • Agent Gamma can produce the final 200-500 word article for MA review
 
-Output format:
-  A structured paper list with the following metadata per paper:
-    Title · Authors · Journal · Publication Date
-    PMID  · PubMed Link (for 'Read More') · DOI
-    Abstract / Key Findings
-    Source (PubMed or MA Library)
+Output:
+  One paper with: Title, Authors, Journal, Date, PMID, PubMed Link, DOI, Abstract
 """
 
 from langgraph.prebuilt import create_react_agent
@@ -31,45 +26,36 @@ from tools import search_pubmed, search_vector_store
 _SYSTEM_PROMPT = """\
 You are Agent Alpha, a medical research discovery agent for Mankind Pharma (India).
 
-Your ONLY job in this pipeline step is to FIND and LIST relevant research papers
-on the given topic. You are NOT writing an article — you are building a paper list.
+Your job is to find the SINGLE BEST research paper on the given topic.
+You search PubMed (primary) and optionally the internal MA Content Library.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-TOOL USAGE RULES
+SEARCH STRATEGY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STEP A — PubMed Search (PRIMARY SOURCE — run 3 or more searches)
-  Use the search_pubmed tool at least 3 times with different query angles:
-    1. Core topic + condition (e.g. "semaglutide type 2 diabetes")
-    2. Topic + clinical outcome (e.g. "semaglutide cardiovascular outcomes RCT")
-    3. Topic + India / Asian population (e.g. "GLP-1 India real world evidence")
-    4. Topic + recent year if applicable (e.g. "SGLT2 inhibitors 2023 2024")
-  Collect ALL unique papers found across all searches.
+STEP A — PubMed Search (PRIMARY — run 1 search)
+  Use the search_pubmed tool ONCE with a focused query for the topic.
+  From the results, select the SINGLE BEST paper based on:
+    • Most relevant to the topic
+    • Most recent (prefer last 2-3 years)
+    • Strongest evidence (RCT > observational > case report)
+    • India/Asian population data preferred when available
 
-STEP B — MA Content Library Search (run 1–2 searches)
-  Use the search_vector_store tool to check Mankind Pharma's internal
-  clinical library for any internal documents, India-specific data, or
-  MA-curated summaries on the topic.
-  Mark papers from this source as "MA Library" (not PubMed).
+STEP B — MA Content Library (OPTIONAL — run 1 search)
+  Use the search_vector_store tool to check if Mankind Pharma's internal
+  library has any relevant document on this topic.
+  If found, note it alongside the PubMed paper.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 OUTPUT FORMAT (follow this EXACTLY)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-After all tool calls are complete, output the following:
-
 ═══════════════════════════════════════════════════════════════
-AGENT ALPHA — PAPER DISCOVERY COMPLETE
+AGENT ALPHA — PAPER FOUND
 Topic: <topic>
-PubMed Papers Found: <N>
-MA Library Documents: <M>
-Total: <N+M>
 ═══════════════════════════════════════════════════════════════
 
-## PAPERS FOUND
-
----
-### PAPER 1
+### SELECTED PAPER
 Title    : <full paper title>
 Authors  : <Author1 LastName Initials, Author2 LastName Initials, et al.>
 Journal  : <journal name>
@@ -78,44 +64,35 @@ PMID     : <PubMed ID>
 Link     : https://pubmed.ncbi.nlm.nih.gov/<PMID>/
 DOI      : <doi or N/A>
 Source   : PubMed
-Abstract : <first 400–500 words of abstract — include key statistics and findings>
+Abstract : <full abstract — include all key statistics and findings>
 
----
-### PAPER 2
-[same structure]
-
----
-[continue for all papers...]
-
-## MA CONTENT LIBRARY
-
-[List any internally found documents using the same structure above,
- with Source: MA Library instead of PubMed. If nothing found, write:
- "No relevant documents found in the MA Content Library for this topic."]
+### MA LIBRARY CHECK
+[If a matching internal document was found, list it here with same format.
+ If nothing found, write: "No matching document in MA Content Library."]
 
 ═══════════════════════════════════════════════════════════════
 END OF ALPHA OUTPUT
 ═══════════════════════════════════════════════════════════════
 
 IMPORTANT RULES:
-- Deduplicate: if the same paper appears in both PubMed and MA Library, list it ONCE
-- Include EVERY paper found — do not drop papers
-- Keep abstracts concise but include key statistics (%, p-values, NNT, trial names)
-- Do NOT write a narrative article — only list papers with their metadata
-- Prioritise papers from India and Asian populations when available
-- Include papers from last 5 years preferentially, but older landmark trials are fine
+- Return only the SINGLE BEST paper — not a list of many papers
+- Include the COMPLETE abstract with key statistics (%, p-values, trial names)
+- The PubMed Link MUST be correct: https://pubmed.ncbi.nlm.nih.gov/<PMID>/
+- This link will be used as "Read More" in the final article
+- Prefer recent papers (2023-2026) with strong evidence
+- Prefer India/Asian population studies when available
 """
 
 
 def run_alpha(topic: str) -> str:
     """
-    Run Agent Alpha: discover research papers from PubMed and MA Content Library.
+    Run Agent Alpha: find the best research paper from PubMed for the given topic.
 
     Args:
         topic: The research topic string (e.g. "SGLT2 inhibitors in heart failure").
 
     Returns:
-        Structured paper list with metadata (title, authors, date, PMID,
+        Single best paper with full metadata (title, authors, date, PMID,
         PubMed link, DOI, abstract) — ready for Agent Beta to summarise.
     """
     llm   = get_llm(temperature=0.1)
@@ -132,10 +109,11 @@ def run_alpha(topic: str) -> str:
 
     result = agent.invoke({
         "messages": [("human", (
-            f"Discover all research papers on this topic: {topic}\n\n"
-            f"Run at least 3 PubMed searches with different query angles, "
-            f"then search the MA Content Library. "
-            f"Return the complete structured paper list."
+            f"Find the single best research paper on this topic: {topic}\n\n"
+            f"Search PubMed once with a focused query. Pick the BEST paper "
+            f"(most relevant, recent, strongest evidence). "
+            f"Also check the MA Content Library for any internal documents. "
+            f"Return the selected paper with full metadata."
         ))]
     })
 

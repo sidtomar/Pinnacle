@@ -1,18 +1,17 @@
 """
-Agent Beta — Research Paper Summarisation Agent
-================================================
+Agent Beta — Research Paper Summary & Article Preparation
+==========================================================
 Responsibility:
-  Takes the structured paper list from Agent Alpha and produces a
-  clinical summary for EACH paper, giving the PMT/BU Head team a
-  quick understanding of every paper's relevance and findings.
+  Takes the single best paper found by Agent Alpha and produces a
+  PRESENTABLE SUMMARY ARTICLE that:
+    • Captures all important points from the research paper
+    • Is written in clear, professional medical language
+    • Includes key statistics, findings, and clinical relevance
+    • Contains a "Read More" link pointing to the original PubMed article
+    • Is ready for Agent Gamma to format into the final 200-500 word article
 
-Input:  Alpha's structured paper list (title, authors, abstract, PMID, etc.)
-Output: Per-paper summaries with executive summary, key findings,
-        clinical relevance, and evidence level for each paper.
-
-This output feeds into:
-  • Agent Gamma — which formats shareable WhatsApp/email messages per paper
-  • Agent Delta — which builds the overall portal content card
+Input:  Alpha's selected paper (title, authors, abstract, PMID, PubMed link)
+Output: A well-structured summary article with key highlights and "Read More" link
 """
 
 from langchain_core.output_parsers import StrOutputParser
@@ -24,57 +23,67 @@ _PROMPT = ChatPromptTemplate.from_messages([
     ("system", """\
 You are Agent Beta, a senior medical research analyst for Mankind Pharma (India).
 
-You receive a structured list of research papers discovered by Agent Alpha.
-Your job is to write a concise clinical summary for EACH paper.
+You receive a research paper discovered by Agent Alpha (with its title, abstract,
+authors, journal, PMID, and PubMed link).
 
-For EVERY paper in the list, produce the following (use the paper's PMID and title
-as the identifier):
+Your job is to create a PRESENTABLE SUMMARY of this paper that captures all the
+important points. This summary will be used by Agent Gamma to write the final
+article for Medical Affairs review.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-### SUMMARY — PAPER <N>: <TITLE> (PMID: <PMID>)
+OUTPUT FORMAT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**EXECUTIVE SUMMARY** (2–3 sentences)
-What did this study do? What was the main result? Why does it matter for Indian doctors?
+═══════════════════════════════════════════════════════════════
+AGENT BETA — PAPER SUMMARY
+═══════════════════════════════════════════════════════════════
 
-**KEY FINDINGS**
-• <Specific finding 1 with numbers/statistics, e.g. "HbA1c reduced by 1.8% vs 0.7% placebo (p<0.001)">
-• <Specific finding 2>
-• <Specific finding 3>
-• <Add more as needed>
-
-**STUDY TYPE & EVIDENCE LEVEL**
-<e.g. "Phase 3 RCT — High quality evidence" or "Meta-analysis of 12 RCTs — Very high evidence">
-
-**CLINICAL RELEVANCE FOR INDIA**
-<1–2 sentences on practical application for Indian doctors/patients.
- Note any India-specific data if present, or how findings apply to Indian population.>
-
-**LIMITATIONS**
-<1 sentence on any notable limitations (sample size, duration, population studied)>
+**Title:** <paper title>
+**Authors:** <authors>
+**Journal:** <journal>, <publication date>
+**PubMed Link:** <exact PubMed URL from Alpha's output — this becomes the "Read More" link>
 
 ---
 
-After summarising ALL papers, add:
+**WHAT THIS STUDY IS ABOUT**
+<2-3 sentences: What was the objective? What question did it try to answer?>
+
+**KEY FINDINGS**
+• <Finding 1 — include specific numbers, percentages, p-values>
+• <Finding 2 — include specific data points>
+• <Finding 3 — include statistical significance>
+• <Finding 4 — if applicable>
+• <Finding 5 — if applicable>
+
+**STUDY DESIGN & EVIDENCE QUALITY**
+<1-2 sentences: What type of study? (RCT, meta-analysis, cohort, etc.)
+ How many patients? Duration? This helps doctors assess the strength of evidence.>
+
+**WHY THIS MATTERS FOR CLINICAL PRACTICE**
+<2-3 sentences: How can Indian doctors apply these findings?
+ What's the practical takeaway for patient care?>
+
+**IMPORTANT LIMITATIONS**
+<1-2 sentences: Any caveats doctors should know about?>
+
+📖 **Read the full paper:** <exact PubMed URL>
 
 ═══════════════════════════════════════════════════════════════
-AGENT BETA — SUMMARY COMPLETE
-Papers Summarised: <N>
-Overall Evidence Strength: <e.g. "Strong — majority are RCTs and meta-analyses">
-Key Consistent Finding: <1 sentence on the most consistent finding across papers>
+END OF BETA SUMMARY
 ═══════════════════════════════════════════════════════════════
 
 RULES:
-- Summarise EVERY paper in the input list — do not skip any
-- Always include specific numbers, percentages, and p-values where available
-- If a paper lacks an abstract, note it and summarise from the title and journal context
-- Keep each summary focused and clinically actionable
-- Highlight India-specific evidence wherever present
+- Extract ALL important data points from the abstract — do not miss key statistics
+- Always include specific numbers (%, p-values, confidence intervals, NNT)
+- The PubMed link MUST be copied EXACTLY from Alpha's output — do not fabricate links
+- Write in clear, professional language that a specialist doctor would appreciate
+- Highlight India-specific or Asian population data if present
+- This summary must contain enough detail for Gamma to write a 200-500 word article
 """),
     ("human", """\
 Topic: {topic}
 
-Agent Alpha's Paper List:
+Agent Alpha's Selected Paper:
 {paper_list}
 """),
 ])
@@ -82,14 +91,15 @@ Agent Alpha's Paper List:
 
 def run_beta(paper_list: str, topic: str = "") -> str:
     """
-    Run Agent Beta: summarise each paper from Alpha's discovery list.
+    Run Agent Beta: create a presentable summary of Alpha's selected paper.
 
     Args:
-        paper_list: Structured paper list from Agent Alpha (titles, abstracts, PMIDs).
+        paper_list: Alpha's output — selected paper with metadata and abstract.
         topic:      The original research topic (for context).
 
     Returns:
-        Per-paper clinical summaries with key findings and evidence levels.
+        A presentable summary article with key findings and "Read More" link,
+        ready for Agent Gamma to format into the final article.
     """
     llm   = get_llm(temperature=0.15)
     chain = _PROMPT | llm | StrOutputParser()

@@ -1,22 +1,20 @@
 """
-Agent Gamma — Shareable Content Writer & Delivery Agent
-========================================================
+Agent Gamma — Article Writer & Medical Affairs Review Submission
+=================================================================
 Responsibility:
-  Takes Beta's per-paper summaries and Alpha's paper list (for PubMed links)
-  and produces SHAREABLE CONTENT for each paper — formatted for WhatsApp and
-  email, with key points and a 'Read More' link to the original PubMed source.
-
-  Optionally delivers content via WhatsApp (Twilio) and email (SendGrid).
+  Takes Beta's paper summary and Alpha's paper data (for PubMed link)
+  and writes a polished 200-500 word ARTICLE suitable for sharing with
+  doctors. The article is then submitted for Medical Affairs (MA) team
+  review before it can be shared with doctors by the PMT/BU Head.
 
 Input:
   • topic         — research topic
-  • paper_list    — Alpha's output (contains PubMed links per paper)
-  • summaries     — Beta's output (per-paper clinical summaries)
+  • paper_list    — Alpha's output (contains PubMed link for "Read More")
+  • summaries     — Beta's output (detailed paper summary with key findings)
 
-Output per paper:
-  • WhatsApp message: emoji-formatted, 150–200 words, key bullet points + Read More link
-  • HTML email body: clean HTML version of the same content
-  • Delivery status from WhatsApp/email APIs
+Output:
+  • A 200-500 word article with key points and "Read More" link
+  • Article status set to "Pending Review" for MA team approval
 """
 
 import re
@@ -24,103 +22,83 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
 from config import get_llm
-from tools import send_email, send_whatsapp
 
-# ── Prompt: Write shareable content per paper ─────────────────────────────────
+# ── Prompt: Write 200-500 word article ────────────────────────────────────────
 
-_CONTENT_PROMPT = ChatPromptTemplate.from_messages([
+_ARTICLE_PROMPT = ChatPromptTemplate.from_messages([
     ("system", """\
-You are Agent Gamma, a medical communications specialist for Mankind Pharma (India).
+You are Agent Gamma, a medical content writer for Mankind Pharma (India).
 
 You receive:
-  1. A list of research papers with their PubMed links (from Agent Alpha)
-  2. Clinical summaries for each paper (from Agent Beta)
+  1. A research paper with its PubMed link (from Agent Alpha)
+  2. A detailed summary of the paper (from Agent Beta)
 
-Your job is to produce a SHAREABLE MESSAGE for EACH paper — formatted for
-WhatsApp and email, ready to be sent by Jijo (BU Head / PMT) to doctors.
-
-For EVERY paper, write the following:
+Your job is to write a POLISHED ARTICLE of 200-500 words that:
+  • Can be shared with specialist doctors by the BU Head / PMT team
+  • Captures the most important findings from the research paper
+  • Is written in clear, professional medical language
+  • Includes a "Read More" link to the original PubMed article
+  • Will be sent for review to the Medical Affairs team before sharing
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-### MESSAGE <N>: <PAPER TITLE (shortened to max 10 words)>
+ARTICLE FORMAT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**WHATSAPP VERSION** (plain text, 150–200 words):
-Use this EXACT format for the WhatsApp message:
+# <Compelling article title — max 15 words>
 
-────────────────────────────────────
-📋 *[Short title — max 12 words]*
+<Opening paragraph: 2-3 sentences introducing the topic and why this research
+matters for clinical practice. Hook the reader immediately.>
 
-Hi Doctor,
+## Key Findings
 
-[1–2 sentence hook: what's the key finding and why it matters]
+<3-5 bullet points with the most important findings. Each bullet should
+include specific data — percentages, p-values, patient numbers, trial names.
+These are the points a busy doctor needs to know.>
 
-*Key Highlights:*
-• [Specific point 1 with number/stat]
-• [Specific point 2 with number/stat]
-• [Specific point 3 with number/stat]
+• <Finding 1 with specific numbers>
+• <Finding 2 with specific numbers>
+• <Finding 3 with specific numbers>
+• <Finding 4 if applicable>
+• <Finding 5 if applicable>
 
-[1 sentence on clinical relevance for Indian patients]
+## Clinical Significance
 
-📖 *Read full paper:* [EXACT PubMed URL from Alpha's paper list]
+<1-2 paragraphs explaining what this means for doctors in practice.
+How can they apply these findings? What changes in patient management?
+Include India-specific relevance if applicable.>
 
-— Pinnacle Research Team | Mankind Pharma
-────────────────────────────────────
+## Study Details
 
-**HTML EMAIL VERSION**:
-<h3>[Full paper title]</h3>
-<p>[1–2 sentence introduction]</p>
-<p><strong>Key Highlights:</strong></p>
-<ul>
-  <li>[Point 1 with stat]</li>
-  <li>[Point 2 with stat]</li>
-  <li>[Point 3 with stat]</li>
-</ul>
-<p>[Clinical relevance for India]</p>
-<p>📖 <a href="[EXACT PubMed URL]">Read full paper on PubMed</a></p>
-<p><em>— Pinnacle Research Team | Mankind Pharma</em></p>
+<1-2 sentences: Study type, sample size, duration, journal, publication date.
+Just enough for the doctor to assess evidence quality.>
 
 ---
 
-After ALL papers, add:
+📖 **Read the full article:** <EXACT PubMed URL from Alpha's output>
 
-═══════════════════════════════════════════════════════════════
-AGENT GAMMA — CONTENT READY
-Messages Prepared: <N>
-Delivery Channel: WhatsApp + Email
-═══════════════════════════════════════════════════════════════
+*Source: <Journal Name>, <Publication Date>*
+*— Pinnacle Research Team | Mankind Pharma*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 CRITICAL RULES:
-- The PubMed URL in each message MUST be the EXACT URL from Agent Alpha's paper list
-  (format: https://pubmed.ncbi.nlm.nih.gov/<PMID>/)
-  Do NOT fabricate or guess any PubMed links — copy them exactly as given
-- Keep WhatsApp messages concise: 150–200 words max
-- Use real statistics from Beta's summaries
-- Write for a busy specialist doctor — direct and clinically relevant
-- Tone: collegial, not promotional — "evidence says" not "our drug does"
+- Article MUST be 200-500 words (not shorter, not longer)
+- The "Read More" PubMed URL MUST be EXACTLY as provided by Alpha — do NOT fabricate links
+- Include specific statistics from Beta's summary — no vague claims
+- Write for specialist doctors — professional tone, not promotional
+- Tone: evidence-based, collegial — "the study demonstrates" not "our product shows"
+- Do NOT include any drug branding or promotional language
+- This article will go to Medical Affairs for review — it must be scientifically accurate
 """),
     ("human", """\
 Topic: {topic}
 
-=== Agent Alpha's Paper List (contains PubMed links) ===
+=== Agent Alpha's Selected Paper (contains PubMed link) ===
 {paper_list}
 
-=== Agent Beta's Clinical Summaries ===
+=== Agent Beta's Detailed Summary ===
 {summaries}
 """),
-])
-
-# ── HTML email wrapper ────────────────────────────────────────────────────────
-
-_EMAIL_WRAP_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", """\
-You are formatting a batch of research paper summaries as a single HTML email digest.
-Wrap all the individual HTML sections into a clean, mobile-friendly email body.
-Add a header with the topic name and a footer with "Pinnacle Research Team | Mankind Pharma".
-Return ONLY the HTML body content — no <html>/<body> wrapper tags needed.
-Keep it professional and easy to read on mobile.
-"""),
-    ("human", "Topic: {topic}\n\nContent:\n{content}"),
 ])
 
 
@@ -128,63 +106,45 @@ Keep it professional and easy to read on mobile.
 
 def run_gamma(topic: str, paper_list: str, summaries: str) -> dict:
     """
-    Run Agent Gamma: write shareable content per paper and deliver via
-    WhatsApp and email.
+    Run Agent Gamma: write a 200-500 word article and submit for MA review.
 
     Args:
         topic:      The research topic.
-        paper_list: Agent Alpha's structured paper list (includes PubMed URLs).
-        summaries:  Agent Beta's per-paper clinical summaries.
+        paper_list: Agent Alpha's selected paper (includes PubMed URL).
+        summaries:  Agent Beta's detailed paper summary.
 
     Returns:
         dict with:
-          'content'         — formatted shareable messages (WhatsApp + HTML) per paper
-          'whatsapp_status' — delivery result from Twilio
-          'email_status'    — delivery result from SendGrid
+          'content'  — the 200-500 word article ready for MA review
+          'status'   — "Pending Review" (awaiting Medical Affairs approval)
+          'word_count' — word count of the article
     """
     llm = get_llm(temperature=0.25)
 
-    # Step 1: Generate shareable content per paper
-    content_chain = _CONTENT_PROMPT | llm | StrOutputParser()
-    content = content_chain.invoke({
+    # Generate the article
+    article_chain = _ARTICLE_PROMPT | llm | StrOutputParser()
+    article = article_chain.invoke({
         "topic":      topic,
         "paper_list": paper_list,
         "summaries":  summaries,
     })
 
-    # Step 2: Build HTML email digest
-    html_chain = _EMAIL_WRAP_PROMPT | llm | StrOutputParser()
-    html_body  = html_chain.invoke({"topic": topic, "content": content})
+    # Count words
+    word_count = len(article.split())
 
-    # Step 3: Extract first WhatsApp message for delivery (avoid sending all at once)
-    wa_message = _extract_first_whatsapp_message(content, topic)
-
-    # Step 4: Deliver
-    subject          = f"Research Update: {topic}"
-    whatsapp_status  = send_whatsapp(wa_message)
-    email_status     = send_email(subject=subject, body_html=html_body)
+    # Extract PubMed link from article for metadata
+    pubmed_link = _extract_pubmed_link(article) or _extract_pubmed_link(paper_list)
 
     return {
-        "content":          content,
-        "html_body":        html_body,
-        "whatsapp_status":  whatsapp_status,
-        "email_status":     email_status,
+        "content":      article,
+        "status":       "Pending Review",
+        "word_count":   word_count,
+        "pubmed_link":  pubmed_link,
+        "review_note":  "Submitted to Medical Affairs team for review and approval before sharing with doctors.",
     }
 
 
-def _extract_first_whatsapp_message(content: str, topic: str) -> str:
-    """
-    Extract the first WhatsApp-formatted message from Gamma's output.
-    Falls back to a compact summary if parsing fails.
-    """
-    # Try to find the WhatsApp section between the dashes
-    match = re.search(
-        r"────+\n(.+?)────+",
-        content,
-        re.DOTALL,
-    )
-    if match:
-        return match.group(1).strip()
-
-    # Fallback: use first 1000 chars of content
-    return f"*Research Update: {topic}*\n\n{content[:1000]}..."
+def _extract_pubmed_link(text: str) -> str:
+    """Extract PubMed URL from text."""
+    match = re.search(r"https://pubmed\.ncbi\.nlm\.nih\.gov/\d+/?", text)
+    return match.group(0) if match else ""

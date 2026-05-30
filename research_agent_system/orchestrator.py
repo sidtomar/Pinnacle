@@ -1,27 +1,26 @@
 """
 Pipeline Orchestrator
 =====================
-Chains the agent pipeline in sequence:
+Chains the 3-agent research pipeline in sequence:
 
-  Step 1 (Pre-pipeline) : get_topics_for_doctor()
-                            → fetch topic from Databricks based on doctor
-                              specialty / interests (falls back to passed topic)
+  Input (Pre-pipeline)  : Topic from topics.txt (demo) or Databricks (production)
+                            → keyword based on doctor specialization / interests
 
-  Step 2 (Agent Alpha)  : PubMed scraping + MA Content Library search
-                            → Structured paper list with metadata
-                              (title, authors, date, PMID, PubMed link, DOI, abstract)
+  Step 1 (Agent Alpha)  : Search PubMed for the BEST paper matching the topic
+                            → Also checks local MA Content Library (Azure/Databricks)
+                            → Returns single best paper with metadata + PubMed link
 
-  Step 3 (Agent Beta)   : Per-paper clinical summaries
-                            → Executive summary, key findings, evidence level,
-                              clinical relevance for each paper
+  Step 2 (Agent Beta)   : Summarise the paper into a presentable article
+                            → Key findings, statistics, clinical relevance
+                            → Includes "Read More" link to original PubMed article
 
-  Step 4 (Agent Gamma)  : Shareable content writer + delivery
-                            → WhatsApp/email message per paper with key points
-                              and 'Read More' PubMed link
+  Step 3 (Agent Gamma)  : Write a 200-500 word article from the summary
+                            → Polished, doctor-ready content
+                            → Submitted for Medical Affairs team review
+                            → Status: "Pending Review" until MA approves
 
-  Step 5 (Agent Delta)  : Portal content card generator
-                            → Structured card stored in SQLite / Databricks
-                              (awaits MA review before BU Head can share)
+  Post (Agent Delta)    : Generate portal content card (auto)
+                            → Stored in SQLite / Databricks for the portal
 
 Each agent's FULL output is printed to console immediately after it completes.
 """
@@ -243,64 +242,61 @@ def run_pipeline(
     else:
         print(f"  Topic (provided)       : {topic}\n")
 
-    # ── Agent Alpha — Paper Discovery ─────────────────────────────────────────
-    _print_agent_start(1, 4, "Alpha", "PubMed + MA Content Library → Paper List")
+    # ── Agent Alpha — Find Best Paper ───────────────────────────────────────
+    _print_agent_start(1, 3, "Alpha", "PubMed search → Find best paper for topic")
     try:
         result.paper_list = run_alpha(topic)
-        _print_agent_complete(1, 4, "Alpha")
-        _print_agent_output(result.paper_list, label="ALPHA — PAPERS FOUND")
-        _save(result.paper_list, "alpha_paper_list.txt", save_outputs)
+        _print_agent_complete(1, 3, "Alpha")
+        _print_agent_output(result.paper_list, label="ALPHA — PAPER FOUND")
+        _save(result.paper_list, "alpha_paper_found.txt", save_outputs)
     except Exception as exc:
         result.errors.append(f"Alpha: {exc}")
         _print_agent_error(1, "Alpha", exc)
         result.duration_seconds = round(time.time() - start, 1)
-        return result   # Alpha is fatal — nothing to summarise without papers
+        return result   # Alpha is fatal — nothing to summarise without a paper
 
-    # ── Agent Beta — Per-Paper Summaries ──────────────────────────────────────
-    _print_agent_start(2, 4, "Beta", "Per-paper clinical summaries")
+    # ── Agent Beta — Presentable Summary ─────────────────────────────────────
+    _print_agent_start(2, 3, "Beta", "Summarise paper → Key findings + Read More link")
     try:
         result.summaries = run_beta(paper_list=result.paper_list, topic=topic)
-        _print_agent_complete(2, 4, "Beta")
-        _print_agent_output(result.summaries, label="BETA — PAPER SUMMARIES")
-        _save(result.summaries, "beta_summaries.txt", save_outputs)
+        _print_agent_complete(2, 3, "Beta")
+        _print_agent_output(result.summaries, label="BETA — PAPER SUMMARY")
+        _save(result.summaries, "beta_summary.txt", save_outputs)
     except Exception as exc:
         result.errors.append(f"Beta: {exc}")
         _print_agent_error(2, "Beta", exc)
         result.duration_seconds = round(time.time() - start, 1)
-        return result   # Beta is fatal — no summaries to format or share
+        return result   # Beta is fatal — no summary to write article from
 
-    # ── Agent Gamma — Shareable Content + Delivery ────────────────────────────
-    _print_agent_start(3, 4, "Gamma", "Shareable content per paper + WhatsApp/Email delivery")
+    # ── Agent Gamma — Write Article (200-500 words) → Send for MA Review ─────
+    _print_agent_start(3, 3, "Gamma", "Write 200-500 word article → Submit for MA review")
     try:
         gamma_out = run_gamma(
             topic=topic,
             paper_list=result.paper_list,
             summaries=result.summaries,
         )
-        result.shareable_content  = gamma_out["content"]
-        result.whatsapp_status    = gamma_out["whatsapp_status"]
-        result.email_status       = gamma_out["email_status"]
-        _print_agent_complete(3, 4, "Gamma")
-        _print_agent_output(result.shareable_content, label="GAMMA — SHAREABLE CONTENT")
-        _print_delivery_status(result.whatsapp_status, result.email_status)
-        _save(result.shareable_content, "gamma_shareable_content.txt", save_outputs)
+        result.shareable_content = gamma_out["content"]
+        _print_agent_complete(3, 3, "Gamma")
+        _print_agent_output(result.shareable_content, label="GAMMA — ARTICLE FOR MA REVIEW")
+        _print_review_status(gamma_out)
+        _save(result.shareable_content, "gamma_article.txt", save_outputs)
     except Exception as exc:
         result.errors.append(f"Gamma: {exc}")
         _print_agent_error(3, "Gamma", exc)
-        # Non-fatal — Delta can still produce the portal card
 
-    # ── Agent Delta — Portal Content Card ─────────────────────────────────────
-    _print_agent_start(4, 4, "Delta", "Portal content card for Pinnacle")
+    # ── Agent Delta — Portal Content Card (auto-generated from pipeline) ─────
+    _print_step("DELTA", "Generating portal content card...", "blue")
     try:
         result.content_card = run_delta(
             topic=topic,
             specialty=specialty,
             therapy_area=therapy_area,
-            insights=result.summaries,          # Beta's summaries feed Delta
-            article=result.shareable_content,   # Gamma's content feeds Delta
+            insights=result.summaries,
+            article=result.shareable_content,
             llm_provider=provider,
         )
-        _print_agent_complete(4, 4, "Delta")
+        _print_step("DELTA", "Portal content card generated", "green")
         _print_delta_output(result.content_card)
         _save(
             json.dumps(result.content_card, indent=2),
@@ -366,6 +362,22 @@ def _print_delivery_status(wa: dict, email: dict) -> None:
     email_icon = "✓" if email_ok else "✗ (check SendGrid credentials)"
     print(f"  Delivery → WhatsApp: {_C['green'] if wa_ok else _C['red']}{wa_icon}{_C['reset']}  "
           f"Email: {_C['green'] if email_ok else _C['red']}{email_icon}{_C['reset']}\n")
+
+
+def _print_review_status(gamma_out: dict) -> None:
+    """Print MA review submission status from Gamma's output."""
+    status     = gamma_out.get("status", "Unknown")
+    word_count = gamma_out.get("word_count", 0)
+    pubmed_link = gamma_out.get("pubmed_link", "")
+    review_note = gamma_out.get("review_note", "")
+
+    print(f"  {_C['yellow']}Article Status : {status}{_C['reset']}")
+    print(f"  Word Count   : {word_count} words")
+    if pubmed_link:
+        print(f"  Read More    : {pubmed_link}")
+    if review_note:
+        print(f"  {_C['grey']}{review_note}{_C['reset']}")
+    print()
 
 
 def _print_delta_output(card: dict) -> None:
