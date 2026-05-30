@@ -23,6 +23,25 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Keep role in sync with hash changes (browser back/forward, URL navigation)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      const [hashRole] = hash.split('/');
+      if (hashRole === 'medical-affairs' || hashRole === 'bu-head') {
+        setRoleState(prev => {
+          if (prev !== hashRole) {
+            localStorage.setItem('pinnacle_role', hashRole);
+            return hashRole;
+          }
+          return prev;
+        });
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const setRole = useCallback((newRole) => {
     setRoleState(newRole);
     localStorage.setItem('pinnacle_role', newRole);

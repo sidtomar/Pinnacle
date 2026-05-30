@@ -39,6 +39,27 @@
   pointer-events: none;
 }
 
+/* FB-003: Hero visual — inline SVG illustration, absolute behind text */
+.heroVisual {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .heroVisual {
+    opacity: 0.4;
+    transform: scale(0.7);
+    transform-origin: right center;
+  }
+}
+
 .headerInner {
   position: relative;
   z-index: 1;
@@ -48,6 +69,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 24px;
+}
+
+.headerTop > div:first-child {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .headerMeta {
@@ -74,6 +101,10 @@
 
 .headerScore {
   text-align: right;
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .scoreValue {
@@ -324,6 +355,11 @@
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
+}
+
+.taskBadgeIcon {
+  font-size: 12px;
+  line-height: 1;
 }
 
 .urgentTag {

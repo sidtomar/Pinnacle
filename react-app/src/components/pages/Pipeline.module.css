@@ -920,6 +920,195 @@
   color: var(--red);
 }
 
+/* ── Agent output label (tab headers) ────────────────────────── */
+.agentOutputLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border-radius: 8px;
+  border-left: 3px solid var(--navy);
+}
+
+/* ── Pipeline steps badge row (Summary tab) ───────────────────── */
+.pipelineStepsBadge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 14px;
+}
+
+.stepBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--blue-bg);
+  color: var(--blue);
+  border: 1px solid var(--blue-bd);
+}
+
+/* ── Paper Card (Alpha output) ───────────────────────────────── */
+.paperCard {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: box-shadow 0.15s;
+}
+
+.paperCard:hover {
+  box-shadow: var(--s1);
+}
+
+.paperHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.paperNo {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text4);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.pubmedLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue);
+  text-decoration: none;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  transition: all 0.15s;
+}
+
+.pubmedLink:hover {
+  background: var(--blue);
+  color: #fff;
+}
+
+.paperTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.paperMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text3);
+  align-items: center;
+}
+
+.paperMetaSep {
+  color: var(--text4);
+}
+
+.paperDoi {
+  font-size: 10.5px;
+  color: var(--text4);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ── Message Card (Gamma output) ─────────────────────────────── */
+.messageCard {
+  background: linear-gradient(135deg, #F0FDF4, #ECFDF5);
+  border: 1px solid #BBF7D0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.messageNo {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.messageTitle {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+  flex: 1;
+}
+
+.messageBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.messageBullets {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.messageBullet {
+  font-size: 12.5px;
+  color: var(--text1);
+  line-height: 1.5;
+  padding-left: 4px;
+}
+
+.readMoreLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 7px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  width: fit-content;
+  transition: all 0.15s;
+}
+
+.readMoreLink:hover {
+  background: var(--blue);
+  color: #fff;
+}
+
+.messageCopyRow {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .kpiRow {

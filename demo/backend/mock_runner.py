@@ -664,6 +664,32 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
     # DEBUG: Log which path was taken
     print(f"[MockRunner] topic='{topic}' matched_key='{key}' using_mock={'YES' if key else 'NO'}")
 
+    # ── Build per-paper shareable messages for Gamma output ─────────────────────
+    # Create shareable WhatsApp-style messages for the top sources
+    top_sources   = sources[:3] if sources else []
+    ga_messages   = []
+    for i, src in enumerate(top_sources, 1):
+        pmid = ""
+        # Extract PMID from URL if it's a PubMed link
+        if "pubmed.ncbi.nlm.nih.gov" in src["url"]:
+            pmid = src["url"].rstrip("/").split("/")[-1]
+        pm_link = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else src["url"]
+
+        # Build 3 key bullet points from the snippet
+        snippet = src.get("snippet", "")
+        bullets = [s.strip() for s in snippet.split(";") if s.strip()][:3]
+        while len(bullets) < 2:
+            bullets.append("See full paper for additional findings")
+
+        ga_messages.append({
+            "paper_no":    i,
+            "title":       src["title"][:70] + "..." if len(src["title"]) > 70 else src["title"],
+            "key_points":  bullets,
+            "pubmed_link": pm_link,
+            "authors":     src.get("authors", ""),
+            "journal":     src.get("journal", ""),
+        })
+
     # Initialise agent_outputs dict in run store
     run_store[run_id]["agent_outputs"] = {}
 
@@ -675,42 +701,66 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
         })
         time.sleep(random.uniform(1.8, 2.8))
 
-    # ── Agent Alpha: Research ─────────────────────────────────────────────────
-    update("alpha", 10, "🔍 Agent Alpha: Searching PubMed and web sources...")
-    update("alpha", 22, "📂 Agent Alpha: Reading internal documents from Research folder...")
-    update("alpha", 35, "📄 Agent Alpha: Reading and ranking relevant papers...")
-    update("alpha", 45, "📝 Agent Alpha: Consolidating research article...")
+    # ── Agent Alpha: PubMed Scraping + MA Library ─────────────────────────────
+    # Step 2 in the new pipeline: PubMed search + MA Content Library check
+    update("alpha", 10, "🔬 Agent Alpha: Querying PubMed with 3 search angles...")
+    update("alpha", 22, "📚 Agent Alpha: Fetching paper metadata (authors, PMID, abstracts)...")
+    update("alpha", 35, "🏥 Agent Alpha: Checking MA Content Library for internal documents...")
+    update("alpha", 45, "📋 Agent Alpha: Compiling paper list with metadata...")
 
-    # Alpha done → publish sources + internal_docs output for UI
+    # Alpha done → paper list with metadata (Step 3 output: show to user)
     run_store[run_id]["agent_outputs"]["alpha"] = {
-        "sources":       sources,
-        "internal_docs": internal_docs,
-        "summary":       f"{len(sources)} web sources + {len(internal_docs)} internal documents",
+        "papers":        sources,        # list of papers with title/authors/url/snippet
+        "internal_docs": internal_docs,  # MA library documents found
+        "paper_count":   len(sources),
+        "internal_count": len(internal_docs),
+        "summary":       (
+            f"✅ {len(sources)} PubMed paper(s) found + "
+            f"{len(internal_docs)} MA library document(s)"
+        ),
     }
 
-    # ── Agent Beta: Insights ──────────────────────────────────────────────────
-    update("beta", 55, "🧠 Agent Beta: Extracting key insights and clinical findings...")
-    update("beta", 65, "📊 Agent Beta: Formulating clinical recommendations...")
+    # ── Agent Beta: Per-Paper Summaries ──────────────────────────────────────
+    # Step 4: summarise each paper from Alpha's list
+    update("beta", 55, "🧠 Agent Beta: Generating summary for each paper...")
+    update("beta", 65, "📊 Agent Beta: Extracting key findings and evidence levels per paper...")
 
-    # Beta done → publish findings output for UI
+    # Beta done → per-paper summaries output (Step 4)
     run_store[run_id]["agent_outputs"]["beta"] = {
-        "findings": content["key_findings"],
-        "summary":  f"{len(content['key_findings'])} key insights extracted",
+        "per_paper_summaries": [
+            {
+                "paper_no":    i + 1,
+                "title":       src["title"][:80],
+                "key_finding": src.get("snippet", "")[:200],
+            }
+            for i, src in enumerate(sources[:5])
+        ],
+        "overall_finding": content["key_findings"][0] if content.get("key_findings") else "",
+        "papers_summarised": len(sources),
+        "summary": (
+            f"✅ {len(sources)} paper(s) summarised · "
+            f"Evidence strength: {content.get('evidence_quality', 'High')}"
+        ),
     }
 
-    # ── Agent Gamma: Content Writer ───────────────────────────────────────────
-    update("gamma", 75, "✍️  Agent Gamma: Writing doctor-friendly short article...")
-    update("gamma", 85, "📱 Agent Gamma: Formatting for WhatsApp & email delivery...")
+    # ── Agent Gamma: Shareable Content with Read More Links ──────────────────
+    # Step 5: format shareable WhatsApp/email messages per paper with PubMed links
+    update("gamma", 75, "✍️  Agent Gamma: Preparing shareable content per paper...")
+    update("gamma", 85, "📱 Agent Gamma: Adding 'Read More' PubMed links to each message...")
 
-    # Gamma done → publish article excerpt for UI (clean word boundary)
+    # Gamma done → shareable content per paper (Step 5)
     article      = content["short_article"]
     word_count   = len(article.split())
     excerpt_raw  = article[:230]
     excerpt      = excerpt_raw.rsplit(" ", 1)[0] if " " in excerpt_raw else excerpt_raw
     run_store[run_id]["agent_outputs"]["gamma"] = {
-        "article_excerpt": excerpt,
+        "messages":        ga_messages,      # per-paper shareable messages with Read More links
+        "article_excerpt": excerpt,          # kept for backward-compat with React UI
         "word_count":      word_count,
-        "summary":         f"Article written · {word_count} words",
+        "messages_count":  len(ga_messages),
+        "summary": (
+            f"✅ {len(ga_messages)} shareable message(s) prepared with PubMed 'Read More' links"
+        ),
     }
 
     # ── Agent Delta: Publisher ────────────────────────────────────────────────
@@ -736,5 +786,5 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
         "card_title":   content["title"],
         "tags":         content["tags"],
         "sub_category": content["sub_category"],
-        "summary":      "Content card saved · Pending MA Review",
+        "summary":      "✅ Content card saved · Pending MA Review",
     }

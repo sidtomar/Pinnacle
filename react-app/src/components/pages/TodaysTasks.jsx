@@ -157,11 +157,18 @@ export default function TodaysTasks() {
           </div>
           <div className={styles.taskCardBody}>
             <div className={styles.taskBadgeRow}>
-              <span className={styles.taskTypeBadge} style={{ background: tc.bg, color: tc.color }}>{tc.label}</span>
+              {/* Icon from task type — matches design's tc.icon + tc.label */}
+              <span className={styles.taskTypeBadge} style={{ background: tc.bg, color: tc.color }}>
+                <span className={styles.taskBadgeIcon}>{task.icon}</span>
+                {tc.label}
+              </span>
               {task.priority === 'urgent' && <span className={styles.urgentTag}>URGENT</span>}
             </div>
             <div className={styles.taskDoctorName}>{task.doctor}</div>
-            <div className={styles.taskReason}>{task.spec} · {task.city} · {task.cat} · Score {task.score}</div>
+            {/* Reason: "Dr. Name · Cat · Spec · City · Score N" — matches design format */}
+            <div className={styles.taskReason}>
+              {task.doctor} · {task.cat} · {task.spec} · {task.city} · Score {task.score}
+            </div>
             <div className={styles.taskHint}>{task.hint}</div>
           </div>
           <div className={styles.taskCardRight}>
@@ -188,6 +195,45 @@ export default function TodaysTasks() {
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
+
+        {/* FB-003: Hero Visual — inline SVG illustration, no external image URL to break */}
+        <div className={styles.heroVisual} aria-hidden="true">
+          <svg width="220" height="150" viewBox="0 0 220 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Outer decorative ring */}
+            <circle cx="155" cy="72" r="62" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5"/>
+            <circle cx="155" cy="72" r="48" stroke="rgba(212,168,67,0.12)" strokeWidth="1"/>
+            {/* Progress arc — represents 0% done (will feel dynamic) */}
+            <circle cx="155" cy="72" r="48" stroke="rgba(212,168,67,0.25)" strokeWidth="3"
+              strokeDasharray="15 287" strokeLinecap="round"
+              transform="rotate(-90 155 72)"/>
+            {/* Floating task cards */}
+            <rect x="28" y="28" width="72" height="22" rx="6" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"/>
+            <circle cx="40" cy="39" r="5" fill="rgba(16,185,129,0.7)"/>
+            <path d="M37.5 39l2 2 3.5-3.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="48" y="35" width="28" height="3" rx="1.5" fill="rgba(255,255,255,0.35)"/>
+            <rect x="48" y="41" width="20" height="2.5" rx="1.25" fill="rgba(255,255,255,0.18)"/>
+
+            <rect x="20" y="60" width="72" height="22" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(185,28,28,0.25)" strokeWidth="0.8"/>
+            <circle cx="32" cy="71" r="5" fill="rgba(185,28,28,0.5)"/>
+            <path d="M29.5 71h5M32 68.5v5" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
+            <rect x="40" y="67" width="32" height="3" rx="1.5" fill="rgba(255,255,255,0.28)"/>
+            <rect x="40" y="73" width="22" height="2.5" rx="1.25" fill="rgba(255,255,255,0.14)"/>
+
+            <rect x="28" y="92" width="72" height="22" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(180,83,9,0.25)" strokeWidth="0.8"/>
+            <circle cx="40" cy="103" r="5" fill="rgba(212,168,67,0.5)"/>
+            <path d="M37 103l1.5 1.5 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.6"/>
+            <rect x="48" y="99" width="26" height="3" rx="1.5" fill="rgba(255,255,255,0.25)"/>
+            <rect x="48" y="105" width="18" height="2.5" rx="1.25" fill="rgba(255,255,255,0.12)"/>
+
+            {/* Sparkle dots */}
+            <circle cx="112" cy="22" r="2" fill="rgba(212,168,67,0.5)"/>
+            <circle cx="196" cy="38" r="1.5" fill="rgba(255,255,255,0.3)"/>
+            <circle cx="206" cy="110" r="2" fill="rgba(212,168,67,0.35)"/>
+            <circle cx="100" cy="128" r="1.5" fill="rgba(255,255,255,0.2)"/>
+            <path d="M190 58l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z" fill="rgba(212,168,67,0.4)"/>
+          </svg>
+        </div>
+
         <div className={styles.headerInner}>
           <div className={styles.headerTop}>
             <div>

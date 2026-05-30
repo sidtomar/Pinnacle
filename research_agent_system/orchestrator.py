@@ -1,145 +1,407 @@
 """
 Pipeline Orchestrator
+=====================
+Chains the agent pipeline in sequence:
 
-Chains Alpha → Beta → Gamma → Delta in sequence,
-passing outputs downstream at each stage.
+  Step 1 (Pre-pipeline) : get_topics_for_doctor()
+                            → fetch topic from Databricks based on doctor
+                              specialty / interests (falls back to passed topic)
 
-Each agent receives exactly what it needs:
-  Alpha  : topic
-  Beta   : Alpha's research article
-  Gamma  : topic + Beta's insights
-  Delta  : topic + specialty + therapy_area + Beta's insights + Gamma's article
+  Step 2 (Agent Alpha)  : PubMed scraping + MA Content Library search
+                            → Structured paper list with metadata
+                              (title, authors, date, PMID, PubMed link, DOI, abstract)
+
+  Step 3 (Agent Beta)   : Per-paper clinical summaries
+                            → Executive summary, key findings, evidence level,
+                              clinical relevance for each paper
+
+  Step 4 (Agent Gamma)  : Shareable content writer + delivery
+                            → WhatsApp/email message per paper with key points
+                              and 'Read More' PubMed link
+
+  Step 5 (Agent Delta)  : Portal content card generator
+                            → Structured card stored in SQLite / Databricks
+                              (awaits MA review before BU Head can share)
+
+Each agent's FULL output is printed to console immediately after it completes.
 """
+
 import json
+import logging
 import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
 
 from agents import run_alpha, run_beta, run_gamma, run_delta
 
+logger = logging.getLogger(__name__)
+
+# ANSI colour codes for console output (auto-disabled if not a TTY)
+_USE_COLOUR = os.isatty(1) if hasattr(os, "isatty") else False
+_C = {
+    "reset":  "\033[0m"  if _USE_COLOUR else "",
+    "bold":   "\033[1m"  if _USE_COLOUR else "",
+    "cyan":   "\033[96m" if _USE_COLOUR else "",
+    "green":  "\033[92m" if _USE_COLOUR else "",
+    "yellow": "\033[93m" if _USE_COLOUR else "",
+    "blue":   "\033[94m" if _USE_COLOUR else "",
+    "red":    "\033[91m" if _USE_COLOUR else "",
+    "grey":   "\033[90m" if _USE_COLOUR else "",
+}
+
+
+# ── Result dataclass ──────────────────────────────────────────────────────────
 
 @dataclass
 class PipelineResult:
     """Holds all outputs from a complete pipeline run."""
     topic:            str
-    specialty:        str = ""
-    therapy_area:     str = ""
-    research_article: str = ""    # Alpha output
-    insights:         str = ""    # Beta output
-    article:          str = ""    # Gamma output
-    content_card:     dict = field(default_factory=dict)   # Delta output (portal card)
+    specialty:        str  = ""
+    therapy_area:     str  = ""
+    doctor_id:        str  = ""
+
+    # Per-agent outputs
+    paper_list:       str  = ""    # Alpha  — structured paper list (PubMed + MA Library)
+    summaries:        str  = ""    # Beta   — per-paper clinical summaries
+    shareable_content: str = ""    # Gamma  — WhatsApp/email messages per paper
+    content_card:     dict = field(default_factory=dict)   # Delta — portal card
+
+    # Delivery status
     whatsapp_status:  dict = field(default_factory=dict)
     email_status:     dict = field(default_factory=dict)
-    duration_seconds: float = 0.0
-    errors:           list = field(default_factory=list)
 
+    # Run metadata
+    duration_seconds: float = 0.0
+    errors:           list  = field(default_factory=list)
+
+
+# ── Step 1: Topic retrieval from Databricks ───────────────────────────────────
+
+def get_topics_for_doctor(
+    specialty: str,
+    doctor_id: str = "",
+    therapy_area: str = "",
+) -> list[str]:
+    """
+    Step 1: Retrieve research topics for a doctor based on their specialty
+    and interests from the Databricks Unity Catalog.
+
+    Production (DATABRICKS_HOST configured):
+        Queries the `pinnacleiq.doctor_profiles.interests` table for the
+        doctor's top topics ranked by relevance score.
+
+    Demo / Databricks not configured:
+        Returns the passed specialty + therapy_area as a single topic string.
+        This ensures the pipeline works end-to-end without Databricks credentials.
+
+    Args:
+        specialty:    Doctor's medical specialty (e.g. "Cardiology").
+        doctor_id:    Doctor's unique ID in the Databricks doctor table (optional).
+        therapy_area: Therapy area of interest (e.g. "Heart Failure").
+
+    Returns:
+        List of topic strings ordered by relevance (highest first).
+        Typically 1–3 topics. The orchestrator runs the pipeline for each.
+    """
+    # ── Try Databricks first ──────────────────────────────────────────────────
+    host  = os.getenv("DATABRICKS_HOST", "")
+    token = os.getenv("DATABRICKS_TOKEN", "")
+
+    if host and token:
+        try:
+            topics = _fetch_topics_from_databricks(
+                host, token, specialty, doctor_id, therapy_area
+            )
+            if topics:
+                _print_step("PRE-PIPELINE", f"Retrieved {len(topics)} topic(s) from Databricks", "cyan")
+                return topics
+        except Exception as exc:
+            logger.warning(f"Databricks topic fetch failed — using fallback: {exc}")
+
+    # ── Fallback: build topic from specialty + therapy_area ───────────────────
+    _print_step("PRE-PIPELINE", "Databricks not configured — using specialty/therapy_area as topic", "yellow")
+
+    if specialty and therapy_area:
+        topic = f"{therapy_area} in {specialty}"
+    elif specialty:
+        topic = specialty
+    else:
+        topic = "General Medicine Evidence Update"
+
+    return [topic]
+
+
+def _fetch_topics_from_databricks(
+    host: str,
+    token: str,
+    specialty: str,
+    doctor_id: str,
+    therapy_area: str,
+) -> list[str]:
+    """
+    Query the Databricks doctor_profiles table for topics matching the
+    doctor's specialty/interests.
+
+    Table schema expected:
+      pinnacleiq.doctor_profiles.interests
+        doctor_id    STRING
+        specialty    STRING
+        topic        STRING
+        relevance    DOUBLE
+        therapy_area STRING
+    """
+    try:
+        from databricks import sql as dbsql  # type: ignore
+    except ImportError:
+        raise ImportError("databricks-sql-connector not installed")
+
+    with dbsql.connect(
+        server_hostname=host,
+        http_path=os.getenv("DATABRICKS_HTTP_PATH", "/sql/1.0/warehouses/pinnacleiq"),
+        access_token=token,
+    ) as conn:
+        with conn.cursor() as cur:
+            if doctor_id:
+                cur.execute(
+                    """
+                    SELECT topic FROM pinnacleiq.doctor_profiles.interests
+                    WHERE doctor_id = ?
+                    ORDER BY relevance DESC
+                    LIMIT 3
+                    """,
+                    [doctor_id],
+                )
+            else:
+                cur.execute(
+                    """
+                    SELECT DISTINCT topic FROM pinnacleiq.doctor_profiles.interests
+                    WHERE specialty = ?
+                    ORDER BY relevance DESC
+                    LIMIT 3
+                    """,
+                    [specialty],
+                )
+            rows = cur.fetchall()
+            return [row[0] for row in rows if row[0]]
+
+
+# ── Main pipeline runner ──────────────────────────────────────────────────────
 
 def run_pipeline(
     topic: str,
-    specialty: str = "General Medicine",
-    therapy_area: str = "General",
-    save_outputs: bool = True,
+    specialty: str         = "General Medicine",
+    therapy_area: str      = "General",
+    doctor_id: str         = "",
+    save_outputs: bool     = True,
+    use_databricks_topics: bool = False,
 ) -> PipelineResult:
     """
-    Execute the full 4-agent research pipeline for the given topic.
+    Execute the full research pipeline for the given topic.
+
+    Flow:
+      [Pre]  get_topics_for_doctor()       — optional Databricks topic lookup
+      [1/4]  Agent Alpha  — PubMed + MA Library → paper list with metadata
+      [2/4]  Agent Beta   — per-paper summaries
+      [3/4]  Agent Gamma  — shareable content + WhatsApp/email delivery
+      [4/4]  Agent Delta  — portal content card
 
     Args:
-        topic:        The research topic or keywords to investigate.
-        specialty:    Medical specialty (e.g. 'Diabetology'). Used by Delta
-                      to correctly categorise the portal content card.
-        therapy_area: Therapy area (e.g. 'GLP-1 Therapy'). Used by Delta.
-        save_outputs: If True, save each agent's output to ./outputs/.
+        topic:                 Research topic (used if use_databricks_topics=False).
+        specialty:             Medical specialty for context + Delta categorisation.
+        therapy_area:          Therapy area for context + Delta categorisation.
+        doctor_id:             Doctor ID for Databricks profile lookup (optional).
+        save_outputs:          Save each agent's output to ./outputs/.
+        use_databricks_topics: If True, override topic with Databricks lookup.
 
     Returns:
-        PipelineResult with all agent outputs and delivery status.
+        PipelineResult with all agent outputs, delivery status, and timing.
     """
-    start = time.time()
-    result = PipelineResult(topic=topic, specialty=specialty, therapy_area=therapy_area)
+    start  = time.time()
+    result = PipelineResult(
+        topic=topic,
+        specialty=specialty,
+        therapy_area=therapy_area,
+        doctor_id=doctor_id,
+    )
     provider = os.getenv("LLM_PROVIDER", "openrouter")
 
-    print(f"\n{'='*60}")
-    print(f"  PINNACLE RESEARCH PIPELINE")
-    print(f"  Topic        : {topic}")
-    print(f"  Specialty    : {specialty}")
-    print(f"  Therapy Area : {therapy_area}")
-    print(f"  LLM Provider : {provider.upper()}")
-    print(f"  Start        : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"{'='*60}\n")
+    _print_header(topic, specialty, therapy_area, provider)
 
-    # ── Agent Alpha — Research ────────────────────────────────────────────────
-    # Input : topic string
-    # Output: structured markdown research article (~1000 words)
-    print("[1/4] Agent Alpha — Researching...")
+    # ── Pre-pipeline: Topic retrieval from Databricks ─────────────────────────
+    if use_databricks_topics:
+        topics = get_topics_for_doctor(
+            specialty=specialty,
+            doctor_id=doctor_id,
+            therapy_area=therapy_area,
+        )
+        # Use the top-ranked topic; future version can loop over all
+        result.topic = topics[0]
+        topic = result.topic
+        print(f"  Topic (from Databricks): {topic}\n")
+    else:
+        print(f"  Topic (provided)       : {topic}\n")
+
+    # ── Agent Alpha — Paper Discovery ─────────────────────────────────────────
+    _print_agent_start(1, 4, "Alpha", "PubMed + MA Content Library → Paper List")
     try:
-        result.research_article = run_alpha(topic)
-        print("[1/4] Alpha complete.\n")
-        _save(result.research_article, "alpha_research.txt", save_outputs)
+        result.paper_list = run_alpha(topic)
+        _print_agent_complete(1, 4, "Alpha")
+        _print_agent_output(result.paper_list, label="ALPHA — PAPERS FOUND")
+        _save(result.paper_list, "alpha_paper_list.txt", save_outputs)
     except Exception as exc:
         result.errors.append(f"Alpha: {exc}")
-        print(f"[1/4] Alpha ERROR: {exc}\n")
-        result.duration_seconds = time.time() - start
-        return result   # Alpha failure is fatal — nothing to pass downstream
+        _print_agent_error(1, "Alpha", exc)
+        result.duration_seconds = round(time.time() - start, 1)
+        return result   # Alpha is fatal — nothing to summarise without papers
 
-    # ── Agent Beta — Insights ─────────────────────────────────────────────────
-    # Input : Alpha's research article
-    # Output: structured insights (Executive Summary, Key Findings, Recommendations...)
-    print("[2/4] Agent Beta — Generating insights...")
+    # ── Agent Beta — Per-Paper Summaries ──────────────────────────────────────
+    _print_agent_start(2, 4, "Beta", "Per-paper clinical summaries")
     try:
-        result.insights = run_beta(result.research_article)
-        print("[2/4] Beta complete.\n")
-        _save(result.insights, "beta_insights.txt", save_outputs)
+        result.summaries = run_beta(paper_list=result.paper_list, topic=topic)
+        _print_agent_complete(2, 4, "Beta")
+        _print_agent_output(result.summaries, label="BETA — PAPER SUMMARIES")
+        _save(result.summaries, "beta_summaries.txt", save_outputs)
     except Exception as exc:
         result.errors.append(f"Beta: {exc}")
-        print(f"[2/4] Beta ERROR: {exc}\n")
-        result.duration_seconds = time.time() - start
-        return result   # Beta failure is fatal — no insights for Gamma/Delta
+        _print_agent_error(2, "Beta", exc)
+        result.duration_seconds = round(time.time() - start, 1)
+        return result   # Beta is fatal — no summaries to format or share
 
-    # ── Agent Gamma — Article Writing & Delivery ──────────────────────────────
-    # Input : topic + Beta's insights
-    # Output: short plain-text article + HTML version → sent via WhatsApp + email
-    print("[3/4] Agent Gamma — Writing article and delivering...")
+    # ── Agent Gamma — Shareable Content + Delivery ────────────────────────────
+    _print_agent_start(3, 4, "Gamma", "Shareable content per paper + WhatsApp/Email delivery")
     try:
-        gamma_out = run_gamma(topic=topic, insights=result.insights)
-        result.article         = gamma_out["article"]
-        result.whatsapp_status = gamma_out["whatsapp_status"]
-        result.email_status    = gamma_out["email_status"]
-        print("[3/4] Gamma complete.\n")
-        _save(result.article, "gamma_article.txt", save_outputs)
+        gamma_out = run_gamma(
+            topic=topic,
+            paper_list=result.paper_list,
+            summaries=result.summaries,
+        )
+        result.shareable_content  = gamma_out["content"]
+        result.whatsapp_status    = gamma_out["whatsapp_status"]
+        result.email_status       = gamma_out["email_status"]
+        _print_agent_complete(3, 4, "Gamma")
+        _print_agent_output(result.shareable_content, label="GAMMA — SHAREABLE CONTENT")
+        _print_delivery_status(result.whatsapp_status, result.email_status)
+        _save(result.shareable_content, "gamma_shareable_content.txt", save_outputs)
     except Exception as exc:
         result.errors.append(f"Gamma: {exc}")
-        print(f"[3/4] Gamma ERROR: {exc}\n")
-        # Non-fatal: Delta can still produce the portal card without the article
+        _print_agent_error(3, "Gamma", exc)
+        # Non-fatal — Delta can still produce the portal card
 
-    # ── Agent Delta — Portal Content Card ────────────────────────────────────
-    # Input : topic + specialty + therapy_area + Beta insights + Gamma article
-    # Output: PinnacleContentCard dict (1:1 with portal DB schema)
-    print("[4/4] Agent Delta — Building Pinnacle content card...")
+    # ── Agent Delta — Portal Content Card ─────────────────────────────────────
+    _print_agent_start(4, 4, "Delta", "Portal content card for Pinnacle")
     try:
         result.content_card = run_delta(
             topic=topic,
             specialty=specialty,
             therapy_area=therapy_area,
-            insights=result.insights,
-            article=result.article,
+            insights=result.summaries,          # Beta's summaries feed Delta
+            article=result.shareable_content,   # Gamma's content feeds Delta
             llm_provider=provider,
         )
-        print("[4/4] Delta complete.\n")
-        _save(json.dumps(result.content_card, indent=2), "delta_content_card.json", save_outputs)
+        _print_agent_complete(4, 4, "Delta")
+        _print_delta_output(result.content_card)
+        _save(
+            json.dumps(result.content_card, indent=2),
+            "delta_content_card.json",
+            save_outputs,
+        )
     except Exception as exc:
         result.errors.append(f"Delta: {exc}")
-        print(f"[4/4] Delta ERROR: {exc}\n")
+        _print_agent_error(4, "Delta", exc)
 
     result.duration_seconds = round(time.time() - start, 1)
-
-    print(f"{'='*60}")
-    print(f"  Pipeline complete in {result.duration_seconds}s")
-    if result.errors:
-        print(f"  Errors: {result.errors}")
-    print(f"{'='*60}\n")
-
+    _print_footer(result)
     return result
 
+
+# ── Console output helpers ─────────────────────────────────────────────────────
+
+def _print_header(topic: str, specialty: str, therapy_area: str, provider: str) -> None:
+    w = 70
+    print(f"\n{'═' * w}")
+    print(f"  {_C['bold']}{_C['cyan']}PINNACLE RESEARCH PIPELINE{_C['reset']}")
+    print(f"  Topic        : {topic}")
+    print(f"  Specialty    : {specialty}")
+    print(f"  Therapy Area : {therapy_area}")
+    print(f"  LLM Provider : {provider.upper()}")
+    print(f"  Start        : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"{'═' * w}\n")
+
+
+def _print_agent_start(step: int, total: int, name: str, desc: str) -> None:
+    print(f"{_C['bold']}{_C['blue']}[{step}/{total}] Agent {name}{_C['reset']} — {desc}")
+    print(f"       Running...\n")
+
+
+def _print_agent_complete(step: int, total: int, name: str) -> None:
+    print(f"  {_C['green']}✓ Agent {name} complete{_C['reset']}\n")
+
+
+def _print_agent_error(step: int, name: str, exc: Exception) -> None:
+    print(f"  {_C['red']}✗ Agent {name} ERROR: {exc}{_C['reset']}\n")
+
+
+def _print_step(label: str, msg: str, colour: str = "grey") -> None:
+    c = _C.get(colour, "")
+    print(f"  {c}[{label}]{_C['reset']} {msg}")
+
+
+def _print_agent_output(content: str, label: str = "OUTPUT") -> None:
+    """Print an agent's full output with clear section boundaries."""
+    w   = 70
+    sep = "─" * w
+    print(f"\n{sep}")
+    print(f"  {_C['bold']}{_C['yellow']}◀ {label} ▶{_C['reset']}")
+    print(sep)
+    print(content)
+    print(f"{sep}\n")
+
+
+def _print_delivery_status(wa: dict, email: dict) -> None:
+    wa_ok    = wa.get("status") not in (None, "error", "failed")
+    email_ok = email.get("status") not in (None, "error", "failed")
+    wa_icon    = "✓" if wa_ok    else "✗ (check Twilio credentials)"
+    email_icon = "✓" if email_ok else "✗ (check SendGrid credentials)"
+    print(f"  Delivery → WhatsApp: {_C['green'] if wa_ok else _C['red']}{wa_icon}{_C['reset']}  "
+          f"Email: {_C['green'] if email_ok else _C['red']}{email_icon}{_C['reset']}\n")
+
+
+def _print_delta_output(card: dict) -> None:
+    """Print a compact preview of the Delta portal content card."""
+    if not card:
+        return
+    preview_keys = ["id", "title", "specialty", "therapy_area", "sub_category",
+                    "tags", "summary", "evidence_quality", "status"]
+    preview = {k: card[k] for k in preview_keys if k in card}
+    w = 70
+    sep = "─" * w
+    print(f"\n{sep}")
+    print(f"  {_C['bold']}{_C['yellow']}◀ DELTA — PORTAL CONTENT CARD ▶{_C['reset']}")
+    print(sep)
+    print(json.dumps(preview, indent=2))
+    print(f"{sep}\n")
+
+
+def _print_footer(result: PipelineResult) -> None:
+    w = 70
+    papers_line = ""
+    if result.paper_list:
+        # Count papers by looking for "### PAPER" headers in Alpha's output
+        import re
+        count = len(re.findall(r"###\s+PAPER\s+\d+", result.paper_list))
+        papers_line = f"\n  Papers Discovered : {count}" if count else ""
+
+    print(f"{'═' * w}")
+    print(f"  {_C['bold']}{_C['green']}Pipeline complete in {result.duration_seconds}s{_C['reset']}")
+    print(f"  Topic            : {result.topic}{papers_line}")
+    if result.errors:
+        print(f"  {_C['red']}Errors            : {result.errors}{_C['reset']}")
+    print(f"{'═' * w}\n")
+
+
+# ── File output ───────────────────────────────────────────────────────────────
 
 def _save(content: str, filename: str, enabled: bool) -> None:
     """Save content to ./outputs/<filename>. No-op if enabled=False."""
@@ -150,4 +412,4 @@ def _save(content: str, filename: str, enabled: bool) -> None:
     path = os.path.join(out_dir, filename)
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
-    print(f"    Saved → {path}")
+    print(f"    {_C['grey']}Saved → {path}{_C['reset']}")

@@ -4,28 +4,34 @@ import { useAppContext } from '../../hooks/useAppContext';
 import { useRouter } from '../../hooks/useRouter';
 import styles from './Sidebar.module.css';
 
+/**
+ * Navigation config per role.
+ * Research Pipeline = admin/debug only — NOT shown to any end-user persona.
+ * MA sees only: Content Library (+ Access Level panel rendered separately).
+ * PMT sees all 7 BRD modules: Today's Tasks, Content Library, Doctor Directory,
+ *   Doctor 360°, Occasion Hub, Analytics, Dashboard.
+ */
 const NAV_ITEMS = {
   'medical-affairs': {
     main: { label: 'My Workspace', items: [
-      { id: 'library', label: 'Content Library', icon: '📄' },
-      { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+      { id: 'library', label: 'Content Library', icon: '📄', badgeKey: 'pending' },
     ]}
   },
   'bu-head': {
     main: { label: 'Modules', items: [
-      { id: 'today', label: "Today's Tasks", icon: '🕐', badge: '9' },
-      { id: 'library', label: 'Content Library', icon: '📄' },
-      { id: 'doctors', label: 'Doctor Directory', icon: '👤' },
-      { id: 'doctor360', label: 'Doctor 360°', icon: '🎯' },
-      { id: 'occasions', label: 'Occasion Hub', icon: '⭐' },
-      { id: 'analytics', label: 'Analytics', icon: '📈' },
-      { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+      { id: 'today',     label: "Today's Tasks",   icon: '🕐', badge: '9' },
+      { id: 'library',   label: 'Content Library',  icon: '📄' },
+      { id: 'doctors',   label: 'Doctor Directory', icon: '👤' },
+      { id: 'doctor360', label: 'Doctor 360°',      icon: '🎯' },
+      { id: 'occasions', label: 'Occasion Hub',     icon: '⭐' },
+      { id: 'analytics', label: 'Analytics',        icon: '📈' },
+      { id: 'dashboard', label: 'Dashboard',        icon: '📊' },
     ]},
-    pipeline: { label: 'AI Pipeline', items: [
-      { id: 'pipeline', label: 'Research Pipeline', icon: '🔬' },
-    ]}
   }
 };
+
+// Demo pending count — in production this comes from ContentContext/API
+const MA_PENDING_COUNT = 2;
 
 export default function Sidebar() {
   const { role } = useAuth();
@@ -37,27 +43,36 @@ export default function Sidebar() {
   const handleNavClick = (pageId) => {
     setCurrentTab(pageId);
     navigate(role, pageId);
-    // Close sidebar on mobile after nav
     if (sidebarOpen) toggleSidebar();
+  };
+
+  /* Resolve badge value — static badge or dynamic badgeKey */
+  const getBadge = (item) => {
+    if (item.badge) return item.badge;
+    if (item.badgeKey === 'pending' && isMA) return MA_PENDING_COUNT > 0 ? String(MA_PENDING_COUNT) : null;
+    return null;
   };
 
   const renderNavGroup = (group) => (
     <div className={styles.navGroup}>
-      {group.items.map(item => (
-        <button
-          key={item.id}
-          className={`${styles.navItem} ${currentTab === item.id ? (isMA ? styles.activeMA : styles.activePMT) : ''}`}
-          onClick={() => handleNavClick(item.id)}
-        >
-          <span className={styles.navIcon}>{item.icon}</span>
-          <span className={styles.navLabel}>{item.label}</span>
-          {item.badge && (
-            <span className={`${styles.navBadge} ${isMA ? styles.badgeAmber : styles.badgeGold}`}>
-              {item.badge}
-            </span>
-          )}
-        </button>
-      ))}
+      {group.items.map(item => {
+        const badge = getBadge(item);
+        return (
+          <button
+            key={item.id}
+            className={`${styles.navItem} ${currentTab === item.id ? (isMA ? styles.activeMA : styles.activePMT) : ''}`}
+            onClick={() => handleNavClick(item.id)}
+          >
+            <span className={styles.navIcon}>{item.icon}</span>
+            <span className={styles.navLabel}>{item.label}</span>
+            {badge && (
+              <span className={`${styles.navBadge} ${isMA ? styles.badgeAmber : styles.badgeGold}`}>
+                {badge}
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 
@@ -101,14 +116,6 @@ export default function Sidebar() {
             <>
               <div className={styles.navGroupLabel}>{navGroups.main.label}</div>
               {renderNavGroup(navGroups.main)}
-            </>
-          )}
-
-          {/* Pipeline nav group (PMT only) */}
-          {navGroups.pipeline && (
-            <>
-              <div className={styles.navGroupLabel} style={{ marginTop: 8 }}>{navGroups.pipeline.label}</div>
-              {renderNavGroup(navGroups.pipeline)}
             </>
           )}
 

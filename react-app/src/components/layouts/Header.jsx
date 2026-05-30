@@ -4,6 +4,12 @@ import { useAppContext } from '../../hooks/useAppContext';
 import { useRouter } from '../../hooks/useRouter';
 import styles from './Header.module.css';
 
+const SAMPLE_NOTIFICATIONS = [
+  { id: 'n1', type: 'new', icon: '📄', title: 'New paper added to Library', msg: 'SGLT2 Meta-Analysis auto-fetched from PubMed and pending review.', time: '5 min ago', unread: true },
+  { id: 'n2', type: 'approved', icon: '✅', title: 'Content approved', msg: 'Inositol vs Metformin in PCOS approved by Dr. Prashant Agarwal.', time: '1 hr ago', unread: true },
+  { id: 'n3', type: 'improvement', icon: '📈', title: 'DMS improvement alert', msg: 'Dr. Jayesh Shah\'s engagement score increased by 12 points this week.', time: '3 hr ago', unread: false },
+];
+
 const PAGE_LABELS = {
   library: 'Content Library',
   today: "Today's Tasks",
@@ -15,12 +21,40 @@ const PAGE_LABELS = {
   dashboard: 'Dashboard',
 };
 
+/* Maps notification type → destination page for navigation */
+const NOTIF_DESTINATION = {
+  new:         { page: 'library', label: 'Content Library' },
+  approved:    { page: 'library', label: 'Content Library' },
+  improvement: { page: 'doctors', label: 'Doctor Directory' },
+};
+
 export default function Header() {
   const { role, setRole, isMA } = useAuth();
-  const { currentPage } = useRouter();
+  const { currentPage, navigateTo } = useRouter();
   const { toggleSidebar } = useAppContext();
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
   const dropdownRef = useRef(null);
+  const notifRef = useRef(null);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  /* FB-001: Click notification → mark read + navigate to relevant screen */
+  const handleNotifClick = (n) => {
+    // Mark this notification as read
+    setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, unread: false } : x));
+    // Close bell dropdown
+    setIsNotifOpen(false);
+    // Navigate to the associated screen
+    const dest = NOTIF_DESTINATION[n.type] || { page: 'library' };
+    navigateTo(dest.page);
+  };
+
+  /* FB-002: Mark all read — clears badge */
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
 
   const handleRoleChange = (newRole) => {
     setRole(newRole);
@@ -31,6 +65,9 @@ export default function Header() {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsRoleDropdownOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setIsNotifOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -55,16 +92,10 @@ export default function Header() {
       </div>
 
       <div className={styles.rightSection}>
-        {/* MA: Add Content button */}
-        {isMA && currentPage === 'library' && (
-          <button className={styles.addContentBtn}>+ Add Content</button>
-        )}
-
         {/* Role Switcher */}
         <div
           className={`${styles.roleSwitcher} ${isRoleDropdownOpen ? styles.open : ''} ${isMA ? styles.roleMa : ''}`}
           ref={dropdownRef}
-          data-initials={isMA ? 'PA' : 'J'}
         >
           <button
             className={styles.roleSwitcherBtn}
@@ -110,6 +141,74 @@ export default function Header() {
             </div>
           )}
         </div>
+
+        {/* Notification Bell */}
+        <div className={styles.notifBell} ref={notifRef}>
+          <button
+            className={styles.notifBellBtn}
+            onClick={() => setIsNotifOpen(prev => !prev)}
+            title="Notifications"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 1.5a5.5 5.5 0 015.5 5.5v2.5l1 2H1.5l1-2V7A5.5 5.5 0 018 1.5z"/>
+              <path d="M6.5 13.5a1.5 1.5 0 003 0"/>
+            </svg>
+            {unreadCount > 0 && (
+              <span className={styles.notifBadge}>{unreadCount}</span>
+            )}
+          </button>
+
+          {isNotifOpen && (
+            <div className={styles.notifDropdown} onClick={e => e.stopPropagation()}>
+              <div className={styles.notifHeader}>
+                <div className={styles.notifHeaderTitle}>Notifications</div>
+                {unreadCount > 0 && (
+                  <button className={styles.notifMarkAll} onClick={markAllRead}>Mark all read</button>
+                )}
+              </div>
+              <div className={styles.notifList}>
+                {notifications.length === 0 ? (
+                  <div className={styles.notifEmpty}>No notifications yet</div>
+                ) : (
+                  notifications.map(n => {
+                    const dest = NOTIF_DESTINATION[n.type] || { label: 'View' };
+                    const iconClass = n.type === 'new'
+                      ? styles.notifIconNew
+                      : n.type === 'approved'
+                      ? styles.notifIconApproved
+                      : styles.notifIconImprovement;
+                    return (
+                      <div
+                        key={n.id}
+                        className={`${styles.notifItem} ${n.unread ? styles.notifUnread : ''}`}
+                        onClick={() => handleNotifClick(n)}
+                        title={`Go to ${dest.label}`}
+                      >
+                        <div className={`${styles.notifIcon} ${iconClass}`}>
+                          {n.icon}
+                        </div>
+                        <div className={styles.notifBody}>
+                          <div className={styles.notifTitle}>{n.title}</div>
+                          <div className={styles.notifMsg}>{n.msg}</div>
+                          <div className={styles.notifMeta}>
+                            <span className={styles.notifTime}>{n.time}</span>
+                            <span className={styles.notifNav}>→ {dest.label}</span>
+                          </div>
+                        </div>
+                        {n.unread && <div className={styles.notifDot} />}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* MA: Add Content button */}
+        {isMA && currentPage === 'library' && (
+          <button className={styles.addContentBtn}>+ Add Content</button>
+        )}
       </div>
     </header>
   );

@@ -1,112 +1,127 @@
 """
-Agent Alpha — Research Agent
-============================
-Gathers comprehensive information on a medical topic from four sources:
+Agent Alpha — PubMed Research & Paper Discovery Agent
+======================================================
+Responsibility:
+  Given a topic (derived from a doctor's specialty/interests via Databricks),
+  Agent Alpha scrapes PubMed for relevant research papers AND searches the
+  internal MA Content Library (Databricks Vector Search or local fallback).
 
-  1. Internet       — Tavily web search (≥3 queries, different angles)
-  2. OneDrive       — Internal documents via Microsoft Graph API
-  3. Vector Store   — Semantic search over the MA document library
-                      (Databricks Vector Search in production;
-                       local keyword fallback in demo / SQLite mode)
-  4. Local Research — Fallback keyword search over Research/ folder
-                      (always available, even offline)
+  It returns a STRUCTURED LIST of papers with full metadata so that:
+    • Agent Beta can summarise each paper
+    • Agent Gamma can format shareable content with the correct PubMed links
 
-Uses LangGraph's create_react_agent (LangChain 1.x / LangGraph 1.x API).
+Sources searched (in priority order):
+  1. PubMed  — peer-reviewed literature via NCBI E-utilities (primary source)
+  2. MA Content Library — internal clinical summaries curated by Medical Affairs
+                          (Databricks Vector Search → local keyword fallback)
+
+Output format:
+  A structured paper list with the following metadata per paper:
+    Title · Authors · Journal · Publication Date
+    PMID  · PubMed Link (for 'Read More') · DOI
+    Abstract / Key Findings
+    Source (PubMed or MA Library)
 """
+
 from langgraph.prebuilt import create_react_agent
 
 from config import get_llm
-from tools import build_tavily_tool, read_onedrive_files, search_vector_store, read_local_docs
+from tools import search_pubmed, search_vector_store
 
 _SYSTEM_PROMPT = """\
-You are Agent Alpha, a meticulous medical research assistant for Mankind Pharma.
+You are Agent Alpha, a medical research discovery agent for Mankind Pharma (India).
 
-Your job is to gather comprehensive information on the given topic from FOUR sources:
+Your ONLY job in this pipeline step is to FIND and LIST relevant research papers
+on the given topic. You are NOT writing an article — you are building a paper list.
 
-1. Internet search — use the internet_search tool.
-   Run at least 3 searches with different angles:
-   latest clinical news, randomised trials, expert guidelines, Indian population data.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TOOL USAGE RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-2. OneDrive internal documents — use the read_onedrive_files tool to search for
-   internal papers, MA briefs, and brand documents.
+STEP A — PubMed Search (PRIMARY SOURCE — run 3 or more searches)
+  Use the search_pubmed tool at least 3 times with different query angles:
+    1. Core topic + condition (e.g. "semaglutide type 2 diabetes")
+    2. Topic + clinical outcome (e.g. "semaglutide cardiovascular outcomes RCT")
+    3. Topic + India / Asian population (e.g. "GLP-1 India real world evidence")
+    4. Topic + recent year if applicable (e.g. "SGLT2 inhibitors 2023 2024")
+  Collect ALL unique papers found across all searches.
 
-3. MA document library (vector search) — use the search_vector_store tool.
-   This searches Mankind Pharma's curated library of clinical summaries,
-   drug-interaction tables, real-world India evidence, and internal protocols.
-   Always run at least one vector store search for the topic.
-   Also search for India-specific angles (e.g. "India real world evidence <topic>").
+STEP B — MA Content Library Search (run 1–2 searches)
+  Use the search_vector_store tool to check Mankind Pharma's internal
+  clinical library for any internal documents, India-specific data, or
+  MA-curated summaries on the topic.
+  Mark papers from this source as "MA Library" (not PubMed).
 
-4. Local Research folder — use the read_local_docs tool as an additional
-   check for any documents not yet indexed in the vector store.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT FORMAT (follow this EXACTLY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-METADATA EXTRACTION:
-While researching, identify and extract the following metadata fields:
-  • Authors: Full author list from the primary source paper
-  • PMID: PubMed ID if the paper is indexed in PubMed
-  • DOI: Digital Object Identifier for the research
-  • Journal: Primary source publication (journal name)
-  • PubMed Link: Direct link to PubMed record
-  • Full Text Link: DOI-based or publisher full text URL
-  • Publication Date: When the primary evidence was published
-  • WhatsApp Summary: 1-2 sentence practical summary for doctors (80-120 words max)
+After all tool calls are complete, output the following:
 
-After gathering all information, produce a consolidated research article in this format:
+═══════════════════════════════════════════════════════════════
+AGENT ALPHA — PAPER DISCOVERY COMPLETE
+Topic: <topic>
+PubMed Papers Found: <N>
+MA Library Documents: <M>
+Total: <N+M>
+═══════════════════════════════════════════════════════════════
 
-## Topic: <topic>
+## PAPERS FOUND
 
-## Internet Findings
-<summarised findings from each web search, with source URLs>
+---
+### PAPER 1
+Title    : <full paper title>
+Authors  : <Author1 LastName Initials, Author2 LastName Initials, et al.>
+Journal  : <journal name>
+Published: <YYYY-MM or YYYY>
+PMID     : <PubMed ID>
+Link     : https://pubmed.ncbi.nlm.nih.gov/<PMID>/
+DOI      : <doi or N/A>
+Source   : PubMed
+Abstract : <first 400–500 words of abstract — include key statistics and findings>
 
-## Internal Document Findings
-### From MA Document Library (Vector Search)
-<relevant chunks retrieved, with source filenames and sections>
+---
+### PAPER 2
+[same structure]
 
-### From OneDrive / Local Research Folder
-<content from OneDrive and/or local Research folder files, or "No additional internal documents found">
+---
+[continue for all papers...]
 
-## Metadata Extracted
-{
-  "authors": "<comma-separated author names, et al if >6 authors>",
-  "pmid": "<PubMed ID or null>",
-  "doi": "<DOI or null>",
-  "journal": "<Primary journal name>",
-  "pubmed_link": "<Full PubMed URL or null>",
-  "full_text_link": "<DOI-based URL or publisher link>",
-  "publication_date": "<YYYY-MM-DD or publication year>",
-  "whatsapp_summary": "<1-2 sentence practical summary for doctors>"
-}
+## MA CONTENT LIBRARY
 
-## Consolidated Research Article
-<a comprehensive, readable article (600-900 words MINIMUM) merging all sources,
- with inline citations, written for a medical professional audience>
+[List any internally found documents using the same structure above,
+ with Source: MA Library instead of PubMed. If nothing found, write:
+ "No relevant documents found in the MA Content Library for this topic."]
 
-IMPORTANT:
-- Article must be 600-900 words minimum (longer articles are better)
-- Include specific statistics, percentages, and trial names (e.g., SUSTAIN-6, DAPA-HF)
-- Prioritise India-specific evidence and real-world outcome data
-- Extract metadata from the primary source papers identified in your research
+═══════════════════════════════════════════════════════════════
+END OF ALPHA OUTPUT
+═══════════════════════════════════════════════════════════════
 
-Be thorough, accurate, and clinically focused. Prioritise India-specific evidence
-wherever available, as Mankind Pharma primarily serves the Indian market.
+IMPORTANT RULES:
+- Deduplicate: if the same paper appears in both PubMed and MA Library, list it ONCE
+- Include EVERY paper found — do not drop papers
+- Keep abstracts concise but include key statistics (%, p-values, NNT, trial names)
+- Do NOT write a narrative article — only list papers with their metadata
+- Prioritise papers from India and Asian populations when available
+- Include papers from last 5 years preferentially, but older landmark trials are fine
 """
 
 
 def run_alpha(topic: str) -> str:
     """
-    Run Agent Alpha and return the consolidated research article.
+    Run Agent Alpha: discover research papers from PubMed and MA Content Library.
 
-    Tool priority:
-        internet_search        — always runs (≥3 queries)
-        search_vector_store    — semantic search over MA library (+ fallback)
-        read_onedrive_files    — internal OneDrive documents
-        read_local_docs        — local Research/ folder keyword search
+    Args:
+        topic: The research topic string (e.g. "SGLT2 inhibitors in heart failure").
+
+    Returns:
+        Structured paper list with metadata (title, authors, date, PMID,
+        PubMed link, DOI, abstract) — ready for Agent Beta to summarise.
     """
     llm   = get_llm(temperature=0.1)
     tools = [
-        build_tavily_tool(),
-        search_vector_store,      # ← Databricks VS (or local keyword fallback)
-        read_onedrive_files,
-        read_local_docs,          # ← keyword fallback always available
+        search_pubmed,          # PRIMARY: PubMed E-utilities (NCBI)
+        search_vector_store,    # SECONDARY: Mankind MA Content Library
     ]
 
     agent = create_react_agent(
@@ -116,8 +131,12 @@ def run_alpha(topic: str) -> str:
     )
 
     result = agent.invoke({
-        "messages": [("human", f"Research this topic thoroughly: {topic}")]
+        "messages": [("human", (
+            f"Discover all research papers on this topic: {topic}\n\n"
+            f"Run at least 3 PubMed searches with different query angles, "
+            f"then search the MA Content Library. "
+            f"Return the complete structured paper list."
+        ))]
     })
 
-    # The final answer is the last AI message in the messages list
     return result["messages"][-1].content

@@ -5,10 +5,10 @@ import { useAuth } from '../../hooks/useAuth';
 import styles from './Pipeline.module.css';
 
 const AGENTS = [
-  { id: 'alpha', name: 'Alpha', role: 'Research Agent', icon: '\u{1F50D}', desc: 'Searches PubMed, web & internal documents for evidence' },
-  { id: 'beta', name: 'Beta', role: 'Insights Agent', icon: '\u{1F4A1}', desc: 'Synthesises key findings, clinical insights & emerging trends' },
-  { id: 'gamma', name: 'Gamma', role: 'Content Agent', icon: '✍️', desc: 'Writes the WhatsApp-ready short article for doctor sharing' },
-  { id: 'delta', name: 'Delta', role: 'Publisher Agent', icon: '\u{1F4E6}', desc: 'Builds the structured content card & saves to library' }
+  { id: 'alpha', name: 'Alpha', role: 'Paper Discovery Agent', icon: '🔬', desc: 'Scrapes PubMed with 3+ query angles + searches MA Content Library → structured paper list with authors, PMID, dates & abstracts' },
+  { id: 'beta',  name: 'Beta',  role: 'Summarisation Agent',   icon: '🧠', desc: 'Generates clinical summary for each paper: executive summary, key findings, evidence level, India-specific relevance' },
+  { id: 'gamma', name: 'Gamma', role: 'Shareable Content Agent', icon: '📱', desc: 'Prepares WhatsApp/email message per paper with key bullet points and a "Read More" link to original PubMed source' },
+  { id: 'delta', name: 'Delta', role: 'Publisher Agent',         icon: '📦', desc: 'Builds the structured portal content card & saves to MA review queue (SQLite → Databricks)' }
 ];
 
 const SPECIALTIES = ['Cardiology', 'Diabetology', 'Gynaecology', 'Endocrinology', 'Paediatrics', 'Dermatology', 'General Medicine'];
@@ -52,27 +52,49 @@ const SAMPLE_RESULT = {
     'Growing evidence for SGLT2i in acute decompensated HF',
     'Combination pill formulations under development'
   ],
-  article: `Heart Failure Management Update: SGLT2 Inhibitors
+  // Agent Alpha output: paper list with metadata
+  papers: [
+    { no: 1, title: 'EMPEROR-Reduced 3-Year Extended Follow-Up: Empagliflozin in HFrEF', authors: 'Packer M, Anker SD, Butler J, Filippatos G, et al.', journal: 'New England Journal of Medicine', published: '2023-11', pmid: '38291234', pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/38291234/', doi: '10.1056/NEJMoa2107519' },
+    { no: 2, title: 'DAPA-HF Extended Analysis: Dapagliflozin Across the EF Spectrum', authors: 'Solomon SD, McMurray JJV, Claggett BL, et al.', journal: 'The Lancet', published: '2023-08', pmid: '36990375', pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/36990375/', doi: '10.1016/S0140-6736(23)00512-8' },
+    { no: 3, title: 'SGLT2i Meta-Analysis: 94,820 Patients Across T2DM, HF, CKD', authors: 'Zannad F, Ferreira JP, Pocock SJ, et al.', journal: 'JACC', published: '2023-06', pmid: '37271387', pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/37271387/', doi: '10.1016/j.jacc.2023.04.034' },
+    { no: 4, title: 'Indian HF Registry 2024: SGLT2i Reduces 30-Day Readmission by 27%', authors: 'Chopra VK, Ramakrishnan S, Gupta A, et al.', journal: 'Indian Heart Journal', published: '2024-02', pmid: '38291234', pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/38291234/', doi: null },
+    { no: 5, title: 'Cochrane Review: SGLT2 Inhibitors for Heart Failure', authors: 'Zelniker TA, Wiviott SD, Raz I, et al.', journal: 'Cochrane Database of Systematic Reviews', published: '2024-01', pmid: '38102847', pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/38102847/', doi: '10.1002/14651858.CD013812' },
+  ],
+  // Agent Gamma output: shareable messages per paper with Read More links
+  messages: [
+    {
+      no: 1, title: 'EMPEROR-Reduced: Empagliflozin in HFrEF',
+      pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/38291234/',
+      key_points: ['Empagliflozin reduces HF hospitalisation by 30% at 3 years', 'CV death reduced by 18% vs placebo (p<0.001)', 'Benefit independent of diabetes status or EF']
+    },
+    {
+      no: 2, title: 'DAPA-HF: Dapagliflozin in HFpEF',
+      pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/36990375/',
+      key_points: ['Dapagliflozin consistent across full EF spectrum (HFrEF + HFpEF)', 'First evidence-based option for HFpEF patients', 'eGFR decline slowed by 1.6 mL/min/year vs placebo']
+    },
+    {
+      no: 3, title: 'Meta-Analysis: SGLT2i in 94,820 Patients',
+      pubmed_link: 'https://pubmed.ncbi.nlm.nih.gov/37271387/',
+      key_points: ['30% reduction in first HF hospitalisation (pooled)', 'Additive benefit with GLP-1 RA: 44% MACE reduction', 'Consistent benefit across all subgroups']
+    },
+  ],
+  article: `SGLT2 Inhibitors — Now for ALL Heart Failure Patients
 
-Recent landmark trials have established SGLT2 inhibitors as a cornerstone therapy for heart failure across all ejection fractions.
+📋 Key Highlights:
+• Empagliflozin reduces HF hospitalisation by 30% at 3 years
+• Dapagliflozin shows consistent efficacy across HFrEF + HFpEF
+• Benefits independent of diabetes status or ejection fraction
 
-Key Evidence:
-The EMPEROR-Preserved and DELIVER trials demonstrated significant reductions in cardiovascular death and heart failure hospitalization in HFpEF patients, extending benefits previously shown in HFrEF.
+📖 Read full paper: https://pubmed.ncbi.nlm.nih.gov/38291234/
 
-Clinical Impact:
-These medications reduce hospitalization risk by 25-30% and improve quality of life metrics. Benefits are seen regardless of diabetes status.
-
-For Your Practice:
-Consider initiating SGLT2 inhibitors early in all heart failure patients. Monitor renal function during the first few weeks of therapy.
-
-Source: PubMed Evidence Review · PinnacleIQ AI Pipeline`,
+— Pinnacle Research Team | Mankind Pharma`,
   json_data: {
     topic: 'SGLT2 inhibitors in heart failure',
     specialty: 'Cardiology',
     therapy_area: 'Heart Failure',
-    sources_count: 12,
-    pubmed_articles: 8,
-    web_sources: 4,
+    papers_found: 5,
+    pubmed_papers: 4,
+    ma_library_docs: 1,
     confidence_score: 0.92,
     generated_at: new Date().toISOString(),
     status: 'pending_ma_review'
@@ -216,24 +238,24 @@ export default function Pipeline() {
       {/* KPI Row */}
       <div className={styles.kpiRow}>
         <div className={`${styles.kpi} ${styles.kpiNavy}`}>
-          <div className={styles.kpiLabel}>Agent Pipeline</div>
-          <div className={styles.kpiValue}>Alpha&rarr;Delta</div>
-          <div className={styles.kpiSub}>4 AI agents in sequence</div>
+          <div className={styles.kpiLabel}>Step 1 · Alpha</div>
+          <div className={styles.kpiValue}>PubMed + MA Lib</div>
+          <div className={styles.kpiSub}>Paper list with authors, PMID, abstracts</div>
         </div>
         <div className={`${styles.kpi} ${styles.kpiTeal}`}>
-          <div className={styles.kpiLabel}>Research Sources</div>
-          <div className={styles.kpiValue}>PubMed + Web</div>
-          <div className={styles.kpiSub}>Tavily real-time search</div>
+          <div className={styles.kpiLabel}>Step 2 · Beta</div>
+          <div className={styles.kpiValue}>Per-Paper Summary</div>
+          <div className={styles.kpiSub}>Key findings + evidence level per paper</div>
         </div>
         <div className={`${styles.kpi} ${styles.kpiGold}`}>
-          <div className={styles.kpiLabel}>Output Format</div>
-          <div className={styles.kpiValue}>Portal Card</div>
-          <div className={styles.kpiSub}>JSON + short article</div>
+          <div className={styles.kpiLabel}>Step 3 · Gamma</div>
+          <div className={styles.kpiValue}>Shareable Content</div>
+          <div className={styles.kpiSub}>WhatsApp/email + Read More PubMed link</div>
         </div>
         <div className={`${styles.kpi} ${styles.kpiGreen}`}>
-          <div className={styles.kpiLabel}>Store Backend</div>
-          <div className={styles.kpiValue}>SQLite &rarr; Databricks</div>
-          <div className={styles.kpiSub}>One env-var switch</div>
+          <div className={styles.kpiLabel}>Step 4 · Delta</div>
+          <div className={styles.kpiValue}>Portal Card</div>
+          <div className={styles.kpiSub}>Saved to MA review queue</div>
         </div>
       </div>
 
@@ -355,13 +377,19 @@ export default function Pipeline() {
 
               {/* Tabs */}
               <div className={styles.resultsTabs}>
-                {['summary', 'findings', 'article', 'json'].map(tab => (
+                {[
+                  { id: 'summary',  label: '📋 Summary' },
+                  { id: 'papers',   label: `📄 Papers (${(result.papers || []).length})` },
+                  { id: 'findings', label: '🧠 Summaries' },
+                  { id: 'messages', label: `📱 Share (${(result.messages || []).length})` },
+                  { id: 'json',     label: '{ } JSON' },
+                ].map(tab => (
                   <button
-                    key={tab}
-                    className={`${styles.resultTab} ${activeResultTab === tab ? styles.resultTabActive : ''}`}
-                    onClick={() => setActiveResultTab(tab)}
+                    key={tab.id}
+                    className={`${styles.resultTab} ${activeResultTab === tab.id ? styles.resultTabActive : ''}`}
+                    onClick={() => setActiveResultTab(tab.id)}
                   >
-                    {tab === 'summary' ? 'Summary' : tab === 'findings' ? 'Key Findings' : tab === 'article' ? 'Short Article' : 'Full JSON'}
+                    {tab.label}
                   </button>
                 ))}
               </div>
@@ -375,6 +403,12 @@ export default function Pipeline() {
                     <span className={styles.resBadgePurple}>{result.therapyArea}</span>
                     <span className={styles.resBadgeAmber}>{result.status}</span>
                   </div>
+                  <div className={styles.pipelineStepsBadge}>
+                    <span className={styles.stepBadge}>🔬 Alpha: {(result.papers || []).length} papers found</span>
+                    <span className={styles.stepBadge}>🧠 Beta: {(result.papers || []).length} summaries</span>
+                    <span className={styles.stepBadge}>📱 Gamma: {(result.messages || []).length} shareable messages</span>
+                    <span className={styles.stepBadge}>📦 Delta: Card saved</span>
+                  </div>
                   <div className={styles.resSummaryBox}>{result.summary}</div>
                   <div className={styles.resSection}>
                     <div className={styles.resSectionLabel}>Clinical Insights</div>
@@ -387,9 +421,36 @@ export default function Pipeline() {
                 </div>
               )}
 
-              {/* Findings Tab */}
+              {/* Papers Tab — Agent Alpha output */}
+              {activeResultTab === 'papers' && (
+                <div className={styles.tabContent}>
+                  <div className={styles.agentOutputLabel}>🔬 Agent Alpha — Paper List from PubMed + MA Content Library</div>
+                  {(result.papers || []).map((p, i) => (
+                    <div key={i} className={styles.paperCard}>
+                      <div className={styles.paperHeader}>
+                        <span className={styles.paperNo}>Paper {p.no}</span>
+                        <a href={p.pubmed_link} target="_blank" rel="noopener noreferrer" className={styles.pubmedLink}>
+                          📖 PubMed {p.pmid}
+                        </a>
+                      </div>
+                      <div className={styles.paperTitle}>{p.title}</div>
+                      <div className={styles.paperMeta}>
+                        <span>👤 {p.authors}</span>
+                        <span className={styles.paperMetaSep}>·</span>
+                        <span>📰 {p.journal}</span>
+                        <span className={styles.paperMetaSep}>·</span>
+                        <span>📅 {p.published}</span>
+                      </div>
+                      {p.doi && <div className={styles.paperDoi}>DOI: {p.doi}</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Summaries Tab — Agent Beta output */}
               {activeResultTab === 'findings' && (
                 <div className={styles.tabContent}>
+                  <div className={styles.agentOutputLabel}>🧠 Agent Beta — Per-Paper Clinical Summaries</div>
                   <div className={styles.findingsList}>
                     {result.findings.map((f, i) => (
                       <div key={i} className={styles.findingRow}>
@@ -419,13 +480,34 @@ export default function Pipeline() {
                 </div>
               )}
 
-              {/* Article Tab */}
-              {activeResultTab === 'article' && (
+              {/* Messages Tab — Agent Gamma output (shareable content with Read More links) */}
+              {activeResultTab === 'messages' && (
                 <div className={styles.tabContent}>
-                  <div className={styles.articlePreview}>{result.article}</div>
-                  <div className={styles.copyRow}>
-                    <button className={styles.copyBtn} onClick={() => handleCopy('article')}>Copy Article</button>
-                  </div>
+                  <div className={styles.agentOutputLabel}>📱 Agent Gamma — Shareable Messages (WhatsApp / Email) with PubMed "Read More" Links</div>
+                  {(result.messages || []).map((msg, i) => (
+                    <div key={i} className={styles.messageCard}>
+                      <div className={styles.messageHeader}>
+                        <span className={styles.messageNo}>Message {msg.no}</span>
+                        <span className={styles.messageTitle}>{msg.title}</span>
+                      </div>
+                      <div className={styles.messageBody}>
+                        <div className={styles.messageBullets}>
+                          {(msg.key_points || []).map((pt, j) => (
+                            <div key={j} className={styles.messageBullet}>• {pt}</div>
+                          ))}
+                        </div>
+                        <a href={msg.pubmed_link} target="_blank" rel="noopener noreferrer" className={styles.readMoreLink}>
+                          📖 Read More on PubMed →
+                        </a>
+                      </div>
+                      <div className={styles.messageCopyRow}>
+                        <button className={styles.copyBtn} onClick={() => {
+                          const text = `${msg.key_points.map(p => `• ${p}`).join('\n')}\n\n📖 Read More: ${msg.pubmed_link}\n\n— Pinnacle Research Team | Mankind Pharma`;
+                          navigator.clipboard.writeText(text).then(() => addNotification('Message copied!', 'success'));
+                        }}>Copy for WhatsApp</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
