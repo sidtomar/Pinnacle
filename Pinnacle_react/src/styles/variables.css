@@ -1,0 +1,65 @@
+:root {
+  /* Primary Colors */
+  --navy: #0D1F3C;
+  --navy2: #162E56;
+  --navy3: #1E3A6E;
+
+  /* Accent Colors */
+  --gold: #B8912A;
+  --gold2: #D4A843;
+  --gold-bg: rgba(184, 145, 42, 0.10);
+  --gold-bd: rgba(184, 145, 42, 0.22);
+
+  /* Surface Colors */
+  --surface: #fff;
+  --surface2: #F6F8FC;
+  --surface3: #EDF0F7;
+
+  /* Border Colors */
+  --border: #E3E8F2;
+  --border2: #C8D2E4;
+
+  /* Text Colors */
+  --text1: #0D1B2A;
+  --text2: #374151;
+  --text3: #6B7280;
+  --text4: #9CA3AF;
+
+  /* Semantic Colors */
+  --green: #047857;
+  --green-bg: #ECFDF5;
+  --green-bd: #A7F3D0;
+
+  --amber: #B45309;
+  --amber-bg: #FFFBEB;
+  --amber-bd: #FCD34D;
+
+  --red: #B91C1C;
+  --red-bg: #FEF2F2;
+  --red-bd: #FCA5A5;
+
+  --blue: #1D4ED8;
+  --blue-bg: #EFF6FF;
+  --blue-bd: #BFDBFE;
+
+  --purple: #6D28D9;
+  --purple-bg: #F5F3FF;
+  --purple-bd: #DDD6FE;
+
+  --teal: #0F766E;
+  --teal-bg: #F0FDFA;
+  --teal-bd: #99F6E4;
+
+  --rose: #BE185D;
+  --rose-bg: #FDF2F8;
+
+  /* Spacing */
+  --r: 10px;
+  --rlg: 14px;
+  --rxl: 18px;
+
+  /* Shadows */
+  --s1: 0 1px 4px rgba(13, 31, 60, 0.07), 0 1px 2px rgba(13, 31, 60, 0.04);
+  --s2: 0 4px 16px rgba(13, 31, 60, 0.10), 0 2px 6px rgba(13, 31, 60, 0.05);
+  --s3: 0 20px 60px rgba(13, 31, 60, 0.20);
+}
