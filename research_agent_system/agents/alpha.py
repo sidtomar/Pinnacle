@@ -64,6 +64,10 @@ def _get_enabled_sources() -> list[dict]:
     Read alpha_sources.yaml and return a list of enabled sources,
     sorted by priority (lowest number first).
 
+    Modes:
+      "demo"       → ALL sources are enabled (showcase full capabilities)
+      "production" → Only sources with production_enabled=true are active
+
     Each item: {"name": str, "description": str, "tool_name": str, "priority": int}
     """
     if not _SOURCES_CONFIG_PATH.exists():
@@ -79,11 +83,33 @@ def _get_enabled_sources() -> list[dict]:
     with open(_SOURCES_CONFIG_PATH, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
+    mode = cfg.get("mode", "production").lower().strip()
     sources = cfg.get("sources", {})
     enabled = []
 
     for name, src in sources.items():
-        if src.get("enabled", False):
+        # In demo mode: ALL sources enabled
+        # In production mode: only production_enabled=true
+        if mode == "demo":
+            is_enabled = True
+        else:
+            is_enabled = src.get("production_enabled", False)
+
+        if is_enabled:
+            # Check if required env vars are set (skip source if creds missing)
+            requires = src.get("requires", [])
+            missing = [r for r in requires if not os.getenv(r, "")]
+            if missing and mode != "demo":
+                logger.warning(
+                    f"Source '{name}' enabled but missing env vars: {missing} — skipping"
+                )
+                continue
+            elif missing and mode == "demo":
+                logger.info(
+                    f"Source '{name}' (demo mode): missing env vars {missing} — "
+                    f"will attempt anyway, may return empty results"
+                )
+
             enabled.append({
                 "name": name,
                 "description": src.get("description", name),
@@ -97,6 +123,7 @@ def _get_enabled_sources() -> list[dict]:
         logger.warning("No sources enabled in alpha_sources.yaml! Falling back to PubMed.")
         return [{"name": "pubmed", "description": "PubMed", "tool_name": "search_pubmed", "priority": 1}]
 
+    logger.info(f"Alpha mode: {mode.upper()} — {len(enabled)} source(s) active")
     return enabled
 
 

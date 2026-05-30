@@ -2,92 +2,138 @@
 # Agent Alpha — Research Source Configuration
 # ═══════════════════════════════════════════════════════════════
 #
-# This file controls which sources Agent Alpha is allowed to
-# search when discovering research papers.
+# This file controls which sources Agent Alpha searches.
 #
-# Set "enabled: true" to allow a source, "enabled: false" to block it.
-# Agent Alpha will ONLY use sources marked as enabled.
+# TWO MODES:
+#   "demo"       → ALL sources enabled (showcase full capabilities)
+#   "production"  → Only admin-approved sources are active
 #
-# After changing this file, restart the pipeline for changes to take effect.
+# For demo: set mode to "demo" and all sources work automatically.
+# For production: set mode to "production" and configure each
+#   source's "production_enabled" flag as per business decision.
+#
+# Admin can switch modes anytime. No code changes required.
+# ═══════════════════════════════════════════════════════════════
+
+# ┌─────────────────────────────────────────────────────────────┐
+# │  MODE SWITCH                                                │
+# │  "demo"       → All sources ON (for management demos)      │
+# │  "production" → Only production_enabled sources are active  │
+# └─────────────────────────────────────────────────────────────┘
+mode: demo
+
+
+# ═══════════════════════════════════════════════════════════════
+# SOURCES
+# ═══════════════════════════════════════════════════════════════
+#
+# Each source has:
+#   production_enabled : true/false — used ONLY when mode is "production"
+#   description        : human-readable name shown in logs & UI
+#   tool               : internal tool name (do not change)
+#   priority           : search order (1 = first, higher = later)
+#   requires           : env vars needed for this source to work
+#   settings           : source-specific configuration
+#
+# In "demo" mode, ALL sources are enabled regardless of
+# production_enabled flag — this lets you showcase everything.
 # ═══════════════════════════════════════════════════════════════
 
 sources:
 
   # ── SOURCE 1: PubMed (NCBI E-utilities) ──────────────────────
-  # Primary source for peer-reviewed medical literature.
-  # Free API, no key required (optional NCBI_API_KEY for higher rate limits).
-  # Searches: esearch (find PMIDs) → efetch (get full records)
+  # Primary source — peer-reviewed medical literature.
+  # Free API. Optional NCBI_API_KEY for higher rate limits.
   pubmed:
-    enabled: true
+    production_enabled: true
     description: "PubMed — peer-reviewed medical literature via NCBI"
     tool: search_pubmed
-    priority: 1    # Lower number = searched first
+    priority: 1
+    requires: []    # No API key required (optional: NCBI_API_KEY)
 
   # ── SOURCE 2: Local Content Repository ───────────────────────
-  # Local folder containing MA team documents (.txt, .pdf, .docx, .xlsx).
-  # Path configured via LOCAL_DOCS_PATH env var (default: <project_root>/Research/)
-  # No external API calls — reads files directly from disk.
+  # MA team documents stored locally (.txt, .pdf, .docx, .xlsx).
+  # Path: LOCAL_DOCS_PATH env var or default <project_root>/Research/
   local_content_repo:
-    enabled: true
+    production_enabled: true
     description: "Local content repo — MA team documents on disk"
     tool: read_local_docs
     priority: 2
+    requires: []    # No credentials needed — reads local files
     settings:
       path: "Research/"    # Override with LOCAL_DOCS_PATH env var
 
   # ── SOURCE 3: Databricks Vector Search ──────────────────────
-  # Semantic search over MA document library stored in Databricks.
-  # Requires: DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_VS_ENDPOINT_NAME
-  # Falls back to local keyword search if Databricks is not configured.
+  # Semantic search over MA document library in Databricks.
+  # Requires Azure Databricks credentials in .env
   databricks_vector_search:
-    enabled: false
+    production_enabled: false
     description: "Databricks Vector Search — semantic search over MA library"
     tool: search_vector_store
     priority: 3
+    requires:
+      - DATABRICKS_HOST
+      - DATABRICKS_TOKEN
     settings:
       endpoint: "pinnacleiq_vs"
       index: "pinnacleiq.medical_content.document_chunks_index"
       embedding_model: "databricks-bge-large-en"
 
   # ── SOURCE 4: Tavily Web Search ─────────────────────────────
-  # Real-time web search via Tavily API.
-  # Requires: TAVILY_API_KEY in .env
-  # Searches the open web for recent articles, news, clinical data.
+  # Real-time web search for recent medical articles & clinical data.
+  # Requires Tavily API key in .env
   tavily_web_search:
-    enabled: false
+    production_enabled: false
     description: "Tavily — real-time web search for medical articles"
     tool: build_tavily_tool
     priority: 4
+    requires:
+      - TAVILY_API_KEY
     settings:
       max_results: 5
 
   # ── SOURCE 5: OneDrive (Microsoft Graph API) ────────────────
-  # Reads documents from a shared OneDrive/SharePoint folder.
-  # Requires: ONEDRIVE_CLIENT_ID, ONEDRIVE_CLIENT_SECRET, ONEDRIVE_TENANT_ID
+  # Shared MA documents on OneDrive/SharePoint.
+  # Requires Microsoft Azure AD app credentials in .env
   onedrive:
-    enabled: false
+    production_enabled: false
     description: "OneDrive — shared MA documents via Microsoft Graph API"
     tool: read_onedrive_files
     priority: 5
+    requires:
+      - ONEDRIVE_CLIENT_ID
+      - ONEDRIVE_CLIENT_SECRET
+      - ONEDRIVE_TENANT_ID
     settings:
       folder_path: "PinnacleIQ/Research"
 
+
 # ═══════════════════════════════════════════════════════════════
-# NOTES:
+# QUICK REFERENCE
+# ═══════════════════════════════════════════════════════════════
 #
-# 1. At minimum, keep "pubmed" enabled — it's the primary source.
+# TO DEMO (show all capabilities to management):
+#   mode: demo
+#   → All 5 sources active. No other changes needed.
 #
-# 2. For demo/local development:
-#    - pubmed: true, local_content_repo: true (current setup)
+# TO GO LIVE (production — admin configures):
+#   mode: production
+#   → Only sources with "production_enabled: true" are active.
+#   → Admin sets each source's flag based on business decision.
 #
-# 3. For production with Databricks:
-#    - pubmed: true, databricks_vector_search: true
-#    - Set DATABRICKS_HOST, DATABRICKS_TOKEN in .env
+# EXAMPLE — Production with PubMed + Databricks only:
+#   mode: production
+#   pubmed:                    production_enabled: true
+#   local_content_repo:        production_enabled: false
+#   databricks_vector_search:  production_enabled: true   # + set .env creds
+#   tavily_web_search:         production_enabled: false
+#   onedrive:                  production_enabled: false
 #
-# 4. For full web-augmented search:
-#    - pubmed: true, tavily_web_search: true
-#    - Set TAVILY_API_KEY in .env
-#
-# 5. Business rule: Only enable sources approved by management.
-#    Agent Alpha will STRICTLY search only enabled sources.
+# EXAMPLE — Production with PubMed + Local repo only:
+#   mode: production
+#   pubmed:                    production_enabled: true
+#   local_content_repo:        production_enabled: true
+#   databricks_vector_search:  production_enabled: false
+#   tavily_web_search:         production_enabled: false
+#   onedrive:                  production_enabled: false
 # ═══════════════════════════════════════════════════════════════
