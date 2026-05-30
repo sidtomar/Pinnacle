@@ -1,0 +1,93 @@
+# ═══════════════════════════════════════════════════════════════
+# Agent Alpha — Research Source Configuration
+# ═══════════════════════════════════════════════════════════════
+#
+# This file controls which sources Agent Alpha is allowed to
+# search when discovering research papers.
+#
+# Set "enabled: true" to allow a source, "enabled: false" to block it.
+# Agent Alpha will ONLY use sources marked as enabled.
+#
+# After changing this file, restart the pipeline for changes to take effect.
+# ═══════════════════════════════════════════════════════════════
+
+sources:
+
+  # ── SOURCE 1: PubMed (NCBI E-utilities) ──────────────────────
+  # Primary source for peer-reviewed medical literature.
+  # Free API, no key required (optional NCBI_API_KEY for higher rate limits).
+  # Searches: esearch (find PMIDs) → efetch (get full records)
+  pubmed:
+    enabled: true
+    description: "PubMed — peer-reviewed medical literature via NCBI"
+    tool: search_pubmed
+    priority: 1    # Lower number = searched first
+
+  # ── SOURCE 2: Local Content Repository ───────────────────────
+  # Local folder containing MA team documents (.txt, .pdf, .docx, .xlsx).
+  # Path configured via LOCAL_DOCS_PATH env var (default: <project_root>/Research/)
+  # No external API calls — reads files directly from disk.
+  local_content_repo:
+    enabled: true
+    description: "Local content repo — MA team documents on disk"
+    tool: read_local_docs
+    priority: 2
+    settings:
+      path: "Research/"    # Override with LOCAL_DOCS_PATH env var
+
+  # ── SOURCE 3: Databricks Vector Search ──────────────────────
+  # Semantic search over MA document library stored in Databricks.
+  # Requires: DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_VS_ENDPOINT_NAME
+  # Falls back to local keyword search if Databricks is not configured.
+  databricks_vector_search:
+    enabled: false
+    description: "Databricks Vector Search — semantic search over MA library"
+    tool: search_vector_store
+    priority: 3
+    settings:
+      endpoint: "pinnacleiq_vs"
+      index: "pinnacleiq.medical_content.document_chunks_index"
+      embedding_model: "databricks-bge-large-en"
+
+  # ── SOURCE 4: Tavily Web Search ─────────────────────────────
+  # Real-time web search via Tavily API.
+  # Requires: TAVILY_API_KEY in .env
+  # Searches the open web for recent articles, news, clinical data.
+  tavily_web_search:
+    enabled: false
+    description: "Tavily — real-time web search for medical articles"
+    tool: build_tavily_tool
+    priority: 4
+    settings:
+      max_results: 5
+
+  # ── SOURCE 5: OneDrive (Microsoft Graph API) ────────────────
+  # Reads documents from a shared OneDrive/SharePoint folder.
+  # Requires: ONEDRIVE_CLIENT_ID, ONEDRIVE_CLIENT_SECRET, ONEDRIVE_TENANT_ID
+  onedrive:
+    enabled: false
+    description: "OneDrive — shared MA documents via Microsoft Graph API"
+    tool: read_onedrive_files
+    priority: 5
+    settings:
+      folder_path: "PinnacleIQ/Research"
+
+# ═══════════════════════════════════════════════════════════════
+# NOTES:
+#
+# 1. At minimum, keep "pubmed" enabled — it's the primary source.
+#
+# 2. For demo/local development:
+#    - pubmed: true, local_content_repo: true (current setup)
+#
+# 3. For production with Databricks:
+#    - pubmed: true, databricks_vector_search: true
+#    - Set DATABRICKS_HOST, DATABRICKS_TOKEN in .env
+#
+# 4. For full web-augmented search:
+#    - pubmed: true, tavily_web_search: true
+#    - Set TAVILY_API_KEY in .env
+#
+# 5. Business rule: Only enable sources approved by management.
+#    Agent Alpha will STRICTLY search only enabled sources.
+# ═══════════════════════════════════════════════════════════════
