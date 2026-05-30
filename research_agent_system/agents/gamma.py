@@ -74,9 +74,25 @@ Just enough for the doctor to assess evidence quality.>
 
 ---
 
-📖 **Read the full article:** <EXACT PubMed URL from Alpha's output>
+📖 **Read the full article:** [<Paper Title>](<EXACT PubMed URL from Alpha's output>)
 
-*Source: <Journal Name>, <Publication Date>*
+For example: [Effect of SGLT2 inhibitors on heart failure outcomes](https://pubmed.ncbi.nlm.nih.gov/38768620/)
+The link MUST be a proper markdown hyperlink with the paper title as display text and PubMed URL as the link.
+
+**Authors:** <Author names from Alpha's paper data>
+**Published:** <Publication date> | **Journal:** <Journal name>
+
+**#<Specialty> #<TherapyArea> #<KeyTopic1> #<KeyTopic2> #<KeyTopic3> ...**
+
+Example hashtags: #Cardiology #HeartFailure #SGLT2Inhibitors #CardiovascularOutcomes #MetaAnalysis #RCT #EvidenceBased
+
+Generate 5-8 relevant hashtags from:
+  - The medical specialty (e.g. #Cardiology, #Diabetology, #Gynaecology)
+  - The therapy area (e.g. #HeartFailure, #PCOS, #Hypertension)
+  - Key topics/drugs from the paper (e.g. #SGLT2Inhibitors, #Semaglutide, #GLP1)
+  - Study type (e.g. #MetaAnalysis, #RCT, #SystematicReview)
+  - Relevant clinical terms (e.g. #CardiovascularOutcomes, #HbA1c, #RenalProtection)
+
 *— Pinnacle Research Team | Mankind Pharma*
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -89,6 +105,11 @@ CRITICAL RULES:
 - Tone: evidence-based, collegial — "the study demonstrates" not "our product shows"
 - Do NOT include any drug branding or promotional language
 - This article will go to Medical Affairs for review — it must be scientifically accurate
+- MUST include article metadata: author names, publication date, journal name
+- MUST include the original article link as a CLICKABLE HYPERLINK in markdown format:
+  [Paper Title](https://pubmed.ncbi.nlm.nih.gov/PMID/) — NOT a raw URL
+- MUST include 5-8 hashtags at the end covering specialty, therapy area, key topics, and study type
+- Hashtags should be in CamelCase format (e.g. #HeartFailure not #heart-failure)
 """),
     ("human", """\
 Topic: {topic}
