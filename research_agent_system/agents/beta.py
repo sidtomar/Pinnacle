@@ -1,17 +1,15 @@
 """
-Agent Beta — Research Paper Summary & Article Preparation
-==========================================================
+Agent Beta — Per-Paper Research Summary
+=========================================
 Responsibility:
-  Takes the single best paper found by Agent Alpha and produces a
-  PRESENTABLE SUMMARY ARTICLE that:
-    • Captures all important points from the research paper
-    • Is written in clear, professional medical language
-    • Includes key statistics, findings, and clinical relevance
-    • Contains a "Read More" link pointing to the original PubMed article
-    • Is ready for Agent Gamma to format into the final 200-500 word article
+  Takes ONE paper from Agent Alpha's list and produces a PRESENTABLE SUMMARY
+  with all important points. Called once per paper found by Alpha.
 
-Input:  Alpha's selected paper (title, authors, abstract, PMID, PubMed link)
-Output: A well-structured summary article with key highlights and "Read More" link
+  For N papers found by Alpha → Beta is called N times → N summaries produced.
+  Each summary then feeds independently into Gamma → Delta.
+
+Input:  ONE paper's metadata (title, authors, abstract, PMID, PubMed link)
+Output: A well-structured summary with key findings and "Read More" link
 """
 
 from langchain_core.output_parsers import StrOutputParser
@@ -23,12 +21,12 @@ _PROMPT = ChatPromptTemplate.from_messages([
     ("system", """\
 You are Agent Beta, a senior medical research analyst for Mankind Pharma (India).
 
-You receive a research paper discovered by Agent Alpha (with its title, abstract,
-authors, journal, PMID, and PubMed link).
+You receive ONE research paper from Agent Alpha (title, abstract, authors, journal, PMID, PubMed link).
+Your job is to create a PRESENTABLE SUMMARY of THIS SPECIFIC PAPER.
 
-Your job is to create a PRESENTABLE SUMMARY of this paper that captures all the
-important points. This summary will be used by Agent Gamma to write the final
-article for Medical Affairs review.
+This summary feeds into Agent Gamma which will write a 200-500 word article
+specifically about this paper. Agent Gamma is then called separately for each
+paper, so each paper gets its own independent article and content card.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 OUTPUT FORMAT
@@ -91,15 +89,18 @@ Agent Alpha's Selected Paper:
 
 def run_beta(paper_list: str, topic: str = "") -> str:
     """
-    Run Agent Beta: create a presentable summary of Alpha's selected paper.
+    Run Agent Beta: create a presentable summary of ONE paper from Alpha.
+
+    Called once per paper found by Alpha. For N papers → called N times.
 
     Args:
-        paper_list: Alpha's output — selected paper with metadata and abstract.
+        paper_list: One paper's metadata from Agent Alpha
+                    (title, authors, abstract, PMID, PubMed link).
         topic:      The original research topic (for context).
 
     Returns:
-        A presentable summary article with key findings and "Read More" link,
-        ready for Agent Gamma to format into the final article.
+        A presentable summary with key findings and "Read More" link,
+        ready for Agent Gamma to write a full article from.
     """
     llm   = get_llm(temperature=0.15)
     chain = _PROMPT | llm | StrOutputParser()

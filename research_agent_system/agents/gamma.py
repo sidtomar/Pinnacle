@@ -1,20 +1,21 @@
 """
-Agent Gamma — Article Writer & Medical Affairs Review Submission
-=================================================================
+Agent Gamma — Per-Paper Article Writer & MA Review Submission
+==============================================================
 Responsibility:
-  Takes Beta's paper summary and Alpha's paper data (for PubMed link)
-  and writes a polished 200-500 word ARTICLE suitable for sharing with
-  doctors. The article is then submitted for Medical Affairs (MA) team
-  review before it can be shared with doctors by the PMT/BU Head.
+  Takes Beta's summary for ONE paper and writes a polished 200-500 word
+  ARTICLE about that specific paper. Called once per paper (N papers → N articles).
+
+  Each article is independently submitted for Medical Affairs (MA) team
+  review before the BU Head/PMT can share it with doctors.
 
 Input:
   • topic         — research topic
-  • paper_list    — Alpha's output (contains PubMed link for "Read More")
-  • summaries     — Beta's output (detailed paper summary with key findings)
+  • paper_list    — ONE paper's metadata from Alpha (PubMed link for "Read More")
+  • summaries     — Beta's summary for this specific paper
 
 Output:
-  • A 200-500 word article with key points and "Read More" link
-  • Article status set to "Pending Review" for MA team approval
+  • One 200-500 word article for this paper with "Read More" link
+  • Status: "Pending Review" — awaiting MA approval
 """
 
 import re

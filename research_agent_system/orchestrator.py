@@ -61,15 +61,18 @@ class PipelineResult:
     therapy_area:     str  = ""
     doctor_id:        str  = ""
 
-    # Per-agent outputs
-    paper_list:       str  = ""    # Alpha  — structured paper list (PubMed + MA Library)
-    summaries:        str  = ""    # Beta   — per-paper clinical summaries
-    shareable_content: str = ""    # Gamma  — WhatsApp/email messages per paper
-    content_card:     dict = field(default_factory=dict)   # Delta — portal card
+    # Alpha output — raw text + parsed list of paper dicts
+    paper_list:       str  = ""    # Alpha raw output
+    papers:           list = field(default_factory=list)  # parsed list of paper dicts
 
-    # Delivery status
-    whatsapp_status:  dict = field(default_factory=dict)
-    email_status:     dict = field(default_factory=dict)
+    # Per-paper outputs (parallel lists — index-matched)
+    summaries:        list = field(default_factory=list)   # Beta outputs (one per paper)
+    articles:         list = field(default_factory=list)   # Gamma outputs (one per paper)
+    content_cards:    list = field(default_factory=list)   # Delta outputs (one per paper)
+
+    # Legacy single-card field (last card, for backward compatibility)
+    shareable_content: str  = ""
+    content_card:      dict = field(default_factory=dict)
 
     # Run metadata
     duration_seconds: float = 0.0
@@ -242,91 +245,116 @@ def run_pipeline(
     else:
         print(f"  Topic (provided)       : {topic}\n")
 
-    # ── Agent Alpha — Find Best Paper ───────────────────────────────────────
-    _print_agent_start(1, 3, "Alpha", "PubMed search → Find best paper for topic")
+    from agents.alpha import parse_alpha_papers
+
+    # ── Agent Alpha — Find ALL papers for topic ──────────────────────────────
+    _print_agent_start(1, 3, "Alpha", "PubMed search → Find ALL papers for topic")
     try:
         result.paper_list = run_alpha(topic)
+        result.papers     = parse_alpha_papers(result.paper_list)
         _print_agent_complete(1, 3, "Alpha")
-        _print_agent_output(result.paper_list, label="ALPHA — PAPER FOUND")
-        _save(result.paper_list, "alpha_paper_found.txt", save_outputs)
+        _print_agent_output(
+            result.paper_list,
+            label=f"ALPHA — {len(result.papers)} PAPER(S) FOUND"
+        )
+        _save(result.paper_list, "alpha_papers.txt", save_outputs)
+        if not result.papers:
+            result.errors.append("Alpha: no papers parsed from output")
+            result.duration_seconds = round(time.time() - start, 1)
+            return result
     except Exception as exc:
         result.errors.append(f"Alpha: {exc}")
         _print_agent_error(1, "Alpha", exc)
         result.duration_seconds = round(time.time() - start, 1)
-        return result   # Alpha is fatal — nothing to summarise without a paper
+        return result
 
-    # ── Agent Beta — Presentable Summary ─────────────────────────────────────
-    _print_agent_start(2, 3, "Beta", "Summarise paper → Key findings + Read More link")
-    try:
-        result.summaries = run_beta(paper_list=result.paper_list, topic=topic)
-        _print_agent_complete(2, 3, "Beta")
-        _print_agent_output(result.summaries, label="BETA — PAPER SUMMARY")
-        _save(result.summaries, "beta_summary.txt", save_outputs)
-    except Exception as exc:
-        result.errors.append(f"Beta: {exc}")
-        _print_agent_error(2, "Beta", exc)
-        result.duration_seconds = round(time.time() - start, 1)
-        return result   # Beta is fatal — no summary to write article from
+    n_papers = len(result.papers)
+    print(f"  {_C['cyan']}Processing {n_papers} paper(s) individually through Beta → Gamma → Delta{_C['reset']}\n")
 
-    # ── Extract authors + pubmed link from Alpha output for Delta ────────────
-    import re as _re
-    _authors_match = _re.search(
-        r"\*\*Authors?\*\*\s*[:\-]?\s*(.+?)(?:\n|$|\*\*)",
-        result.paper_list, _re.IGNORECASE
-    )
-    _pubmed_match = _re.search(
-        r"https://pubmed\.ncbi\.nlm\.nih\.gov/\d+/?",
-        result.paper_list
-    )
-    _extracted_authors   = _authors_match.group(1).strip() if _authors_match else ""
-    _extracted_pubmed    = _pubmed_match.group(0) if _pubmed_match else ""
+    # ── Per-Paper Loop: Beta → Gamma → Delta ─────────────────────────────────
+    for idx, paper in enumerate(result.papers, 1):
+        paper_label = f"Paper {idx}/{n_papers}: {paper.get('title','')[:60]}..."
+        print(f"\n{_C['bold']}{'─'*70}{_C['reset']}")
+        print(f"  {_C['bold']}{_C['yellow']}PROCESSING {paper_label}{_C['reset']}\n")
 
-    # Also try from paper metadata lines
-    if not _extracted_authors:
-        _auth_line = _re.search(r"^Authors\s*:\s*(.+)$", result.paper_list, _re.MULTILINE | _re.IGNORECASE)
-        if _auth_line:
-            _extracted_authors = _auth_line.group(1).strip()
+        # Format this paper as text for Beta/Gamma
+        paper_text = "\n".join([
+            f"Title    : {paper.get('title', '')}",
+            f"Authors  : {paper.get('authors', '')}",
+            f"Journal  : {paper.get('journal', '')}",
+            f"Published: {paper.get('published', '')}",
+            f"PMID     : {paper.get('pmid', '')}",
+            f"Link     : {paper.get('pubmed_link', paper.get('link', ''))}",
+            f"DOI      : {paper.get('doi', 'N/A')}",
+            f"Source   : {paper.get('source', 'PubMed')}",
+            f"Abstract : {paper.get('abstract', '')}",
+        ])
 
-    # ── Agent Gamma — Write Article (200-500 words) → Send for MA Review ─────
-    _print_agent_start(3, 3, "Gamma", "Write 200-500 word article → Submit for MA review")
-    try:
-        gamma_out = run_gamma(
-            topic=topic,
-            paper_list=result.paper_list,
-            summaries=result.summaries,
-        )
-        result.shareable_content = gamma_out["content"]
-        _print_agent_complete(3, 3, "Gamma")
-        _print_agent_output(result.shareable_content, label="GAMMA — ARTICLE FOR MA REVIEW")
-        _print_review_status(gamma_out)
-        _save(result.shareable_content, "gamma_article.txt", save_outputs)
-    except Exception as exc:
-        result.errors.append(f"Gamma: {exc}")
-        _print_agent_error(3, "Gamma", exc)
+        # ── Beta: Summarise this paper ──────────────────────────────────────
+        _print_agent_start(2, 3, "Beta", f"Summarising paper {idx}/{n_papers}")
+        beta_out = ""
+        try:
+            beta_out = run_beta(paper_list=paper_text, topic=topic)
+            result.summaries.append(beta_out)
+            _print_agent_complete(2, 3, "Beta")
+            _print_agent_output(beta_out, label=f"BETA — SUMMARY {idx}/{n_papers}")
+            _save(beta_out, f"beta_summary_paper{idx}.txt", save_outputs)
+        except Exception as exc:
+            result.errors.append(f"Beta[paper {idx}]: {exc}")
+            _print_agent_error(2, "Beta", exc)
+            result.summaries.append("")
+            continue   # skip Gamma + Delta for this paper if Beta fails
 
-    # ── Agent Delta — Portal Content Card (auto-generated from pipeline) ─────
-    _print_step("DELTA", "Generating portal content card...", "blue")
-    try:
-        result.content_card = run_delta(
-            topic=topic,
-            specialty=specialty,
-            therapy_area=therapy_area,
-            insights=result.summaries,
-            article=result.shareable_content,
-            llm_provider=provider,
-            authors=_extracted_authors,
-            pubmed_link=_extracted_pubmed,
-        )
-        _print_step("DELTA", "Portal content card generated", "green")
-        _print_delta_output(result.content_card)
-        _save(
-            json.dumps(result.content_card, indent=2),
-            "delta_content_card.json",
-            save_outputs,
-        )
-    except Exception as exc:
-        result.errors.append(f"Delta: {exc}")
-        _print_agent_error(4, "Delta", exc)
+        # ── Gamma: Write article for this paper ─────────────────────────────
+        _print_agent_start(3, 3, "Gamma", f"Writing article for paper {idx}/{n_papers}")
+        gamma_out = {}
+        try:
+            gamma_out = run_gamma(
+                topic=topic,
+                paper_list=paper_text,
+                summaries=beta_out,
+            )
+            result.articles.append(gamma_out["content"])
+            result.shareable_content = gamma_out["content"]   # keep last for legacy
+            _print_agent_complete(3, 3, "Gamma")
+            _print_agent_output(gamma_out["content"], label=f"GAMMA — ARTICLE {idx}/{n_papers}")
+            _print_review_status(gamma_out)
+            _save(gamma_out["content"], f"gamma_article_paper{idx}.txt", save_outputs)
+        except Exception as exc:
+            result.errors.append(f"Gamma[paper {idx}]: {exc}")
+            _print_agent_error(3, "Gamma", exc)
+            result.articles.append("")
+            continue
+
+        # ── Delta: Save one content card for this paper ──────────────────────
+        _print_step("DELTA", f"Saving content card for paper {idx}/{n_papers}...", "blue")
+        try:
+            card = run_delta(
+                topic=topic,
+                specialty=specialty,
+                therapy_area=therapy_area,
+                insights=beta_out,
+                article=gamma_out["content"],
+                llm_provider=provider,
+                authors=paper.get("authors", ""),
+                pubmed_link=paper.get("pubmed_link", paper.get("link", "")),
+            )
+            result.content_cards.append(card)
+            result.content_card = card   # keep last for legacy
+            _print_step("DELTA", f"Content card {idx}/{n_papers} saved", "green")
+            _print_delta_output(card)
+            _save(
+                json.dumps(card, indent=2),
+                f"delta_card_paper{idx}.json",
+                save_outputs,
+            )
+        except Exception as exc:
+            result.errors.append(f"Delta[paper {idx}]: {exc}")
+            _print_agent_error(4, "Delta", exc)
+            result.content_cards.append({})
+
+    print(f"\n{_C['bold']}{_C['green']}All {n_papers} paper(s) processed{_C['reset']}")
+    print(f"  Content cards saved: {len([c for c in result.content_cards if c])}/{n_papers}")
 
     result.duration_seconds = round(time.time() - start, 1)
     _print_footer(result)
@@ -419,16 +447,17 @@ def _print_delta_output(card: dict) -> None:
 
 def _print_footer(result: PipelineResult) -> None:
     w = 70
-    papers_line = ""
-    if result.paper_list:
-        # Count papers by looking for "### PAPER" headers in Alpha's output
-        import re
-        count = len(re.findall(r"###\s+PAPER\s+\d+", result.paper_list))
-        papers_line = f"\n  Papers Discovered : {count}" if count else ""
+    n_papers   = len(result.papers)
+    n_articles = len([a for a in result.articles if a])
+    n_cards    = len([c for c in result.content_cards if c])
 
     print(f"{'═' * w}")
     print(f"  {_C['bold']}{_C['green']}Pipeline complete in {result.duration_seconds}s{_C['reset']}")
-    print(f"  Topic            : {result.topic}{papers_line}")
+    print(f"  Topic            : {result.topic}")
+    print(f"  Papers Found     : {n_papers} (Alpha)")
+    print(f"  Summaries        : {len(result.summaries)} (Beta — one per paper)")
+    print(f"  Articles Written : {n_articles} (Gamma — one per paper)")
+    print(f"  Content Cards    : {n_cards} (Delta — one per paper → Pending MA Review)")
     if result.errors:
         print(f"  {_C['red']}Errors            : {result.errors}{_C['reset']}")
     print(f"{'═' * w}\n")

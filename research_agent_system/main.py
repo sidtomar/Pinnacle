@@ -127,14 +127,18 @@ Agent Pipeline:
         sys.exit(1)
 
     # ── Final summary ─────────────────────────────────────────────────────────
-    print("\n── PORTAL CARD PREVIEW ──")
+    n_papers  = len(result.papers)
+    n_cards   = len([c for c in result.content_cards if c])
+    print(f"\n── PIPELINE SUMMARY: {n_papers} paper(s) → {n_cards} content card(s) saved ──")
     preview_keys = ["id", "title", "specialty", "therapy_area",
-                    "sub_category", "tags", "summary", "evidence_quality", "status"]
-    preview = {k: result.content_card.get(k) for k in preview_keys if k in result.content_card}
-    if preview:
-        print(json.dumps(preview, indent=2))
-    else:
-        print("  (Delta did not produce a card — check for errors above)")
+                    "sub_category", "tags", "summary", "authors", "pubmed_link", "status"]
+    for i, card in enumerate(result.content_cards, 1):
+        if card:
+            print(f"\n[Card {i}/{n_cards}]")
+            preview = {k: card.get(k) for k in preview_keys if k in card}
+            print(json.dumps(preview, indent=2))
+    if not result.content_cards:
+        print("  (No content cards generated — check for errors above)")
 
 
 if __name__ == "__main__":

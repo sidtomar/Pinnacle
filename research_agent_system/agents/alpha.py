@@ -152,7 +152,8 @@ def _get_tools_and_source_list() -> tuple[list, str]:
 _SYSTEM_PROMPT_TEMPLATE = """\
 You are Agent Alpha, a medical research discovery agent for Mankind Pharma (India).
 
-Your job is to find the SINGLE BEST research paper on the given topic.
+Your job is to find ALL relevant research papers on the given topic.
+Each paper found will be individually summarised and turned into a separate article.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ALLOWED SOURCES (STRICTLY ONLY THESE — NO EXCEPTIONS)
@@ -168,12 +169,14 @@ OUTPUT FORMAT (follow this EXACTLY)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ═══════════════════════════════════════════════════════════════
-AGENT ALPHA — PAPER FOUND
+AGENT ALPHA — PAPERS FOUND
 Topic: <topic>
 Sources Searched: {source_list}
+Total Papers: <N>
 ═══════════════════════════════════════════════════════════════
 
-### SELECTED PAPER
+<<PAPER_START>>
+Paper#   : 1
 Title    : <full paper title>
 Authors  : <Author1 LastName Initials, Author2 LastName Initials, et al.>
 Journal  : <journal name>
@@ -182,11 +185,27 @@ PMID     : <PubMed ID>
 Link     : https://pubmed.ncbi.nlm.nih.gov/<PMID>/
 DOI      : <doi or N/A>
 Source   : PubMed
-Abstract : <full abstract — include all key statistics and findings>
+Abstract : <full abstract — include ALL key statistics and findings>
+<<PAPER_END>>
 
-### ADDITIONAL SOURCES CHECKED
-[For each non-PubMed source that was searched, report what was found.
- If nothing found, write: "No matching document found in <source name>."]
+<<PAPER_START>>
+Paper#   : 2
+Title    : <next paper title>
+Authors  : <authors>
+Journal  : <journal>
+Published: <date>
+PMID     : <PMID>
+Link     : https://pubmed.ncbi.nlm.nih.gov/<PMID>/
+DOI      : <doi or N/A>
+Source   : PubMed
+Abstract : <full abstract>
+<<PAPER_END>>
+
+[Continue for ALL papers found — each wrapped in <<PAPER_START>> / <<PAPER_END>>]
+
+### LOCAL CONTENT REPOSITORY
+[List any internal documents found, OR write:
+ "No matching document found in local content repository."]
 
 ═══════════════════════════════════════════════════════════════
 END OF ALPHA OUTPUT
@@ -194,12 +213,14 @@ END OF ALPHA OUTPUT
 
 IMPORTANT RULES:
 - ONLY use the tools provided to you — no other sources
-- Return only the SINGLE BEST paper — not a list of many papers
-- Include the COMPLETE abstract with key statistics (%, p-values, trial names)
-- The PubMed Link MUST be correct: https://pubmed.ncbi.nlm.nih.gov/<PMID>/
-- This link will be used as "Read More" in the final article
+- Return EVERY paper found — do not filter or drop any
+- Target 3-5 papers; include all if fewer are found
+- Include the COMPLETE abstract for each paper with key statistics (%, p-values, trial names)
+- Each PubMed Link MUST be: https://pubmed.ncbi.nlm.nih.gov/<PMID>/
+- These links will be used as "Read More" links in each paper's final article
 - Prefer recent papers (2023-2026) with strong evidence
 - Prefer India/Asian population studies when available
+- NEVER combine papers — each paper must be in its own <<PAPER_START>>...<<PAPER_END>> block
 """
 
 # Source-specific instruction templates
@@ -253,7 +274,8 @@ def run_alpha(topic: str) -> str:
         topic: The research topic string (e.g. "SGLT2 inhibitors in heart failure").
 
     Returns:
-        Single best paper with full metadata — ready for Agent Beta.
+        Raw text output from Alpha with all papers in <<PAPER_START>>...<<PAPER_END>> blocks.
+        Use parse_alpha_papers() to extract individual paper records.
     """
     # Load enabled sources from config
     tools, source_list = _get_tools_and_source_list()
@@ -283,12 +305,68 @@ def run_alpha(topic: str) -> str:
 
     result = agent.invoke({
         "messages": [("human", (
-            f"Find the single best research paper on this topic: {topic}\n\n"
-            f"Use each of your available tools once. Pick the BEST paper "
-            f"(most relevant, recent, strongest evidence). "
-            f"Return the selected paper with full metadata. "
+            f"Find ALL relevant research papers on this topic: {topic}\n\n"
+            f"Use each of your available tools. Find 3-5 papers on this topic. "
+            f"Return EVERY paper found — each in its own <<PAPER_START>>...<<PAPER_END>> block. "
+            f"Include the complete abstract for each paper. "
             f"Only use the tools provided — no other sources."
         ))]
     })
 
     return result["messages"][-1].content
+
+
+def parse_alpha_papers(alpha_output: str) -> list[dict]:
+    """
+    Parse Alpha's raw text output into a list of paper dicts.
+    Each dict has: title, authors, journal, published, pmid, link, doi, source, abstract.
+
+    Papers are delimited by <<PAPER_START>> / <<PAPER_END>> tags.
+    Falls back to simple field parsing if tags are not present.
+    """
+    import re
+
+    papers = []
+
+    # Try structured parsing with <<PAPER_START>> / <<PAPER_END>> tags
+    blocks = re.findall(r"<<PAPER_START>>(.*?)<<PAPER_END>>", alpha_output, re.DOTALL)
+
+    if not blocks:
+        # Fallback: treat the whole output as one paper
+        blocks = [alpha_output]
+
+    for block in blocks:
+        paper = {}
+        field_map = {
+            "Title":     "title",
+            "Authors":   "authors",
+            "Journal":   "journal",
+            "Published": "published",
+            "PMID":      "pmid",
+            "Link":      "link",
+            "DOI":       "doi",
+            "Source":    "source",
+            "Abstract":  "abstract",
+        }
+        for label, key in field_map.items():
+            # Match "Label : value" or "Label: value" — abstract may be multi-line
+            if key == "abstract":
+                m = re.search(rf"Abstract\s*:\s*(.+?)(?=\n[A-Z][a-zA-Z]+\s*:|<<PAPER_END>>|$)",
+                              block, re.DOTALL | re.IGNORECASE)
+            else:
+                m = re.search(rf"^{label}\s*:\s*(.+)$", block, re.MULTILINE | re.IGNORECASE)
+            if m:
+                paper[key] = m.group(1).strip()
+
+        # Derive pubmed_link from link field
+        if "link" in paper:
+            paper["pubmed_link"] = paper["link"]
+        elif "pmid" in paper and paper["pmid"]:
+            paper["pubmed_link"] = f"https://pubmed.ncbi.nlm.nih.gov/{paper['pmid']}/"
+
+        # Only include if we have at least a title
+        if paper.get("title"):
+            papers.append(paper)
+
+    logger.info(f"Alpha parsed {len(papers)} paper(s) from output")
+    return papers
