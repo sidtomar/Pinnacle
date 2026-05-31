@@ -1872,9 +1872,57 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
       <div id="ma-notice"></div>
       <div class="ms" style="border-top:none;padding-top:0;">Categorisation <span style="font-size:9px;font-weight:400;color:var(--text4);text-transform:none;letter-spacing:0;">(Edit as needed)</span></div>
       <label class="fl">Specialty</label>
-      <select class="fsel2" id="ma-cat"><option>Gynaecology</option><option>Cardiology</option><option>Paediatrics</option><option>Oncology</option><option>Dermatology</option><option>Diabetology</option><option>General Medicine</option></select>
+      <select class="fsel2" id="ma-cat">
+        <option value="">— Select Specialty —</option>
+        <option>Cardiology</option>
+        <option>Diabetology</option>
+        <option>Endocrinology</option>
+        <option>Gynaecology</option>
+        <option>Paediatrics</option>
+        <option>Dermatology</option>
+        <option>Oncology</option>
+        <option>Nephrology</option>
+        <option>Neurology</option>
+        <option>Pulmonology</option>
+        <option>Gastroenterology</option>
+        <option>Rheumatology</option>
+        <option>Ophthalmology</option>
+        <option>Orthopaedics</option>
+        <option>Urology</option>
+        <option>Psychiatry</option>
+        <option>Infectious Disease</option>
+        <option>General Medicine</option>
+        <option>Surgery</option>
+        <option>Emergency Medicine</option>
+        <option>Critical Care</option>
+      </select>
       <label class="fl">Therapy Area</label>
-      <select class="fsel2" id="ma-therapy"><option>PCOS</option><option>Fertility &amp; ART</option><option>High-risk Pregnancy</option><option>Heart Failure</option><option>Dyslipidaemia</option><option>Hypertension</option><option>Paediatric Nutrition</option><option>Immunisation</option><option>Acne &amp; Skin</option><option>GLP-1 Therapy</option></select>
+      <select class="fsel2" id="ma-therapy">
+        <option value="">— Select Therapy Area —</option>
+        <option>GLP-1 Therapy</option>
+        <option>Heart Failure</option>
+        <option>Hypertension</option>
+        <option>Dyslipidaemia</option>
+        <option>PCOS</option>
+        <option>Fertility &amp; ART</option>
+        <option>High-risk Pregnancy</option>
+        <option>Paediatric Nutrition</option>
+        <option>Immunisation</option>
+        <option>Acne &amp; Skin</option>
+        <option>Type 2 Diabetes</option>
+        <option>Insulin Resistance</option>
+        <option>Thyroid</option>
+        <option>Antibiotic Resistance</option>
+        <option>Infectious Disease</option>
+        <option>Ebola</option>
+        <option>Hanta Virus</option>
+        <option>Oncology</option>
+        <option>Renal Disease</option>
+        <option>Cardiovascular</option>
+        <option>Neurology</option>
+        <option>Gastroenterology</option>
+        <option>General Medicine</option>
+      </select>
       <label class="fl">Sub-category</label>
       <select class="fsel2" id="ma-sub"><option>Meta-Analysis / Systematic Review</option><option>Clinical Trial / RCT</option><option>Observational Study</option><option>Guideline / Consensus</option><option>Review Article</option><option>Real-World Evidence</option><option>Indian Population Study</option></select>
       <label class="fl">Clinical Relevance</label>
@@ -5878,7 +5926,7 @@ function plInjectIntoLibrary(card) {
     journal:    'PinnacleIQ Research Pipeline (AI-Generated)',
     year:       now.getFullYear().toString(),
     month:      MON[now.getMonth()],
-    authors:    'AI Pipeline · Alpha→Beta→Gamma→Delta',
+    authors:    card.authors || (card.pubmed_link ? 'See PubMed for author details' : 'Pinnacle Research Team | Mankind Pharma'),
     date:       now.toISOString().slice(0,10),
     cat:        card.specialty    || 'General Medicine',
     therapy:    card.therapy_area || 'General',
@@ -6929,8 +6977,8 @@ function mapAPIItemToPaper(item) {
     _apiSource: true,          // flag so action fns know to call the backend
     _apiId: item.id,           // real UUID for API calls (approve/reject/improve)
     title: item.title || item.topic || 'AI Generated Article',
-    journal: 'PinnacleIQ Research Pipeline (AI-Generated)',
-    authors: 'AI Pipeline · Alpha · Delta · et al.',
+    journal: item.source_journals || 'PinnacleIQ Research Pipeline (AI-Generated)',
+    authors: item.authors || item.pubmed_link || 'See PubMed for author details',
     month: d.toLocaleString('en-IN',{month:'long'}),
     year: d.getFullYear(),
     date: (item.created_at||'').slice(0,10),
@@ -6938,7 +6986,7 @@ function mapAPIItemToPaper(item) {
     abstract: rawContent || summary,
     cat: item.specialty || 'General',
     therapy: item.therapy_area || item.topic || '',
-    sub: item.specialty || '',
+    sub: item.sub_category || '',
     rec: 'All Specialists',
     rel: 'High',
     tags: [item.specialty, item.therapy_area, 'AI Pipeline'].filter(Boolean),

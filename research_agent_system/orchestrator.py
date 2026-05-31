@@ -268,6 +268,25 @@ def run_pipeline(
         result.duration_seconds = round(time.time() - start, 1)
         return result   # Beta is fatal — no summary to write article from
 
+    # ── Extract authors + pubmed link from Alpha output for Delta ────────────
+    import re as _re
+    _authors_match = _re.search(
+        r"\*\*Authors?\*\*\s*[:\-]?\s*(.+?)(?:\n|$|\*\*)",
+        result.paper_list, _re.IGNORECASE
+    )
+    _pubmed_match = _re.search(
+        r"https://pubmed\.ncbi\.nlm\.nih\.gov/\d+/?",
+        result.paper_list
+    )
+    _extracted_authors   = _authors_match.group(1).strip() if _authors_match else ""
+    _extracted_pubmed    = _pubmed_match.group(0) if _pubmed_match else ""
+
+    # Also try from paper metadata lines
+    if not _extracted_authors:
+        _auth_line = _re.search(r"^Authors\s*:\s*(.+)$", result.paper_list, _re.MULTILINE | _re.IGNORECASE)
+        if _auth_line:
+            _extracted_authors = _auth_line.group(1).strip()
+
     # ── Agent Gamma — Write Article (200-500 words) → Send for MA Review ─────
     _print_agent_start(3, 3, "Gamma", "Write 200-500 word article → Submit for MA review")
     try:
@@ -295,6 +314,8 @@ def run_pipeline(
             insights=result.summaries,
             article=result.shareable_content,
             llm_provider=provider,
+            authors=_extracted_authors,
+            pubmed_link=_extracted_pubmed,
         )
         _print_step("DELTA", "Portal content card generated", "green")
         _print_delta_output(result.content_card)
