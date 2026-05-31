@@ -3073,6 +3073,22 @@ let ROLE='pmt', CL_VIEW='grid', CL_TAB='all', CUR_ID=null, CUR_TAGS=[], CUR_REL=
 
 /* ══ UTILS ══ */
 function fmtDate(d){if(!d)return'—';const[y,m,dd]=d.split('-');const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(dd)} ${M[parseInt(m)-1]} ${y}`;}
+
+/* ── mdToHtml: convert markdown links, bold, and line breaks to HTML ── */
+function mdToHtml(text) {
+  if (!text) return '';
+  return text
+    // Markdown links: [text](url)
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">$1 ↗</a>')
+    // Raw PubMed URLs (not inside a markdown link)
+    .replace(/(?<!\()https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)\/?/g,
+      '<a href="https://pubmed.ncbi.nlm.nih.gov/$1/" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;">https://pubmed.ncbi.nlm.nih.gov/$1/ ↗</a>')
+    // Bold: **text**
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Newlines to <br>
+    .replace(/\n/g, '<br>');
+}
 function fmtMoney(n){return n>=100000?`₹${(n/100000).toFixed(1)}L`:n>=1000?`₹${(n/1000).toFixed(0)}K`:`₹${n}`;}
 function srcPill(s){return s==='pubmed'?'<span class="sp sp-pm">PubMed</span>':s==='upload'?'<span class="sp sp-up">MA Upload</span>':s==='pipeline'?'<span class="sp" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#5B21B6;border:1px solid #DDD6FE;">AI Pipeline</span>':'<span class="sp sp-lk">Link</span>';}
 function stBadge(s){return s==='approved'?'<span class="badge b-green">✅ Approved</span>':s==='pending'?'<span class="badge b-amber">⏳ Pending Review</span>':'<span class="badge b-red">❌ Rejected</span>';}
@@ -3465,9 +3481,24 @@ function openMADetail(id){
   if(p.pmid){pmEl.style.display='block';document.getElementById('ma-pmid').textContent='PMID: '+p.pmid;}else pmEl.style.display='none';
   const pdfEl=document.getElementById('ma-pdf-wrap');
   if(p.pdf){pdfEl.style.display='block';document.getElementById('ma-pdf-name').textContent=p.pdf;document.getElementById('ma-pdf-meta').textContent=`PDF · ${p.pdfSz}`;}else pdfEl.style.display='none';
-  document.getElementById('ma-abstract').textContent=p.abstract;
+  document.getElementById('ma-abstract').innerHTML = mdToHtml(p.abstract || '');
   document.getElementById('ma-summary').value=p.sum;
-  document.getElementById('ma-inforows').innerHTML=[['Journal',p.journal],['Authors',p.authors],['Published',`${p.month} ${p.year}`],['Recommended For',p.rec],p.pmid?['PubMed ID',p.pmid]:null].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
+
+  // Build Publication Details rows — including a clickable Read More link
+  const pubmLink = p._pubmed_link || p.pubmed_link || (p.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/` : '');
+  const readMoreRow = pubmLink
+    ? [`<span style="display:flex;align-items:center;gap:6px;">📖 Read Full Article</span>`,
+       `<a href="${pubmLink}" target="_blank" rel="noopener" style="color:var(--blue);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">View on PubMed ↗</a>`]
+    : null;
+
+  document.getElementById('ma-inforows').innerHTML=[
+    ['Journal', p.journal],
+    ['Authors', p.authors],
+    ['Published', `${p.month} ${p.year}`],
+    ['Recommended For', p.rec],
+    p.pmid ? ['PubMed ID', p.pmid] : null,
+    readMoreRow,
+  ].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
   document.getElementById('ma-cat').value=p.cat;
   document.getElementById('ma-therapy').value=p.therapy;
   document.getElementById('ma-sub').value=p.sub;
@@ -5873,7 +5904,7 @@ function plShowResults(card) {
     `<div class="pl-trend-row"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:2px;"><polyline points="1,10 3.5,5.5 6.5,8 9.5,3 12.5,5"/></svg>${t}</div>`).join('');
 
   // Article tab
-  const rart = document.getElementById('pl-res-article');  if (rart) rart.textContent = card.short_article || '—';
+  const rart = document.getElementById('pl-res-article');  if (rart) rart.innerHTML = mdToHtml(card.short_article || '—');
   // JSON tab
   const rjsn = document.getElementById('pl-res-json');    if (rjsn) rjsn.textContent = JSON.stringify(card, null, 2);
 
@@ -6978,7 +7009,8 @@ function mapAPIItemToPaper(item) {
     _apiId: item.id,           // real UUID for API calls (approve/reject/improve)
     title: item.title || item.topic || 'AI Generated Article',
     journal: item.source_journals || 'PinnacleIQ Research Pipeline (AI-Generated)',
-    authors: item.authors || item.pubmed_link || 'See PubMed for author details',
+    authors: item.authors || 'See PubMed for author details',
+    _pubmed_link: item.pubmed_link || '',
     month: d.toLocaleString('en-IN',{month:'long'}),
     year: d.getFullYear(),
     date: (item.created_at||'').slice(0,10),
