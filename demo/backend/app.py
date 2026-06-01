@@ -195,19 +195,35 @@ def start_pipeline(req: RunRequest, bg: BackgroundTasks):
             run_id=run_id,
         )
         # Persist completed content via the store abstraction
+        # Save ALL cards (one per paper) to SQLite
         run = pipeline_runs.get(run_id, {})
-        if run.get("status") == "completed" and run.get("content"):
-            content_id = store.save_content_card(run["content"])
-            pipeline_runs[run_id]["content_id"] = content_id
+        if run.get("status") == "completed":
+            all_cards = run.get("all_cards", [])
+            if not all_cards and run.get("content"):
+                all_cards = [run["content"]]  # backward compat: single card
+
+            saved_ids = []
+            for card in all_cards:
+                try:
+                    cid = store.save_content_card(card)
+                    saved_ids.append(cid)
+                    print(f"[App] Saved card: {card.get('title','')[:60]}... → {cid}")
+                except Exception as e:
+                    print(f"[App] Failed to save card: {e}")
+
+            pipeline_runs[run_id]["content_id"] = saved_ids[0] if saved_ids else None
+            pipeline_runs[run_id]["all_content_ids"] = saved_ids
+            print(f"[App] Pipeline saved {len(saved_ids)} card(s) to SQLite")
+
             # Notify MA team that new content is ready for review
             try:
-                card = run["content"]
+                first_card = all_cards[0] if all_cards else run.get("content", {})
                 notify_ma_new_content(
                     store,
-                    content_id,
-                    card.get("title", req.topic),
+                    saved_ids[0] if saved_ids else "",
+                    first_card.get("title", req.topic),
                     req.specialty,
-                    card.get("division", "All"),
+                    first_card.get("division", "All"),
                 )
             except Exception as e:
                 print(f"[App] Pipeline notification failed: {e}")

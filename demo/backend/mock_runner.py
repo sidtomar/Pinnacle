@@ -73,6 +73,10 @@ MOCK_LIBRARY = {
             "ACTION FOR YOUR PRACTICE: Review your current Type 2 Diabetes patients against 2025 guidelines at your next clinic session. "
             "Identify candidates with cardiovascular risk, HbA1c >7.5%, or significant weight concerns. Consider initiating semaglutide in your next eligible patient. "
             "The evidence is now unequivocal — GLP-1 receptor agonists save lives and improve quality of life.\n\n"
+            "---\n\n"
+            "📖 **Read the full article:** [GLP-1 RA Meta-Analysis 2025: Superior Glycaemic + CV Control](https://pubmed.ncbi.nlm.nih.gov/39102847/)\n\n"
+            "**Authors:** Nauck MA, Quast DR, Wefers J, Meier JJ, et al.\n"
+            "**Published:** 2025 | **Journal:** Diabetes Care (ADA)\n\n"
             "— Pinnacle Research Team, Mankind Pharma"
         ),
         "tags": ["GLP-1", "Semaglutide", "T2DM", "Cardiovascular", "HbA1c", "RCT", "Indian Population"],
@@ -149,6 +153,10 @@ MOCK_LIBRARY = {
             "SGLT2i benefit is independent of baseline HbA1c, EF status, or diabetes history. Every HF admission is an opportunity to initiate this "
             "life-saving therapy. The evidence is now Class I — strongest possible recommendation. Don't delay. Your next suitable HF patient should "
             "receive SGLT2i at their next admission.\n\n"
+            "---\n\n"
+            "📖 **Read the full article:** [EMPEROR-Reduced 3-Year Extended Follow-Up: Empagliflozin in HFrEF](https://pubmed.ncbi.nlm.nih.gov/38291234/)\n\n"
+            "**Authors:** Packer M, Anker SD, Butler J, Filippatos G, et al.\n"
+            "**Published:** 2025 | **Journal:** New England Journal of Medicine\n\n"
             "— Pinnacle Research Team, Mankind Pharma"
         ),
         "tags": ["SGLT2", "Heart Failure", "Empagliflozin", "Dapagliflozin", "HFrEF", "HFpEF", "ESC 2025"],
@@ -223,6 +231,10 @@ MOCK_LIBRARY = {
             "highly tolerable alternative with superior fertility outcomes. The evidence is compelling: switch metformin-intolerant PCOS patients to "
             "myo-inositol 4g/day at your next consultation. Your lean PCOS patients deserve better outcomes than metformin provides. Inositol is the "
             "evidence-based alternative they've been waiting for.\n\n"
+            "---\n\n"
+            "📖 **Read the full article:** [Myo-Inositol vs Metformin in PCOS: 2025 Systematic Review](https://pubmed.ncbi.nlm.nih.gov/38712089/)\n\n"
+            "**Authors:** Unfer V, Grillone R, Laganà AS, Bizzarri M, et al.\n"
+            "**Published:** 2025 | **Journal:** Fertility and Sterility\n\n"
             "— Pinnacle Research Team, Mankind Pharma"
         ),
         "tags": ["PCOS", "Inositol", "Metformin", "Menstrual Regularity", "Fertility", "Indian Population"],
@@ -631,6 +643,9 @@ def _generic_content(topic: str, specialty: str, therapy_area: str) -> dict:
             f"WHY IT MATTERS: Your {specialty.lower()} patients stand to benefit from updated "
             f"management approaches — combination strategies now show 40% better outcomes.\n\n"
             f"ACTION: Review your current {therapy_area} patients against 2025 guidelines at your next clinic.\n\n"
+            f"---\n\n"
+            f"📖 **Read the full article:** [{topic}: 2025 Evidence Update](https://pubmed.ncbi.nlm.nih.gov/)\n\n"
+            f"**Authors:** International {specialty} Research Consortium, et al.\n\n"
             f"— Pinnacle Research Team, Mankind Pharma"
         ),
         "tags": [topic.split()[0], specialty, therapy_area, "RCT", "Indian Population", "2025 Guidelines"],
@@ -767,18 +782,67 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
     update("delta", 92, "🗂️  Agent Delta: Generating structured JSON content card...")
     update("delta", 98, "✅ Agent Delta: Saving to Pinnacle Content Library...")
 
+    # ── Build one content card per source paper ───────────────────────────────
+    # Each card gets its own title, authors, pubmed_link, short_article with Read More
+    per_paper_cards = []
+    for i, src in enumerate(sources):
+        pmid = ""
+        if "pubmed.ncbi.nlm.nih.gov" in src.get("url", ""):
+            pmid = src["url"].rstrip("/").split("/")[-1]
+        pm_link = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else src.get("url", "")
+        src_title   = src.get("title", f"{topic} — Paper {i+1}")
+        src_authors = src.get("authors", f"International {specialty} Research Consortium, et al.")
+        src_journal = src.get("journal", "PubMed Central / NCBI")
+        src_snippet = src.get("snippet", "")
+
+        # Build a per-paper short_article WITH Read More link
+        paper_article = (
+            f"RESEARCH UPDATE: {src_title}\n\n"
+            f"{src_snippet}\n\n"
+            f"This paper provides important insights for {specialty} practice in "
+            f"{therapy_area}. The findings are directly relevant to clinical decision-making "
+            f"and patient management in the Indian healthcare context.\n\n"
+            f"---\n\n"
+            f"📖 **Read the full article:** [{src_title}]({pm_link})\n\n"
+            f"**Authors:** {src_authors}\n"
+            f"**Journal:** {src_journal}\n\n"
+            f"*— Pinnacle Research Team | Mankind Pharma*"
+        )
+
+        card = {
+            "topic":        topic,
+            "title":        src_title[:120],
+            "specialty":    content.get("specialty", specialty),
+            "therapy_area": content.get("therapy_area", therapy_area),
+            "sub_category": content.get("sub_category", "Review Article"),
+            "tags":         content.get("tags", [topic.split()[0], specialty, therapy_area]),
+            "summary":      src_snippet[:300] if src_snippet else content.get("summary", ""),
+            "key_findings":      content.get("key_findings", []),
+            "clinical_insights": content.get("clinical_insights", ""),
+            "recommendations":   content.get("recommendations", []),
+            "emerging_trends":   content.get("emerging_trends", []),
+            "evidence_quality":  content.get("evidence_quality", ""),
+            "short_article":     paper_article,
+            "authors":           src_authors,
+            "pubmed_link":       pm_link,
+            "source_journals":   src_journal,
+            "pmid":              pmid or None,
+            "doi":               content.get("doi"),
+            "publication_date":  content.get("publication_date"),
+            "relevant_doctor_specialties": content.get("relevant_doctor_specialties", specialty),
+            "whatsapp_summary":  src_snippet[:200] if src_snippet else content.get("whatsapp_summary", ""),
+        }
+        per_paper_cards.append(card)
+
     # ── Pipeline complete ─────────────────────────────────────────────────────
     run_store[run_id].update({
         "status":        "completed",
         "progress":      100,
         "current_agent": "done",
         "status_msg":    "Pipeline complete. Content ready for MA review.",
-        "content": {
-            "topic":        topic,
-            "specialty":    specialty,
-            "therapy_area": therapy_area,
-            **content,
-        },
+        # Store ALL cards — app.py will save each one to SQLite
+        "content":       per_paper_cards[0] if per_paper_cards else content,
+        "all_cards":     per_paper_cards,
     })
 
     # Delta done → publish card preview for UI (one card per paper)
@@ -786,6 +850,6 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
         "card_title":    content["title"],
         "tags":          content["tags"],
         "sub_category":  content["sub_category"],
-        "cards_saved":   len(sources),
-        "summary":       f"✅ {len(sources)} content card(s) saved · Pending MA Review",
+        "cards_saved":   len(per_paper_cards),
+        "summary":       f"✅ {len(per_paper_cards)} content card(s) saved · Pending MA Review",
     }
