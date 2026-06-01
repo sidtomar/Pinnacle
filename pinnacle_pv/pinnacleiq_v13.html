@@ -5604,7 +5604,7 @@ function plRenderAgentOutput(agent, output) {
     if (papers.length) {
       html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
         <span style="background:var(--navy);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">PubMed</span>
-        ${papers.length} article${papers.length!==1?'s':''} found
+        <strong style="font-size:13px;color:var(--navy);">${papers.length}</strong> article${papers.length!==1?'s':''} found
       </div>`;
       papers.forEach((p, idx) => {
         const isPubmed = p.url && p.url.includes('pubmed');
@@ -5641,7 +5641,7 @@ function plRenderAgentOutput(agent, output) {
       const EXT_ICON = {docx:'📝', xlsx:'📊', pdf:'📕', txt:'📄'};
       html += `<div class="pl-out-hdr" style="margin-top:14px;margin-bottom:8px;">
         <span style="background:var(--teal);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Local Repo</span>
-        ${docs.length} internal document${docs.length!==1?'s':''} found
+        <strong style="font-size:13px;color:var(--teal);">${docs.length}</strong> internal document${docs.length!==1?'s':''} found
       </div>`;
       docs.forEach(d => {
         html += `<div class="pl-src-item" style="border:1.5px solid var(--teal-bd);border-radius:10px;padding:11px 14px;background:var(--teal-bg);margin-bottom:7px;border-left:4px solid var(--teal);">
@@ -5668,7 +5668,7 @@ function plRenderAgentOutput(agent, output) {
     if (summaries.length) {
       html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
         <span style="background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Beta</span>
-        ${summaries.length} paper${summaries.length!==1?'s':''} summarised
+        <strong style="font-size:13px;color:#7C3AED;">${summaries.length}</strong> paper${summaries.length!==1?'s':''} summarised
       </div>`;
       summaries.forEach(s => {
         html += `<div style="border:1.5px solid var(--purple-bd);border-radius:10px;padding:11px 14px;background:var(--purple-bg);margin-bottom:9px;border-left:4px solid var(--purple);">
@@ -5697,7 +5697,7 @@ function plRenderAgentOutput(agent, output) {
     if (messages.length) {
       html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
         <span style="background:var(--green);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Gamma</span>
-        ${messages.length} shareable article${messages.length!==1?'s':''} written · ${wc} words
+        <strong style="font-size:13px;color:var(--green);">${messages.length}</strong> shareable article${messages.length!==1?'s':''} written · <strong>${wc}</strong> words
       </div>`;
       messages.forEach(m => {
         html += `<div style="border:1.5px solid var(--green-bd);border-radius:10px;padding:12px 14px;background:var(--green-bg);margin-bottom:9px;border-left:4px solid var(--green);">
@@ -5708,7 +5708,7 @@ function plRenderAgentOutput(agent, output) {
             </div>` : ''}
           ${m.authors ? `<div style="font-size:10px;color:var(--text3);margin-bottom:5px;">👤 ${m.authors} · ${m.journal||''}</div>` : ''}
           <a href="${m.pubmed_link}" target="_blank" rel="noopener" style="font-size:10.5px;color:var(--blue);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
-            📖 Read More on PubMed ↗
+            📖 Read More.. ↗
           </a>
         </div>`;
       });
@@ -5724,7 +5724,7 @@ function plRenderAgentOutput(agent, output) {
 
     html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
       <span style="background:linear-gradient(135deg,var(--gold),#D97706);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Delta</span>
-      ${cardCount} content card${cardCount!==1?'s':''} saved to library
+      <strong style="font-size:13px;color:#D97706;">${cardCount}</strong> content card${cardCount!==1?'s':''} saved to library
     </div>`;
 
     if (cards.length) {
@@ -5736,7 +5736,7 @@ function plRenderAgentOutput(agent, output) {
           <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">${c.sub_category || ''}</div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">${cTags}</div>
           ${c.pubmed_link ? `<a href="${c.pubmed_link}" target="_blank" rel="noopener" style="font-size:10.5px;color:var(--blue);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
-            📖 Read More on PubMed ↗
+            📖 Read More.. ↗
           </a>` : ''}
         </div>`;
       });
@@ -5751,7 +5751,7 @@ function plRenderAgentOutput(agent, output) {
     }
 
     html += `<div style="font-size:10.5px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:6px;padding:6px 10px;color:var(--amber);font-weight:600;display:flex;align-items:center;gap:5px;margin-top:8px;">
-      ⏳ Pending MA Review · ${cardCount} card${cardCount!==1?'s':''} saved to Content Library
+      ⏳ Pending MA Review · <strong>${cardCount}</strong> card${cardCount!==1?'s':''} saved to Content Library
     </div>`;
   }
 
