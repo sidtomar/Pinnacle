@@ -2856,7 +2856,7 @@ Would love your thoughts at your convenience!
 
 <script>
 /* ══════════════════════ DATA ══════════════════════ */
-const ALL_PAPERS = [
+let ALL_PAPERS = [
   {id:1,status:'pending',src:'pubmed',title:'Inositol vs Metformin in PCOS: A Systematic Review and Meta-Analysis',journal:'Fertility & Sterility (Asia-Pacific)',year:'2025',month:'Mar',authors:'Sharma RK, Nair P, Krishnamurthy A, et al.',pmid:'39124578',date:'2025-04-30',cat:'Gynaecology',therapy:'PCOS',sub:'Meta-Analysis / Systematic Review',rel:'High',tags:['PCOS','Inositol','Metformin','Insulin Resistance'],rec:'PCOS-focused Gynaecs',abstract:'Background: PCOS affects 6–12% of reproductive-age women. Metformin is standard but causes GI side effects.\n\nMethods: Meta-analysis of 18 RCTs (n=2,847) comparing myo-inositol to metformin.\n\nResults: Comparable insulin sensitisation (SMD 0.42 vs 0.38; p=0.61) with fewer GI adverse events (OR 0.28; p<0.001). Menstrual regularity 78% vs 71% at 6 months.\n\nConclusion: Myo-inositol is a viable, better-tolerated alternative.',sum:'Meta-analysis of 18 RCTs (n=2,847): myo-inositol achieves comparable insulin sensitisation with significantly fewer GI side effects. 78% menstrual regularity at 6 months. Key for PCOS patients with GI intolerance to metformin.'},
   {id:2,status:'pending',src:'pubmed',title:'Micronutrient Deficiency in Children Under 5: South Asian Multicentre Study 2024',journal:'Lancet Regional Health — South-East Asia',year:'2024',month:'Nov',authors:'Kumar S, Patil R, Iyengar M, et al.',pmid:'38876241',date:'2025-04-30',cat:'Paediatrics',therapy:'Paediatric Nutrition',sub:'Observational Study',rel:'High',tags:['Paediatric Nutrition','Iron Deficiency','Zinc','South Asia'],rec:'Paediatricians',abstract:'Cross-sectional study, 6 South Asian countries, n=14,800 children. Iron deficiency 62%; zinc 45%; Vitamin D insufficiency 78% urban; B12 deficiency 38%. Co-deficiency (≥2) in 41%.',sum:'6-country study (n=14,800): 62% iron-deficient, 45% zinc-deficient, 78% Vitamin D-insufficient in urban children. High relevance for paediatricians counselling on early supplementation.'},
   {id:3,status:'pending',src:'pubmed',title:'Paediatric Vaccination Schedule Update 2025: IAP Position Statement',journal:'Indian Pediatrics',year:'2025',month:'Jan',authors:'Indian Academy of Pediatrics (IAP)',pmid:'39034122',date:'2025-04-28',cat:'Paediatrics',therapy:'Immunisation',sub:'Guideline / Consensus',rel:'Medium',tags:['Vaccination','IAP','Immunisation'],rec:'Paediatricians',abstract:'IAP updated immunisation schedule for 2025. Key changes: revised rotavirus timing, meningococcal conjugate vaccine now recommended, HPV expanded to boys.',sum:'IAP 2025: revised rotavirus timing, meningococcal conjugate recommended, HPV expanded to boys. Essential update for all paediatricians.'},
@@ -3081,8 +3081,8 @@ function mdToHtml(text) {
     // Markdown links: [text](url)
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">$1 ↗</a>')
-    // Raw PubMed URLs (not inside a markdown link)
-    .replace(/(?<!\()https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)\/?/g,
+    // Raw PubMed URLs (not inside href="" or markdown link)
+    .replace(/(?<![("])https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/(\d+)\/?/g,
       '<a href="https://pubmed.ncbi.nlm.nih.gov/$1/" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;">https://pubmed.ncbi.nlm.nih.gov/$1/ ↗</a>')
     // Bold: **text**
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
