@@ -182,14 +182,41 @@ def run_delta(
     llm = get_llm(temperature=0.0)
     chain = _DELTA_PROMPT | llm | JsonOutputParser()
 
-    # LLM extracts/generates the content-specific fields
-    extracted = chain.invoke({
-        "topic":        topic,
-        "specialty":    specialty,
-        "therapy_area": therapy_area,
-        "insights":     insights,
-        "article":      article,
-    })
+    # LLM extracts/generates the content-specific fields — retry up to 3 times
+    # because OpenRouter occasionally returns malformed JSON
+    extracted = None
+    last_err = None
+    for attempt in range(3):
+        try:
+            extracted = chain.invoke({
+                "topic":        topic,
+                "specialty":    specialty,
+                "therapy_area": therapy_area,
+                "insights":     insights,
+                "article":      article,
+            })
+            break  # success
+        except Exception as exc:
+            last_err = exc
+            print(f"[Delta] JSON parse attempt {attempt+1}/3 failed: {exc}")
+            if attempt < 2:
+                import time
+                time.sleep(2)  # brief pause before retry
+
+    if extracted is None:
+        # All retries failed — build a minimal fallback card from available data
+        print(f"[Delta] All 3 attempts failed — using fallback card")
+        extracted = {
+            "title":             f"{topic}: Evidence Update",
+            "sub_category":      "Review Article",
+            "tags":              [specialty, therapy_area],
+            "summary":           article[:300] if article else insights[:300] if insights else "",
+            "key_findings":      [],
+            "clinical_insights": "",
+            "recommendations":   [],
+            "emerging_trends":   [],
+            "evidence_quality":  "Unable to parse — review article directly",
+        }
 
     # Build the complete card — combining LLM output with pipeline metadata
     card = {

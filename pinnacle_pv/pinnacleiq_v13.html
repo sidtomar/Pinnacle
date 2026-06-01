@@ -7000,7 +7000,7 @@ function mapAPIItemToPaper(item) {
   const statusMap = {pending_review:'pending', approved:'approved', rejected:'rejected', improvement_requested:'pending'};
   const d = item.created_at ? new Date(item.created_at) : new Date();
   // Extract a readable summary from the AI-generated content
-  const rawContent = item.content || item.article || '';
+  const rawContent = item.short_article || item.content || item.article || '';
   const summary = rawContent.replace(/#+\s*/g,'').slice(0,220).trim() || item.topic || '';
   return {
     // String ID prefixed with 'api-' to avoid collisions with static numeric IDs
