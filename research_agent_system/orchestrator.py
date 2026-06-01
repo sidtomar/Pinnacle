@@ -290,43 +290,65 @@ def run_pipeline(
             f"Abstract : {paper.get('abstract', '')}",
         ])
 
-        # ── Beta: Summarise this paper ──────────────────────────────────────
+        # ── Beta: Summarise this paper (with retry) ─────────────────────────
         _print_agent_start(2, 3, "Beta", f"Summarising paper {idx}/{n_papers}")
         beta_out = ""
-        try:
-            beta_out = run_beta(paper_list=paper_text, topic=topic)
+        beta_ok = False
+        for attempt in range(3):
+            try:
+                beta_out = run_beta(paper_list=paper_text, topic=topic)
+                beta_ok = True
+                break
+            except Exception as exc:
+                print(f"  {_C['yellow']}Beta attempt {attempt+1}/3 failed: {exc}{_C['reset']}")
+                if attempt < 2:
+                    time.sleep(3)
+        if beta_ok:
             result.summaries.append(beta_out)
             _print_agent_complete(2, 3, "Beta")
             _print_agent_output(beta_out, label=f"BETA — SUMMARY {idx}/{n_papers}")
             _save(beta_out, f"beta_summary_paper{idx}.txt", save_outputs)
-        except Exception as exc:
-            result.errors.append(f"Beta[paper {idx}]: {exc}")
-            _print_agent_error(2, "Beta", exc)
+        else:
+            result.errors.append(f"Beta[paper {idx}]: failed after 3 attempts")
+            _print_agent_error(2, "Beta", Exception("failed after 3 attempts"))
             result.summaries.append("")
+            result.articles.append("")
+            result.content_cards.append({})
             continue   # skip Gamma + Delta for this paper if Beta fails
 
-        # ── Gamma: Write article for this paper ─────────────────────────────
+        # ── Gamma: Write article for this paper (with retry) ────────────────
         _print_agent_start(3, 3, "Gamma", f"Writing article for paper {idx}/{n_papers}")
         gamma_out = {}
-        try:
-            gamma_out = run_gamma(
-                topic=topic,
-                paper_list=paper_text,
-                summaries=beta_out,
-            )
+        gamma_ok = False
+        for attempt in range(3):
+            try:
+                gamma_out = run_gamma(
+                    topic=topic,
+                    paper_list=paper_text,
+                    summaries=beta_out,
+                )
+                gamma_ok = True
+                break
+            except Exception as exc:
+                print(f"  {_C['yellow']}Gamma attempt {attempt+1}/3 failed: {exc}{_C['reset']}")
+                if attempt < 2:
+                    time.sleep(3)
+        if gamma_ok:
             result.articles.append(gamma_out["content"])
             result.shareable_content = gamma_out["content"]   # keep last for legacy
             _print_agent_complete(3, 3, "Gamma")
             _print_agent_output(gamma_out["content"], label=f"GAMMA — ARTICLE {idx}/{n_papers}")
             _print_review_status(gamma_out)
             _save(gamma_out["content"], f"gamma_article_paper{idx}.txt", save_outputs)
-        except Exception as exc:
-            result.errors.append(f"Gamma[paper {idx}]: {exc}")
-            _print_agent_error(3, "Gamma", exc)
+        else:
+            result.errors.append(f"Gamma[paper {idx}]: failed after 3 attempts")
+            _print_agent_error(3, "Gamma", Exception("failed after 3 attempts"))
             result.articles.append("")
-            continue
+            result.content_cards.append({})
+            continue  # skip Delta for this paper if Gamma fails
 
         # ── Delta: Save one content card for this paper ──────────────────────
+        # Delta already has internal retry (3 attempts + fallback) in delta.py
         _print_step("DELTA", f"Saving content card for paper {idx}/{n_papers}...", "blue")
         try:
             card = run_delta(

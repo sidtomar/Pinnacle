@@ -5718,13 +5718,14 @@ function plRenderAgentOutput(agent, output) {
   } else if (agent === 'delta' && output.card_title) {
     const tagsHtml = (output.tags || []).map(t =>
       `<span class="pl-card-tag">${t}</span>`).join(' ');
+    const cardCount = output.cards_saved || 1;
     html = `<div style="border:1.5px solid var(--gold-bd);border-radius:10px;padding:12px 14px;background:var(--gold-bg);">
-      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;">Content Card Generated</div>
+      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;">Content Card${cardCount > 1 ? 's' : ''} Generated</div>
       <div style="font-size:12.5px;font-weight:800;color:var(--navy);line-height:1.4;margin-bottom:8px;">${output.card_title}</div>
       <div style="font-size:10.5px;color:var(--text3);margin-bottom:8px;">${output.sub_category || ''}</div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px;">${tagsHtml}</div>
       <div style="font-size:10.5px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:6px;padding:6px 10px;color:var(--amber);font-weight:600;display:flex;align-items:center;gap:5px;">
-        ⏳ Pending MA Review · Saved to Content Library
+        ⏳ Pending MA Review · ${cardCount} card${cardCount > 1 ? 's' : ''} saved to Content Library
       </div>
     </div>`;
   }

@@ -665,8 +665,8 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
     print(f"[MockRunner] topic='{topic}' matched_key='{key}' using_mock={'YES' if key else 'NO'}")
 
     # ── Build per-paper shareable messages for Gamma output ─────────────────────
-    # Create shareable WhatsApp-style messages for the top sources
-    top_sources   = sources[:3] if sources else []
+    # Create shareable WhatsApp-style messages for ALL sources (one per paper)
+    top_sources   = sources or []
     ga_messages   = []
     for i, src in enumerate(top_sources, 1):
         pmid = ""
@@ -733,7 +733,7 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
                 "title":       src["title"][:80],
                 "key_finding": src.get("snippet", "")[:200],
             }
-            for i, src in enumerate(sources[:5])
+            for i, src in enumerate(sources)
         ],
         "overall_finding": content["key_findings"][0] if content.get("key_findings") else "",
         "papers_summarised": len(sources),
@@ -781,10 +781,11 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
         },
     })
 
-    # Delta done → publish card preview for UI
+    # Delta done → publish card preview for UI (one card per paper)
     run_store[run_id]["agent_outputs"]["delta"] = {
-        "card_title":   content["title"],
-        "tags":         content["tags"],
-        "sub_category": content["sub_category"],
-        "summary":      "✅ Content card saved · Pending MA Review",
+        "card_title":    content["title"],
+        "tags":          content["tags"],
+        "sub_category":  content["sub_category"],
+        "cards_saved":   len(sources),
+        "summary":       f"✅ {len(sources)} content card(s) saved · Pending MA Review",
     }
