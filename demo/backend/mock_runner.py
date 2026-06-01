@@ -854,10 +854,23 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
     })
 
     # Delta done → publish card preview for UI (one card per paper)
+    # Build per-card summaries for the UI
+    delta_cards_ui = []
+    for j, pc in enumerate(per_paper_cards, 1):
+        delta_cards_ui.append({
+            "card_no":      j,
+            "title":        pc.get("title", ""),
+            "authors":      pc.get("authors", ""),
+            "pubmed_link":  pc.get("pubmed_link", ""),
+            "sub_category": pc.get("sub_category", ""),
+            "tags":         pc.get("tags", [])[:5],
+        })
+
     run_store[run_id]["agent_outputs"]["delta"] = {
         "card_title":    content["title"],
         "tags":          content["tags"],
         "sub_category":  content["sub_category"],
         "cards_saved":   len(per_paper_cards),
+        "per_paper_cards": delta_cards_ui,
         "summary":       f"✅ {len(per_paper_cards)} content card(s) saved · Pending MA Review",
     }

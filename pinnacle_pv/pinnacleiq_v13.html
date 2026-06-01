@@ -4310,6 +4310,9 @@ function buildMsgPreview(){
     // Source journals — always shown for credibility
     const journals = _deriveJournals(p);
     if(journals) paperSection += `\n\n📚 Based on: ${journals}`;
+    // Read More link — PubMed source for the article
+    const readLink = p._pubmed_link || p.pubmed_link || '';
+    if(readLink) paperSection += `\n\n📖 Read More: ${readLink}`;
   }
   const msg = `Dear Dr. ${firstName},\n\nHope this message finds you well!${paperSection}\n\nWould love to hear your thoughts.\n\n— Jijo, Team Life · Mankind Pharma`;
   document.getElementById('sh-msg-ta').value = msg;
@@ -5714,19 +5717,41 @@ function plRenderAgentOutput(agent, output) {
         <div class="pl-art-preview">${excerpt}…</div>`;
     }
 
-  /* ── AGENT DELTA — Content card preview ──────────────────────────────── */
+  /* ── AGENT DELTA — Per-paper content card previews ────────────────────── */
   } else if (agent === 'delta' && output.card_title) {
-    const tagsHtml = (output.tags || []).map(t =>
-      `<span class="pl-card-tag">${t}</span>`).join(' ');
+    const cards = output.per_paper_cards || [];
     const cardCount = output.cards_saved || 1;
-    html = `<div style="border:1.5px solid var(--gold-bd);border-radius:10px;padding:12px 14px;background:var(--gold-bg);">
-      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;">Content Card${cardCount > 1 ? 's' : ''} Generated</div>
-      <div style="font-size:12.5px;font-weight:800;color:var(--navy);line-height:1.4;margin-bottom:8px;">${output.card_title}</div>
-      <div style="font-size:10.5px;color:var(--text3);margin-bottom:8px;">${output.sub_category || ''}</div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px;">${tagsHtml}</div>
-      <div style="font-size:10.5px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:6px;padding:6px 10px;color:var(--amber);font-weight:600;display:flex;align-items:center;gap:5px;">
-        ⏳ Pending MA Review · ${cardCount} card${cardCount > 1 ? 's' : ''} saved to Content Library
-      </div>
+
+    html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
+      <span style="background:linear-gradient(135deg,var(--gold),#D97706);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Delta</span>
+      ${cardCount} content card${cardCount!==1?'s':''} saved to library
+    </div>`;
+
+    if (cards.length) {
+      cards.forEach(c => {
+        const cTags = (c.tags || []).map(t => `<span class="pl-card-tag">${t}</span>`).join(' ');
+        html += `<div style="border:1.5px solid var(--gold-bd);border-radius:10px;padding:11px 14px;background:var(--gold-bg);margin-bottom:9px;border-left:4px solid var(--gold);">
+          <div style="font-size:11.5px;font-weight:700;color:#92400E;margin-bottom:4px;">Card ${c.card_no}: ${c.title}</div>
+          ${c.authors ? `<div style="font-size:10px;color:var(--text3);margin-bottom:4px;">👤 ${c.authors}</div>` : ''}
+          <div style="font-size:10px;color:var(--text3);margin-bottom:6px;">${c.sub_category || ''}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">${cTags}</div>
+          ${c.pubmed_link ? `<a href="${c.pubmed_link}" target="_blank" rel="noopener" style="font-size:10.5px;color:var(--blue);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+            📖 Read More on PubMed ↗
+          </a>` : ''}
+        </div>`;
+      });
+    } else {
+      // Fallback: single card view
+      const tagsHtml = (output.tags || []).map(t => `<span class="pl-card-tag">${t}</span>`).join(' ');
+      html += `<div style="border:1.5px solid var(--gold-bd);border-radius:10px;padding:12px 14px;background:var(--gold-bg);">
+        <div style="font-size:12.5px;font-weight:800;color:var(--navy);line-height:1.4;margin-bottom:8px;">${output.card_title}</div>
+        <div style="font-size:10.5px;color:var(--text3);margin-bottom:8px;">${output.sub_category || ''}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px;">${tagsHtml}</div>
+      </div>`;
+    }
+
+    html += `<div style="font-size:10.5px;background:var(--amber-bg);border:1px solid var(--amber-bd);border-radius:6px;padding:6px 10px;color:var(--amber);font-weight:600;display:flex;align-items:center;gap:5px;margin-top:8px;">
+      ⏳ Pending MA Review · ${cardCount} card${cardCount!==1?'s':''} saved to Content Library
     </div>`;
   }
 
