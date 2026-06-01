@@ -245,6 +245,7 @@ def pipeline_status(run_id: str):
         "current_agent":  run["current_agent"],
         "status_msg":     run["status_msg"],
         "content_id":     run.get("content_id"),
+        "all_content_ids": run.get("all_content_ids", []),
         "agent_outputs":  run.get("agent_outputs", {}),
     }
 

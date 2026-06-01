@@ -5825,14 +5825,20 @@ async function plPoll(runId, btn) {
       if (pb) pb.style.width = '100%';
       if (op) op.textContent = '100%';
 
-      if (d.content_id) {
+      // Fetch and inject ALL cards (one per paper)
+      const allIds = d.all_content_ids || [];
+      if (allIds.length > 0) {
+        plFetchAndShowAll(allIds, btn);
+      } else if (d.content_id) {
         plFetchAndShow(d.content_id, btn);
       } else {
         // content_id set slightly after — retry once
         setTimeout(async () => {
           const r2 = await fetch(PL_API + '/pipeline/status/' + runId);
           const d2 = await r2.json();
-          if (d2.content_id) plFetchAndShow(d2.content_id, btn);
+          const ids2 = d2.all_content_ids || [];
+          if (ids2.length > 0) plFetchAndShowAll(ids2, btn);
+          else if (d2.content_id) plFetchAndShow(d2.content_id, btn);
           else plResetBtn(btn);
         }, 2500);
       }
@@ -5844,6 +5850,27 @@ async function plPoll(runId, btn) {
   } catch(e) { console.error('Poll error:', e); }
 }
 
+async function plFetchAndShowAll(contentIds, btn) {
+  // Fetch and inject ALL cards (one per paper) into the library
+  let savedCount = 0;
+  let lastCard = null;
+  for (const cid of contentIds) {
+    try {
+      const res = await fetch(PL_API + '/content/' + cid);
+      if (!res.ok) continue;
+      const card = await res.json();
+      plInjectIntoLibrary(card);
+      lastCard = card;
+      savedCount++;
+    } catch(e) { console.error('Fetch card failed:', cid, e); }
+  }
+  if (lastCard) plShowResults(lastCard);
+  // Also reload full library from API to ensure complete sync
+  if (typeof loadContentFromAPI === 'function') loadContentFromAPI();
+  plResetBtn(btn);
+  toast('✅', `${savedCount} content card${savedCount!==1?'s':''} saved! Switch to MA role to review.`);
+}
+
 async function plFetchAndShow(contentId, btn) {
   try {
     const res = await fetch(PL_API + '/content/' + contentId);
@@ -5851,6 +5878,8 @@ async function plFetchAndShow(contentId, btn) {
     const card = await res.json();
     plShowResults(card);
     plInjectIntoLibrary(card);
+    // Also reload full library from API to catch all cards
+    if (typeof loadContentFromAPI === 'function') loadContentFromAPI();
     plResetBtn(btn);
     toast('✅', 'Content card saved! Switch to MA role to review it.');
   } catch(e) {
