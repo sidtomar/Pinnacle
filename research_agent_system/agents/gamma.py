@@ -151,11 +151,22 @@ def run_gamma(topic: str, paper_list: str, summaries: str) -> dict:
         "summaries":  summaries,
     })
 
+    # Extract PubMed link — prefer from article text, fallback to Alpha's paper data
+    pubmed_link = _extract_pubmed_link(article) or _extract_pubmed_link(paper_list)
+
+    # ── Safety net: if the LLM didn't include Read More, append it ────────
+    has_read_more = bool(re.search(
+        r"Read the full|Read More|View on PubMed",
+        article, re.IGNORECASE
+    ))
+    if not has_read_more and pubmed_link:
+        # Extract title from Alpha's paper data
+        title_match = re.search(r"Title\s*:\s*(.+)", paper_list)
+        title_text = title_match.group(1).strip() if title_match else topic
+        article += f"\n\n---\n\n📖 **Read the full article:** [{title_text}]({pubmed_link})"
+
     # Count words
     word_count = len(article.split())
-
-    # Extract PubMed link from article for metadata
-    pubmed_link = _extract_pubmed_link(article) or _extract_pubmed_link(paper_list)
 
     return {
         "content":      article,

@@ -7002,6 +7002,12 @@ function mapAPIItemToPaper(item) {
   // Extract a readable summary from the AI-generated content
   const rawContent = item.short_article || item.content || item.article || '';
   const summary = rawContent.replace(/#+\s*/g,'').slice(0,220).trim() || item.topic || '';
+  // Extract PubMed link: prefer explicit field, fallback to extracting from article text
+  let _pubmed_link = item.pubmed_link || '';
+  if (!_pubmed_link && rawContent) {
+    const pmMatch = rawContent.match(/https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/\d+\/?/);
+    if (pmMatch) _pubmed_link = pmMatch[0];
+  }
   return {
     // String ID prefixed with 'api-' to avoid collisions with static numeric IDs
     id: 'api-' + (item.id||'').slice(0,8),
@@ -7010,7 +7016,7 @@ function mapAPIItemToPaper(item) {
     title: item.title || item.topic || 'AI Generated Article',
     journal: item.source_journals || 'PinnacleIQ Research Pipeline (AI-Generated)',
     authors: item.authors || 'See PubMed for author details',
-    _pubmed_link: item.pubmed_link || '',
+    _pubmed_link: _pubmed_link,
     month: d.toLocaleString('en-IN',{month:'long'}),
     year: d.getFullYear(),
     date: (item.created_at||'').slice(0,10),
