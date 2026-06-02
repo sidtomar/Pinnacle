@@ -751,7 +751,7 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
 
     # Alpha done → paper list with metadata (Step 3 output: show to user)
     run_store[run_id]["agent_outputs"]["alpha"] = {
-        "papers":        sources,        # list of papers with title/authors/url/snippet
+        "sources":       sources,        # list of papers with title/authors/url/snippet
         "internal_docs": internal_docs,  # MA library documents found
         "paper_count":   len(sources),
         "internal_count": len(internal_docs),
