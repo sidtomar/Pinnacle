@@ -768,6 +768,10 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
 
     # Beta done → per-paper summaries output (Step 4)
     run_store[run_id]["agent_outputs"]["beta"] = {
+        "findings": [
+            src.get("snippet", "")[:200]
+            for src in sources
+        ],
         "per_paper_summaries": [
             {
                 "paper_no":    i + 1,
