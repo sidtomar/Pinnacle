@@ -1514,6 +1514,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         <div class="ra-results-header">
           <h3>Search Results</h3>
           <span class="ra-results-badge" id="ra-results-badge-2">0</span>
+          <span id="ra-showing-count-2" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);">Showing <strong id="ra-showing-num-2">0</strong> articles</span>
         </div>
         <div id="ra-loading-state-2" class="ra-loading"><div class="ra-spinner"></div><p>Querying PubMed database…</p></div>
         <div id="ra-empty-state-2" class="ra-empty"><div class="ra-empty-icon">📭</div><h4>No articles found</h4><p>Try adjusting your filters or broadening your date range.</p></div>
@@ -7699,9 +7700,12 @@ async function raDisplayDynamicResults(contentIds) {
       if (!res.ok) continue;
       const item = await res.json();
       successCount++;
-      // Reuse the same mapAPIItemToPaper + clCardHTML pipeline as the Content Library
-      // so card design is always 100% identical between Research Agent and Research Pipeline
-      papers.push(mapAPIItemToPaper(item));
+      // Reuse mapAPIItemToPaper + clCardHTML — same pipeline as Content Library
+      const paper = mapAPIItemToPaper(item);
+      // Override src to 'pubmed' so srcPill renders "PubMed" badge (not "Link")
+      // Research Agent content is always PubMed-sourced
+      paper.src = 'pubmed';
+      papers.push(paper);
     } catch(e) {
       console.error('Error fetching content:', contentId, e);
     }
@@ -7720,6 +7724,9 @@ async function raDisplayDynamicResults(contentIds) {
     document.getElementById('ra-results-badge-2').textContent = successCount;
     document.getElementById('ra-res-count-2').textContent = successCount;
     document.getElementById('ra-result-label-2').style.display = 'inline';
+    // "Showing X articles" on the right of the results header
+    document.getElementById('ra-showing-num-2').textContent = successCount;
+    document.getElementById('ra-showing-count-2').style.display = 'inline';
     // Update hero header badge count
     raUpdateHeroBadge(successCount);
     document.getElementById('ra-articles-grid-2').scrollIntoView({ behavior: 'smooth' });
@@ -7728,6 +7735,7 @@ async function raDisplayDynamicResults(contentIds) {
     document.getElementById('ra-ma-review-footer-2').style.display = 'flex';
   } else {
     document.getElementById('ra-empty-state-2').classList.add('show');
+    document.getElementById('ra-showing-count-2').style.display = 'none';
     document.getElementById('ra-ma-review-footer-2').style.display = 'none';
   }
 }
