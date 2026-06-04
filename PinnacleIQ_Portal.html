@@ -7784,6 +7784,13 @@ async function raDownloadDatabase() {
       'Full Text Link (DOI)'
     ];
 
+    // Helper: return 'NA' for empty/null/undefined values
+    const naIfEmpty = (val) => {
+      if (val === null || val === undefined) return 'NA';
+      const s = String(val).trim();
+      return s.length === 0 ? 'NA' : s;
+    };
+
     const rows = items.map((item, idx) => {
       // Extract PMID from pubmed_link if not stored directly
       let pmid = item.pmid || '';
@@ -7811,22 +7818,23 @@ async function raDownloadDatabase() {
       // Date: use publication_date or created_at
       const dateStr = item.publication_date || (item.created_at ? item.created_at.split('T')[0] : '');
 
+      // Return all 15 columns — 'NA' for any missing value
       return [
         idx + 1,                                    // #
-        dateStr,                                     // Date
-        item.specialty || '',                        // Specialty
-        item.therapy_area || '',                     // Therapy Area
-        item.sub_category || '',                     // Sub-category
-        tags,                                        // Tags
-        doctorSpecs,                                 // Relevant Doctor Specialties
-        whatsappSummary,                             // WhatsApp Summary
-        item.title || '',                            // Title
-        pmid,                                        // PMID
-        doi,                                         // DOI
-        abstract,                                    // Abstract
-        item.authors || '',                          // Authors
-        item.pubmed_link || '',                      // PubMed Link
-        doiLink                                      // Full Text Link (DOI)
+        naIfEmpty(dateStr),                          // Date
+        naIfEmpty(item.specialty),                   // Specialty
+        naIfEmpty(item.therapy_area),                // Therapy Area
+        naIfEmpty(item.sub_category),                // Sub-category
+        naIfEmpty(tags),                             // Tags
+        naIfEmpty(doctorSpecs),                      // Relevant Doctor Specialties
+        naIfEmpty(whatsappSummary),                  // WhatsApp Summary
+        naIfEmpty(item.title),                       // Title
+        naIfEmpty(pmid),                             // PMID
+        naIfEmpty(doi),                              // DOI
+        naIfEmpty(abstract),                         // Abstract
+        naIfEmpty(item.authors),                     // Authors
+        naIfEmpty(item.pubmed_link),                 // PubMed Link
+        naIfEmpty(doiLink)                           // Full Text Link (DOI)
       ];
     });
 
@@ -7835,7 +7843,7 @@ async function raDownloadDatabase() {
     csv += headers.map(h => `"${h}"`).join(',') + '\n';
     rows.forEach(row => {
       csv += row.map(cell => {
-        const str = (cell === null || cell === undefined) ? '' : String(cell);
+        const str = (cell === null || cell === undefined) ? 'NA' : String(cell);
         return `"${str.replace(/"/g, '""')}"`;
       }).join(',') + '\n';
     });
