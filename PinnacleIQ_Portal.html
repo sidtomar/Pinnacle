@@ -574,9 +574,86 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   .k4,.k5{grid-template-columns:repeat(2,1fr)!important;}
   #content-area{padding:16px 18px;}
 }
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0D1F3C 0%,#162E56 45%,#0D1F3C 100%);}
+#login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 20%,rgba(184,145,42,.14) 0%,transparent 55%),radial-gradient(ellipse at 75% 80%,rgba(29,78,216,.1) 0%,transparent 55%);pointer-events:none;}
+.login-card{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,.38);position:relative;z-index:1;}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+.login-logo{width:46px;height:46px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.login-app-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:900;color:var(--navy);letter-spacing:-.4px;}
+.login-app-name span{color:var(--gold);}
+.login-tagline{font-size:10.5px;color:var(--text4);margin-top:2px;}
+.login-heading{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--navy);margin-bottom:5px;}
+.login-subheading{font-size:13px;color:var(--text3);margin-bottom:22px;}
+.login-field{margin-bottom:15px;}
+.login-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.login-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--text1);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;}
+.login-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(13,31,60,.07);}
+.login-role-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.login-role-btn{border:1.5px solid var(--border);border-radius:10px;padding:10px 10px;cursor:pointer;text-align:left;transition:all .15s;background:#fff;width:100%;}
+.login-role-btn.active{border-color:var(--navy);background:#EBF0F8;box-shadow:0 0 0 3px rgba(13,31,60,.06);}
+.login-role-btn .lr-title{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.login-role-btn .lr-sub{font-size:10.5px;color:var(--text3);}
+.login-submit{width:100%;background:var(--navy);color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border:none;transition:background .15s,opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.login-submit:hover{background:var(--navy2);}
+.login-submit:disabled{opacity:.65;cursor:not-allowed;}
+.login-error{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.login-footer-txt{text-align:center;font-size:10.5px;color:var(--text4);margin-top:20px;}
+@keyframes ls{to{transform:rotate(360deg);}}
+.login-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:ls .7s linear infinite;flex-shrink:0;}
 </style>
 </head>
 <body>
+
+<!-- ══════ LOGIN SCREEN ══════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-logo">
+        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+          <path d="M7 21V10l7-3 7 3v11" stroke="#B8912A" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M11 21v-6h6v6" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="login-app-name">Pinnacle<span>IQ</span></div>
+        <div class="login-tagline">Medical Intelligence Portal &nbsp;·&nbsp; Mankind Pharma</div>
+      </div>
+    </div>
+    <h1 class="login-heading">Welcome back</h1>
+    <p class="login-subheading">Sign in to your account to continue</p>
+
+    <div id="login-error" class="login-error" style="display:none;">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" stroke="currentColor"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="login-error-msg"></span>
+    </div>
+
+    <div class="login-field">
+      <label class="login-label" for="login-email">Email address</label>
+      <input id="login-email" type="email" class="login-input" placeholder="you@mankind.in" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field" style="margin-bottom:18px;">
+      <label class="login-label" for="login-password">Password</label>
+      <input id="login-password" type="password" class="login-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">Select your role</div>
+    <div class="login-role-row">
+      <button class="login-role-btn active" id="lr-pmt" onclick="selectLoginRole('pmt')">
+        <div class="lr-title">BU Head &nbsp;·&nbsp; PMT</div>
+        <div class="lr-sub">Jijo &nbsp;·&nbsp; Life Division</div>
+      </button>
+      <button class="login-role-btn" id="lr-ma" onclick="selectLoginRole('ma')">
+        <div class="lr-title">Medical Affairs</div>
+        <div class="lr-sub">Dr. Prashant Agarwal</div>
+      </button>
+    </div>
+
+    <button class="login-submit" id="login-btn" onclick="doLogin()">Sign in</button>
+    <p class="login-footer-txt">© 2026 PinnacleIQ &nbsp;·&nbsp; Mankind Pharma &nbsp;·&nbsp; All rights reserved</p>
+  </div>
+</div>
 
 <!-- ══════ SIDEBAR ══════ -->
 <div id="sb">
@@ -636,6 +713,11 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="rd-av av-ma">PA</div>
             <div><div class="rd-name">Dr. Prashant Agarwal</div><div class="rd-role">Medical Affairs · MA</div></div>
             <div class="rd-check" id="chk-ma" style="display:none;">✓</div>
+          </div>
+          <div class="rd-divider"></div>
+          <div class="rd-option" onclick="doLogout()" style="color:var(--red);gap:10px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3"/><polyline points="11,11 14,8 11,5"/><line x1="14" y1="8" x2="6" y2="8"/></svg>
+            <div><div class="rd-name" style="color:var(--red);">Sign out</div><div class="rd-role">Return to login screen</div></div>
           </div>
         </div>
       </div>
@@ -7282,18 +7364,78 @@ function renderAPIContent() {
   // No-op: API content is now merged into ALL_PAPERS and rendered by renderCL()
 }
 
+/* ══ LOGIN / AUTH ══ */
+let _loginRole = 'pmt';
+
+function selectLoginRole(role) {
+  _loginRole = role;
+  document.getElementById('lr-pmt').classList.toggle('active', role === 'pmt');
+  document.getElementById('lr-ma').classList.toggle('active', role === 'ma');
+}
+
+function doLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  const errEl    = document.getElementById('login-error');
+  const errMsg   = document.getElementById('login-error-msg');
+  const btn      = document.getElementById('login-btn');
+
+  errEl.style.display = 'none';
+
+  if (!email)           { errMsg.textContent = 'Please enter your email address.';    errEl.style.display = 'flex'; return; }
+  if (!password)        { errMsg.textContent = 'Please enter your password.';         errEl.style.display = 'flex'; return; }
+  if (password.length < 6) { errMsg.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'flex'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="login-spinner"></span> Signing in…';
+
+  setTimeout(() => {
+    localStorage.setItem('pinnacle_logged_in', 'true');
+    localStorage.setItem('pinnacle_user', email);
+    localStorage.setItem('pinnacle_role', _loginRole);
+    document.getElementById('login-screen').style.display = 'none';
+    switchRole(_loginRole);
+    // Start background services after login
+    startNotifPolling();
+    loadSchedulerStatus();
+    loadContentFromAPI();
+    btn.disabled = false;
+    btn.innerHTML = 'Sign in';
+  }, 600);
+}
+
+function doLogout() {
+  localStorage.removeItem('pinnacle_logged_in');
+  localStorage.removeItem('pinnacle_user');
+  localStorage.removeItem('pinnacle_role');
+  document.getElementById('login-email').value    = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('role-switcher').classList.remove('open');
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function initApp() {
+  const loggedIn  = localStorage.getItem('pinnacle_logged_in') === 'true';
+  const savedRole = localStorage.getItem('pinnacle_role') || 'pmt';
+  if (loggedIn) {
+    document.getElementById('login-screen').style.display = 'none';
+    switchRole(_getHashRole() || savedRole);
+    setTimeout(() => {
+      startNotifPolling();
+      loadSchedulerStatus();
+      loadContentFromAPI();
+    }, 1200);
+  } else {
+    // Show login; keep app rendered underneath (z-index covers it)
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+}
+
 /* ══ STARTUP CALLS ══ */
-// Start notification polling after initial load
-setTimeout(() => {
-  startNotifPolling();
-  loadSchedulerStatus();
-  loadContentFromAPI();
-}, 1500);
-
 // API content is merged directly into ALL_PAPERS — no separate container needed
-
-// Restore role+page from URL hash, default to PMT
-switchRole(_getHashRole() || 'pmt');
+// initApp checks localStorage session; starts background services after login
+initApp();
 
 // ═════════════════════════════════════════════════════════════════════
 // PUBMED RESEARCH AGENT FUNCTIONS
