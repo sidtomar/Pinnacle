@@ -13,3 +13,25 @@ Insulin Resistance in Metabolic Syndrome: 2025 Consensus | Diabetology | GLP-1 T
 Antibiotic Resistance in ICU Settings: Emerging Strategies | Infectious Disease | Antibiotic Resistance
 Ebola Virus Disease: Latest Treatment and Vaccine Evidence | Infectious Disease | Ebola
 Hanta Virus Infection: Diagnosis, Treatment and Prevention | Infectious Disease | Hanta Virus
+Migrane
+Migrane | General Medicine | GLP-1 Therapy
+Hanta | Infectious Disease | Infectious Disease
+antihypertensive therapy advances
+ 
+antihypertensive therapy advances | General Medicine | GLP-1 Therapy
+Migraine | Neurology | Neurology
+Hypertension | Cardiology | Cardiology
+Endocrinology | Endocrinology | Endocrinology
+Hypertension - Cardiology (systematic review) | Cardiology | Cardiology
+Coronary Artery Disease (CAD) - Endocrinology (antihypertensive therapy advances) | Endocrinology | Endocrinology
+Hypertension Management | Cardiology | Cardiology
+Hypertension - Cardiology (treatment guidelines) | Cardiology | Cardiology
+Dyslipidemia - Cardiology (statin therapy advances) | Cardiology | Cardiology
+Atrial Fibrillation - Cardiology (anticoagulation therapy) | Cardiology | Cardiology
+Heart Failure - Cardiology (SGLT2 inhibitors) | Cardiology | Cardiology
+Migraine - Neurology (CGRP inhibitors) | Neurology | Neurology
+Asthma - Pulmonology (biologic therapy) | Pulmonology | Pulmonology
+Chronic Kidney Disease - Oncology | Oncology | Oncology
+Coronary Artery Disease (CAD) - Oncology | Oncology | Oncology
+Type 2 Diabetes - Diabetology (GLP-1 clinical outcomes) | Diabetology | Diabetology
+Type 2 Diabetes - Diabetology (randomized controlled trial) | Diabetology | Diabetology

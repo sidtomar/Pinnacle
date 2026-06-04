@@ -1,0 +1,96 @@
+{
+  "app_password": "Test",
+  "note": "Common password for all users: Test",
+  "users": [
+    {
+      "category": "Admin",
+      "id": "admin1", "name": "Admin 1", "email": "admin1@mankind.in",
+      "role": "admin", "designation": "System Administrator", "initials": "A1"
+    },
+    {
+      "category": "Admin",
+      "id": "admin2", "name": "Admin 2", "email": "admin2@mankind.in",
+      "role": "admin", "designation": "System Administrator", "initials": "A2"
+    },
+    {
+      "category": "Admin",
+      "id": "admin3", "name": "Admin 3", "email": "admin3@mankind.in",
+      "role": "admin", "designation": "System Administrator", "initials": "A3"
+    },
+    {
+      "category": "Admin",
+      "id": "admin4", "name": "Admin 4", "email": "admin4@mankind.in",
+      "role": "admin", "designation": "System Administrator", "initials": "A4"
+    },
+    {
+      "category": "Admin",
+      "id": "admin5", "name": "Admin 5", "email": "admin5@mankind.in",
+      "role": "admin", "designation": "System Administrator", "initials": "A5"
+    },
+    {
+      "category": "Business",
+      "id": "jijo", "name": "Jijo Kumar", "email": "jijo@mankind.in",
+      "role": "pmt", "designation": "BU Head · Life Division", "initials": "JK"
+    },
+    {
+      "category": "Business",
+      "id": "rajesh_sharma", "name": "Rajesh Sharma", "email": "rajesh.sharma@mankind.in",
+      "role": "pmt", "designation": "NSM · National Sales Manager", "initials": "RS"
+    },
+    {
+      "category": "Business",
+      "id": "priya_nair", "name": "Priya Nair", "email": "priya.nair@mankind.in",
+      "role": "pmt", "designation": "Marketing Head · Life Division", "initials": "PN"
+    },
+    {
+      "category": "Business",
+      "id": "amit_verma", "name": "Amit Verma", "email": "amit.verma@mankind.in",
+      "role": "pmt", "designation": "BU Head · Cardiac Division", "initials": "AV"
+    },
+    {
+      "category": "Business",
+      "id": "sunita_patel", "name": "Sunita Patel", "email": "sunita.patel@mankind.in",
+      "role": "pmt", "designation": "NSM · North Region", "initials": "SP"
+    },
+    {
+      "category": "Business",
+      "id": "vikram_singh", "name": "Vikram Singh", "email": "vikram.singh@mankind.in",
+      "role": "pmt", "designation": "Marketing Head · Oncology", "initials": "VS"
+    },
+    {
+      "category": "Business",
+      "id": "neha_gupta", "name": "Neha Gupta", "email": "neha.gupta@mankind.in",
+      "role": "pmt", "designation": "BU Head · Metabolic Division", "initials": "NG"
+    },
+    {
+      "category": "Business",
+      "id": "arjun_mehta", "name": "Arjun Mehta", "email": "arjun.mehta@mankind.in",
+      "role": "pmt", "designation": "NSM · West Region", "initials": "AM"
+    },
+    {
+      "category": "Business",
+      "id": "deepa_krishnan", "name": "Deepa Krishnan", "email": "deepa.krishnan@mankind.in",
+      "role": "pmt", "designation": "Marketing Head · Neurology", "initials": "DK"
+    },
+    {
+      "category": "Business",
+      "id": "rahul_agarwal", "name": "Rahul Agarwal", "email": "rahul.agarwal@mankind.in",
+      "role": "pmt", "designation": "BU Head · GI Division", "initials": "RA"
+    },
+    {
+      "category": "Medical Affairs",
+      "id": "prashant_agarwal", "name": "Dr. Prashant Agarwal", "email": "prashant.agarwal@mankind.in",
+      "role": "ma", "designation": "Medical Affairs · MA Lead", "initials": "PA"
+    },
+    {
+      "category": "Medical Affairs",
+      "id": "anita_sharma", "name": "Dr. Anita Sharma", "email": "anita.sharma@mankind.in",
+      "role": "ma", "designation": "Medical Affairs · Cardiology", "initials": "AS"
+    },
+    {
+      "category": "Medical Affairs",
+      "id": "rohit_kumar", "name": "Dr. Rohit Kumar", "email": "rohit.kumar@mankind.in",
+      "role": "ma", "designation": "Medical Affairs · Diabetology", "initials": "RK"
+    }
+  ]
+}

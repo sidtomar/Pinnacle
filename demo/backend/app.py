@@ -42,8 +42,204 @@ app.add_middleware(
 )
 
 from pathlib import Path
+from datetime import datetime
 TOPICS_FILE   = Path(__file__).parent.parent / "topics.txt"
 DOCTORS_FILE  = Path(__file__).parent.parent / "doctors.json"
+FILTERS_FILE  = Path(__file__).parent.parent / "filter_suggestions.txt"
+
+
+def _parse_topics_text(text: str) -> list[dict]:
+    topics = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = [p.strip() for p in line.split("|")]
+        topics.append({
+            "topic": parts[0] if len(parts) > 0 else line,
+            "specialty": parts[1] if len(parts) > 1 else "General Medicine",
+            "therapy_area": parts[2] if len(parts) > 2 else "General",
+        })
+    return topics
+
+
+def _read_topics() -> list[dict]:
+    if not TOPICS_FILE.exists():
+        raise HTTPException(404, f"topics.txt not found at {TOPICS_FILE}")
+    return _parse_topics_text(TOPICS_FILE.read_text(encoding="utf-8"))
+
+
+def _topic_key(topic: str, specialty: str, therapy_area: str) -> tuple[str, str, str]:
+    return (
+        topic.strip().casefold(),
+        specialty.strip().casefold(),
+        therapy_area.strip().casefold(),
+    )
+
+
+def _persist_topic(topic: str, specialty: str, therapy_area: str) -> bool:
+    topic = topic.strip()
+    specialty = (specialty or "General Medicine").strip()
+    therapy_area = (therapy_area or "General").strip()
+    if not topic:
+        return False
+
+    existing_text = TOPICS_FILE.read_text(encoding="utf-8") if TOPICS_FILE.exists() else ""
+    existing_topics = _parse_topics_text(existing_text)
+    new_key = _topic_key(topic, specialty, therapy_area)
+    if any(_topic_key(item["topic"], item["specialty"], item["therapy_area"]) == new_key for item in existing_topics):
+        return False
+
+    new_line = f"{topic} | {specialty} | {therapy_area}"
+    if existing_text and not existing_text.endswith(("\n", "\r")):
+        existing_text += "\n"
+    TOPICS_FILE.write_text(existing_text + new_line + "\n", encoding="utf-8")
+    return True
+
+# ── Filter Suggestions helpers ───────────────────────────────────────────────
+# Reads/writes demo/filter_suggestions.txt  (same pattern as topics.txt)
+
+MAX_RECENT = 5   # how many recent terms to show at the top
+
+def _parse_filters_file() -> dict:
+    """Parse filter_suggestions.txt into {section: [{value, recent, ts}]}"""
+    result = {"therapy_area": [], "disease": [], "keywords": []}
+    if not FILTERS_FILE.exists():
+        return result
+
+    current_section = None
+    section_map = {
+        "[THERAPY_AREA]": "therapy_area",
+        "[DISEASE]":      "disease",
+        "[KEYWORDS]":     "keywords",
+    }
+
+    for raw in FILTERS_FILE.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line in section_map:
+            current_section = section_map[line]
+            continue
+        if current_section is None:
+            continue
+
+        # Format: value  OR  value [RECENT:timestamp]
+        if "[RECENT:" in line:
+            idx = line.index("[RECENT:")
+            value = line[:idx].strip()
+            ts = line[idx + 8:].rstrip("]").strip()
+        else:
+            value = line
+            ts = None
+
+        result[current_section].append({
+            "value": value,
+            "recent": ts is not None,
+            "ts": ts,
+        })
+    return result
+
+
+def _get_filter_suggestions() -> dict:
+    """Return suggestions per filter: recent terms first (top 5), then defaults."""
+    raw = _parse_filters_file()
+    out = {}
+    for section, items in raw.items():
+        recent = sorted(
+            [i for i in items if i["recent"]],
+            key=lambda x: x["ts"] or "",
+            reverse=True,
+        )[:MAX_RECENT]
+        defaults = [i for i in items if not i["recent"]]
+
+        # Deduplicate: recent wins over default with same name
+        recent_vals_lower = {r["value"].lower() for r in recent}
+        defaults = [d for d in defaults if d["value"].lower() not in recent_vals_lower]
+
+        out[section] = {
+            "recent":   [r["value"] for r in recent],
+            "defaults": [d["value"] for d in defaults],
+        }
+    return out
+
+
+def _add_filter_term(section: str, term: str) -> bool:
+    """Append a [RECENT] term to filter_suggestions.txt. Returns True if added."""
+    term = term.strip()
+    if not term:
+        return False
+
+    section_header_map = {
+        "therapy_area": "[THERAPY_AREA]",
+        "disease":      "[DISEASE]",
+        "keywords":     "[KEYWORDS]",
+    }
+    header = section_header_map.get(section)
+    if not header:
+        return False
+
+    raw = _parse_filters_file()
+    existing_lower = [i["value"].lower() for i in raw.get(section, [])]
+
+    # If term already exists as a default, promote it to recent by adding [RECENT]
+    # If term already exists as recent, update timestamp
+    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    new_entry = f"{term} [RECENT:{ts}]"
+
+    text = FILTERS_FILE.read_text(encoding="utf-8") if FILTERS_FILE.exists() else ""
+    lines = text.splitlines()
+
+    # Check if term already exists anywhere in this section
+    in_section = False
+    found = False
+    new_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped in section_header_map.values():
+            in_section = (stripped == header)
+            new_lines.append(line)
+            continue
+
+        if in_section and stripped and not stripped.startswith("#"):
+            # Extract value from this line
+            val = stripped.split("[RECENT:")[0].strip() if "[RECENT:" in stripped else stripped
+            if val.lower() == term.lower():
+                # Replace with updated recent entry
+                new_lines.append(new_entry)
+                found = True
+                continue
+
+        new_lines.append(line)
+
+    if not found:
+        # Append at end of section
+        # Find last line of the target section
+        insert_idx = None
+        in_section = False
+        for i, line in enumerate(new_lines):
+            stripped = line.strip()
+            if stripped == header:
+                in_section = True
+                continue
+            if in_section:
+                if stripped in section_header_map.values():
+                    # Start of next section — insert before this
+                    insert_idx = i
+                    break
+                insert_idx = i + 1  # keep tracking last line in section
+
+        if insert_idx is not None:
+            new_lines.insert(insert_idx, new_entry)
+        else:
+            # Section not found or file empty — append section + entry
+            new_lines.append("")
+            new_lines.append(header)
+            new_lines.append(new_entry)
+
+    FILTERS_FILE.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+    return True
+
 
 # ── Initialise store on startup ───────────────────────────────────────────────
 # get_store() reads STORE_BACKEND env var -> returns SQLiteStore or DatabricksStore
@@ -152,26 +348,57 @@ def get_doctor(doctor_id: str):
 @app.get("/topics")
 def get_topics():
     """Read research topics from topics.txt."""
-    if not TOPICS_FILE.exists():
-        raise HTTPException(404, f"topics.txt not found at {TOPICS_FILE}")
-    topics = []
-    for line in TOPICS_FILE.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        parts = [p.strip() for p in line.split("|")]
-        topics.append({
-            "topic":        parts[0] if len(parts) > 0 else line,
-            "specialty":    parts[1] if len(parts) > 1 else "General Medicine",
-            "therapy_area": parts[2] if len(parts) > 2 else "General",
-        })
+    topics = _read_topics()
     return {"topics": topics, "count": len(topics)}
+
+
+# ── Filter Suggestions endpoints ─────────────────────────────────────────────
+
+@app.get("/filters/suggestions")
+def get_filter_suggestions():
+    """
+    Return autocomplete suggestions for Research Agent filter fields.
+    Each section returns { recent: [...top 5], defaults: [...] }.
+    Recent terms are sorted by most-recently-used first.
+    """
+    return _get_filter_suggestions()
+
+
+class AddFilterTermRequest(BaseModel):
+    section: str    # therapy_area | disease | keywords
+    term: str       # the value to add
+
+@app.post("/filters/suggestions")
+def add_filter_suggestion(req: AddFilterTermRequest):
+    """
+    Add a user-searched term to filter_suggestions.txt.
+    Term is tagged [RECENT] and will appear at the top of the dropdown.
+    Only the 5 most recent terms per section are shown at top.
+    """
+    valid_sections = ["therapy_area", "disease", "keywords"]
+    if req.section not in valid_sections:
+        raise HTTPException(400, f"Invalid section '{req.section}'. Must be one of: {valid_sections}")
+    if not req.term.strip():
+        raise HTTPException(400, "Term cannot be empty")
+
+    added = _add_filter_term(req.section, req.term.strip())
+    return {
+        "added": added,
+        "section": req.section,
+        "term": req.term.strip(),
+        "message": f"Term '{req.term.strip()}' {'added to' if added else 'updated in'} {req.section}",
+    }
 
 
 @app.post("/pipeline/run")
 def start_pipeline(req: RunRequest, bg: BackgroundTasks):
     """Start mock pipeline in background. Returns run_id for polling."""
     from datetime import datetime, timezone
+
+    # Persist custom topics so they remain available after refreshes and future runs.
+    with _lock:
+        _persist_topic(req.topic, req.specialty, req.therapy_area)
+
     run_id = str(uuid.uuid4())
     with _lock:
         pipeline_runs[run_id] = {
@@ -531,6 +758,20 @@ def download_business_report(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Serve portal HTML (for public/UAT deployment via ngrok or cloud) ──────────
+PORTAL_HTML = Path(__file__).parent.parent.parent / "PinnacleIQ_Portal.html"
+
+from fastapi.responses import FileResponse as _FileResponse
+
+@app.get("/portal", include_in_schema=False)
+@app.get("/app",    include_in_schema=False)
+async def serve_portal():
+    """Serve the PinnacleIQ portal HTML — used when deployed publicly."""
+    if PORTAL_HTML.exists():
+        return _FileResponse(str(PORTAL_HTML), media_type="text/html")
+    return {"error": "Portal HTML not found at " + str(PORTAL_HTML)}
 
 
 if __name__ == "__main__":

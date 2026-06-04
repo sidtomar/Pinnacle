@@ -44,6 +44,9 @@ input,select,textarea{font-family:inherit;}
 .sb-av{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800;flex-shrink:0;}
 .av-ma{background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;}
 .av-pmt{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);}
+.av-admin{background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;}
+.rb-admin{background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.35);color:#C4B5FD;}
+.ni.active-admin{background:linear-gradient(135deg,rgba(124,58,237,.28),rgba(124,58,237,.1));color:#C4B5FD;border-color:rgba(124,58,237,.22);}
 .sb-un{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#fff;}
 .sb-ur{font-size:10px;color:rgba(255,255,255,.38);}
 .sb-role-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
@@ -574,9 +577,74 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   .k4,.k5{grid-template-columns:repeat(2,1fr)!important;}
   #content-area{padding:16px 18px;}
 }
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0D1F3C 0%,#162E56 45%,#0D1F3C 100%);}
+#login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 20%,rgba(184,145,42,.14) 0%,transparent 55%),radial-gradient(ellipse at 75% 80%,rgba(29,78,216,.1) 0%,transparent 55%);pointer-events:none;}
+.login-card{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,.38);position:relative;z-index:1;}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+.login-logo{width:46px;height:46px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.login-app-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:900;color:var(--navy);letter-spacing:-.4px;}
+.login-app-name span{color:var(--gold);}
+.login-tagline{font-size:10.5px;color:var(--text4);margin-top:2px;}
+.login-heading{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--navy);margin-bottom:5px;}
+.login-subheading{font-size:13px;color:var(--text3);margin-bottom:22px;}
+.login-field{margin-bottom:15px;}
+.login-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.login-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--text1);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s;}
+.login-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(13,31,60,.07);}
+.login-role-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.login-role-btn{border:1.5px solid var(--border);border-radius:10px;padding:10px 10px;cursor:pointer;text-align:left;transition:all .15s;background:#fff;width:100%;}
+.login-role-btn.active{border-color:var(--navy);background:#EBF0F8;box-shadow:0 0 0 3px rgba(13,31,60,.06);}
+.login-role-btn .lr-title{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.login-role-btn .lr-sub{font-size:10.5px;color:var(--text3);}
+.login-submit{width:100%;background:var(--navy);color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border:none;transition:background .15s,opacity .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.login-submit:hover{background:var(--navy2);}
+.login-submit:disabled{opacity:.65;cursor:not-allowed;}
+.login-error{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.login-footer-txt{text-align:center;font-size:10.5px;color:var(--text4);margin-top:20px;}
+@keyframes ls{to{transform:rotate(360deg);}}
+.login-spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:ls .7s linear infinite;flex-shrink:0;}
 </style>
 </head>
 <body>
+
+<!-- ══════ LOGIN SCREEN ══════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-logo">
+        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+          <path d="M7 21V10l7-3 7 3v11" stroke="#B8912A" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M11 21v-6h6v6" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="login-app-name">Pinnacle<span>IQ</span></div>
+        <div class="login-tagline">Medical Intelligence Portal &nbsp;·&nbsp; Mankind Pharma</div>
+      </div>
+    </div>
+    <h1 class="login-heading">Welcome back</h1>
+    <p class="login-subheading">Sign in to your account to continue</p>
+
+    <div id="login-error" class="login-error" style="display:none;">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" stroke="currentColor"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="login-error-msg"></span>
+    </div>
+
+    <div class="login-field">
+      <label class="login-label" for="login-email">Email address</label>
+      <input id="login-email" type="email" class="login-input" placeholder="you@mankind.in" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field" style="margin-bottom:18px;">
+      <label class="login-label" for="login-password">Password</label>
+      <input id="login-password" type="password" class="login-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="login-submit" id="login-btn" onclick="doLogin()">Sign in</button>
+    <p class="login-footer-txt">© 2026 PinnacleIQ &nbsp;·&nbsp; Mankind Pharma &nbsp;·&nbsp; All rights reserved</p>
+  </div>
+</div>
 
 <!-- ══════ SIDEBAR ══════ -->
 <div id="sb">
@@ -636,6 +704,11 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="rd-av av-ma">PA</div>
             <div><div class="rd-name">Dr. Prashant Agarwal</div><div class="rd-role">Medical Affairs · MA</div></div>
             <div class="rd-check" id="chk-ma" style="display:none;">✓</div>
+          </div>
+          <div class="rd-divider"></div>
+          <div class="rd-option" onclick="doLogout()" style="color:var(--red);gap:10px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3"/><polyline points="11,11 14,8 11,5"/><line x1="14" y1="8" x2="6" y2="8"/></svg>
+            <div><div class="rd-name" style="color:var(--red);">Sign out</div><div class="rd-role">Return to login screen</div></div>
           </div>
         </div>
       </div>
@@ -1351,14 +1424,36 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-ai-badge{margin-left:auto;display:flex;align-items:center;gap:5px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#b8912a;}
         .ra-panel-divider{height:1px;background:#e2eaf2;margin:16px 24px 0;}
         .ra-panel-body{padding:20px 24px 24px;}
-        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1.6fr 1.4fr;gap:16px;margin-bottom:16px;}
+        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.2fr auto auto;gap:12px;align-items:end;margin-bottom:0;}
+        .ra-btn-reset{display:flex;align-items:center;gap:5px;background:#fff;color:#6b7280;border:1.5px solid #e2eaf2;border-radius:8px;padding:0 14px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
+        .ra-btn-reset:hover{border-color:#94a3b8;color:#374151;background:#f8fafc;}
         .ra-filter-group{display:flex;flex-direction:column;gap:6px;position:relative;}
         .ra-filter-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;}
         .ra-req{color:#b8912a;margin-left:2px;}
         .ra-fuzzy-input{width:100%;height:38px;padding:0 36px 0 12px;border:1.5px solid #e2eaf2;border-radius:6px;background:#f9fbfd;font-family:'DM Sans',sans-serif;font-size:13px;color:#1a2e42;outline:none;transition:all .15s;cursor:pointer;}
         .ra-fuzzy-input:focus{border-color:#b8912a;background:#fff;box-shadow:0 0 0 3px rgba(240,180,41,.12);}
+        .ra-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2eaf2;border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(15,28,46,.12);}
+        .ra-dropdown.hidden{display:none;}
+        .ra-dropdown-item{padding:10px 12px;cursor:pointer;font-size:13px;color:#1a2e42;border-bottom:1px solid #f3f4f6;transition:background .12s;}
+        .ra-dropdown-item:hover{background:#f9fbfd;color:#0f1c2e;font-weight:500;}
+        .ra-dropdown-item.selected{background:#e8f3ff;color:#0369a1;font-weight:600;border-left:3px solid #0369a1;padding-left:9px;}
+        .ra-dropdown-item:last-child{border-bottom:none;}
+        .ra-dropdown-empty{padding:12px;text-align:center;color:#6b7280;font-size:12px;}
+        .ra-selected-keywords{margin-top:12px;}
+        .ra-selected-keywords-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+        .ra-keyword-chips{display:flex;flex-wrap:wrap;gap:6px;}
+        .ra-keyword-chip{display:inline-flex;align-items:center;gap:5px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:14px;padding:4px 10px 4px 12px;font-size:12px;font-weight:500;}
+        .ra-keyword-chip .ra-chip-x{cursor:pointer;font-size:14px;color:#6b7280;line-height:1;margin-left:2px;transition:color .12s;}
+        .ra-keyword-chip .ra-chip-x:hover{color:#c62828;}
+        .ra-active-filters{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;}
+        .ra-active-filters-label{font-size:12px;font-weight:600;color:#4a637a;}
+        .ra-filter-chip{display:inline-flex;align-items:center;gap:4px;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;border-radius:14px;padding:3px 8px 3px 10px;font-size:12px;font-weight:500;}
+        .ra-filter-chip .ra-chip-x{cursor:pointer;font-size:13px;color:#6b7280;line-height:1;transition:color .12s;}
+        .ra-filter-chip .ra-chip-x:hover{color:#c62828;}
+        .ra-clear-all{font-size:12px;font-weight:600;color:#e53935;cursor:pointer;margin-left:4px;transition:opacity .12s;}
+        .ra-clear-all:hover{opacity:.7;}
         .ra-action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-        .ra-btn-search{display:flex;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:6px;padding:0 22px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.02em;}
+        .ra-btn-search{display:flex;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:6px;padding:0 22px;height:38px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.02em;white-space:nowrap;}
         .ra-btn-search:hover{background:#1a3050;box-shadow:0 4px 12px rgba(15,28,46,.25);transform:translateY(-1px);}
         .ra-btn-secondary{display:flex;align-items:center;gap:7px;background:transparent;color:#1a2e42;border:1.5px solid #e2eaf2;border-radius:6px;padding:0 16px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
         .ra-btn-secondary:hover{border-color:#0f1c2e;background:#f4f8fb;}
@@ -1414,11 +1509,15 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
           <p class="ra-hero-desc">Select therapy areas, diseases, and keywords — the AI agent will scan PubMed and surface the most relevant recent publications.</p>
         </div>
         <div class="ra-hero-stats">
-          <div class="ra-stat-item"><div class="ra-stat-num">7</div><div class="ra-stat-lbl">Therapy Areas</div></div>
+          <div class="ra-stat-item"><div class="ra-stat-num" id="ra-hero-results">0</div><div class="ra-stat-lbl">Results</div></div>
           <div style="width:1px;background:rgba(255,255,255,.2);align-self:stretch;"></div>
           <div class="ra-stat-item"><div class="ra-stat-num">35</div><div class="ra-stat-lbl">Diseases</div></div>
           <div style="width:1px;background:rgba(255,255,255,.2);align-self:stretch;"></div>
           <div class="ra-stat-item"><div class="ra-stat-num">105</div><div class="ra-stat-lbl">Keywords</div></div>
+          <div style="width:1px;background:rgba(255,255,255,.2);align-self:stretch;"></div>
+          <div class="ra-stat-item" style="margin-left:8px;">
+            <button class="ra-btn-download" id="ra-db-btn-2" onclick="raDownloadDatabase()" style="height:36px;font-size:12px;border-radius:8px;">📊 Download Database</button>
+          </div>
         </div>
       </div>
 
@@ -1432,19 +1531,22 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         <div class="ra-panel-divider"></div>
         <div class="ra-panel-body">
 
-          <!-- FILTER GRID -->
+          <!-- FILTER GRID (with inline Search button) -->
           <div class="ra-filter-grid">
             <div class="ra-filter-group">
               <label class="ra-filter-label">Therapy Area <span class="ra-req">*</span></label>
-              <input class="ra-fuzzy-input" id="ra-therapy-2" placeholder="Search therapy…" autocomplete="off">
+              <input class="ra-fuzzy-input" id="ra-therapy-2" placeholder="Search therapy…" autocomplete="off" oninput="raShowDropdown('therapy')">
+              <div class="ra-dropdown hidden" id="ra-dropdown-therapy"></div>
             </div>
             <div class="ra-filter-group">
               <label class="ra-filter-label">Disease <span class="ra-req">*</span></label>
-              <input class="ra-fuzzy-input" id="ra-disease-2" placeholder="Search disease…" autocomplete="off">
+              <input class="ra-fuzzy-input" id="ra-disease-2" placeholder="Search disease…" autocomplete="off" oninput="raShowDropdown('disease')">
+              <div class="ra-dropdown hidden" id="ra-dropdown-disease"></div>
             </div>
             <div class="ra-filter-group">
               <label class="ra-filter-label">Keywords</label>
-              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type, press Enter…" autocomplete="off">
+              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type, press Enter…" autocomplete="off" oninput="raShowDropdown('keywords')" onkeydown="if(event.key==='Enter'){raAddKeywordChip();event.preventDefault();}">
+              <div class="ra-dropdown hidden" id="ra-dropdown-keywords"></div>
             </div>
             <div class="ra-filter-group">
               <label class="ra-filter-label">Publication Date</label>
@@ -1454,14 +1556,33 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
                 <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2" value="2026-06-01">
               </div>
             </div>
+            <div class="ra-filter-group" style="justify-content:flex-end;">
+              <button class="ra-btn-search" id="ra-search-btn-2" onclick="raRunDynamicSearch()">🔍 Search</button>
+            </div>
+            <div class="ra-filter-group" style="justify-content:flex-end;">
+              <button class="ra-btn-reset" onclick="raResetForm('2')" title="Clear all filters">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6.5A4.5 4.5 0 1 1 3.5 10"/><polyline points="2,3.5 2,6.5 5,6.5"/></svg>
+                Reset
+              </button>
+            </div>
           </div>
 
-          <!-- ACTIONS -->
-          <div class="ra-action-row" style="margin-top:16px;">
-            <button class="ra-btn-search" onclick="raRunSearch('2')">🔍 Search PubMed</button>
-            <button class="ra-btn-secondary" onclick="raResetForm('2')">↺ Reset</button>
+          <!-- SELECTED KEYWORDS (chip tags) -->
+          <div class="ra-selected-keywords" id="ra-keywords-chips-section" style="display:none;">
+            <div class="ra-selected-keywords-label">Selected Keywords</div>
+            <div class="ra-keyword-chips" id="ra-keyword-chips"></div>
+          </div>
+
+          <!-- ACTIVE FILTERS (removable chips + clear all) -->
+          <div class="ra-active-filters" id="ra-active-filters-section" style="display:none;">
+            <span class="ra-active-filters-label">Active Filters:</span>
+            <div id="ra-active-filter-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <span class="ra-clear-all" onclick="raClearAllFilters()">Clear all</span>
+          </div>
+
+          <!-- ACTIONS (Export CSV hidden until results load) -->
+          <div class="ra-action-row" style="margin-top:12px;">
             <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;">⬇ Export CSV</button>
-            <button class="ra-btn-download" id="ra-db-btn-2" style="display:none;">📊 Download Database</button>
             <span class="ra-result-label" id="ra-result-label-2" style="display:none;">Showing <span id="ra-res-count-2">0</span> articles</span>
           </div>
 
@@ -1473,10 +1594,23 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         <div class="ra-results-header">
           <h3>Search Results</h3>
           <span class="ra-results-badge" id="ra-results-badge-2">0</span>
+          <span id="ra-showing-count-2" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);">Showing <strong id="ra-showing-num-2">0</strong> articles</span>
         </div>
         <div id="ra-loading-state-2" class="ra-loading"><div class="ra-spinner"></div><p>Querying PubMed database…</p></div>
         <div id="ra-empty-state-2" class="ra-empty"><div class="ra-empty-icon">📭</div><h4>No articles found</h4><p>Try adjusting your filters or broadening your date range.</p></div>
         <div class="ra-cards-grid" id="ra-articles-grid-2"></div>
+
+        <!-- MA Review Footer — shown after cards are generated (mirrors Research Pipeline behaviour) -->
+        <div id="ra-ma-review-footer-2" style="display:none;justify-content:space-between;align-items:center;margin-top:20px;padding:14px 18px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;">
+          <div style="font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px;">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="6" fill="var(--green)"/><path d="M3.5 6.2l1.8 1.6 3.2-3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            <span id="ra-ma-saved-count-2">0</span> card(s) saved &nbsp;·&nbsp; Pending MA Review
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="switchRole('ma');showPage('content')">Review in Library →</button>
+            <button class="btn btn-navy btn-sm" onclick="raResetForm('2')">New Search</button>
+          </div>
+        </div>
       </div>
 
     </div><!-- /pg-research-agent -->
@@ -3167,7 +3301,22 @@ const TH_COL={PCOS:'b-purple','Heart Failure':'b-red','Paediatric Nutrition':'b-
 let ROLE='pmt', CL_VIEW='grid', CL_TAB='all', CUR_ID=null, CUR_TAGS=[], CUR_REL=null, SORT_F=null, SORT_D=1, WZ_STEP=1, WZ_SRC=null;
 
 /* ══ UTILS ══ */
-function fmtDate(d){if(!d)return'—';const[y,m,dd]=d.split('-');const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(dd)} ${M[parseInt(m)-1]} ${y}`;}
+function fmtDate(d){if(!d)return'—';const[y,m,dd]=(d.split('T')[0]).split('-');const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(dd)} ${M[parseInt(m)-1]} ${y}`;}
+// Format full ISO timestamp as "4 Jun 2026, 10:30 PM"
+function fmtDateTime(iso){
+  if(!iso)return'—';
+  try{
+    const dt=new Date(iso);
+    if(isNaN(dt))return fmtDate(iso);
+    // Convert to IST (UTC+5:30)
+    const ist=new Date(dt.getTime()+(5.5*60*60*1000));
+    const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const day=ist.getUTCDate(), mon=M[ist.getUTCMonth()], yr=ist.getUTCFullYear();
+    let h=ist.getUTCHours(); const min=String(ist.getUTCMinutes()).padStart(2,'0');
+    const ampm=h>=12?'PM':'AM'; h=h%12||12;
+    return`${day} ${mon} ${yr}, ${h}:${min} ${ampm}`;
+  }catch(e){return fmtDate(iso);}
+}
 
 /* ── mdToHtml: convert markdown links, bold, and line breaks to HTML ── */
 function mdToHtml(text) {
@@ -3198,8 +3347,9 @@ function toggleRoleDropdown(e){
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
 // Valid page IDs for each role — used to validate hash on load/switch
-const PAGES_MA  = ['content','pipeline','dashboard'];
-const PAGES_PMT = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline'];
+const PAGES_MA    = ['content','pipeline','dashboard'];
+const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
+const PAGES_ADMIN = ['research-agent','pipeline'];
 
 function _getHashPage(){
   const h = location.hash.replace('#','');
@@ -3209,52 +3359,91 @@ function _getHashPage(){
 function _getHashRole(){
   const h = location.hash.replace('#','');
   const parts = h.split('/');
-  return (parts[0]==='ma'||parts[0]==='pmt') ? parts[0] : '';
+  return (['ma','pmt','admin'].includes(parts[0])) ? parts[0] : '';
 }
 
 function switchRole(role, skipHash){
   ROLE=role;
   document.getElementById('role-switcher').classList.remove('open');
-  document.getElementById('rd-pmt').classList.toggle('selected',role==='pmt');
-  document.getElementById('rd-ma').classList.toggle('selected',role==='ma');
-  document.getElementById('chk-pmt').style.display=role==='pmt'?'block':'none';
-  document.getElementById('chk-ma').style.display=role==='ma'?'block':'none';
-  // Update header display
-  if(role==='ma'){
-    document.getElementById('rs-value').textContent='Dr. Prashant Agarwal · MA';
-    document.getElementById('sb-av').textContent='PA';
-    document.getElementById('sb-av').className='sb-av av-ma';
-    document.getElementById('sb-name').textContent='Dr. Prashant Agarwal';
-    document.getElementById('sb-role-lbl').textContent='Medical Affairs';
-    document.getElementById('sb-badge').textContent='MA';
-    document.getElementById('sb-badge').className='sb-role-badge rb-ma';
+
+  // Show/hide PMT·MA switcher options — hidden for admin (no role switching)
+  const adminMode = role === 'admin';
+  document.getElementById('rd-pmt').style.display = adminMode ? 'none' : '';
+  document.getElementById('rd-ma').style.display  = adminMode ? 'none' : '';
+  document.getElementById('rd-pmt').classList.toggle('selected', role==='pmt');
+  document.getElementById('rd-ma').classList.toggle('selected',  role==='ma');
+  document.getElementById('chk-pmt').style.display = role==='pmt' ? 'block' : 'none';
+  document.getElementById('chk-ma').style.display  = role==='ma'  ? 'block' : 'none';
+
+  // Determine display values — prefer logged-in CURRENT_USER, fall back to defaults
+  const cu = CURRENT_USER;
+  if(role === 'admin'){
+    const label = cu ? cu.name + ' · ADM' : 'Admin · ADM';
+    document.getElementById('rs-value').textContent = label;
+    document.getElementById('sb-av').textContent    = cu ? cu.initials : 'AD';
+    document.getElementById('sb-av').className      = 'sb-av av-admin';
+    document.getElementById('sb-name').textContent  = cu ? cu.name : 'Admin';
+    document.getElementById('sb-role-lbl').textContent = cu ? cu.designation : 'System Administrator';
+    document.getElementById('sb-badge').textContent    = 'ADM';
+    document.getElementById('sb-badge').className      = 'sb-role-badge rb-admin';
+  } else if(role === 'ma'){
+    const n = cu && cu.role==='ma' ? cu.name : 'Dr. Prashant Agarwal';
+    const d = cu && cu.role==='ma' ? cu.designation : 'Medical Affairs';
+    const i = cu && cu.role==='ma' ? cu.initials : 'PA';
+    document.getElementById('rs-value').textContent    = n + ' · MA';
+    document.getElementById('sb-av').textContent       = i;
+    document.getElementById('sb-av').className         = 'sb-av av-ma';
+    document.getElementById('sb-name').textContent     = n;
+    document.getElementById('sb-role-lbl').textContent = d;
+    document.getElementById('sb-badge').textContent    = 'MA';
+    document.getElementById('sb-badge').className      = 'sb-role-badge rb-ma';
   } else {
-    document.getElementById('rs-value').textContent='Jijo · PMT';
-    document.getElementById('sb-av').textContent='J';
-    document.getElementById('sb-av').className='sb-av av-pmt';
-    document.getElementById('sb-name').textContent='Jijo';
-    document.getElementById('sb-role-lbl').textContent='BU Head · PMT';
-    document.getElementById('sb-badge').textContent='PMT';
-    document.getElementById('sb-badge').className='sb-role-badge rb-pmt';
+    const n = cu && cu.role==='pmt' ? cu.name : 'Jijo';
+    const d = cu && cu.role==='pmt' ? cu.designation : 'BU Head · PMT';
+    const i = cu && cu.role==='pmt' ? cu.initials : 'J';
+    document.getElementById('rs-value').textContent    = n + ' · PMT';
+    document.getElementById('sb-av').textContent       = i;
+    document.getElementById('sb-av').className         = 'sb-av av-pmt';
+    document.getElementById('sb-name').textContent     = n;
+    document.getElementById('sb-role-lbl').textContent = d;
+    document.getElementById('sb-badge').textContent    = 'PMT';
+    document.getElementById('sb-badge').className      = 'sb-role-badge rb-pmt';
   }
+
   buildSidebar();
-  // Restore page from URL hash if available, otherwise default
-  const hashPage = _getHashPage();
-  const validPages = role==='ma' ? PAGES_MA : PAGES_PMT;
-  const targetPage = (hashPage && validPages.includes(hashPage)) ? hashPage : (role==='pmt' ? 'today' : 'content');
+  const hashPage   = _getHashPage();
+  const validPages = role==='admin' ? PAGES_ADMIN : role==='ma' ? PAGES_MA : PAGES_PMT;
+  const targetPage = (hashPage && validPages.includes(hashPage)) ? hashPage
+                   : role==='admin' ? 'research-agent'
+                   : role==='pmt'   ? 'today' : 'content';
   showPage(targetPage, skipHash);
   buildCLKpis();
   buildCLTabs();
   buildSidebarFooter();
   buildTopbarActions();
-  renderCL();
+  if(role !== 'admin') renderCL();
   if(role==='pmt' && targetPage==='today') renderToday();
 }
 
 function buildSidebar(){
-  const isMA = ROLE==='ma';
-  const activeClass = isMA ? 'active-ma' : 'active-pmt';
+  const isMA    = ROLE==='ma';
+  const isAdmin = ROLE==='admin';
+  const activeClass = isMA ? 'active-ma' : isAdmin ? 'active-admin' : 'active-pmt';
   const nav = document.getElementById('sb-nav');
+  if(isAdmin){
+    nav.innerHTML=`
+      <div class="ng">AI Pipeline</div>
+      <div class="ni ${activeClass}" id="ni-research-agent" onclick="showPage('research-agent')">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
+        Research Agent
+        <span class="nb nb-gold">New</span>
+      </div>
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
+        Research Pipeline
+      </div>`;
+    return;
+  }
   if(isMA){
     nav.innerHTML=`
       <div class="ng">My Workspace</div>
@@ -3329,7 +3518,9 @@ function buildSidebar(){
 
 function buildSidebarFooter(){
   const foot = document.getElementById('sb-foot');
-  if(ROLE==='pmt'){
+  if(ROLE==='admin'){
+    foot.innerHTML=`<div class="sync-row"><div class="sdot" style="background:#C4B5FD;"></div>PubMed sync · active</div>`;
+  } else if(ROLE==='pmt'){
     foot.innerHTML=`<div class="sb-stats"><div class="sb-stat"><div class="sb-sv">50</div><div class="sb-sl">Doctors</div></div><div class="sb-stat"><div class="sb-sv">74%</div><div class="sb-sl">Coverage</div></div></div><div class="sync-row"><div class="sdot"></div>PubMed sync · 14 min ago</div>`;
   } else {
     foot.innerHTML=`<div class="sync-row" style="margin-bottom:6px;"><div class="sdot"></div>PubMed sync · 14 min ago · 3 new</div><div style="font-size:10px;color:rgba(255,255,255,.18);">Last review: Today 11:30 AM</div>`;
@@ -3347,6 +3538,7 @@ function buildTopbarActions(){
 
 function buildCLKpis(){
   const el = document.getElementById('cl-kpis');
+  if(ROLE==='admin'){ el.innerHTML=''; return; }
   const pend=ALL_PAPERS.filter(p=>p.status==='pending').length;
   const appr=ALL_PAPERS.filter(p=>p.status==='approved').length;
   const rej=ALL_PAPERS.filter(p=>p.status==='rejected').length;
@@ -3359,6 +3551,7 @@ function buildCLKpis(){
 
 function buildCLTabs(){
   const el = document.getElementById('cl-tabs');
+  if(ROLE==='admin'){ el.innerHTML=''; return; }
   const pend=ALL_PAPERS.filter(p=>p.status==='pending').length;
   const appr=ALL_PAPERS.filter(p=>p.status==='approved').length;
   const rej=ALL_PAPERS.filter(p=>p.status==='rejected').length;
@@ -3384,12 +3577,12 @@ function buildCLTabs(){
 function showPage(id, skipHash){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   const pgEl = document.getElementById('pg-'+id);
-  if(!pgEl) { id = ROLE==='pmt'?'today':'content'; document.getElementById('pg-'+id).classList.add('on'); }
+  if(!pgEl) { id = ROLE==='admin'?'research-agent':ROLE==='pmt'?'today':'content'; document.getElementById('pg-'+id).classList.add('on'); }
   else pgEl.classList.add('on');
   const T={content:'Content Library',doctors:'Doctor Directory','360':'Doctor 360°',today:"Today's Tasks",occasions:'Occasion Hub',analytics:'Analytics','research-agent':'Research Agent',pipeline:'Research Pipeline',dashboard:'Dashboard'};
   document.getElementById('tb-cur').textContent=T[id]||'PinnacleIQ';
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active-ma','active-pmt'));
-  const activeClass = ROLE==='ma'?'active-ma':'active-pmt';
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active-ma','active-pmt','active-admin'));
+  const activeClass = ROLE==='ma'?'active-ma':ROLE==='admin'?'active-admin':'active-pmt';
   const sidebarId = id==='360'?'360':id;
   const ni = document.getElementById('ni-'+sidebarId) || document.getElementById('ni-today');
   if(ni) ni.classList.add(activeClass);
@@ -3471,9 +3664,11 @@ function getCLFiltered(){
     return true;
   });
 
-  // Sort: newest first (desc) or oldest first (asc) by date
+  // Sort: newest first (desc) or oldest first (asc)
+  // Use full ISO timestamp (_createdAt) for API items for precise ordering within same day
   list.sort((a,b)=>{
-    const da = a.date||'', db = b.date||'';
+    const da = a._createdAt || a.date || '';
+    const db = b._createdAt || b.date || '';
     return sort==='old' ? da.localeCompare(db) : db.localeCompare(da);
   });
 
@@ -3536,7 +3731,7 @@ function clCardHTML(p){
       <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span>${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
-    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);">${fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;">${actions}</div></div>
+    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;flex-shrink:0;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:nowrap;flex-shrink:0;">${actions}</div></div>
   </div>`;
 }
 
@@ -3562,7 +3757,7 @@ function clRowHTML(p){
       <div class="pr-sum">${p.sum}</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span></div>
     </div>
-    <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);">${fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
+    <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;
 }
 
@@ -3576,7 +3771,7 @@ function openMADetail(id){
   document.getElementById('ma-icon').style.background=bg;
   document.getElementById('ma-icon').innerHTML=`<svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 3h13M2.5 6.5h13M2.5 10h9M2.5 13.5h6"/></svg>`;
   document.getElementById('ma-title').textContent=p.title;
-  document.getElementById('ma-meta').innerHTML=`${srcPill(p.src)}${stBadge(p.status)}<span class="badge b-gray">${fmtDate(p.date)}</span>`;
+  document.getElementById('ma-meta').innerHTML=`${srcPill(p.src)}${stBadge(p.status)}<span class="badge b-gray">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</span>`;
   const pmEl=document.getElementById('ma-pubmed-wrap');
   if(p.pmid){pmEl.style.display='block';document.getElementById('ma-pmid').textContent='PMID: '+p.pmid;}else pmEl.style.display='none';
   const pdfEl=document.getElementById('ma-pdf-wrap');
@@ -5551,7 +5746,12 @@ function sendBroadcast(){
 // showPage already handles occasions inline
 
 /* ══════════════════════ RESEARCH PIPELINE ══════════════════════ */
-const PL_API = 'http://localhost:8010';
+// Auto-detect API base URL:
+// - Local dev (Live Server on :5500 or :7788) → backend on localhost:8010
+// - Deployed (ngrok / cloud VM) → same origin (backend serves both HTML + API)
+const PL_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8010'
+  : window.location.origin;
 let PL_TOPICS = [];          // [{topic, specialty, therapy_area}, ...]
 let PL_SEL_IDX = -1;         // selected topic index
 let PL_POLL = null;           // polling interval ID
@@ -7175,6 +7375,7 @@ function mapAPIItemToPaper(item) {
     month: d.toLocaleString('en-IN',{month:'long'}),
     year: d.getFullYear(),
     date: (item.created_at||'').slice(0,10),
+    _createdAt: item.created_at || '',   // full ISO timestamp — used for IST display + precise sort
     sum: summary,
     abstract: rawContent || summary,
     cat: item.specialty || 'General',
@@ -7228,98 +7429,684 @@ function renderAPIContent() {
   // No-op: API content is now merged into ALL_PAPERS and rendered by renderCL()
 }
 
+/* ══ USER DATABASE ══ */
+const USERS_DB = [
+  // ── Category 1: Admin (Research Pipeline + Research Agent only) ──
+  {id:'admin1', name:'Admin 1',          email:'admin1@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A1'},
+  {id:'admin2', name:'Admin 2',          email:'admin2@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A2'},
+  {id:'admin3', name:'Admin 3',          email:'admin3@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A3'},
+  {id:'admin4', name:'Admin 4',          email:'admin4@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A4'},
+  {id:'admin5', name:'Admin 5',          email:'admin5@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A5'},
+  // ── Category 2: Business (PMT — full app view) ──
+  {id:'jijo',           name:'Jijo Kumar',        email:'jijo@mankind.in',              role:'pmt', category:'Business', designation:'BU Head · Life Division',         initials:'JK'},
+  {id:'rajesh_sharma',  name:'Rajesh Sharma',     email:'rajesh.sharma@mankind.in',     role:'pmt', category:'Business', designation:'NSM · National Sales Manager',     initials:'RS'},
+  {id:'priya_nair',     name:'Priya Nair',         email:'priya.nair@mankind.in',        role:'pmt', category:'Business', designation:'Marketing Head · Life Division',   initials:'PN'},
+  {id:'amit_verma',     name:'Amit Verma',         email:'amit.verma@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Cardiac Division',       initials:'AV'},
+  {id:'sunita_patel',   name:'Sunita Patel',       email:'sunita.patel@mankind.in',      role:'pmt', category:'Business', designation:'NSM · North Region',               initials:'SP'},
+  {id:'vikram_singh',   name:'Vikram Singh',       email:'vikram.singh@mankind.in',      role:'pmt', category:'Business', designation:'Marketing Head · Oncology',        initials:'VS'},
+  {id:'neha_gupta',     name:'Neha Gupta',         email:'neha.gupta@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Metabolic Division',     initials:'NG'},
+  {id:'arjun_mehta',    name:'Arjun Mehta',        email:'arjun.mehta@mankind.in',       role:'pmt', category:'Business', designation:'NSM · West Region',                initials:'AM'},
+  {id:'deepa_krishnan', name:'Deepa Krishnan',     email:'deepa.krishnan@mankind.in',    role:'pmt', category:'Business', designation:'Marketing Head · Neurology',       initials:'DK'},
+  {id:'rahul_agarwal',  name:'Rahul Agarwal',      email:'rahul.agarwal@mankind.in',     role:'pmt', category:'Business', designation:'BU Head · GI Division',            initials:'RA'},
+  // ── Category 3: Medical Affairs ──
+  {id:'prashant_agarwal', name:'Dr. Prashant Agarwal', email:'prashant.agarwal@mankind.in', role:'ma', category:'Medical Affairs', designation:'Medical Affairs · MA Lead',    initials:'PA'},
+  {id:'anita_sharma',     name:'Dr. Anita Sharma',     email:'anita.sharma@mankind.in',     role:'ma', category:'Medical Affairs', designation:'Medical Affairs · Cardiology', initials:'AS'},
+  {id:'rohit_kumar',      name:'Dr. Rohit Kumar',      email:'rohit.kumar@mankind.in',      role:'ma', category:'Medical Affairs', designation:'Medical Affairs · Diabetology',initials:'RK'},
+];
+const APP_PASSWORD = 'Test';
+let CURRENT_USER = null;
+
+/* ══ LOGIN / AUTH ══ */
+function doLogin() {
+  const email   = document.getElementById('login-email').value.trim().toLowerCase();
+  const password= document.getElementById('login-password').value;
+  const errEl   = document.getElementById('login-error');
+  const errMsg  = document.getElementById('login-error-msg');
+  const btn     = document.getElementById('login-btn');
+  errEl.style.display = 'none';
+
+  if (!email)    { errMsg.textContent = 'Please enter your email address.'; errEl.style.display = 'flex'; return; }
+  if (!password) { errMsg.textContent = 'Please enter your password.';      errEl.style.display = 'flex'; return; }
+
+  const user = USERS_DB.find(u => u.email.toLowerCase() === email);
+  if (!user) { errMsg.textContent = 'No account found with that email address.'; errEl.style.display = 'flex'; return; }
+  if (password !== APP_PASSWORD) { errMsg.textContent = 'Incorrect password. Please try again.'; errEl.style.display = 'flex'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="login-spinner"></span> Signing in…';
+
+  setTimeout(() => {
+    CURRENT_USER = user;
+    localStorage.setItem('pinnacle_logged_in', 'true');
+    localStorage.setItem('pinnacle_user_id', user.id);
+    localStorage.setItem('pinnacle_role', user.role);
+    document.getElementById('login-screen').style.display = 'none';
+    switchRole(user.role);
+    startNotifPolling();
+    loadSchedulerStatus();
+    loadContentFromAPI();
+    btn.disabled = false;
+    btn.innerHTML = 'Sign in';
+  }, 600);
+}
+
+function doLogout() {
+  localStorage.removeItem('pinnacle_logged_in');
+  localStorage.removeItem('pinnacle_user_id');
+  localStorage.removeItem('pinnacle_role');
+  CURRENT_USER = null;
+  document.getElementById('login-email').value    = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('role-switcher').classList.remove('open');
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function initApp() {
+  const loggedIn = localStorage.getItem('pinnacle_logged_in') === 'true';
+  const userId   = localStorage.getItem('pinnacle_user_id');
+  const savedRole= localStorage.getItem('pinnacle_role') || 'pmt';
+  if (loggedIn) {
+    CURRENT_USER = USERS_DB.find(u => u.id === userId) || null;
+    document.getElementById('login-screen').style.display = 'none';
+    switchRole(_getHashRole() || savedRole);
+    setTimeout(() => { startNotifPolling(); loadSchedulerStatus(); loadContentFromAPI(); }, 1200);
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+}
+
 /* ══ STARTUP CALLS ══ */
-// Start notification polling after initial load
-setTimeout(() => {
-  startNotifPolling();
-  loadSchedulerStatus();
-  loadContentFromAPI();
-}, 1500);
-
 // API content is merged directly into ALL_PAPERS — no separate container needed
-
-// Restore role+page from URL hash, default to PMT
-switchRole(_getHashRole() || 'pmt');
+// initApp checks localStorage session; starts background services after login
+initApp();
 
 // ═════════════════════════════════════════════════════════════════════
 // PUBMED RESEARCH AGENT FUNCTIONS
 // ═════════════════════════════════════════════════════════════════════
 
-function raRunSearch(suffix = '') {
-  const suffix_str = suffix ? `-${suffix}` : '';
-  const therapy = document.getElementById(`ra-therapy${suffix_str}`).value.trim();
-  const disease = document.getElementById(`ra-disease${suffix_str}`).value.trim();
-  if (!therapy || !disease) {
-    alert('Please select Therapy Area and Disease');
+/* ── Autocomplete & Filter Suggestions ────────────────────────────────────────
+   Dropdown suggestions backed by filter_suggestions.txt (via backend API).
+   Recent user-searched terms (top 5) appear first, then default values.
+   New terms are persisted to the file and available across all sessions.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+// In-memory cache of suggestions loaded from backend
+// Structure: { therapy_area: { recent: [...], defaults: [...] }, disease: {...}, keywords: {...} }
+let RA_SUGGESTIONS_CACHE = null;
+
+// Map frontend filter names to backend section names
+const RA_SECTION_MAP = {
+  therapy:  'therapy_area',
+  disease:  'disease',
+  keywords: 'keywords'
+};
+
+// Load suggestions from backend file (filter_suggestions.txt)
+async function raLoadSuggestions() {
+  try {
+    const res = await fetch(PL_API + '/filters/suggestions');
+    if (res.ok) {
+      RA_SUGGESTIONS_CACHE = await res.json();
+    }
+  } catch (e) {
+    console.warn('[RA] Could not load filter suggestions from backend, using fallback defaults');
+  }
+
+  // Fallback defaults if backend unavailable
+  if (!RA_SUGGESTIONS_CACHE) {
+    RA_SUGGESTIONS_CACHE = {
+      therapy_area: { recent: [], defaults: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology'] },
+      disease:      { recent: [], defaults: ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS'] },
+      keywords:     { recent: [], defaults: ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine'] },
+    };
+  }
+}
+
+// Get ordered suggestions: recent (top 5) first, then defaults
+function raGetSuggestions(filterType) {
+  if (!RA_SUGGESTIONS_CACHE) return [];
+  const section = RA_SECTION_MAP[filterType] || filterType;
+  const data = RA_SUGGESTIONS_CACHE[section];
+  if (!data) return [];
+  // Recent terms first, then defaults
+  return [...(data.recent || []), ...(data.defaults || [])];
+}
+
+// Persist a new/searched term to the backend file
+async function raAddSuggestion(filterType, term) {
+  if (!term || term.trim().length === 0) return;
+  const section = RA_SECTION_MAP[filterType] || filterType;
+
+  try {
+    await fetch(PL_API + '/filters/suggestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ section: section, term: term.trim() })
+    });
+    // Refresh cache from file so dropdown reflects the change
+    await raLoadSuggestions();
+  } catch (e) {
+    console.warn('[RA] Could not save filter term to backend:', e.message);
+  }
+}
+
+// Fuzzy match: filter + sort by relevance (prefix matches first)
+function raFuzzyMatch(query, items) {
+  if (!query) return items;
+  const q = query.toLowerCase();
+  return items.filter(item =>
+    item.toLowerCase().includes(q)
+  ).sort((a, b) => {
+    const aStarts = a.toLowerCase().startsWith(q);
+    const bStarts = b.toLowerCase().startsWith(q);
+    if (aStarts && !bStarts) return -1;
+    if (!aStarts && bStarts) return 1;
+    return 0;
+  });
+}
+
+// Render the dropdown with suggestions
+function raShowDropdown(filterType) {
+  const input = document.getElementById(`ra-${filterType}-2`);
+  const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
+  const query = input.value.trim();
+  const section = RA_SECTION_MAP[filterType] || filterType;
+
+  const allSuggestions = raGetSuggestions(filterType);
+  const filtered = raFuzzyMatch(query, allSuggestions);
+
+  // How many recent items exist (to show a separator)
+  const recentCount = RA_SUGGESTIONS_CACHE
+    ? (RA_SUGGESTIONS_CACHE[section]?.recent?.length || 0)
+    : 0;
+
+  dropdown.classList.remove('hidden');
+
+  if (filtered.length === 0 && query.length > 0) {
+    dropdown.innerHTML = `
+      <div class="ra-dropdown-item" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${query.replace(/'/g, "\\'")}', true)">
+        ➕ Add "<b>${query}</b>" as new suggestion
+      </div>`;
+  } else if (filtered.length === 0) {
+    dropdown.innerHTML = '<div class="ra-dropdown-empty">No suggestions available</div>';
+  } else {
+    let html = '';
+    // If not filtering (empty query), show recent header
+    if (!query && recentCount > 0) {
+      html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;">Recent Searches</div>';
+    }
+    filtered.forEach((item, idx) => {
+      // Add separator between recent and defaults when showing full list
+      if (!query && idx === recentCount && recentCount > 0) {
+        html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;border-top:1.5px solid #e2eaf2;">All Suggestions</div>';
+      }
+      const isRecent = !query && idx < recentCount;
+      html += `<div class="ra-dropdown-item${isRecent ? ' selected' : ''}" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
+        ${isRecent ? '🕐 ' : ''}${item}
+      </div>`;
+    });
+    dropdown.innerHTML = html;
+  }
+}
+
+// Handle selection from dropdown
+function raSelectFilterOption(filterType, value, isNew = false) {
+  const input = document.getElementById(`ra-${filterType}-2`);
+  const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
+
+  // Prevent focusin from reopening the dropdown right after this selection
+  _raJustSelected = true;
+
+  if (filterType === 'keywords') {
+    // For keywords: add as chip instead of setting input value
+    input.value = '';
+    raAddKeywordChipValue(value);
+  } else {
+    input.value = value;
+    // Move focus away from input after selection so the dropdown stays closed
+    input.blur();
+  }
+
+  // Persist new or selected term as recent
+  raAddSuggestion(filterType, value);
+
+  dropdown.classList.add('hidden');
+
+  // Update active filters display
+  raUpdateActiveFilters();
+}
+
+// Flag set after a selection so focusin doesn't immediately reopen the dropdown
+let _raJustSelected = false;
+
+// Close dropdowns when clicking outside any fuzzy input or dropdown
+document.addEventListener('click', (e) => {
+  const isInput    = e.target.classList.contains('ra-fuzzy-input');
+  const isDropdown = e.target.closest && e.target.closest('.ra-dropdown');
+  if (!isInput && !isDropdown) {
+    document.querySelectorAll('.ra-dropdown').forEach(d => d.classList.add('hidden'));
+  }
+});
+
+// Show dropdown on focus ONLY when user clicks into an empty input (not right after a selection)
+document.addEventListener('focusin', (e) => {
+  if (_raJustSelected) { _raJustSelected = false; return; }
+  if (e.target.classList.contains('ra-fuzzy-input')) {
+    const id = e.target.id;
+    if (id === 'ra-therapy-2') raShowDropdown('therapy');
+    else if (id === 'ra-disease-2') raShowDropdown('disease');
+    else if (id === 'ra-keywords-2') raShowDropdown('keywords');
+  }
+});
+
+// Load suggestions from file on page load
+raLoadSuggestions();
+
+/* ── Keyword Chips & Active Filters ──────────────────────────────────────────
+   Keywords are collected as removable chip tags.
+   Active filters row shows selected Therapy Area & Disease as chips.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+// Store selected keyword chips
+let raSelectedKeywords = [];
+
+// Add keyword chip from input field (called on Enter key)
+function raAddKeywordChip() {
+  const input = document.getElementById('ra-keywords-2');
+  const val = input.value.trim();
+  if (!val) return;
+  raAddKeywordChipValue(val);
+  input.value = '';
+  // Hide dropdown
+  const dd = document.getElementById('ra-dropdown-keywords');
+  if (dd) dd.classList.add('hidden');
+}
+
+// Add a keyword value as a chip
+function raAddKeywordChipValue(value) {
+  if (!value || raSelectedKeywords.map(k => k.toLowerCase()).includes(value.toLowerCase())) return;
+  raSelectedKeywords.push(value);
+  raRenderKeywordChips();
+  raUpdateActiveFilters();
+  // Persist to suggestions file
+  raAddSuggestion('keywords', value);
+}
+
+// Remove a keyword chip
+function raRemoveKeywordChip(idx) {
+  raSelectedKeywords.splice(idx, 1);
+  raRenderKeywordChips();
+  raUpdateActiveFilters();
+}
+
+// Render the keyword chips UI
+function raRenderKeywordChips() {
+  const section = document.getElementById('ra-keywords-chips-section');
+  const container = document.getElementById('ra-keyword-chips');
+  if (!section || !container) return;
+
+  if (raSelectedKeywords.length === 0) {
+    section.style.display = 'none';
     return;
   }
 
-  document.getElementById(`ra-results-section${suffix_str}`).style.display = 'block';
-  document.getElementById(`ra-loading-state${suffix_str}`).classList.add('show');
-  document.getElementById(`ra-articles-grid${suffix_str}`).innerHTML = '';
-  document.getElementById(`ra-empty-state${suffix_str}`).classList.remove('show');
-
-  // Simulate PubMed search after delay
-  setTimeout(() => {
-    document.getElementById(`ra-loading-state${suffix_str}`).classList.remove('show');
-    raDisplayMockResults(therapy, disease, suffix_str);
-    document.getElementById(`ra-results-section${suffix_str}`).scrollIntoView({behavior:'smooth'});
-  }, 1500);
+  section.style.display = 'block';
+  container.innerHTML = raSelectedKeywords.map((kw, i) =>
+    `<span class="ra-keyword-chip">${kw}<span class="ra-chip-x" onclick="raRemoveKeywordChip(${i})">×</span></span>`
+  ).join('');
 }
 
-function raDisplayMockResults(therapy, disease, suffix_str = '') {
-  const results = [
-    {id:1, title:`Efficacy and Safety of Novel Treatment in ${disease}: A Randomized Controlled Trial`, journal:'Nature Medicine', year:2024, authors:'Smith et al', relevance:95},
-    {id:2, title:`${disease} Management: Updated Clinical Guidelines`, journal:'Lancet', year:2024, authors:'Johnson et al', relevance:92},
-    {id:3, title:`Real-world Evidence for ${therapy} in ${disease}`, journal:'NEJM', year:2025, authors:'Williams et al', relevance:88},
-    {id:4, title:`Emerging Biomarkers in ${disease} Treatment`, journal:'Circulation', year:2024, authors:'Brown et al', relevance:85},
-    {id:5, title:`Long-term Outcomes with New ${therapy} Approach`, journal:'BMJ', year:2025, authors:'Davis et al', relevance:82},
-    {id:6, title:`${disease}: Mechanisms and Clinical Implications`, journal:'Cell', year:2024, authors:'Miller et al', relevance:78},
-  ];
+// Update the active filters row (shows therapy area + disease as chips)
+function raUpdateActiveFilters() {
+  const section = document.getElementById('ra-active-filters-section');
+  const container = document.getElementById('ra-active-filter-chips');
+  if (!section || !container) return;
 
-  document.getElementById(`ra-results-badge${suffix_str}`).textContent = results.length;
-  document.getElementById(`ra-res-count${suffix_str}`).textContent = results.length;
-  document.getElementById(`ra-result-label${suffix_str}`).style.display = 'inline';
-  document.getElementById(`ra-csv-btn${suffix_str}`).style.display = 'flex';
-  document.getElementById(`ra-db-btn${suffix_str}`).style.display = 'flex';
+  const therapy = document.getElementById('ra-therapy-2').value.trim();
+  const disease = document.getElementById('ra-disease-2').value.trim();
 
-  const grid = document.getElementById(`ra-articles-grid${suffix_str}`);
-  grid.innerHTML = results.map(r => `
-    <div class="ra-article-card">
-      <div class="ra-card-top">
-        <div class="ra-card-badges">
-          <span class="ra-badge-source">PubMed</span>
-          <span class="ra-badge-approved">Approved</span>
-        </div>
-        <span style="font-size:12px;font-weight:700;color:#10b981;background:#dcfce7;border:1px solid #86efac;padding:2px 8px;border-radius:4px;">⚡ ${r.relevance}%</span>
-      </div>
-      <div class="ra-card-title">${r.title}</div>
-      <div class="ra-card-journal">${r.journal} · ${r.year}</div>
-      <div class="ra-card-abstract">This study examines the effectiveness and clinical outcomes of novel treatment approaches in ${disease}, providing evidence-based recommendations for clinical practice.</div>
-      <div class="ra-card-tags">
-        <span class="ra-ctag ra-ctag-therapy">${therapy}</span>
-        <span class="ra-ctag ra-ctag-disease">${disease}</span>
-        <span class="ra-ctag ra-ctag-relevance">High Relevance</span>
-      </div>
-      <div class="ra-card-footer">
-        <span class="ra-card-date">${r.year}</span>
-        <div class="ra-card-actions">
-          <button class="ra-btn-card ra-btn-view">View</button>
-          <button class="ra-btn-card ra-btn-share">Share</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
+  const chips = [];
+  if (therapy) chips.push({ label: therapy, field: 'therapy' });
+  if (disease) chips.push({ label: disease, field: 'disease' });
+
+  if (chips.length === 0 && raSelectedKeywords.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'flex';
+  container.innerHTML = chips.map(c =>
+    `<span class="ra-filter-chip">${c.label}<span class="ra-chip-x" onclick="raClearFilter('${c.field}')">×</span></span>`
+  ).join('');
+}
+
+// Clear a specific filter
+function raClearFilter(field) {
+  if (field === 'therapy') document.getElementById('ra-therapy-2').value = '';
+  if (field === 'disease') document.getElementById('ra-disease-2').value = '';
+  raUpdateActiveFilters();
+}
+
+// Clear all filters and keyword chips
+function raClearAllFilters() {
+  document.getElementById('ra-therapy-2').value = '';
+  document.getElementById('ra-disease-2').value = '';
+  document.getElementById('ra-keywords-2').value = '';
+  raSelectedKeywords = [];
+  raRenderKeywordChips();
+  raUpdateActiveFilters();
+}
+
+// Update the hero badge count when results come in
+function raUpdateHeroBadge(count) {
+  const badge = document.getElementById('ra-hero-results');
+  if (badge) badge.textContent = count;
+}
+
+/* ── Dynamic Research Agent Functions ─────────────────────────────────────────
+   These functions implement user-driven article generation using the agentic
+   pipeline (Alpha→Beta→Gamma→Delta) based on dynamic filter selections.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+async function raRunDynamicSearch() {
+  const therapyArea = document.getElementById('ra-therapy-2').value.trim();
+  const disease = document.getElementById('ra-disease-2').value.trim();
+  // Combine keyword chips + any text still in the input field
+  const inputKw = document.getElementById('ra-keywords-2').value.trim();
+  if (inputKw) raAddKeywordChipValue(inputKw);
+  document.getElementById('ra-keywords-2').value = '';
+  const keywords = raSelectedKeywords.join(', ');
+  const dateFrom = document.getElementById('ra-date-from-2').value;
+  const dateTo = document.getElementById('ra-date-to-2').value;
+
+  // Validate at least disease or therapy area is selected
+  if (!disease && !therapyArea) {
+    toast('⚠️', 'Please select Disease or Therapy Area');
+    return;
+  }
+
+  // Save selected terms to backend file for future suggestions
+  if (therapyArea) raAddSuggestion('therapy', therapyArea);
+  if (disease) raAddSuggestion('disease', disease);
+
+  // Show results section and loading state
+  document.getElementById('ra-results-section-2').style.display = 'block';
+  document.getElementById('ra-loading-state-2').classList.add('show');
+  document.getElementById('ra-articles-grid-2').innerHTML = '';
+  document.getElementById('ra-empty-state-2').classList.remove('show');
+  document.getElementById('ra-search-btn-2').disabled = true;
+
+  try {
+    // Construct topic from user filters
+    const topic = `${disease || 'General Research'} - ${therapyArea || 'Multiple Therapies'}${keywords ? ' (' + keywords + ')' : ''}`;
+
+    // Call agentic pipeline with user filters
+    const response = await fetch(PL_API + '/pipeline/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: topic,
+        specialty: therapyArea || 'General Medicine',
+        therapy_area: therapyArea || 'General',
+        keywords: keywords
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Pipeline request failed');
+    }
+
+    const data = await response.json();
+    const runId = data.run_id;
+
+    // Store metadata for result processing
+    window.RA_SEARCH_CONTEXT = {
+      therapy: therapyArea,
+      disease: disease,
+      keywords: keywords,
+      dateFrom: dateFrom,
+      dateTo: dateTo
+    };
+
+    // Poll for pipeline results
+    raPollDynamicResults(runId);
+
+  } catch(e) {
+    document.getElementById('ra-loading-state-2').classList.remove('show');
+    document.getElementById('ra-search-btn-2').disabled = false;
+    toast('❌', 'Search failed: ' + e.message);
+  }
+}
+
+async function raPollDynamicResults(runId) {
+  try {
+    const response = await fetch(PL_API + '/pipeline/status/' + runId);
+    if (!response.ok) {
+      // Retry on network errors
+      setTimeout(() => raPollDynamicResults(runId), 2000);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status === 'completed') {
+      // Pipeline complete - fetch and display articles
+      document.getElementById('ra-loading-state-2').classList.remove('show');
+      document.getElementById('ra-search-btn-2').disabled = false;
+
+      // Fetch all generated content cards
+      if (data.all_content_ids && data.all_content_ids.length > 0) {
+        raDisplayDynamicResults(data.all_content_ids);
+      } else if (data.content_id) {
+        raDisplayDynamicResults([data.content_id]);
+      } else {
+        document.getElementById('ra-empty-state-2').classList.add('show');
+      }
+
+    } else if (data.status === 'error') {
+      // Pipeline failed
+      document.getElementById('ra-loading-state-2').classList.remove('show');
+      document.getElementById('ra-search-btn-2').disabled = false;
+      document.getElementById('ra-empty-state-2').classList.add('show');
+      toast('❌', 'Pipeline processing failed');
+
+    } else {
+      // Still running - continue polling
+      setTimeout(() => raPollDynamicResults(runId), 2000);
+    }
+
+  } catch(e) {
+    console.error('Poll error:', e);
+    // Retry on error
+    setTimeout(() => raPollDynamicResults(runId), 2000);
+  }
+}
+
+async function raDisplayDynamicResults(contentIds) {
+  const grid = document.getElementById('ra-articles-grid-2');
+  grid.innerHTML = '';
+  // Use the same papers-grid layout as the Content Library for visual consistency
+  grid.className = 'papers-grid';
+
+  let successCount = 0;
+  const papers = [];
+  for (const contentId of contentIds) {
+    try {
+      const res = await fetch(PL_API + '/content/' + contentId);
+      if (!res.ok) continue;
+      const item = await res.json();
+      successCount++;
+      // Reuse mapAPIItemToPaper + clCardHTML — same pipeline as Content Library
+      const paper = mapAPIItemToPaper(item);
+      // Override src to 'pubmed' so srcPill renders "PubMed" badge (not "Link")
+      // Research Agent content is always PubMed-sourced
+      paper.src = 'pubmed';
+      papers.push(paper);
+    } catch(e) {
+      console.error('Error fetching content:', contentId, e);
+    }
+  }
+
+  // Merge fetched papers into ALL_PAPERS so clCardHTML actions (View / Share) resolve correctly
+  papers.forEach(p => {
+    if (!ALL_PAPERS.find(x => x.id === p.id)) ALL_PAPERS.unshift(p);
+  });
+
+  // Render using the shared Content Library card template
+  grid.innerHTML = papers.map(p => clCardHTML(p)).join('');
+
+  // Update result metadata
+  if (successCount > 0) {
+    document.getElementById('ra-results-badge-2').textContent = successCount;
+    document.getElementById('ra-res-count-2').textContent = successCount;
+    document.getElementById('ra-result-label-2').style.display = 'inline';
+    // "Showing X articles" on the right of the results header
+    document.getElementById('ra-showing-num-2').textContent = successCount;
+    document.getElementById('ra-showing-count-2').style.display = 'inline';
+    // Update hero header badge count
+    raUpdateHeroBadge(successCount);
+    document.getElementById('ra-articles-grid-2').scrollIntoView({ behavior: 'smooth' });
+    // Show MA review footer with card count (mirrors Research Pipeline behaviour)
+    document.getElementById('ra-ma-saved-count-2').textContent = successCount;
+    document.getElementById('ra-ma-review-footer-2').style.display = 'flex';
+  } else {
+    document.getElementById('ra-empty-state-2').classList.add('show');
+    document.getElementById('ra-showing-count-2').style.display = 'none';
+    document.getElementById('ra-ma-review-footer-2').style.display = 'none';
+  }
 }
 
 function raResetForm(suffix = '') {
   const suffix_str = suffix ? `-${suffix}` : '';
+  // Only clear filter inputs — never hide or remove generated articles
   document.getElementById(`ra-therapy${suffix_str}`).value = '';
   document.getElementById(`ra-disease${suffix_str}`).value = '';
   document.getElementById(`ra-keywords${suffix_str}`).value = '';
   document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
   document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
-  document.getElementById(`ra-results-section${suffix_str}`).style.display = 'none';
+  document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
+  // Clear keyword chips and active filters (UI only, not results)
+  raClearAllFilters();
+}
+
+/* ── Download Database Function ────────────────────────────────────────────────
+   Allows users to export all accumulated search results as CSV.
+   ────────────────────────────────────────────────────────────────────────────── */
+async function raDownloadDatabase() {
+  try {
+    // Fetch all content cards from the database
+    const response = await fetch(PL_API + '/content');
+    if (!response.ok) throw new Error('Failed to fetch content');
+
+    const data = await response.json();
+    const items = data.items || data || [];
+
+    if (!items.length) {
+      toast('⚠️', 'No articles to download');
+      return;
+    }
+
+    // Business-standard 15-column format (matches PinnacleIQ_PubMed_Database template)
+    const headers = [
+      '#',
+      'Date',
+      'Specialty',
+      'Therapy Area',
+      'Sub-category',
+      'Tags',
+      'Relevant Doctor Specialties',
+      'WhatsApp Summary',
+      'Title',
+      'PMID',
+      'DOI',
+      'Abstract',
+      'Authors',
+      'PubMed Link',
+      'Full Text Link (DOI)'
+    ];
+
+    // Helper: return 'NA' for empty/null/undefined values
+    const naIfEmpty = (val) => {
+      if (val === null || val === undefined) return 'NA';
+      const s = String(val).trim();
+      return s.length === 0 ? 'NA' : s;
+    };
+
+    const rows = items.map((item, idx) => {
+      // Extract PMID from pubmed_link if not stored directly
+      let pmid = item.pmid || '';
+      if (!pmid && item.pubmed_link) {
+        const m = item.pubmed_link.match(/\/(\d+)\/?$/);
+        if (m) pmid = m[1];
+      }
+
+      // Build DOI link from doi field
+      const doi = item.doi || '';
+      const doiLink = doi ? `https://doi.org/${doi}` : (item.full_text_link || '');
+
+      // Tags: join array or use string
+      const tags = Array.isArray(item.tags) ? item.tags.join(', ') : (item.tags || '');
+
+      // Relevant doctor specialties
+      const doctorSpecs = item.relevant_doctor_specialties || item.specialty || '';
+
+      // WhatsApp summary: use dedicated field, fallback to short_article excerpt or summary
+      const whatsappSummary = item.whatsapp_summary || item.short_article || item.summary || '';
+
+      // Abstract: use summary/description
+      const abstract = item.summary || item.description || '';
+
+      // Date: use publication_date or created_at
+      const dateStr = item.publication_date || (item.created_at ? item.created_at.split('T')[0] : '');
+
+      // Return all 15 columns — 'NA' for any missing value
+      return [
+        idx + 1,                                    // #
+        naIfEmpty(dateStr),                          // Date
+        naIfEmpty(item.specialty),                   // Specialty
+        naIfEmpty(item.therapy_area),                // Therapy Area
+        naIfEmpty(item.sub_category),                // Sub-category
+        naIfEmpty(tags),                             // Tags
+        naIfEmpty(doctorSpecs),                      // Relevant Doctor Specialties
+        naIfEmpty(whatsappSummary),                  // WhatsApp Summary
+        naIfEmpty(item.title),                       // Title
+        naIfEmpty(pmid),                             // PMID
+        naIfEmpty(doi),                              // DOI
+        naIfEmpty(abstract),                         // Abstract
+        naIfEmpty(item.authors),                     // Authors
+        naIfEmpty(item.pubmed_link),                 // PubMed Link
+        naIfEmpty(doiLink)                           // Full Text Link (DOI)
+      ];
+    });
+
+    // Format CSV with proper escaping
+    let csv = '﻿'; // BOM for Excel UTF-8 compatibility
+    csv += headers.map(h => `"${h}"`).join(',') + '\n';
+    rows.forEach(row => {
+      csv += row.map(cell => {
+        const str = (cell === null || cell === undefined) ? 'NA' : String(cell);
+        return `"${str.replace(/"/g, '""')}"`;
+      }).join(',') + '\n';
+    });
+
+    // Trigger download as CSV (business-standard format)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `PinnacleIQ_PubMed_Database_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast('✓', `Database downloaded — ${items.length} articles`);
+
+  } catch(e) {
+    console.error('Download error:', e);
+    toast('❌', 'Download failed: ' + e.message);
+  }
 }
 </script>
 </body>
