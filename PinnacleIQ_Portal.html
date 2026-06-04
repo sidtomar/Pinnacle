@@ -7256,133 +7256,162 @@ switchRole(_getHashRole() || 'pmt');
 // ═════════════════════════════════════════════════════════════════════
 
 /* ── Autocomplete & Filter Suggestions ────────────────────────────────────────
-   Manage dropdown suggestions with fuzzy matching and localStorage persistence.
-   New terms entered by users are automatically stored for future reference.
+   Dropdown suggestions backed by filter_suggestions.txt (via backend API).
+   Recent user-searched terms (top 5) appear first, then default values.
+   New terms are persisted to the file and available across all sessions.
    ────────────────────────────────────────────────────────────────────────────── */
 
-// Initial default suggestions
-const RA_FILTER_DEFAULTS = {
-  therapy: [
-    'Cardiology', 'Diabetology', 'Endocrinology', 'Gynecology',
-    'Gastroenterology', 'Ophthalmology', 'Oncology', 'Neurology'
-  ],
-  disease: [
-    'Hypertension', 'Coronary Artery Disease (CAD)', 'Heart Failure',
-    'Atrial Fibrillation', 'Dyslipidemia', 'Type 2 Diabetes', 'PCOS'
-  ],
-  keywords: [
-    'antihypertensive therapy advances', 'hypertension drug approval',
-    'cardiovascular outcomes', 'clinical efficacy', 'treatment guidelines',
-    'latest research', 'evidence-based medicine'
-  ]
+// In-memory cache of suggestions loaded from backend
+// Structure: { therapy_area: { recent: [...], defaults: [...] }, disease: {...}, keywords: {...} }
+let RA_SUGGESTIONS_CACHE = null;
+
+// Map frontend filter names to backend section names
+const RA_SECTION_MAP = {
+  therapy:  'therapy_area',
+  disease:  'disease',
+  keywords: 'keywords'
 };
 
-// Initialize localStorage with defaults
-function raInitializeFilters() {
-  Object.keys(RA_FILTER_DEFAULTS).forEach(key => {
-    const storageKey = `ra-filters-${key}`;
-    if (!localStorage.getItem(storageKey)) {
-      localStorage.setItem(storageKey, JSON.stringify(RA_FILTER_DEFAULTS[key]));
+// Load suggestions from backend file (filter_suggestions.txt)
+async function raLoadSuggestions() {
+  try {
+    const res = await fetch(PL_API + '/filters/suggestions');
+    if (res.ok) {
+      RA_SUGGESTIONS_CACHE = await res.json();
     }
-  });
-}
+  } catch (e) {
+    console.warn('[RA] Could not load filter suggestions from backend, using fallback defaults');
+  }
 
-// Get suggestions from localStorage or defaults
-function raGetSuggestions(filterType) {
-  const storageKey = `ra-filters-${filterType}`;
-  const stored = localStorage.getItem(storageKey);
-  return stored ? JSON.parse(stored) : RA_FILTER_DEFAULTS[filterType] || [];
-}
-
-// Add new term to suggestions and localStorage
-function raAddSuggestion(filterType, term) {
-  if (!term || term.trim().length === 0) return;
-
-  const storageKey = `ra-filters-${filterType}`;
-  let suggestions = raGetSuggestions(filterType);
-
-  // Avoid duplicates (case-insensitive)
-  if (!suggestions.map(s => s.toLowerCase()).includes(term.toLowerCase())) {
-    suggestions.unshift(term); // Add to top for recent
-    localStorage.setItem(storageKey, JSON.stringify(suggestions));
+  // Fallback defaults if backend unavailable
+  if (!RA_SUGGESTIONS_CACHE) {
+    RA_SUGGESTIONS_CACHE = {
+      therapy_area: { recent: [], defaults: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology'] },
+      disease:      { recent: [], defaults: ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS'] },
+      keywords:     { recent: [], defaults: ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine'] },
+    };
   }
 }
 
-// Fuzzy match for filtering suggestions
+// Get ordered suggestions: recent (top 5) first, then defaults
+function raGetSuggestions(filterType) {
+  if (!RA_SUGGESTIONS_CACHE) return [];
+  const section = RA_SECTION_MAP[filterType] || filterType;
+  const data = RA_SUGGESTIONS_CACHE[section];
+  if (!data) return [];
+  // Recent terms first, then defaults
+  return [...(data.recent || []), ...(data.defaults || [])];
+}
+
+// Persist a new/searched term to the backend file
+async function raAddSuggestion(filterType, term) {
+  if (!term || term.trim().length === 0) return;
+  const section = RA_SECTION_MAP[filterType] || filterType;
+
+  try {
+    await fetch(PL_API + '/filters/suggestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ section: section, term: term.trim() })
+    });
+    // Refresh cache from file so dropdown reflects the change
+    await raLoadSuggestions();
+  } catch (e) {
+    console.warn('[RA] Could not save filter term to backend:', e.message);
+  }
+}
+
+// Fuzzy match: filter + sort by relevance (prefix matches first)
 function raFuzzyMatch(query, items) {
   if (!query) return items;
-
   const q = query.toLowerCase();
   return items.filter(item =>
     item.toLowerCase().includes(q)
   ).sort((a, b) => {
-    const aLower = a.toLowerCase();
-    const bLower = b.toLowerCase();
-    const aStarts = aLower.startsWith(q);
-    const bStarts = bLower.startsWith(q);
-
+    const aStarts = a.toLowerCase().startsWith(q);
+    const bStarts = b.toLowerCase().startsWith(q);
     if (aStarts && !bStarts) return -1;
     if (!aStarts && bStarts) return 1;
     return 0;
   });
 }
 
-// Show dropdown with filtered suggestions
+// Render the dropdown with suggestions
 function raShowDropdown(filterType) {
   const input = document.getElementById(`ra-${filterType}-2`);
   const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
   const query = input.value.trim();
+  const section = RA_SECTION_MAP[filterType] || filterType;
 
-  let suggestions = raGetSuggestions(filterType);
-  let filtered = raFuzzyMatch(query, suggestions);
+  const allSuggestions = raGetSuggestions(filterType);
+  const filtered = raFuzzyMatch(query, allSuggestions);
 
-  // Show dropdown
+  // How many recent items exist (to show a separator)
+  const recentCount = RA_SUGGESTIONS_CACHE
+    ? (RA_SUGGESTIONS_CACHE[section]?.recent?.length || 0)
+    : 0;
+
   dropdown.classList.remove('hidden');
 
   if (filtered.length === 0 && query.length > 0) {
-    // Show "Add new" option if typing custom term
     dropdown.innerHTML = `
       <div class="ra-dropdown-item" onclick="raSelectFilterOption('${filterType}', '${query.replace(/'/g, "\\'")}', true)">
-        ➕ Add "${query}" as new suggestion
-      </div>
-    `;
+        ➕ Add "<b>${query}</b>" as new suggestion
+      </div>`;
   } else if (filtered.length === 0) {
-    dropdown.innerHTML = '<div class="ra-dropdown-empty">No suggestions</div>';
+    dropdown.innerHTML = '<div class="ra-dropdown-empty">No suggestions available</div>';
   } else {
-    dropdown.innerHTML = filtered.map(item => `
-      <div class="ra-dropdown-item" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
-        ${item}
-      </div>
-    `).join('');
+    let html = '';
+    // If not filtering (empty query), show recent header
+    if (!query && recentCount > 0) {
+      html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;">Recent Searches</div>';
+    }
+    filtered.forEach((item, idx) => {
+      // Add separator between recent and defaults when showing full list
+      if (!query && idx === recentCount && recentCount > 0) {
+        html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;border-top:1.5px solid #e2eaf2;">All Suggestions</div>';
+      }
+      const isRecent = !query && idx < recentCount;
+      html += `<div class="ra-dropdown-item${isRecent ? ' selected' : ''}" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
+        ${isRecent ? '🕐 ' : ''}${item}
+      </div>`;
+    });
+    dropdown.innerHTML = html;
   }
 }
 
-// Handle filter selection from dropdown
+// Handle selection from dropdown
 function raSelectFilterOption(filterType, value, isNew = false) {
   const input = document.getElementById(`ra-${filterType}-2`);
   const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
 
-  // Set input value
   input.value = value;
 
-  // Add to suggestions if new
-  if (isNew || !raGetSuggestions(filterType).map(s => s.toLowerCase()).includes(value.toLowerCase())) {
-    raAddSuggestion(filterType, value);
-  }
+  // Persist new or selected term as recent
+  raAddSuggestion(filterType, value);
 
-  // Hide dropdown
   dropdown.classList.add('hidden');
 }
 
-// Hide dropdowns when clicking outside
+// Close dropdowns when clicking outside
 document.addEventListener('click', (e) => {
   if (!e.target.classList.contains('ra-fuzzy-input')) {
     document.querySelectorAll('.ra-dropdown').forEach(d => d.classList.add('hidden'));
   }
 });
 
-// Initialize filters on page load
-raInitializeFilters();
+// Show dropdown on focus (click into empty field)
+document.addEventListener('focusin', (e) => {
+  if (e.target.classList.contains('ra-fuzzy-input')) {
+    const id = e.target.id;
+    if (id === 'ra-therapy-2') raShowDropdown('therapy');
+    else if (id === 'ra-disease-2') raShowDropdown('disease');
+    else if (id === 'ra-keywords-2') raShowDropdown('keywords');
+  }
+});
+
+// Load suggestions from file on page load
+raLoadSuggestions();
 
 /* ── Dynamic Research Agent Functions ─────────────────────────────────────────
    These functions implement user-driven article generation using the agentic
