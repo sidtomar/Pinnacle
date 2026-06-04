@@ -1351,7 +1351,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-ai-badge{margin-left:auto;display:flex;align-items:center;gap:5px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#b8912a;}
         .ra-panel-divider{height:1px;background:#e2eaf2;margin:16px 24px 0;}
         .ra-panel-body{padding:20px 24px 24px;}
-        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1.6fr 1.4fr;gap:16px;margin-bottom:16px;}
+        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.2fr auto;gap:16px;align-items:end;margin-bottom:0;}
         .ra-filter-group{display:flex;flex-direction:column;gap:6px;position:relative;}
         .ra-filter-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;}
         .ra-req{color:#b8912a;margin-left:2px;}
@@ -1364,8 +1364,21 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-dropdown-item.selected{background:#e8f3ff;color:#0369a1;font-weight:600;border-left:3px solid #0369a1;padding-left:9px;}
         .ra-dropdown-item:last-child{border-bottom:none;}
         .ra-dropdown-empty{padding:12px;text-align:center;color:#6b7280;font-size:12px;}
+        .ra-selected-keywords{margin-top:12px;}
+        .ra-selected-keywords-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+        .ra-keyword-chips{display:flex;flex-wrap:wrap;gap:6px;}
+        .ra-keyword-chip{display:inline-flex;align-items:center;gap:5px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:14px;padding:4px 10px 4px 12px;font-size:12px;font-weight:500;}
+        .ra-keyword-chip .ra-chip-x{cursor:pointer;font-size:14px;color:#6b7280;line-height:1;margin-left:2px;transition:color .12s;}
+        .ra-keyword-chip .ra-chip-x:hover{color:#c62828;}
+        .ra-active-filters{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;}
+        .ra-active-filters-label{font-size:12px;font-weight:600;color:#4a637a;}
+        .ra-filter-chip{display:inline-flex;align-items:center;gap:4px;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;border-radius:14px;padding:3px 8px 3px 10px;font-size:12px;font-weight:500;}
+        .ra-filter-chip .ra-chip-x{cursor:pointer;font-size:13px;color:#6b7280;line-height:1;transition:color .12s;}
+        .ra-filter-chip .ra-chip-x:hover{color:#c62828;}
+        .ra-clear-all{font-size:12px;font-weight:600;color:#e53935;cursor:pointer;margin-left:4px;transition:opacity .12s;}
+        .ra-clear-all:hover{opacity:.7;}
         .ra-action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-        .ra-btn-search{display:flex;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:6px;padding:0 22px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.02em;}
+        .ra-btn-search{display:flex;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:6px;padding:0 22px;height:38px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.02em;white-space:nowrap;}
         .ra-btn-search:hover{background:#1a3050;box-shadow:0 4px 12px rgba(15,28,46,.25);transform:translateY(-1px);}
         .ra-btn-secondary{display:flex;align-items:center;gap:7px;background:transparent;color:#1a2e42;border:1.5px solid #e2eaf2;border-radius:6px;padding:0 16px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;}
         .ra-btn-secondary:hover{border-color:#0f1c2e;background:#f4f8fb;}
@@ -1421,11 +1434,15 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
           <p class="ra-hero-desc">Select therapy areas, diseases, and keywords — the AI agent will scan PubMed and surface the most relevant recent publications.</p>
         </div>
         <div class="ra-hero-stats">
-          <div class="ra-stat-item"><div class="ra-stat-num">7</div><div class="ra-stat-lbl">Therapy Areas</div></div>
+          <div class="ra-stat-item"><div class="ra-stat-num" id="ra-hero-results">0</div><div class="ra-stat-lbl">Results</div></div>
           <div style="width:1px;background:rgba(255,255,255,.2);align-self:stretch;"></div>
           <div class="ra-stat-item"><div class="ra-stat-num">35</div><div class="ra-stat-lbl">Diseases</div></div>
           <div style="width:1px;background:rgba(255,255,255,.2);align-self:stretch;"></div>
           <div class="ra-stat-item"><div class="ra-stat-num">105</div><div class="ra-stat-lbl">Keywords</div></div>
+          <div style="width:1px;background:rgba(255,255,255,.2);align-self:stretch;"></div>
+          <div class="ra-stat-item" style="margin-left:8px;">
+            <button class="ra-btn-download" id="ra-db-btn-2" onclick="raDownloadDatabase()" style="height:36px;font-size:12px;border-radius:8px;">📊 Download Database</button>
+          </div>
         </div>
       </div>
 
@@ -1439,7 +1456,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         <div class="ra-panel-divider"></div>
         <div class="ra-panel-body">
 
-          <!-- FILTER GRID -->
+          <!-- FILTER GRID (with inline Search button) -->
           <div class="ra-filter-grid">
             <div class="ra-filter-group">
               <label class="ra-filter-label">Therapy Area <span class="ra-req">*</span></label>
@@ -1453,7 +1470,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             </div>
             <div class="ra-filter-group">
               <label class="ra-filter-label">Keywords</label>
-              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type, press Enter…" autocomplete="off" oninput="raShowDropdown('keywords')">
+              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type, press Enter…" autocomplete="off" oninput="raShowDropdown('keywords')" onkeydown="if(event.key==='Enter'){raAddKeywordChip();event.preventDefault();}">
               <div class="ra-dropdown hidden" id="ra-dropdown-keywords"></div>
             </div>
             <div class="ra-filter-group">
@@ -1464,14 +1481,28 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
                 <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2" value="2026-06-01">
               </div>
             </div>
+            <div class="ra-filter-group" style="justify-content:flex-end;">
+              <button class="ra-btn-search" id="ra-search-btn-2" onclick="raRunDynamicSearch()">🔍 Search</button>
+            </div>
+          </div>
+
+          <!-- SELECTED KEYWORDS (chip tags) -->
+          <div class="ra-selected-keywords" id="ra-keywords-chips-section" style="display:none;">
+            <div class="ra-selected-keywords-label">Selected Keywords</div>
+            <div class="ra-keyword-chips" id="ra-keyword-chips"></div>
+          </div>
+
+          <!-- ACTIVE FILTERS (removable chips + clear all) -->
+          <div class="ra-active-filters" id="ra-active-filters-section" style="display:none;">
+            <span class="ra-active-filters-label">Active Filters:</span>
+            <div id="ra-active-filter-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <span class="ra-clear-all" onclick="raClearAllFilters()">Clear all</span>
           </div>
 
           <!-- ACTIONS -->
           <div class="ra-action-row" style="margin-top:16px;">
-            <button class="ra-btn-search" id="ra-search-btn-2" onclick="raRunDynamicSearch()">🔍 Search PubMed</button>
             <button class="ra-btn-secondary" onclick="raResetForm('2')">↺ Reset</button>
             <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;">⬇ Export CSV</button>
-            <button class="ra-btn-download" id="ra-db-btn-2" onclick="raDownloadDatabase()">📊 Download Database</button>
             <span class="ra-result-label" id="ra-result-label-2" style="display:none;">Showing <span id="ra-res-count-2">0</span> articles</span>
           </div>
 
@@ -7385,12 +7416,21 @@ function raSelectFilterOption(filterType, value, isNew = false) {
   const input = document.getElementById(`ra-${filterType}-2`);
   const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
 
-  input.value = value;
+  if (filterType === 'keywords') {
+    // For keywords: add as chip instead of setting input value
+    input.value = '';
+    raAddKeywordChipValue(value);
+  } else {
+    input.value = value;
+  }
 
   // Persist new or selected term as recent
   raAddSuggestion(filterType, value);
 
   dropdown.classList.add('hidden');
+
+  // Update active filters display
+  raUpdateActiveFilters();
 }
 
 // Close dropdowns when clicking outside
@@ -7413,6 +7453,107 @@ document.addEventListener('focusin', (e) => {
 // Load suggestions from file on page load
 raLoadSuggestions();
 
+/* ── Keyword Chips & Active Filters ──────────────────────────────────────────
+   Keywords are collected as removable chip tags.
+   Active filters row shows selected Therapy Area & Disease as chips.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+// Store selected keyword chips
+let raSelectedKeywords = [];
+
+// Add keyword chip from input field (called on Enter key)
+function raAddKeywordChip() {
+  const input = document.getElementById('ra-keywords-2');
+  const val = input.value.trim();
+  if (!val) return;
+  raAddKeywordChipValue(val);
+  input.value = '';
+  // Hide dropdown
+  const dd = document.getElementById('ra-dropdown-keywords');
+  if (dd) dd.classList.add('hidden');
+}
+
+// Add a keyword value as a chip
+function raAddKeywordChipValue(value) {
+  if (!value || raSelectedKeywords.map(k => k.toLowerCase()).includes(value.toLowerCase())) return;
+  raSelectedKeywords.push(value);
+  raRenderKeywordChips();
+  raUpdateActiveFilters();
+  // Persist to suggestions file
+  raAddSuggestion('keywords', value);
+}
+
+// Remove a keyword chip
+function raRemoveKeywordChip(idx) {
+  raSelectedKeywords.splice(idx, 1);
+  raRenderKeywordChips();
+  raUpdateActiveFilters();
+}
+
+// Render the keyword chips UI
+function raRenderKeywordChips() {
+  const section = document.getElementById('ra-keywords-chips-section');
+  const container = document.getElementById('ra-keyword-chips');
+  if (!section || !container) return;
+
+  if (raSelectedKeywords.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  container.innerHTML = raSelectedKeywords.map((kw, i) =>
+    `<span class="ra-keyword-chip">${kw}<span class="ra-chip-x" onclick="raRemoveKeywordChip(${i})">×</span></span>`
+  ).join('');
+}
+
+// Update the active filters row (shows therapy area + disease as chips)
+function raUpdateActiveFilters() {
+  const section = document.getElementById('ra-active-filters-section');
+  const container = document.getElementById('ra-active-filter-chips');
+  if (!section || !container) return;
+
+  const therapy = document.getElementById('ra-therapy-2').value.trim();
+  const disease = document.getElementById('ra-disease-2').value.trim();
+
+  const chips = [];
+  if (therapy) chips.push({ label: therapy, field: 'therapy' });
+  if (disease) chips.push({ label: disease, field: 'disease' });
+
+  if (chips.length === 0 && raSelectedKeywords.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'flex';
+  container.innerHTML = chips.map(c =>
+    `<span class="ra-filter-chip">${c.label}<span class="ra-chip-x" onclick="raClearFilter('${c.field}')">×</span></span>`
+  ).join('');
+}
+
+// Clear a specific filter
+function raClearFilter(field) {
+  if (field === 'therapy') document.getElementById('ra-therapy-2').value = '';
+  if (field === 'disease') document.getElementById('ra-disease-2').value = '';
+  raUpdateActiveFilters();
+}
+
+// Clear all filters and keyword chips
+function raClearAllFilters() {
+  document.getElementById('ra-therapy-2').value = '';
+  document.getElementById('ra-disease-2').value = '';
+  document.getElementById('ra-keywords-2').value = '';
+  raSelectedKeywords = [];
+  raRenderKeywordChips();
+  raUpdateActiveFilters();
+}
+
+// Update the hero badge count when results come in
+function raUpdateHeroBadge(count) {
+  const badge = document.getElementById('ra-hero-results');
+  if (badge) badge.textContent = count;
+}
+
 /* ── Dynamic Research Agent Functions ─────────────────────────────────────────
    These functions implement user-driven article generation using the agentic
    pipeline (Alpha→Beta→Gamma→Delta) based on dynamic filter selections.
@@ -7421,7 +7562,11 @@ raLoadSuggestions();
 async function raRunDynamicSearch() {
   const therapyArea = document.getElementById('ra-therapy-2').value.trim();
   const disease = document.getElementById('ra-disease-2').value.trim();
-  const keywords = document.getElementById('ra-keywords-2').value.trim();
+  // Combine keyword chips + any text still in the input field
+  const inputKw = document.getElementById('ra-keywords-2').value.trim();
+  if (inputKw) raAddKeywordChipValue(inputKw);
+  document.getElementById('ra-keywords-2').value = '';
+  const keywords = raSelectedKeywords.join(', ');
   const dateFrom = document.getElementById('ra-date-from-2').value;
   const dateTo = document.getElementById('ra-date-to-2').value;
 
@@ -7431,10 +7576,9 @@ async function raRunDynamicSearch() {
     return;
   }
 
-  // Save selected terms to localStorage for future suggestions
+  // Save selected terms to backend file for future suggestions
   if (therapyArea) raAddSuggestion('therapy', therapyArea);
   if (disease) raAddSuggestion('disease', disease);
-  if (keywords) raAddSuggestion('keywords', keywords);
 
   // Show results section and loading state
   document.getElementById('ra-results-section-2').style.display = 'block';
@@ -7583,7 +7727,8 @@ async function raDisplayDynamicResults(contentIds) {
     document.getElementById('ra-results-badge-2').textContent = successCount;
     document.getElementById('ra-res-count-2').textContent = successCount;
     document.getElementById('ra-result-label-2').style.display = 'inline';
-    document.getElementById('ra-db-btn-2').style.display = 'flex';
+    // Update hero header badge count
+    raUpdateHeroBadge(successCount);
     document.getElementById('ra-articles-grid-2').scrollIntoView({ behavior: 'smooth' });
   } else {
     document.getElementById('ra-empty-state-2').classList.add('show');
@@ -7599,6 +7744,8 @@ function raResetForm(suffix = '') {
   document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
   document.getElementById(`ra-results-section${suffix_str}`).style.display = 'none';
   document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
+  // Clear keyword chips and active filters
+  raClearAllFilters();
 }
 
 /* ── Download Database Function ────────────────────────────────────────────────
