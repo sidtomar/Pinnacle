@@ -7737,14 +7737,14 @@ async function raDisplayDynamicResults(contentIds) {
 
 function raResetForm(suffix = '') {
   const suffix_str = suffix ? `-${suffix}` : '';
+  // Only clear filter inputs — never hide or remove generated articles
   document.getElementById(`ra-therapy${suffix_str}`).value = '';
   document.getElementById(`ra-disease${suffix_str}`).value = '';
   document.getElementById(`ra-keywords${suffix_str}`).value = '';
   document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
   document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
-  document.getElementById(`ra-results-section${suffix_str}`).style.display = 'none';
   document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
-  // Clear keyword chips and active filters
+  // Clear keyword chips and active filters (UI only, not results)
   raClearAllFilters();
 }
 
