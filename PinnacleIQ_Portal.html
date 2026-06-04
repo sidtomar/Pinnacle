@@ -7602,7 +7602,7 @@ function raShowDropdown(filterType) {
 
   if (filtered.length === 0 && query.length > 0) {
     dropdown.innerHTML = `
-      <div class="ra-dropdown-item" onclick="raSelectFilterOption('${filterType}', '${query.replace(/'/g, "\\'")}', true)">
+      <div class="ra-dropdown-item" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${query.replace(/'/g, "\\'")}', true)">
         ➕ Add "<b>${query}</b>" as new suggestion
       </div>`;
   } else if (filtered.length === 0) {
@@ -7619,7 +7619,7 @@ function raShowDropdown(filterType) {
         html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;border-top:1.5px solid #e2eaf2;">All Suggestions</div>';
       }
       const isRecent = !query && idx < recentCount;
-      html += `<div class="ra-dropdown-item${isRecent ? ' selected' : ''}" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
+      html += `<div class="ra-dropdown-item${isRecent ? ' selected' : ''}" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
         ${isRecent ? '🕐 ' : ''}${item}
       </div>`;
     });
@@ -7632,12 +7632,17 @@ function raSelectFilterOption(filterType, value, isNew = false) {
   const input = document.getElementById(`ra-${filterType}-2`);
   const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
 
+  // Prevent focusin from reopening the dropdown right after this selection
+  _raJustSelected = true;
+
   if (filterType === 'keywords') {
     // For keywords: add as chip instead of setting input value
     input.value = '';
     raAddKeywordChipValue(value);
   } else {
     input.value = value;
+    // Move focus away from input after selection so the dropdown stays closed
+    input.blur();
   }
 
   // Persist new or selected term as recent
@@ -7649,15 +7654,21 @@ function raSelectFilterOption(filterType, value, isNew = false) {
   raUpdateActiveFilters();
 }
 
-// Close dropdowns when clicking outside
+// Flag set after a selection so focusin doesn't immediately reopen the dropdown
+let _raJustSelected = false;
+
+// Close dropdowns when clicking outside any fuzzy input or dropdown
 document.addEventListener('click', (e) => {
-  if (!e.target.classList.contains('ra-fuzzy-input')) {
+  const isInput    = e.target.classList.contains('ra-fuzzy-input');
+  const isDropdown = e.target.closest && e.target.closest('.ra-dropdown');
+  if (!isInput && !isDropdown) {
     document.querySelectorAll('.ra-dropdown').forEach(d => d.classList.add('hidden'));
   }
 });
 
-// Show dropdown on focus (click into empty field)
+// Show dropdown on focus ONLY when user clicks into an empty input (not right after a selection)
 document.addEventListener('focusin', (e) => {
+  if (_raJustSelected) { _raJustSelected = false; return; }
   if (e.target.classList.contains('ra-fuzzy-input')) {
     const id = e.target.id;
     if (id === 'ra-therapy-2') raShowDropdown('therapy');
