@@ -1357,6 +1357,13 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-req{color:#b8912a;margin-left:2px;}
         .ra-fuzzy-input{width:100%;height:38px;padding:0 36px 0 12px;border:1.5px solid #e2eaf2;border-radius:6px;background:#f9fbfd;font-family:'DM Sans',sans-serif;font-size:13px;color:#1a2e42;outline:none;transition:all .15s;cursor:pointer;}
         .ra-fuzzy-input:focus{border-color:#b8912a;background:#fff;box-shadow:0 0 0 3px rgba(240,180,41,.12);}
+        .ra-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2eaf2;border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(15,28,46,.12);}
+        .ra-dropdown.hidden{display:none;}
+        .ra-dropdown-item{padding:10px 12px;cursor:pointer;font-size:13px;color:#1a2e42;border-bottom:1px solid #f3f4f6;transition:background .12s;}
+        .ra-dropdown-item:hover{background:#f9fbfd;color:#0f1c2e;font-weight:500;}
+        .ra-dropdown-item.selected{background:#e8f3ff;color:#0369a1;font-weight:600;border-left:3px solid #0369a1;padding-left:9px;}
+        .ra-dropdown-item:last-child{border-bottom:none;}
+        .ra-dropdown-empty{padding:12px;text-align:center;color:#6b7280;font-size:12px;}
         .ra-action-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
         .ra-btn-search{display:flex;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:6px;padding:0 22px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.02em;}
         .ra-btn-search:hover{background:#1a3050;box-shadow:0 4px 12px rgba(15,28,46,.25);transform:translateY(-1px);}
@@ -1436,15 +1443,18 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
           <div class="ra-filter-grid">
             <div class="ra-filter-group">
               <label class="ra-filter-label">Therapy Area <span class="ra-req">*</span></label>
-              <input class="ra-fuzzy-input" id="ra-therapy-2" placeholder="Search therapy…" autocomplete="off">
+              <input class="ra-fuzzy-input" id="ra-therapy-2" placeholder="Search therapy…" autocomplete="off" oninput="raShowDropdown('therapy')">
+              <div class="ra-dropdown hidden" id="ra-dropdown-therapy"></div>
             </div>
             <div class="ra-filter-group">
               <label class="ra-filter-label">Disease <span class="ra-req">*</span></label>
-              <input class="ra-fuzzy-input" id="ra-disease-2" placeholder="Search disease…" autocomplete="off">
+              <input class="ra-fuzzy-input" id="ra-disease-2" placeholder="Search disease…" autocomplete="off" oninput="raShowDropdown('disease')">
+              <div class="ra-dropdown hidden" id="ra-dropdown-disease"></div>
             </div>
             <div class="ra-filter-group">
               <label class="ra-filter-label">Keywords</label>
-              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type, press Enter…" autocomplete="off">
+              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type, press Enter…" autocomplete="off" oninput="raShowDropdown('keywords')">
+              <div class="ra-dropdown hidden" id="ra-dropdown-keywords"></div>
             </div>
             <div class="ra-filter-group">
               <label class="ra-filter-label">Publication Date</label>
@@ -7245,6 +7255,135 @@ switchRole(_getHashRole() || 'pmt');
 // PUBMED RESEARCH AGENT FUNCTIONS
 // ═════════════════════════════════════════════════════════════════════
 
+/* ── Autocomplete & Filter Suggestions ────────────────────────────────────────
+   Manage dropdown suggestions with fuzzy matching and localStorage persistence.
+   New terms entered by users are automatically stored for future reference.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+// Initial default suggestions
+const RA_FILTER_DEFAULTS = {
+  therapy: [
+    'Cardiology', 'Diabetology', 'Endocrinology', 'Gynecology',
+    'Gastroenterology', 'Ophthalmology', 'Oncology', 'Neurology'
+  ],
+  disease: [
+    'Hypertension', 'Coronary Artery Disease (CAD)', 'Heart Failure',
+    'Atrial Fibrillation', 'Dyslipidemia', 'Type 2 Diabetes', 'PCOS'
+  ],
+  keywords: [
+    'antihypertensive therapy advances', 'hypertension drug approval',
+    'cardiovascular outcomes', 'clinical efficacy', 'treatment guidelines',
+    'latest research', 'evidence-based medicine'
+  ]
+};
+
+// Initialize localStorage with defaults
+function raInitializeFilters() {
+  Object.keys(RA_FILTER_DEFAULTS).forEach(key => {
+    const storageKey = `ra-filters-${key}`;
+    if (!localStorage.getItem(storageKey)) {
+      localStorage.setItem(storageKey, JSON.stringify(RA_FILTER_DEFAULTS[key]));
+    }
+  });
+}
+
+// Get suggestions from localStorage or defaults
+function raGetSuggestions(filterType) {
+  const storageKey = `ra-filters-${filterType}`;
+  const stored = localStorage.getItem(storageKey);
+  return stored ? JSON.parse(stored) : RA_FILTER_DEFAULTS[filterType] || [];
+}
+
+// Add new term to suggestions and localStorage
+function raAddSuggestion(filterType, term) {
+  if (!term || term.trim().length === 0) return;
+
+  const storageKey = `ra-filters-${filterType}`;
+  let suggestions = raGetSuggestions(filterType);
+
+  // Avoid duplicates (case-insensitive)
+  if (!suggestions.map(s => s.toLowerCase()).includes(term.toLowerCase())) {
+    suggestions.unshift(term); // Add to top for recent
+    localStorage.setItem(storageKey, JSON.stringify(suggestions));
+  }
+}
+
+// Fuzzy match for filtering suggestions
+function raFuzzyMatch(query, items) {
+  if (!query) return items;
+
+  const q = query.toLowerCase();
+  return items.filter(item =>
+    item.toLowerCase().includes(q)
+  ).sort((a, b) => {
+    const aLower = a.toLowerCase();
+    const bLower = b.toLowerCase();
+    const aStarts = aLower.startsWith(q);
+    const bStarts = bLower.startsWith(q);
+
+    if (aStarts && !bStarts) return -1;
+    if (!aStarts && bStarts) return 1;
+    return 0;
+  });
+}
+
+// Show dropdown with filtered suggestions
+function raShowDropdown(filterType) {
+  const input = document.getElementById(`ra-${filterType}-2`);
+  const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
+  const query = input.value.trim();
+
+  let suggestions = raGetSuggestions(filterType);
+  let filtered = raFuzzyMatch(query, suggestions);
+
+  // Show dropdown
+  dropdown.classList.remove('hidden');
+
+  if (filtered.length === 0 && query.length > 0) {
+    // Show "Add new" option if typing custom term
+    dropdown.innerHTML = `
+      <div class="ra-dropdown-item" onclick="raSelectFilterOption('${filterType}', '${query.replace(/'/g, "\\'")}', true)">
+        ➕ Add "${query}" as new suggestion
+      </div>
+    `;
+  } else if (filtered.length === 0) {
+    dropdown.innerHTML = '<div class="ra-dropdown-empty">No suggestions</div>';
+  } else {
+    dropdown.innerHTML = filtered.map(item => `
+      <div class="ra-dropdown-item" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
+        ${item}
+      </div>
+    `).join('');
+  }
+}
+
+// Handle filter selection from dropdown
+function raSelectFilterOption(filterType, value, isNew = false) {
+  const input = document.getElementById(`ra-${filterType}-2`);
+  const dropdown = document.getElementById(`ra-dropdown-${filterType}`);
+
+  // Set input value
+  input.value = value;
+
+  // Add to suggestions if new
+  if (isNew || !raGetSuggestions(filterType).map(s => s.toLowerCase()).includes(value.toLowerCase())) {
+    raAddSuggestion(filterType, value);
+  }
+
+  // Hide dropdown
+  dropdown.classList.add('hidden');
+}
+
+// Hide dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.classList.contains('ra-fuzzy-input')) {
+    document.querySelectorAll('.ra-dropdown').forEach(d => d.classList.add('hidden'));
+  }
+});
+
+// Initialize filters on page load
+raInitializeFilters();
+
 /* ── Dynamic Research Agent Functions ─────────────────────────────────────────
    These functions implement user-driven article generation using the agentic
    pipeline (Alpha→Beta→Gamma→Delta) based on dynamic filter selections.
@@ -7262,6 +7401,11 @@ async function raRunDynamicSearch() {
     toast('⚠️', 'Please select Disease or Therapy Area');
     return;
   }
+
+  // Save selected terms to localStorage for future suggestions
+  if (therapyArea) raAddSuggestion('therapy', therapyArea);
+  if (disease) raAddSuggestion('disease', disease);
+  if (keywords) raAddSuggestion('keywords', keywords);
 
   // Show results section and loading state
   document.getElementById('ra-results-section-2').style.display = 'block';
