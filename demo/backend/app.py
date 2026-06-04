@@ -777,5 +777,9 @@ async def serve_portal():
 if __name__ == "__main__":
     import uvicorn
     import sys
-    port = int(sys.argv[sys.argv.index("--port") + 1]) if "--port" in sys.argv else 8010
+    # Railway (and other PaaS) set PORT env var — fall back to CLI arg, then 8010
+    port = int(
+        os.environ.get("PORT") or
+        (sys.argv[sys.argv.index("--port") + 1] if "--port" in sys.argv else 8010)
+    )
     uvicorn.run(app, host="0.0.0.0", port=port, reload=False)
