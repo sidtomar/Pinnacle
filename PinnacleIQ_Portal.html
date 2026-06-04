@@ -1424,7 +1424,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-ai-badge{margin-left:auto;display:flex;align-items:center;gap:5px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#b8912a;}
         .ra-panel-divider{height:1px;background:#e2eaf2;margin:16px 24px 0;}
         .ra-panel-body{padding:20px 24px 24px;}
-        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.2fr auto;gap:16px;align-items:end;margin-bottom:0;}
+        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.2fr auto auto;gap:12px;align-items:end;margin-bottom:0;}
+        .ra-btn-reset{display:flex;align-items:center;gap:5px;background:#fff;color:#6b7280;border:1.5px solid #e2eaf2;border-radius:8px;padding:0 14px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
+        .ra-btn-reset:hover{border-color:#94a3b8;color:#374151;background:#f8fafc;}
         .ra-filter-group{display:flex;flex-direction:column;gap:6px;position:relative;}
         .ra-filter-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;}
         .ra-req{color:#b8912a;margin-left:2px;}
@@ -1557,6 +1559,12 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="ra-filter-group" style="justify-content:flex-end;">
               <button class="ra-btn-search" id="ra-search-btn-2" onclick="raRunDynamicSearch()">🔍 Search</button>
             </div>
+            <div class="ra-filter-group" style="justify-content:flex-end;">
+              <button class="ra-btn-reset" onclick="raResetForm('2')" title="Clear all filters">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6.5A4.5 4.5 0 1 1 3.5 10"/><polyline points="2,3.5 2,6.5 5,6.5"/></svg>
+                Reset
+              </button>
+            </div>
           </div>
 
           <!-- SELECTED KEYWORDS (chip tags) -->
@@ -1572,9 +1580,8 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <span class="ra-clear-all" onclick="raClearAllFilters()">Clear all</span>
           </div>
 
-          <!-- ACTIONS -->
-          <div class="ra-action-row" style="margin-top:16px;">
-            <button class="ra-btn-secondary" onclick="raResetForm('2')">↺ Reset</button>
+          <!-- ACTIONS (Export CSV hidden until results load) -->
+          <div class="ra-action-row" style="margin-top:12px;">
             <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;">⬇ Export CSV</button>
             <span class="ra-result-label" id="ra-result-label-2" style="display:none;">Showing <span id="ra-res-count-2">0</span> articles</span>
           </div>
