@@ -3301,7 +3301,22 @@ const TH_COL={PCOS:'b-purple','Heart Failure':'b-red','Paediatric Nutrition':'b-
 let ROLE='pmt', CL_VIEW='grid', CL_TAB='all', CUR_ID=null, CUR_TAGS=[], CUR_REL=null, SORT_F=null, SORT_D=1, WZ_STEP=1, WZ_SRC=null;
 
 /* ══ UTILS ══ */
-function fmtDate(d){if(!d)return'—';const[y,m,dd]=d.split('-');const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(dd)} ${M[parseInt(m)-1]} ${y}`;}
+function fmtDate(d){if(!d)return'—';const[y,m,dd]=(d.split('T')[0]).split('-');const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(dd)} ${M[parseInt(m)-1]} ${y}`;}
+// Format full ISO timestamp as "4 Jun 2026, 10:30 AM IST"
+function fmtDateTime(iso){
+  if(!iso)return'—';
+  try{
+    const dt=new Date(iso);
+    if(isNaN(dt))return fmtDate(iso);
+    // Convert to IST (UTC+5:30)
+    const ist=new Date(dt.getTime()+(5.5*60*60*1000));
+    const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const day=ist.getUTCDate(), mon=M[ist.getUTCMonth()], yr=ist.getUTCFullYear();
+    let h=ist.getUTCHours(); const min=String(ist.getUTCMinutes()).padStart(2,'0');
+    const ampm=h>=12?'PM':'AM'; h=h%12||12;
+    return`${day} ${mon} ${yr}, ${h}:${min} ${ampm} IST`;
+  }catch(e){return fmtDate(iso);}
+}
 
 /* ── mdToHtml: convert markdown links, bold, and line breaks to HTML ── */
 function mdToHtml(text) {
@@ -3649,9 +3664,11 @@ function getCLFiltered(){
     return true;
   });
 
-  // Sort: newest first (desc) or oldest first (asc) by date
+  // Sort: newest first (desc) or oldest first (asc)
+  // Use full ISO timestamp (_createdAt) for API items for precise ordering within same day
   list.sort((a,b)=>{
-    const da = a.date||'', db = b.date||'';
+    const da = a._createdAt || a.date || '';
+    const db = b._createdAt || b.date || '';
     return sort==='old' ? da.localeCompare(db) : db.localeCompare(da);
   });
 
@@ -3714,7 +3731,7 @@ function clCardHTML(p){
       <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span>${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
-    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);">${fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;">${actions}</div></div>
+    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;">${actions}</div></div>
   </div>`;
 }
 
@@ -3740,7 +3757,7 @@ function clRowHTML(p){
       <div class="pr-sum">${p.sum}</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span></div>
     </div>
-    <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);">${fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
+    <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;
 }
 
@@ -3754,7 +3771,7 @@ function openMADetail(id){
   document.getElementById('ma-icon').style.background=bg;
   document.getElementById('ma-icon').innerHTML=`<svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 3h13M2.5 6.5h13M2.5 10h9M2.5 13.5h6"/></svg>`;
   document.getElementById('ma-title').textContent=p.title;
-  document.getElementById('ma-meta').innerHTML=`${srcPill(p.src)}${stBadge(p.status)}<span class="badge b-gray">${fmtDate(p.date)}</span>`;
+  document.getElementById('ma-meta').innerHTML=`${srcPill(p.src)}${stBadge(p.status)}<span class="badge b-gray">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</span>`;
   const pmEl=document.getElementById('ma-pubmed-wrap');
   if(p.pmid){pmEl.style.display='block';document.getElementById('ma-pmid').textContent='PMID: '+p.pmid;}else pmEl.style.display='none';
   const pdfEl=document.getElementById('ma-pdf-wrap');
@@ -7353,6 +7370,7 @@ function mapAPIItemToPaper(item) {
     month: d.toLocaleString('en-IN',{month:'long'}),
     year: d.getFullYear(),
     date: (item.created_at||'').slice(0,10),
+    _createdAt: item.created_at || '',   // full ISO timestamp — used for IST display + precise sort
     sum: summary,
     abstract: rawContent || summary,
     cat: item.specialty || 'General',
