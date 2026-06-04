@@ -760,6 +760,20 @@ def download_business_report(
     )
 
 
+# ── Serve portal HTML (for public/UAT deployment via ngrok or cloud) ──────────
+PORTAL_HTML = Path(__file__).parent.parent.parent / "PinnacleIQ_Portal.html"
+
+from fastapi.responses import FileResponse as _FileResponse
+
+@app.get("/portal", include_in_schema=False)
+@app.get("/app",    include_in_schema=False)
+async def serve_portal():
+    """Serve the PinnacleIQ portal HTML — used when deployed publicly."""
+    if PORTAL_HTML.exists():
+        return _FileResponse(str(PORTAL_HTML), media_type="text/html")
+    return {"error": "Portal HTML not found at " + str(PORTAL_HTML)}
+
+
 if __name__ == "__main__":
     import uvicorn
     import sys

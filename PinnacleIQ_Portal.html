@@ -5746,7 +5746,12 @@ function sendBroadcast(){
 // showPage already handles occasions inline
 
 /* ══════════════════════ RESEARCH PIPELINE ══════════════════════ */
-const PL_API = 'http://localhost:8010';
+// Auto-detect API base URL:
+// - Local dev (Live Server on :5500 or :7788) → backend on localhost:8010
+// - Deployed (ngrok / cloud VM) → same origin (backend serves both HTML + API)
+const PL_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8010'
+  : window.location.origin;
 let PL_TOPICS = [];          // [{topic, specialty, therapy_area}, ...]
 let PL_SEL_IDX = -1;         // selected topic index
 let PL_POLL = null;           // polling interval ID
