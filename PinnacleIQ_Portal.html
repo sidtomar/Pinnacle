@@ -7688,51 +7688,32 @@ async function raPollDynamicResults(runId) {
 async function raDisplayDynamicResults(contentIds) {
   const grid = document.getElementById('ra-articles-grid-2');
   grid.innerHTML = '';
-  const ctx = window.RA_SEARCH_CONTEXT || {};
+  // Use the same papers-grid layout as the Content Library for visual consistency
+  grid.className = 'papers-grid';
 
   let successCount = 0;
+  const papers = [];
   for (const contentId of contentIds) {
     try {
       const res = await fetch(PL_API + '/content/' + contentId);
       if (!res.ok) continue;
-
-      const card = await res.json();
+      const item = await res.json();
       successCount++;
-
-      // Build article card from generated content
-      const html = `
-        <div class="ra-article-card">
-          <div class="ra-card-top">
-            <div class="ra-card-badges">
-              <span class="ra-badge-source">PubMed</span>
-              <span class="ra-badge-approved">✓ Approved</span>
-            </div>
-            <span style="font-size:12px;font-weight:700;color:#10b981;background:#dcfce7;border:1px solid #86efac;padding:2px 8px;border-radius:4px;">⚡ High Quality</span>
-          </div>
-          <div class="ra-card-title">${card.title || 'Untitled'}</div>
-          <div class="ra-card-journal">${card.authors || 'Unknown'} · ${card.published_date || 'Recent'}</div>
-          <div class="ra-card-abstract">${card.summary || card.description || 'Research article on the selected topic.'}</div>
-          <div class="ra-card-tags">
-            ${ctx.therapy ? `<span class="ra-ctag ra-ctag-therapy">${ctx.therapy}</span>` : ''}
-            ${ctx.disease ? `<span class="ra-ctag ra-ctag-disease">${ctx.disease}</span>` : ''}
-            <span class="ra-ctag ra-ctag-relevance">High Relevance</span>
-          </div>
-          <div class="ra-card-footer">
-            <span class="ra-card-date">${card.published_date || new Date().getFullYear()}</span>
-            <div class="ra-card-actions">
-              <a href="${card.pubmed_link || '#'}" target="_blank" class="ra-btn-card ra-btn-view" style="text-decoration:none;">View PubMed →</a>
-              <button class="ra-btn-card ra-btn-share" onclick="toast('✓', 'Article ready to share')">Share</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      grid.innerHTML += html;
-
+      // Reuse the same mapAPIItemToPaper + clCardHTML pipeline as the Content Library
+      // so card design is always 100% identical between Research Agent and Research Pipeline
+      papers.push(mapAPIItemToPaper(item));
     } catch(e) {
       console.error('Error fetching content:', contentId, e);
     }
   }
+
+  // Merge fetched papers into ALL_PAPERS so clCardHTML actions (View / Share) resolve correctly
+  papers.forEach(p => {
+    if (!ALL_PAPERS.find(x => x.id === p.id)) ALL_PAPERS.unshift(p);
+  });
+
+  // Render using the shared Content Library card template
+  grid.innerHTML = papers.map(p => clCardHTML(p)).join('');
 
   // Update result metadata
   if (successCount > 0) {
