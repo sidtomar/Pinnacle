@@ -7765,37 +7765,93 @@ async function raDownloadDatabase() {
       return;
     }
 
-    // Build CSV
-    const headers = ['Title', 'Authors', 'Published Date', 'Therapy Area', 'Disease', 'Summary', 'PubMed Link', 'Status'];
-    const rows = items.map(item => [
-      item.title || '',
-      item.authors || '',
-      item.published_date || '',
-      item.therapy_area || '',
-      item.disease || '',
-      (item.summary || item.description || '').replace(/"/g, '""'),
-      item.pubmed_link || '',
-      item.status || 'Pending MA Review'
-    ]);
+    // Business-standard 15-column format (matches PinnacleIQ_PubMed_Database template)
+    const headers = [
+      '#',
+      'Date',
+      'Specialty',
+      'Therapy Area',
+      'Sub-category',
+      'Tags',
+      'Relevant Doctor Specialties',
+      'WhatsApp Summary',
+      'Title',
+      'PMID',
+      'DOI',
+      'Abstract',
+      'Authors',
+      'PubMed Link',
+      'Full Text Link (DOI)'
+    ];
 
-    // Format CSV
-    let csv = headers.map(h => `"${h}"`).join(',') + '\n';
-    rows.forEach(row => {
-      csv += row.map(cell => `"${(cell || '').toString().replace(/"/g, '""')}"`).join(',') + '\n';
+    const rows = items.map((item, idx) => {
+      // Extract PMID from pubmed_link if not stored directly
+      let pmid = item.pmid || '';
+      if (!pmid && item.pubmed_link) {
+        const m = item.pubmed_link.match(/\/(\d+)\/?$/);
+        if (m) pmid = m[1];
+      }
+
+      // Build DOI link from doi field
+      const doi = item.doi || '';
+      const doiLink = doi ? `https://doi.org/${doi}` : (item.full_text_link || '');
+
+      // Tags: join array or use string
+      const tags = Array.isArray(item.tags) ? item.tags.join(', ') : (item.tags || '');
+
+      // Relevant doctor specialties
+      const doctorSpecs = item.relevant_doctor_specialties || item.specialty || '';
+
+      // WhatsApp summary: use dedicated field, fallback to short_article excerpt or summary
+      const whatsappSummary = item.whatsapp_summary || item.short_article || item.summary || '';
+
+      // Abstract: use summary/description
+      const abstract = item.summary || item.description || '';
+
+      // Date: use publication_date or created_at
+      const dateStr = item.publication_date || (item.created_at ? item.created_at.split('T')[0] : '');
+
+      return [
+        idx + 1,                                    // #
+        dateStr,                                     // Date
+        item.specialty || '',                        // Specialty
+        item.therapy_area || '',                     // Therapy Area
+        item.sub_category || '',                     // Sub-category
+        tags,                                        // Tags
+        doctorSpecs,                                 // Relevant Doctor Specialties
+        whatsappSummary,                             // WhatsApp Summary
+        item.title || '',                            // Title
+        pmid,                                        // PMID
+        doi,                                         // DOI
+        abstract,                                    // Abstract
+        item.authors || '',                          // Authors
+        item.pubmed_link || '',                      // PubMed Link
+        doiLink                                      // Full Text Link (DOI)
+      ];
     });
 
-    // Trigger download
+    // Format CSV with proper escaping
+    let csv = '﻿'; // BOM for Excel UTF-8 compatibility
+    csv += headers.map(h => `"${h}"`).join(',') + '\n';
+    rows.forEach(row => {
+      csv += row.map(cell => {
+        const str = (cell === null || cell === undefined) ? '' : String(cell);
+        return `"${str.replace(/"/g, '""')}"`;
+      }).join(',') + '\n';
+    });
+
+    // Trigger download as CSV (business-standard format)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `research-articles-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `PinnacleIQ_PubMed_Database_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    toast('✓', 'Database downloaded successfully');
+    toast('✓', `Database downloaded — ${items.length} articles`);
 
   } catch(e) {
     console.error('Download error:', e);
