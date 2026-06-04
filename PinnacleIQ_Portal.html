@@ -1458,10 +1458,10 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
           <!-- ACTIONS -->
           <div class="ra-action-row" style="margin-top:16px;">
-            <button class="ra-btn-search" onclick="raRunSearch('2')">🔍 Search PubMed</button>
+            <button class="ra-btn-search" id="ra-search-btn-2" onclick="raRunDynamicSearch()">🔍 Search PubMed</button>
             <button class="ra-btn-secondary" onclick="raResetForm('2')">↺ Reset</button>
             <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;">⬇ Export CSV</button>
-            <button class="ra-btn-download" id="ra-db-btn-2" style="display:none;">📊 Download Database</button>
+            <button class="ra-btn-download" id="ra-db-btn-2" onclick="raDownloadDatabase()">📊 Download Database</button>
             <span class="ra-result-label" id="ra-result-label-2" style="display:none;">Showing <span id="ra-res-count-2">0</span> articles</span>
           </div>
 
@@ -7245,71 +7245,176 @@ switchRole(_getHashRole() || 'pmt');
 // PUBMED RESEARCH AGENT FUNCTIONS
 // ═════════════════════════════════════════════════════════════════════
 
-function raRunSearch(suffix = '') {
-  const suffix_str = suffix ? `-${suffix}` : '';
-  const therapy = document.getElementById(`ra-therapy${suffix_str}`).value.trim();
-  const disease = document.getElementById(`ra-disease${suffix_str}`).value.trim();
-  if (!therapy || !disease) {
-    alert('Please select Therapy Area and Disease');
+/* ── Dynamic Research Agent Functions ─────────────────────────────────────────
+   These functions implement user-driven article generation using the agentic
+   pipeline (Alpha→Beta→Gamma→Delta) based on dynamic filter selections.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+async function raRunDynamicSearch() {
+  const therapyArea = document.getElementById('ra-therapy-2').value.trim();
+  const disease = document.getElementById('ra-disease-2').value.trim();
+  const keywords = document.getElementById('ra-keywords-2').value.trim();
+  const dateFrom = document.getElementById('ra-date-from-2').value;
+  const dateTo = document.getElementById('ra-date-to-2').value;
+
+  // Validate at least disease or therapy area is selected
+  if (!disease && !therapyArea) {
+    toast('⚠️', 'Please select Disease or Therapy Area');
     return;
   }
 
-  document.getElementById(`ra-results-section${suffix_str}`).style.display = 'block';
-  document.getElementById(`ra-loading-state${suffix_str}`).classList.add('show');
-  document.getElementById(`ra-articles-grid${suffix_str}`).innerHTML = '';
-  document.getElementById(`ra-empty-state${suffix_str}`).classList.remove('show');
+  // Show results section and loading state
+  document.getElementById('ra-results-section-2').style.display = 'block';
+  document.getElementById('ra-loading-state-2').classList.add('show');
+  document.getElementById('ra-articles-grid-2').innerHTML = '';
+  document.getElementById('ra-empty-state-2').classList.remove('show');
+  document.getElementById('ra-search-btn-2').disabled = true;
 
-  // Simulate PubMed search after delay
-  setTimeout(() => {
-    document.getElementById(`ra-loading-state${suffix_str}`).classList.remove('show');
-    raDisplayMockResults(therapy, disease, suffix_str);
-    document.getElementById(`ra-results-section${suffix_str}`).scrollIntoView({behavior:'smooth'});
-  }, 1500);
+  try {
+    // Construct topic from user filters
+    const topic = `${disease || 'General Research'} - ${therapyArea || 'Multiple Therapies'}${keywords ? ' (' + keywords + ')' : ''}`;
+
+    // Call agentic pipeline with user filters
+    const response = await fetch(PL_API + '/pipeline/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: topic,
+        specialty: therapyArea || 'General Medicine',
+        therapy_area: therapyArea || 'General',
+        keywords: keywords
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Pipeline request failed');
+    }
+
+    const data = await response.json();
+    const runId = data.run_id;
+
+    // Store metadata for result processing
+    window.RA_SEARCH_CONTEXT = {
+      therapy: therapyArea,
+      disease: disease,
+      keywords: keywords,
+      dateFrom: dateFrom,
+      dateTo: dateTo
+    };
+
+    // Poll for pipeline results
+    raPollDynamicResults(runId);
+
+  } catch(e) {
+    document.getElementById('ra-loading-state-2').classList.remove('show');
+    document.getElementById('ra-search-btn-2').disabled = false;
+    toast('❌', 'Search failed: ' + e.message);
+  }
 }
 
-function raDisplayMockResults(therapy, disease, suffix_str = '') {
-  const results = [
-    {id:1, title:`Efficacy and Safety of Novel Treatment in ${disease}: A Randomized Controlled Trial`, journal:'Nature Medicine', year:2024, authors:'Smith et al', relevance:95},
-    {id:2, title:`${disease} Management: Updated Clinical Guidelines`, journal:'Lancet', year:2024, authors:'Johnson et al', relevance:92},
-    {id:3, title:`Real-world Evidence for ${therapy} in ${disease}`, journal:'NEJM', year:2025, authors:'Williams et al', relevance:88},
-    {id:4, title:`Emerging Biomarkers in ${disease} Treatment`, journal:'Circulation', year:2024, authors:'Brown et al', relevance:85},
-    {id:5, title:`Long-term Outcomes with New ${therapy} Approach`, journal:'BMJ', year:2025, authors:'Davis et al', relevance:82},
-    {id:6, title:`${disease}: Mechanisms and Clinical Implications`, journal:'Cell', year:2024, authors:'Miller et al', relevance:78},
-  ];
+async function raPollDynamicResults(runId) {
+  try {
+    const response = await fetch(PL_API + '/pipeline/status/' + runId);
+    if (!response.ok) {
+      // Retry on network errors
+      setTimeout(() => raPollDynamicResults(runId), 2000);
+      return;
+    }
 
-  document.getElementById(`ra-results-badge${suffix_str}`).textContent = results.length;
-  document.getElementById(`ra-res-count${suffix_str}`).textContent = results.length;
-  document.getElementById(`ra-result-label${suffix_str}`).style.display = 'inline';
-  document.getElementById(`ra-csv-btn${suffix_str}`).style.display = 'flex';
-  document.getElementById(`ra-db-btn${suffix_str}`).style.display = 'flex';
+    const data = await response.json();
 
-  const grid = document.getElementById(`ra-articles-grid${suffix_str}`);
-  grid.innerHTML = results.map(r => `
-    <div class="ra-article-card">
-      <div class="ra-card-top">
-        <div class="ra-card-badges">
-          <span class="ra-badge-source">PubMed</span>
-          <span class="ra-badge-approved">Approved</span>
+    if (data.status === 'completed') {
+      // Pipeline complete - fetch and display articles
+      document.getElementById('ra-loading-state-2').classList.remove('show');
+      document.getElementById('ra-search-btn-2').disabled = false;
+
+      // Fetch all generated content cards
+      if (data.all_content_ids && data.all_content_ids.length > 0) {
+        raDisplayDynamicResults(data.all_content_ids);
+      } else if (data.content_id) {
+        raDisplayDynamicResults([data.content_id]);
+      } else {
+        document.getElementById('ra-empty-state-2').classList.add('show');
+      }
+
+    } else if (data.status === 'error') {
+      // Pipeline failed
+      document.getElementById('ra-loading-state-2').classList.remove('show');
+      document.getElementById('ra-search-btn-2').disabled = false;
+      document.getElementById('ra-empty-state-2').classList.add('show');
+      toast('❌', 'Pipeline processing failed');
+
+    } else {
+      // Still running - continue polling
+      setTimeout(() => raPollDynamicResults(runId), 2000);
+    }
+
+  } catch(e) {
+    console.error('Poll error:', e);
+    // Retry on error
+    setTimeout(() => raPollDynamicResults(runId), 2000);
+  }
+}
+
+async function raDisplayDynamicResults(contentIds) {
+  const grid = document.getElementById('ra-articles-grid-2');
+  grid.innerHTML = '';
+  const ctx = window.RA_SEARCH_CONTEXT || {};
+
+  let successCount = 0;
+  for (const contentId of contentIds) {
+    try {
+      const res = await fetch(PL_API + '/content/' + contentId);
+      if (!res.ok) continue;
+
+      const card = await res.json();
+      successCount++;
+
+      // Build article card from generated content
+      const html = `
+        <div class="ra-article-card">
+          <div class="ra-card-top">
+            <div class="ra-card-badges">
+              <span class="ra-badge-source">PubMed</span>
+              <span class="ra-badge-approved">✓ Approved</span>
+            </div>
+            <span style="font-size:12px;font-weight:700;color:#10b981;background:#dcfce7;border:1px solid #86efac;padding:2px 8px;border-radius:4px;">⚡ High Quality</span>
+          </div>
+          <div class="ra-card-title">${card.title || 'Untitled'}</div>
+          <div class="ra-card-journal">${card.authors || 'Unknown'} · ${card.published_date || 'Recent'}</div>
+          <div class="ra-card-abstract">${card.summary || card.description || 'Research article on the selected topic.'}</div>
+          <div class="ra-card-tags">
+            ${ctx.therapy ? `<span class="ra-ctag ra-ctag-therapy">${ctx.therapy}</span>` : ''}
+            ${ctx.disease ? `<span class="ra-ctag ra-ctag-disease">${ctx.disease}</span>` : ''}
+            <span class="ra-ctag ra-ctag-relevance">High Relevance</span>
+          </div>
+          <div class="ra-card-footer">
+            <span class="ra-card-date">${card.published_date || new Date().getFullYear()}</span>
+            <div class="ra-card-actions">
+              <a href="${card.pubmed_link || '#'}" target="_blank" class="ra-btn-card ra-btn-view" style="text-decoration:none;">View PubMed →</a>
+              <button class="ra-btn-card ra-btn-share" onclick="toast('✓', 'Article ready to share')">Share</button>
+            </div>
+          </div>
         </div>
-        <span style="font-size:12px;font-weight:700;color:#10b981;background:#dcfce7;border:1px solid #86efac;padding:2px 8px;border-radius:4px;">⚡ ${r.relevance}%</span>
-      </div>
-      <div class="ra-card-title">${r.title}</div>
-      <div class="ra-card-journal">${r.journal} · ${r.year}</div>
-      <div class="ra-card-abstract">This study examines the effectiveness and clinical outcomes of novel treatment approaches in ${disease}, providing evidence-based recommendations for clinical practice.</div>
-      <div class="ra-card-tags">
-        <span class="ra-ctag ra-ctag-therapy">${therapy}</span>
-        <span class="ra-ctag ra-ctag-disease">${disease}</span>
-        <span class="ra-ctag ra-ctag-relevance">High Relevance</span>
-      </div>
-      <div class="ra-card-footer">
-        <span class="ra-card-date">${r.year}</span>
-        <div class="ra-card-actions">
-          <button class="ra-btn-card ra-btn-view">View</button>
-          <button class="ra-btn-card ra-btn-share">Share</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
+      `;
+
+      grid.innerHTML += html;
+
+    } catch(e) {
+      console.error('Error fetching content:', contentId, e);
+    }
+  }
+
+  // Update result metadata
+  if (successCount > 0) {
+    document.getElementById('ra-results-badge-2').textContent = successCount;
+    document.getElementById('ra-res-count-2').textContent = successCount;
+    document.getElementById('ra-result-label-2').style.display = 'inline';
+    document.getElementById('ra-db-btn-2').style.display = 'flex';
+    document.getElementById('ra-articles-grid-2').scrollIntoView({ behavior: 'smooth' });
+  } else {
+    document.getElementById('ra-empty-state-2').classList.add('show');
+  }
 }
 
 function raResetForm(suffix = '') {
@@ -7320,6 +7425,62 @@ function raResetForm(suffix = '') {
   document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
   document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
   document.getElementById(`ra-results-section${suffix_str}`).style.display = 'none';
+  document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
+}
+
+/* ── Download Database Function ────────────────────────────────────────────────
+   Allows users to export all accumulated search results as CSV.
+   ────────────────────────────────────────────────────────────────────────────── */
+async function raDownloadDatabase() {
+  try {
+    // Fetch all content cards from the database
+    const response = await fetch(PL_API + '/content');
+    if (!response.ok) throw new Error('Failed to fetch content');
+
+    const data = await response.json();
+    const items = data.items || data || [];
+
+    if (!items.length) {
+      toast('⚠️', 'No articles to download');
+      return;
+    }
+
+    // Build CSV
+    const headers = ['Title', 'Authors', 'Published Date', 'Therapy Area', 'Disease', 'Summary', 'PubMed Link', 'Status'];
+    const rows = items.map(item => [
+      item.title || '',
+      item.authors || '',
+      item.published_date || '',
+      item.therapy_area || '',
+      item.disease || '',
+      (item.summary || item.description || '').replace(/"/g, '""'),
+      item.pubmed_link || '',
+      item.status || 'Pending MA Review'
+    ]);
+
+    // Format CSV
+    let csv = headers.map(h => `"${h}"`).join(',') + '\n';
+    rows.forEach(row => {
+      csv += row.map(cell => `"${(cell || '').toString().replace(/"/g, '""')}"`).join(',') + '\n';
+    });
+
+    // Trigger download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `research-articles-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast('✓', 'Database downloaded successfully');
+
+  } catch(e) {
+    console.error('Download error:', e);
+    toast('❌', 'Download failed: ' + e.message);
+  }
 }
 </script>
 </body>
