@@ -8,7 +8,10 @@
 - **Started:** June 4, 2026
 - **Description:** Allow users to dynamically search articles using filters (Therapy Area, Disease, Keywords, Publication Date) and trigger agentic pipeline to generate content cards
 - **Key Features:**
-  - [ ] Filter interface (Therapy Area, Disease, Keywords, Publication Date)
+  - [x] Filter interface (Therapy Area, Disease, Keywords, Publication Date)
+  - [x] Autocomplete dropdown suggestions with localStorage persistence
+  - [x] Fuzzy matching for partial text search
+  - [x] Support for custom/new term entry
   - [ ] "Search PubMed" button to trigger pipeline
   - [ ] Simple loading indicator (iOS-style spinner)
   - [ ] Multiple articles generated per search
