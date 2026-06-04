@@ -1,0 +1,3 @@
+
+[DISEASE]
+Type 2 Diabetes [RECENT:20260604174045]
