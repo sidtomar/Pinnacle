@@ -3302,7 +3302,7 @@ let ROLE='pmt', CL_VIEW='grid', CL_TAB='all', CUR_ID=null, CUR_TAGS=[], CUR_REL=
 
 /* ══ UTILS ══ */
 function fmtDate(d){if(!d)return'—';const[y,m,dd]=(d.split('T')[0]).split('-');const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(dd)} ${M[parseInt(m)-1]} ${y}`;}
-// Format full ISO timestamp as "4 Jun 2026, 10:30 AM IST"
+// Format full ISO timestamp as "4 Jun 2026, 10:30 PM"
 function fmtDateTime(iso){
   if(!iso)return'—';
   try{
@@ -3314,7 +3314,7 @@ function fmtDateTime(iso){
     const day=ist.getUTCDate(), mon=M[ist.getUTCMonth()], yr=ist.getUTCFullYear();
     let h=ist.getUTCHours(); const min=String(ist.getUTCMinutes()).padStart(2,'0');
     const ampm=h>=12?'PM':'AM'; h=h%12||12;
-    return`${day} ${mon} ${yr}, ${h}:${min} ${ampm} IST`;
+    return`${day} ${mon} ${yr}, ${h}:${min} ${ampm}`;
   }catch(e){return fmtDate(iso);}
 }
 
@@ -3731,7 +3731,7 @@ function clCardHTML(p){
       <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span>${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
-    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;">${actions}</div></div>
+    <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;flex-shrink:0;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:nowrap;flex-shrink:0;">${actions}</div></div>
   </div>`;
 }
 
@@ -3757,7 +3757,7 @@ function clRowHTML(p){
       <div class="pr-sum">${p.sum}</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span></div>
     </div>
-    <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
+    <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;
 }
 
