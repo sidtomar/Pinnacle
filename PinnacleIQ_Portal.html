@@ -44,6 +44,9 @@ input,select,textarea{font-family:inherit;}
 .sb-av{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800;flex-shrink:0;}
 .av-ma{background:linear-gradient(135deg,#3B82F6,#1D4ED8);color:#fff;}
 .av-pmt{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);}
+.av-admin{background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;}
+.rb-admin{background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.35);color:#C4B5FD;}
+.ni.active-admin{background:linear-gradient(135deg,rgba(124,58,237,.28),rgba(124,58,237,.1));color:#C4B5FD;border-color:rgba(124,58,237,.22);}
 .sb-un{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:#fff;}
 .sb-ur{font-size:10px;color:rgba(255,255,255,.38);}
 .sb-role-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
@@ -636,18 +639,6 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     <div class="login-field" style="margin-bottom:18px;">
       <label class="login-label" for="login-password">Password</label>
       <input id="login-password" type="password" class="login-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-
-    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">Select your role</div>
-    <div class="login-role-row">
-      <button class="login-role-btn active" id="lr-pmt" onclick="selectLoginRole('pmt')">
-        <div class="lr-title">BU Head &nbsp;·&nbsp; PMT</div>
-        <div class="lr-sub">Jijo &nbsp;·&nbsp; Life Division</div>
-      </button>
-      <button class="login-role-btn" id="lr-ma" onclick="selectLoginRole('ma')">
-        <div class="lr-title">Medical Affairs</div>
-        <div class="lr-sub">Dr. Prashant Agarwal</div>
-      </button>
     </div>
 
     <button class="login-submit" id="login-btn" onclick="doLogin()">Sign in</button>
@@ -3334,8 +3325,9 @@ function toggleRoleDropdown(e){
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
 // Valid page IDs for each role — used to validate hash on load/switch
-const PAGES_MA  = ['content','pipeline','dashboard'];
-const PAGES_PMT = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline'];
+const PAGES_MA    = ['content','pipeline','dashboard'];
+const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
+const PAGES_ADMIN = ['research-agent','pipeline'];
 
 function _getHashPage(){
   const h = location.hash.replace('#','');
@@ -3345,52 +3337,91 @@ function _getHashPage(){
 function _getHashRole(){
   const h = location.hash.replace('#','');
   const parts = h.split('/');
-  return (parts[0]==='ma'||parts[0]==='pmt') ? parts[0] : '';
+  return (['ma','pmt','admin'].includes(parts[0])) ? parts[0] : '';
 }
 
 function switchRole(role, skipHash){
   ROLE=role;
   document.getElementById('role-switcher').classList.remove('open');
-  document.getElementById('rd-pmt').classList.toggle('selected',role==='pmt');
-  document.getElementById('rd-ma').classList.toggle('selected',role==='ma');
-  document.getElementById('chk-pmt').style.display=role==='pmt'?'block':'none';
-  document.getElementById('chk-ma').style.display=role==='ma'?'block':'none';
-  // Update header display
-  if(role==='ma'){
-    document.getElementById('rs-value').textContent='Dr. Prashant Agarwal · MA';
-    document.getElementById('sb-av').textContent='PA';
-    document.getElementById('sb-av').className='sb-av av-ma';
-    document.getElementById('sb-name').textContent='Dr. Prashant Agarwal';
-    document.getElementById('sb-role-lbl').textContent='Medical Affairs';
-    document.getElementById('sb-badge').textContent='MA';
-    document.getElementById('sb-badge').className='sb-role-badge rb-ma';
+
+  // Show/hide PMT·MA switcher options — hidden for admin (no role switching)
+  const adminMode = role === 'admin';
+  document.getElementById('rd-pmt').style.display = adminMode ? 'none' : '';
+  document.getElementById('rd-ma').style.display  = adminMode ? 'none' : '';
+  document.getElementById('rd-pmt').classList.toggle('selected', role==='pmt');
+  document.getElementById('rd-ma').classList.toggle('selected',  role==='ma');
+  document.getElementById('chk-pmt').style.display = role==='pmt' ? 'block' : 'none';
+  document.getElementById('chk-ma').style.display  = role==='ma'  ? 'block' : 'none';
+
+  // Determine display values — prefer logged-in CURRENT_USER, fall back to defaults
+  const cu = CURRENT_USER;
+  if(role === 'admin'){
+    const label = cu ? cu.name + ' · ADM' : 'Admin · ADM';
+    document.getElementById('rs-value').textContent = label;
+    document.getElementById('sb-av').textContent    = cu ? cu.initials : 'AD';
+    document.getElementById('sb-av').className      = 'sb-av av-admin';
+    document.getElementById('sb-name').textContent  = cu ? cu.name : 'Admin';
+    document.getElementById('sb-role-lbl').textContent = cu ? cu.designation : 'System Administrator';
+    document.getElementById('sb-badge').textContent    = 'ADM';
+    document.getElementById('sb-badge').className      = 'sb-role-badge rb-admin';
+  } else if(role === 'ma'){
+    const n = cu && cu.role==='ma' ? cu.name : 'Dr. Prashant Agarwal';
+    const d = cu && cu.role==='ma' ? cu.designation : 'Medical Affairs';
+    const i = cu && cu.role==='ma' ? cu.initials : 'PA';
+    document.getElementById('rs-value').textContent    = n + ' · MA';
+    document.getElementById('sb-av').textContent       = i;
+    document.getElementById('sb-av').className         = 'sb-av av-ma';
+    document.getElementById('sb-name').textContent     = n;
+    document.getElementById('sb-role-lbl').textContent = d;
+    document.getElementById('sb-badge').textContent    = 'MA';
+    document.getElementById('sb-badge').className      = 'sb-role-badge rb-ma';
   } else {
-    document.getElementById('rs-value').textContent='Jijo · PMT';
-    document.getElementById('sb-av').textContent='J';
-    document.getElementById('sb-av').className='sb-av av-pmt';
-    document.getElementById('sb-name').textContent='Jijo';
-    document.getElementById('sb-role-lbl').textContent='BU Head · PMT';
-    document.getElementById('sb-badge').textContent='PMT';
-    document.getElementById('sb-badge').className='sb-role-badge rb-pmt';
+    const n = cu && cu.role==='pmt' ? cu.name : 'Jijo';
+    const d = cu && cu.role==='pmt' ? cu.designation : 'BU Head · PMT';
+    const i = cu && cu.role==='pmt' ? cu.initials : 'J';
+    document.getElementById('rs-value').textContent    = n + ' · PMT';
+    document.getElementById('sb-av').textContent       = i;
+    document.getElementById('sb-av').className         = 'sb-av av-pmt';
+    document.getElementById('sb-name').textContent     = n;
+    document.getElementById('sb-role-lbl').textContent = d;
+    document.getElementById('sb-badge').textContent    = 'PMT';
+    document.getElementById('sb-badge').className      = 'sb-role-badge rb-pmt';
   }
+
   buildSidebar();
-  // Restore page from URL hash if available, otherwise default
-  const hashPage = _getHashPage();
-  const validPages = role==='ma' ? PAGES_MA : PAGES_PMT;
-  const targetPage = (hashPage && validPages.includes(hashPage)) ? hashPage : (role==='pmt' ? 'today' : 'content');
+  const hashPage   = _getHashPage();
+  const validPages = role==='admin' ? PAGES_ADMIN : role==='ma' ? PAGES_MA : PAGES_PMT;
+  const targetPage = (hashPage && validPages.includes(hashPage)) ? hashPage
+                   : role==='admin' ? 'research-agent'
+                   : role==='pmt'   ? 'today' : 'content';
   showPage(targetPage, skipHash);
   buildCLKpis();
   buildCLTabs();
   buildSidebarFooter();
   buildTopbarActions();
-  renderCL();
+  if(role !== 'admin') renderCL();
   if(role==='pmt' && targetPage==='today') renderToday();
 }
 
 function buildSidebar(){
-  const isMA = ROLE==='ma';
-  const activeClass = isMA ? 'active-ma' : 'active-pmt';
+  const isMA    = ROLE==='ma';
+  const isAdmin = ROLE==='admin';
+  const activeClass = isMA ? 'active-ma' : isAdmin ? 'active-admin' : 'active-pmt';
   const nav = document.getElementById('sb-nav');
+  if(isAdmin){
+    nav.innerHTML=`
+      <div class="ng">AI Pipeline</div>
+      <div class="ni ${activeClass}" id="ni-research-agent" onclick="showPage('research-agent')">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
+        Research Agent
+        <span class="nb nb-gold">New</span>
+      </div>
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
+        Research Pipeline
+      </div>`;
+    return;
+  }
   if(isMA){
     nav.innerHTML=`
       <div class="ng">My Workspace</div>
@@ -3465,7 +3496,9 @@ function buildSidebar(){
 
 function buildSidebarFooter(){
   const foot = document.getElementById('sb-foot');
-  if(ROLE==='pmt'){
+  if(ROLE==='admin'){
+    foot.innerHTML=`<div class="sync-row"><div class="sdot" style="background:#C4B5FD;"></div>PubMed sync · active</div>`;
+  } else if(ROLE==='pmt'){
     foot.innerHTML=`<div class="sb-stats"><div class="sb-stat"><div class="sb-sv">50</div><div class="sb-sl">Doctors</div></div><div class="sb-stat"><div class="sb-sv">74%</div><div class="sb-sl">Coverage</div></div></div><div class="sync-row"><div class="sdot"></div>PubMed sync · 14 min ago</div>`;
   } else {
     foot.innerHTML=`<div class="sync-row" style="margin-bottom:6px;"><div class="sdot"></div>PubMed sync · 14 min ago · 3 new</div><div style="font-size:10px;color:rgba(255,255,255,.18);">Last review: Today 11:30 AM</div>`;
@@ -3483,6 +3516,7 @@ function buildTopbarActions(){
 
 function buildCLKpis(){
   const el = document.getElementById('cl-kpis');
+  if(ROLE==='admin'){ el.innerHTML=''; return; }
   const pend=ALL_PAPERS.filter(p=>p.status==='pending').length;
   const appr=ALL_PAPERS.filter(p=>p.status==='approved').length;
   const rej=ALL_PAPERS.filter(p=>p.status==='rejected').length;
@@ -3495,6 +3529,7 @@ function buildCLKpis(){
 
 function buildCLTabs(){
   const el = document.getElementById('cl-tabs');
+  if(ROLE==='admin'){ el.innerHTML=''; return; }
   const pend=ALL_PAPERS.filter(p=>p.status==='pending').length;
   const appr=ALL_PAPERS.filter(p=>p.status==='approved').length;
   const rej=ALL_PAPERS.filter(p=>p.status==='rejected').length;
@@ -3520,12 +3555,12 @@ function buildCLTabs(){
 function showPage(id, skipHash){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   const pgEl = document.getElementById('pg-'+id);
-  if(!pgEl) { id = ROLE==='pmt'?'today':'content'; document.getElementById('pg-'+id).classList.add('on'); }
+  if(!pgEl) { id = ROLE==='admin'?'research-agent':ROLE==='pmt'?'today':'content'; document.getElementById('pg-'+id).classList.add('on'); }
   else pgEl.classList.add('on');
   const T={content:'Content Library',doctors:'Doctor Directory','360':'Doctor 360°',today:"Today's Tasks",occasions:'Occasion Hub',analytics:'Analytics','research-agent':'Research Agent',pipeline:'Research Pipeline',dashboard:'Dashboard'};
   document.getElementById('tb-cur').textContent=T[id]||'PinnacleIQ';
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active-ma','active-pmt'));
-  const activeClass = ROLE==='ma'?'active-ma':'active-pmt';
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active-ma','active-pmt','active-admin'));
+  const activeClass = ROLE==='ma'?'active-ma':ROLE==='admin'?'active-admin':'active-pmt';
   const sidebarId = id==='360'?'360':id;
   const ni = document.getElementById('ni-'+sidebarId) || document.getElementById('ni-today');
   if(ni) ni.classList.add(activeClass);
@@ -7364,38 +7399,59 @@ function renderAPIContent() {
   // No-op: API content is now merged into ALL_PAPERS and rendered by renderCL()
 }
 
+/* ══ USER DATABASE ══ */
+const USERS_DB = [
+  // ── Category 1: Admin (Research Pipeline + Research Agent only) ──
+  {id:'admin1', name:'Admin 1',          email:'admin1@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A1'},
+  {id:'admin2', name:'Admin 2',          email:'admin2@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A2'},
+  {id:'admin3', name:'Admin 3',          email:'admin3@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A3'},
+  {id:'admin4', name:'Admin 4',          email:'admin4@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A4'},
+  {id:'admin5', name:'Admin 5',          email:'admin5@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A5'},
+  // ── Category 2: Business (PMT — full app view) ──
+  {id:'jijo',           name:'Jijo Kumar',        email:'jijo@mankind.in',              role:'pmt', category:'Business', designation:'BU Head · Life Division',         initials:'JK'},
+  {id:'rajesh_sharma',  name:'Rajesh Sharma',     email:'rajesh.sharma@mankind.in',     role:'pmt', category:'Business', designation:'NSM · National Sales Manager',     initials:'RS'},
+  {id:'priya_nair',     name:'Priya Nair',         email:'priya.nair@mankind.in',        role:'pmt', category:'Business', designation:'Marketing Head · Life Division',   initials:'PN'},
+  {id:'amit_verma',     name:'Amit Verma',         email:'amit.verma@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Cardiac Division',       initials:'AV'},
+  {id:'sunita_patel',   name:'Sunita Patel',       email:'sunita.patel@mankind.in',      role:'pmt', category:'Business', designation:'NSM · North Region',               initials:'SP'},
+  {id:'vikram_singh',   name:'Vikram Singh',       email:'vikram.singh@mankind.in',      role:'pmt', category:'Business', designation:'Marketing Head · Oncology',        initials:'VS'},
+  {id:'neha_gupta',     name:'Neha Gupta',         email:'neha.gupta@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Metabolic Division',     initials:'NG'},
+  {id:'arjun_mehta',    name:'Arjun Mehta',        email:'arjun.mehta@mankind.in',       role:'pmt', category:'Business', designation:'NSM · West Region',                initials:'AM'},
+  {id:'deepa_krishnan', name:'Deepa Krishnan',     email:'deepa.krishnan@mankind.in',    role:'pmt', category:'Business', designation:'Marketing Head · Neurology',       initials:'DK'},
+  {id:'rahul_agarwal',  name:'Rahul Agarwal',      email:'rahul.agarwal@mankind.in',     role:'pmt', category:'Business', designation:'BU Head · GI Division',            initials:'RA'},
+  // ── Category 3: Medical Affairs ──
+  {id:'prashant_agarwal', name:'Dr. Prashant Agarwal', email:'prashant.agarwal@mankind.in', role:'ma', category:'Medical Affairs', designation:'Medical Affairs · MA Lead',    initials:'PA'},
+  {id:'anita_sharma',     name:'Dr. Anita Sharma',     email:'anita.sharma@mankind.in',     role:'ma', category:'Medical Affairs', designation:'Medical Affairs · Cardiology', initials:'AS'},
+  {id:'rohit_kumar',      name:'Dr. Rohit Kumar',      email:'rohit.kumar@mankind.in',      role:'ma', category:'Medical Affairs', designation:'Medical Affairs · Diabetology',initials:'RK'},
+];
+const APP_PASSWORD = 'Test';
+let CURRENT_USER = null;
+
 /* ══ LOGIN / AUTH ══ */
-let _loginRole = 'pmt';
-
-function selectLoginRole(role) {
-  _loginRole = role;
-  document.getElementById('lr-pmt').classList.toggle('active', role === 'pmt');
-  document.getElementById('lr-ma').classList.toggle('active', role === 'ma');
-}
-
 function doLogin() {
-  const email    = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value.trim();
-  const errEl    = document.getElementById('login-error');
-  const errMsg   = document.getElementById('login-error-msg');
-  const btn      = document.getElementById('login-btn');
-
+  const email   = document.getElementById('login-email').value.trim().toLowerCase();
+  const password= document.getElementById('login-password').value;
+  const errEl   = document.getElementById('login-error');
+  const errMsg  = document.getElementById('login-error-msg');
+  const btn     = document.getElementById('login-btn');
   errEl.style.display = 'none';
 
-  if (!email)           { errMsg.textContent = 'Please enter your email address.';    errEl.style.display = 'flex'; return; }
-  if (!password)        { errMsg.textContent = 'Please enter your password.';         errEl.style.display = 'flex'; return; }
-  if (password.length < 6) { errMsg.textContent = 'Password must be at least 6 characters.'; errEl.style.display = 'flex'; return; }
+  if (!email)    { errMsg.textContent = 'Please enter your email address.'; errEl.style.display = 'flex'; return; }
+  if (!password) { errMsg.textContent = 'Please enter your password.';      errEl.style.display = 'flex'; return; }
+
+  const user = USERS_DB.find(u => u.email.toLowerCase() === email);
+  if (!user) { errMsg.textContent = 'No account found with that email address.'; errEl.style.display = 'flex'; return; }
+  if (password !== APP_PASSWORD) { errMsg.textContent = 'Incorrect password. Please try again.'; errEl.style.display = 'flex'; return; }
 
   btn.disabled = true;
   btn.innerHTML = '<span class="login-spinner"></span> Signing in…';
 
   setTimeout(() => {
+    CURRENT_USER = user;
     localStorage.setItem('pinnacle_logged_in', 'true');
-    localStorage.setItem('pinnacle_user', email);
-    localStorage.setItem('pinnacle_role', _loginRole);
+    localStorage.setItem('pinnacle_user_id', user.id);
+    localStorage.setItem('pinnacle_role', user.role);
     document.getElementById('login-screen').style.display = 'none';
-    switchRole(_loginRole);
-    // Start background services after login
+    switchRole(user.role);
     startNotifPolling();
     loadSchedulerStatus();
     loadContentFromAPI();
@@ -7406,8 +7462,9 @@ function doLogin() {
 
 function doLogout() {
   localStorage.removeItem('pinnacle_logged_in');
-  localStorage.removeItem('pinnacle_user');
+  localStorage.removeItem('pinnacle_user_id');
   localStorage.removeItem('pinnacle_role');
+  CURRENT_USER = null;
   document.getElementById('login-email').value    = '';
   document.getElementById('login-password').value = '';
   document.getElementById('login-error').style.display = 'none';
@@ -7416,18 +7473,15 @@ function doLogout() {
 }
 
 function initApp() {
-  const loggedIn  = localStorage.getItem('pinnacle_logged_in') === 'true';
-  const savedRole = localStorage.getItem('pinnacle_role') || 'pmt';
+  const loggedIn = localStorage.getItem('pinnacle_logged_in') === 'true';
+  const userId   = localStorage.getItem('pinnacle_user_id');
+  const savedRole= localStorage.getItem('pinnacle_role') || 'pmt';
   if (loggedIn) {
+    CURRENT_USER = USERS_DB.find(u => u.id === userId) || null;
     document.getElementById('login-screen').style.display = 'none';
     switchRole(_getHashRole() || savedRole);
-    setTimeout(() => {
-      startNotifPolling();
-      loadSchedulerStatus();
-      loadContentFromAPI();
-    }, 1200);
+    setTimeout(() => { startNotifPolling(); loadSchedulerStatus(); loadContentFromAPI(); }, 1200);
   } else {
-    // Show login; keep app rendered underneath (z-index covers it)
     document.getElementById('login-screen').style.display = 'flex';
   }
 }
