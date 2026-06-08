@@ -17,6 +17,9 @@ __pycache__/
 venv/
 .venv/
 env/
+env1/
+env2/
+*.egg-info/
 
 # Pipeline outputs
 research_agent_system/outputs/

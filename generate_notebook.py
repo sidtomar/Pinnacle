@@ -2025,6 +2025,55 @@ BASE       = Path(__file__).parent
 DB_PATH    = BASE / "pinnacleiq.db"
 TOPICS_FILE = BASE.parent / "topics.txt"
 
+
+def _parse_topics_text(text: str) -> list[dict]:
+    topics = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = [p.strip() for p in line.split("|")]
+        topics.append({
+            "topic": parts[0] if len(parts) > 0 else line,
+            "specialty": parts[1] if len(parts) > 1 else "General Medicine",
+            "therapy_area": parts[2] if len(parts) > 2 else "General",
+        })
+    return topics
+
+
+def _read_topics() -> list[dict]:
+    if not TOPICS_FILE.exists():
+        raise HTTPException(404, f"topics.txt not found at {TOPICS_FILE}")
+    return _parse_topics_text(TOPICS_FILE.read_text(encoding="utf-8"))
+
+
+def _topic_key(topic: str, specialty: str, therapy_area: str) -> tuple[str, str, str]:
+    return (
+        topic.strip().casefold(),
+        specialty.strip().casefold(),
+        therapy_area.strip().casefold(),
+    )
+
+
+def _persist_topic(topic: str, specialty: str, therapy_area: str) -> bool:
+    topic = topic.strip()
+    specialty = (specialty or "General Medicine").strip()
+    therapy_area = (therapy_area or "General").strip()
+    if not topic:
+        return False
+
+    existing_text = TOPICS_FILE.read_text(encoding="utf-8") if TOPICS_FILE.exists() else ""
+    existing_topics = _parse_topics_text(existing_text)
+    new_key = _topic_key(topic, specialty, therapy_area)
+    if any(_topic_key(item["topic"], item["specialty"], item["therapy_area"]) == new_key for item in existing_topics):
+        return False
+
+    new_line = f"{topic} | {specialty} | {therapy_area}"
+    if existing_text and not existing_text.endswith(("\n", "\r")):
+        existing_text += "\n"
+    TOPICS_FILE.write_text(existing_text + new_line + "\n", encoding="utf-8")
+    return True
+
 # In-memory store for pipeline run status.
 # Key: run_id (UUID string)  Value: dict with status/progress/content
 # We use a threading.Lock() to prevent race conditions when multiple
@@ -2138,19 +2187,7 @@ def health():
 @app.get("/topics")
 def get_topics():
     \"\"\"Read research topics from topics.txt and return as a list.\"\"\"
-    if not TOPICS_FILE.exists():
-        raise HTTPException(404, f"topics.txt not found at {TOPICS_FILE}")
-    topics = []
-    for line in TOPICS_FILE.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue    # skip comments and blank lines
-        parts = [p.strip() for p in line.split("|")]
-        topics.append({
-            "topic":        parts[0] if len(parts) > 0 else line,
-            "specialty":    parts[1] if len(parts) > 1 else "General Medicine",
-            "therapy_area": parts[2] if len(parts) > 2 else "General",
-        })
+    topics = _read_topics()
     return {"topics": topics, "count": len(topics)}
 
 
@@ -2163,6 +2200,9 @@ def start_pipeline(req: RunRequest, bg: BackgroundTasks):
     BackgroundTasks: FastAPI runs the pipeline in a background thread after returning
     the 200 response. The browser can poll for status while it runs.
     \"\"\"
+    with _lock:
+        _persist_topic(req.topic, req.specialty, req.therapy_area)
+
     run_id = str(uuid.uuid4())
 
     # Initialize the run's status in the in-memory store

@@ -29,11 +29,13 @@ const NOTIF_DESTINATION = {
 };
 
 export default function Header() {
-  const { role, setRole, isMA } = useAuth();
+  const { role, setRole, isMA, user, logout } = useAuth();
   const { currentPage, navigateTo } = useRouter();
   const { toggleSidebar } = useAppContext();
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
   const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
@@ -68,6 +70,9 @@ export default function Header() {
       }
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setIsNotifOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setIsUserMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -209,6 +214,29 @@ export default function Header() {
         {isMA && currentPage === 'library' && (
           <button className={styles.addContentBtn}>+ Add Content</button>
         )}
+
+        {/* User avatar + logout */}
+        <div className={styles.userMenu} ref={userMenuRef}>
+          <button
+            className={styles.userAvatar}
+            onClick={() => setIsUserMenuOpen(prev => !prev)}
+            title={user || 'Account'}
+          >
+            {user ? user[0].toUpperCase() : 'U'}
+          </button>
+          {isUserMenuOpen && (
+            <div className={styles.userDropdown} onClick={e => e.stopPropagation()}>
+              <div className={styles.userDropdownEmail}>{user}</div>
+              <div className={styles.userDropdownDivider} />
+              <button className={styles.logoutBtn} onClick={logout}>
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                  <path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h3M9 9.5l2.5-3L9 3M11.5 6.5H5"/>
+                </svg>
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

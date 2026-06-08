@@ -337,7 +337,7 @@ Estimated time for Phase 2: 2-3 days
 ## 🎯 Key Accomplishments
 
 1. ✅ **Converted from single HTML file to modular React project**
-   - Before: 6,900+ lines in pinnacleiq_v13.html
+   - Before: 6,900+ lines in PinnacleIQ_Portal.html
    - After: Organized into 35 files by concern
 
 2. ✅ **Replaced global variables with Context API**

@@ -11,7 +11,7 @@
   "settings": {
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
-      "pinnacleiq_v13.html": "pipeline_ui.html",
+      "PinnacleIQ_Portal.html": "pipeline_ui.html",
       "README.md": "generate_notebook.py, PinnacleIQ_Research_Pipeline.ipynb",
       "START_DEMO.bat": "run_demo.bat",
       "requirements.txt": ".env, .env.example"
@@ -21,7 +21,8 @@
     "editor.fontSize": 14,
     "editor.wordWrap": "on",
     "editor.minimap.enabled": true,
-    "breadcrumbs.enabled": true
+    "breadcrumbs.enabled": true,
+    "liveServer.settings.multiRootWorkspaceName": "🏥 PinnacleIQ — Mankind Pharma"
   },
   "launch": {
     "configurations": [

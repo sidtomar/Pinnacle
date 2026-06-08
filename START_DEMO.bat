@@ -37,7 +37,7 @@ timeout /t 3 /nobreak >nul
 
 :: ── Open the portal in Chrome ─────────────────────────────────────────────────
 echo  [4/4] Launching PinnacleIQ Portal in Chrome...
-set "HTML=%~dp0pinnacleiq_v13.html"
+set "HTML=%~dp0PinnacleIQ_Portal.html"
 
 where chrome >nul 2>&1
 if %errorlevel%==0 (

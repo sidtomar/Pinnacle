@@ -3,8 +3,14 @@ import { createContext, useState, useCallback, useEffect } from 'react';
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(() =>
+    localStorage.getItem('pinnacle_logged_in') === 'true'
+  );
+  const [user, setUser] = useState(() =>
+    localStorage.getItem('pinnacle_user') || null
+  );
+
   const [role, setRoleState] = useState(() => {
-    // If hash already has a role, use that
     const hash = window.location.hash.slice(1);
     const [hashRole] = hash.split('/');
     if (hashRole === 'medical-affairs' || hashRole === 'bu-head') {
@@ -15,15 +21,16 @@ export function AuthProvider({ children }) {
     return savedRole || 'bu-head';
   });
 
-  // Set hash on initial load if empty
+  // Set hash on initial load if empty (only when logged in)
   useEffect(() => {
+    if (!isLoggedIn) return;
     if (!window.location.hash || window.location.hash === '#') {
       const defaultPage = role === 'bu-head' ? 'today' : 'library';
       window.location.hash = `#${role}/${defaultPage}`;
     }
-  }, []);
+  }, [isLoggedIn]);
 
-  // Keep role in sync with hash changes (browser back/forward, URL navigation)
+  // Keep role in sync with hash changes
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
@@ -42,6 +49,23 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  const login = useCallback((email) => {
+    localStorage.setItem('pinnacle_logged_in', 'true');
+    localStorage.setItem('pinnacle_user', email);
+    setUser(email);
+    setIsLoggedIn(true);
+    const defaultPage = role === 'bu-head' ? 'today' : 'library';
+    window.location.hash = `#${role}/${defaultPage}`;
+  }, [role]);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('pinnacle_logged_in');
+    localStorage.removeItem('pinnacle_user');
+    setUser(null);
+    setIsLoggedIn(false);
+    window.location.hash = '';
+  }, []);
+
   const setRole = useCallback((newRole) => {
     setRoleState(newRole);
     localStorage.setItem('pinnacle_role', newRole);
@@ -54,6 +78,10 @@ export function AuthProvider({ children }) {
   const canApproveContent = role === 'medical-affairs';
 
   const value = {
+    isLoggedIn,
+    user,
+    login,
+    logout,
     role,
     setRole,
     canExport,

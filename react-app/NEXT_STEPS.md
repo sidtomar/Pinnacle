@@ -4,7 +4,7 @@
 
 Convert the Content Library page from vanilla JS to React component.
 
-**Current vanilla JS file**: `D:\Codebase\Pinnacle\pinnacleiq_v13.html`
+**Current vanilla JS file**: `D:\Codebase\Pinnacle\PinnacleIQ_Portal.html`
 - Lines with `.papers-grid` (content cards)
 - Lines with `.fr` and `.fsel` (filters & search)
 - Lines with sorting/view toggle

@@ -1,7 +1,7 @@
 # Agent Output Fix Summary
 
 ## Problem
-The frontend UI (`plRenderAgentOutput()` function in `pinnacleiq_v13.html`) was not displaying results from the research pipeline agents Beta, Gamma, and Delta. While Agent Alpha had just been fixed to display correctly, the same data key mismatch issue existed for the other agents.
+The frontend UI (`plRenderAgentOutput()` function in `PinnacleIQ_Portal.html`) was not displaying results from the research pipeline agents Beta, Gamma, and Delta. While Agent Alpha had just been fixed to display correctly, the same data key mismatch issue existed for the other agents.
 
 ## Root Cause
 The backend's `mock_runner.py` was sending agent outputs with incorrect key names that didn't match what the frontend `plRenderAgentOutput()` function expected to receive.

@@ -11,7 +11,7 @@
 Pinnacle/
 │
 ├── 🚀 START_DEMO.bat                       ← ONE CLICK: starts API + opens portal
-├── 🌐 pinnacleiq_v13.html                  ← MAIN PORTAL — pipeline fully integrated
+├── 🌐 PinnacleIQ_Portal.html               ← MAIN PORTAL — pipeline fully integrated
 ├── 📓 PinnacleIQ_Research_Pipeline.ipynb   ← Annotated Colab notebook
 ├── 📄 generate_notebook.py                 ← Script that builds the notebook
 │
@@ -118,10 +118,25 @@ python main.py "GLP-1 receptor agonists in Type 2 Diabetes"
 START_DEMO.bat        ← double-click from project root
 ```
 
+### Streamlit launcher
+
+If you want to run the same demo through Streamlit, use:
+
+```bash
+pip install -r demo/backend/requirements.txt streamlit
+streamlit run streamlit_app.py
+```
+
+For Streamlit platforms that ask for the main file path, enter:
+
+```text
+streamlit_app.py
+```
+
 That's it. The script:
 1. Clears port 8000
 2. Starts the FastAPI backend (`demo/backend/app.py`)
-3. Opens **`pinnacleiq_v13.html`** in Chrome automatically
+3. Opens **`PinnacleIQ_Portal.html`** in Chrome automatically
 
 **Demo flow inside the portal:**
 1. Switch to **PMT** role → click **Research Pipeline** in the sidebar
