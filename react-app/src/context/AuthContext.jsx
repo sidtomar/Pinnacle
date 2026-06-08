@@ -10,23 +10,30 @@ export function AuthProvider({ children }) {
     localStorage.getItem('pinnacle_user') || null
   );
 
+  const VALID_ROLES = ['admin', 'bu-head', 'medical-affairs'];
+
   const [role, setRoleState] = useState(() => {
     const hash = window.location.hash.slice(1);
     const [hashRole] = hash.split('/');
-    if (hashRole === 'medical-affairs' || hashRole === 'bu-head') {
+    if (VALID_ROLES.includes(hashRole)) {
       localStorage.setItem('pinnacle_role', hashRole);
       return hashRole;
     }
     const savedRole = localStorage.getItem('pinnacle_role');
-    return savedRole || 'bu-head';
+    return savedRole || 'admin';
   });
+
+  const defaultPageForRole = (r) => {
+    if (r === 'admin') return 'pipeline';
+    if (r === 'bu-head') return 'today';
+    return 'library';
+  };
 
   // Set hash on initial load if empty (only when logged in)
   useEffect(() => {
     if (!isLoggedIn) return;
     if (!window.location.hash || window.location.hash === '#') {
-      const defaultPage = role === 'bu-head' ? 'today' : 'library';
-      window.location.hash = `#${role}/${defaultPage}`;
+      window.location.hash = `#${role}/${defaultPageForRole(role)}`;
     }
   }, [isLoggedIn]);
 
@@ -35,7 +42,7 @@ export function AuthProvider({ children }) {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
       const [hashRole] = hash.split('/');
-      if (hashRole === 'medical-affairs' || hashRole === 'bu-head') {
+      if (VALID_ROLES.includes(hashRole)) {
         setRoleState(prev => {
           if (prev !== hashRole) {
             localStorage.setItem('pinnacle_role', hashRole);
@@ -49,14 +56,17 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const login = useCallback((email) => {
+  const login = useCallback((username) => {
     localStorage.setItem('pinnacle_logged_in', 'true');
-    localStorage.setItem('pinnacle_user', email);
-    setUser(email);
+    localStorage.setItem('pinnacle_user', username);
+    // Admin always starts in admin role
+    const startRole = 'admin';
+    localStorage.setItem('pinnacle_role', startRole);
+    setRoleState(startRole);
+    setUser(username);
     setIsLoggedIn(true);
-    const defaultPage = role === 'bu-head' ? 'today' : 'library';
-    window.location.hash = `#${role}/${defaultPage}`;
-  }, [role]);
+    window.location.hash = `#${startRole}/${defaultPageForRole(startRole)}`;
+  }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('pinnacle_logged_in');
@@ -69,13 +79,12 @@ export function AuthProvider({ children }) {
   const setRole = useCallback((newRole) => {
     setRoleState(newRole);
     localStorage.setItem('pinnacle_role', newRole);
-    const defaultPage = newRole === 'bu-head' ? 'today' : 'library';
-    window.location.hash = `#${newRole}/${defaultPage}`;
+    window.location.hash = `#${newRole}/${defaultPageForRole(newRole)}`;
   }, []);
 
-  const canExport = role === 'bu-head';
-  const canRunPipeline = role === 'medical-affairs';
-  const canApproveContent = role === 'medical-affairs';
+  const isAdmin = role === 'admin';
+  const isMA = role === 'medical-affairs';
+  const isBUHead = role === 'bu-head';
 
   const value = {
     isLoggedIn,
@@ -84,11 +93,12 @@ export function AuthProvider({ children }) {
     logout,
     role,
     setRole,
-    canExport,
-    canRunPipeline,
-    canApproveContent,
-    isMA: role === 'medical-affairs',
-    isBUHead: role === 'bu-head'
+    isAdmin,
+    isMA,
+    isBUHead,
+    canExport: isBUHead,
+    canRunPipeline: isAdmin || isMA,
+    canApproveContent: isMA,
   };
 
   return (

@@ -29,7 +29,7 @@ const NOTIF_DESTINATION = {
 };
 
 export default function Header() {
-  const { role, setRole, isMA, user, logout } = useAuth();
+  const { role, setRole, isAdmin, isMA, user, logout } = useAuth();
   const { currentPage, navigateTo } = useRouter();
   const { toggleSidebar } = useAppContext();
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
@@ -109,7 +109,7 @@ export default function Header() {
             <div>
               <div className={styles.roleLabel}>Viewing as</div>
               <div className={styles.roleValue}>
-                {isMA ? 'Dr. Prashant Agarwal · MA' : 'Jijo · PMT'}
+                {isAdmin ? 'Admin' : isMA ? 'Dr. Prashant Agarwal · MA' : 'Jijo · PMT'}
               </div>
             </div>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.arrow}>
@@ -121,13 +121,25 @@ export default function Header() {
             <div className={styles.roleDropdown} onClick={e => e.stopPropagation()}>
               <div className={styles.dropdownHeading}>Switch Role</div>
               <button
+                className={`${styles.roleOption} ${role === 'admin' ? styles.selected : ''}`}
+                onClick={() => handleRoleChange('admin')}
+              >
+                <div className={`${styles.roleAvatar} ${styles.roleAvatarAdmin}`}>A</div>
+                <div className={styles.roleOptionInfo}>
+                  <div className={styles.roleOptionName}>Admin</div>
+                  <div className={styles.roleOptionDesc}>Research Agent · Admin Pipeline</div>
+                </div>
+                {role === 'admin' && <span className={styles.check}>✓</span>}
+              </button>
+              <div className={styles.dropdownDivider} />
+              <button
                 className={`${styles.roleOption} ${role === 'bu-head' ? styles.selected : ''}`}
                 onClick={() => handleRoleChange('bu-head')}
               >
                 <div className={`${styles.roleAvatar} ${styles.roleAvatarPMT}`}>J</div>
                 <div className={styles.roleOptionInfo}>
                   <div className={styles.roleOptionName}>Jijo</div>
-                  <div className={styles.roleOptionDesc}>BU Head · PMT · Life Division</div>
+                  <div className={styles.roleOptionDesc}>Business User · BU Head · PMT</div>
                 </div>
                 {role === 'bu-head' && <span className={styles.check}>✓</span>}
               </button>

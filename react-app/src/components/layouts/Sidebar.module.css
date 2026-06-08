@@ -125,6 +125,11 @@
   flex-shrink: 0;
 }
 
+.avatarAdmin {
+  background: linear-gradient(135deg, #7C3AED, #5B21B6);
+  color: #fff;
+}
+
 .avatarMA {
   background: linear-gradient(135deg, #3B82F6, #1D4ED8);
   color: #fff;
@@ -158,6 +163,12 @@
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 4px;
+}
+
+.badgeAdmin {
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  color: #C4B5FD;
 }
 
 .badgeMA {
@@ -216,6 +227,12 @@
 .navItem:hover {
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.88);
+}
+
+.activeAdmin {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(124, 58, 237, 0.1));
+  color: #C4B5FD;
+  border-color: rgba(124, 58, 237, 0.22);
 }
 
 .activeMA {

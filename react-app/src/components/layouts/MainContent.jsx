@@ -22,6 +22,7 @@ const PAGE_COMPONENTS = {
   'occasions': OccasionHub,
   'analytics': Analytics,
   'pipeline': Pipeline,
+  'admin-pipeline': Pipeline,
   'dashboard': Dashboard,
 };
 

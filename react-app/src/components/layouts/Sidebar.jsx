@@ -12,6 +12,12 @@ import styles from './Sidebar.module.css';
  *   Doctor 360°, Occasion Hub, Analytics, Dashboard.
  */
 const NAV_ITEMS = {
+  'admin': {
+    main: { label: 'Admin Tools', items: [
+      { id: 'pipeline',        label: 'Research Agent',  icon: '🔬' },
+      { id: 'admin-pipeline',  label: 'Admin Pipeline',  icon: '⚙️' },
+    ]}
+  },
   'medical-affairs': {
     main: { label: 'My Workspace', items: [
       { id: 'library', label: 'Content Library', icon: '📄', badgeKey: 'pending' },
@@ -34,11 +40,10 @@ const NAV_ITEMS = {
 const MA_PENDING_COUNT = 2;
 
 export default function Sidebar() {
-  const { role } = useAuth();
+  const { role, isAdmin, isMA, user } = useAuth();
   const { currentTab, setCurrentTab, sidebarOpen, toggleSidebar } = useAppContext();
   const { navigate } = useRouter();
   const navGroups = NAV_ITEMS[role] || {};
-  const isMA = role === 'medical-affairs';
 
   const handleNavClick = (pageId) => {
     setCurrentTab(pageId);
@@ -60,13 +65,13 @@ export default function Sidebar() {
         return (
           <button
             key={item.id}
-            className={`${styles.navItem} ${currentTab === item.id ? (isMA ? styles.activeMA : styles.activePMT) : ''}`}
+            className={`${styles.navItem} ${currentTab === item.id ? (isAdmin ? styles.activeAdmin : isMA ? styles.activeMA : styles.activePMT) : ''}`}
             onClick={() => handleNavClick(item.id)}
           >
             <span className={styles.navIcon}>{item.icon}</span>
             <span className={styles.navLabel}>{item.label}</span>
             {badge && (
-              <span className={`${styles.navBadge} ${isMA ? styles.badgeAmber : styles.badgeGold}`}>
+              <span className={`${styles.navBadge} ${isAdmin ? styles.badgeAdmin : isMA ? styles.badgeAmber : styles.badgeGold}`}>
                 {badge}
               </span>
             )}
@@ -94,19 +99,19 @@ export default function Sidebar() {
         </div>
 
         <div className={styles.user}>
-          <div className={`${styles.avatar} ${isMA ? styles.avatarMA : styles.avatarPMT}`}>
-            {isMA ? 'PA' : 'J'}
+          <div className={`${styles.avatar} ${isAdmin ? styles.avatarAdmin : isMA ? styles.avatarMA : styles.avatarPMT}`}>
+            {isAdmin ? 'A' : isMA ? 'PA' : 'J'}
           </div>
           <div className={styles.userInfo}>
             <div className={styles.userName}>
-              {isMA ? 'Dr. Prashant Agarwal' : 'Jijo'}
+              {isAdmin ? (user || 'Admin') : isMA ? 'Dr. Prashant Agarwal' : 'Jijo'}
             </div>
             <div className={styles.userRole}>
-              {isMA ? 'Medical Affairs' : 'BU Head · PMT'}
+              {isAdmin ? 'Administrator' : isMA ? 'Medical Affairs' : 'BU Head · PMT'}
             </div>
           </div>
-          <div className={`${styles.roleBadge} ${isMA ? styles.badgeMA : styles.badgePMT}`}>
-            {isMA ? 'MA' : 'PMT'}
+          <div className={`${styles.roleBadge} ${isAdmin ? styles.badgeAdmin : isMA ? styles.badgeMA : styles.badgePMT}`}>
+            {isAdmin ? 'ADMIN' : isMA ? 'MA' : 'PMT'}
           </div>
         </div>
 
@@ -116,6 +121,23 @@ export default function Sidebar() {
             <>
               <div className={styles.navGroupLabel}>{navGroups.main.label}</div>
               {renderNavGroup(navGroups.main)}
+            </>
+          )}
+
+          {/* Admin: access info panel */}
+          {isAdmin && (
+            <>
+              <div className={styles.navGroupLabel} style={{ marginTop: 8 }}>Access Level</div>
+              <div className={styles.accessPanel}>
+                <div className={styles.accessTitle}>Permissions</div>
+                <div className={styles.accessList}>
+                  {['Run Research Agent', 'Run Admin Pipeline', 'Generate Articles', 'View All Roles'].map(p => (
+                    <div key={p} className={styles.accessItem}>
+                      <span className={styles.accessDotGreen}>✓</span>{p}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </>
           )}
 

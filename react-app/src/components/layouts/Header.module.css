@@ -267,6 +267,11 @@
   flex-shrink: 0;
 }
 
+.roleAvatarAdmin {
+  background: linear-gradient(135deg, #7C3AED, #5B21B6);
+  color: #fff;
+}
+
 .roleAvatarMA {
   background: linear-gradient(135deg, #3B82F6, #1D4ED8);
   color: #fff;
