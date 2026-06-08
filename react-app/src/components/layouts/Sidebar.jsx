@@ -40,7 +40,7 @@ const NAV_ITEMS = {
 const MA_PENDING_COUNT = 2;
 
 export default function Sidebar() {
-  const { role, isAdmin, isMA, user } = useAuth();
+  const { role, isAdmin, isMA, user, logout } = useAuth();
   const { currentTab, setCurrentTab, sidebarOpen, toggleSidebar } = useAppContext();
   const { navigate } = useRouter();
   const navGroups = NAV_ITEMS[role] || {};
@@ -191,6 +191,12 @@ export default function Sidebar() {
               <div className={styles.syncSub}>Last review: Today 11:30 AM</div>
             </>
           )}
+          <button className={styles.logoutBtn} onClick={logout}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+              <path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h3M9 9.5l2.5-3L9 3M11.5 6.5H5"/>
+            </svg>
+            Sign Out
+          </button>
         </div>
       </aside>
     </>
