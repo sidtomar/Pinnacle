@@ -1,6 +1,6 @@
 ﻿[build]
 builder = "NIXPACKS"
-buildCommand = "pip install -r demo/backend/requirements.txt"
+buildCommand = "pip install -r demo/backend/requirements.txt && npm install --prefix react-app && npm run build --prefix react-app"
 
 [deploy]
 startCommand = "python demo/backend/app.py"

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8010';
+// Dev: call localhost:8010 directly. Production (Railway): same origin, empty base = relative URLs.
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8010' : '');
 
 const client = axios.create({
   baseURL: API_BASE,

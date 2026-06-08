@@ -760,18 +760,24 @@ def download_business_report(
     )
 
 
-# ── Serve portal HTML (for public/UAT deployment via ngrok or cloud) ──────────
-PORTAL_HTML = Path(__file__).parent.parent.parent / "PinnacleIQ_Portal.html"
-
+# ── Serve React SPA (for production/Railway deployment) ───────────────────────
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse as _FileResponse
 
-@app.get("/portal", include_in_schema=False)
-@app.get("/app",    include_in_schema=False)
-async def serve_portal():
-    """Serve the PinnacleIQ portal HTML — used when deployed publicly."""
-    if PORTAL_HTML.exists():
-        return _FileResponse(str(PORTAL_HTML), media_type="text/html")
-    return {"error": "Portal HTML not found at " + str(PORTAL_HTML)}
+REACT_DIST = Path(__file__).parent.parent.parent / "react-app" / "dist"
+
+if REACT_DIST.exists():
+    # Serve JS/CSS/assets
+    app.mount("/assets", StaticFiles(directory=str(REACT_DIST / "assets")), name="assets")
+
+    @app.get("/", include_in_schema=False)
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str = ""):
+        # Let API routes pass through (they are registered before this catch-all)
+        index = REACT_DIST / "index.html"
+        if index.exists():
+            return _FileResponse(str(index))
+        return {"error": "React build not found. Run: cd react-app && npm run build"}
 
 
 if __name__ == "__main__":
