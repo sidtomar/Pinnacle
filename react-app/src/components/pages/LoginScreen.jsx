@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './LoginScreen.module.css';
 
+const DEMO_USER = 'admin';
+const DEMO_PASS = 'admin';
+
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -12,13 +15,17 @@ export default function LoginScreen() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!email.trim()) { setError('Please enter your email address.'); return; }
+    if (!username.trim()) { setError('Please enter your username.'); return; }
     if (!password.trim()) { setError('Please enter your password.'); return; }
 
+    if (username.trim().toLowerCase() !== DEMO_USER || password !== DEMO_PASS) {
+      setError('Invalid credentials. Use admin / admin for the demo.');
+      return;
+    }
+
     setLoading(true);
-    // Simulate brief network delay for UX realism
     await new Promise(r => setTimeout(r, 600));
-    login(email.trim());
+    login('Admin');
     setLoading(false);
   };
 
@@ -45,17 +52,22 @@ export default function LoginScreen() {
         <h1 className={styles.heading}>Welcome back</h1>
         <p className={styles.subheading}>Sign in to your account to continue</p>
 
+        <div className={styles.demoHint}>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="6" stroke="currentColor" strokeWidth="1.2"/><path d="M6.5 5.5v4M6.5 4h.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+          Demo credentials: <strong>admin</strong> / <strong>admin</strong>
+        </div>
+
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <div className={styles.field}>
-            <label className={styles.label} htmlFor="email">Email address</label>
+            <label className={styles.label} htmlFor="username">Username</label>
             <input
-              id="email"
-              type="email"
+              id="username"
+              type="text"
               className={styles.input}
-              placeholder="you@company.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              autoComplete="email"
+              placeholder="admin"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              autoComplete="username"
               autoFocus
               disabled={loading}
             />
