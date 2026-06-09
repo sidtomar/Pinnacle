@@ -7945,6 +7945,10 @@ async function raPollDynamicResults(runId) {
       const curAgent = data.current_agent || '';
       const loadMsg = document.querySelector('#ra-loading-state-2 p');
       if (loadMsg && agentLabels[curAgent]) loadMsg.textContent = agentLabels[curAgent];
+      // Hide large loading spinner after Alpha completes (after first agent)
+      if (curAgent !== 'alpha' && curAgent !== '') {
+        document.getElementById('ra-loading-state-2').classList.remove('show');
+      }
       setTimeout(() => raPollDynamicResults(runId), 2000);
     }
 
