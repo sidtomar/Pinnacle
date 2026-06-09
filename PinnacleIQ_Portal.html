@@ -1493,6 +1493,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-loading{display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:16px;}
         .ra-loading.show{display:flex;}
         .ra-spinner{width:36px;height:36px;border:3px solid #e2eaf2;border-top-color:#0f1c2e;border-radius:50%;animation:spin .8s linear infinite;}
+        .ra-badge-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;}
         @keyframes spin{to{transform:rotate(360deg);}}
         .ra-empty{display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:10px;}
         .ra-empty.show{display:flex;}
@@ -7544,22 +7545,30 @@ const RA_SECTION_MAP = {
 
 // Load suggestions from backend file (filter_suggestions.txt)
 async function raLoadSuggestions() {
+  const DEFAULTS = {
+    therapy_area: { recent: [], defaults: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology','Dermatology','Paediatrics','Infectious Disease','Neurology','General Medicine'] },
+    disease:      { recent: [], defaults: ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS','Acne','Migraine','Ebola','Hanta Virus'] },
+    keywords:     { recent: [], defaults: ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine','systematic review','statin therapy','SGLT2 inhibitors'] },
+  };
   try {
     const res = await fetch(PL_API + '/filters/suggestions');
     if (res.ok) {
-      RA_SUGGESTIONS_CACHE = await res.json();
+      const backend = await res.json();
+      RA_SUGGESTIONS_CACHE = {};
+      for (const key of Object.keys(DEFAULTS)) {
+        const b = backend[key] || {};
+        const d = DEFAULTS[key];
+        const recentSet = new Set(b.recent || []);
+        const mergedDefaults = [...(d.defaults || [])].filter(t => !recentSet.has(t));
+        RA_SUGGESTIONS_CACHE[key] = { recent: b.recent || [], defaults: mergedDefaults };
+      }
     }
   } catch (e) {
     console.warn('[RA] Could not load filter suggestions from backend, using fallback defaults');
   }
 
-  // Fallback defaults if backend unavailable
   if (!RA_SUGGESTIONS_CACHE) {
-    RA_SUGGESTIONS_CACHE = {
-      therapy_area: { recent: [], defaults: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology'] },
-      disease:      { recent: [], defaults: ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS'] },
-      keywords:     { recent: [], defaults: ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine'] },
-    };
+    RA_SUGGESTIONS_CACHE = DEFAULTS;
   }
 }
 
@@ -7836,6 +7845,9 @@ async function raRunDynamicSearch() {
   document.getElementById('ra-articles-grid-2').innerHTML = '';
   document.getElementById('ra-empty-state-2').classList.remove('show');
   document.getElementById('ra-search-btn-2').disabled = true;
+  document.getElementById('ra-results-badge-2').innerHTML = '<span class="ra-badge-spinner"></span>';
+  document.getElementById('ra-showing-count-2').style.display = 'none';
+  document.getElementById('ra-ma-review-footer-2').style.display = 'none';
 
   try {
     // Construct topic from user filters
@@ -7875,6 +7887,7 @@ async function raRunDynamicSearch() {
   } catch(e) {
     document.getElementById('ra-loading-state-2').classList.remove('show');
     document.getElementById('ra-search-btn-2').disabled = false;
+    document.getElementById('ra-results-badge-2').textContent = '0';
     toast('❌', 'Search failed: ' + e.message);
   }
 }
@@ -7912,7 +7925,11 @@ async function raPollDynamicResults(runId) {
       toast('❌', 'Pipeline processing failed');
 
     } else {
-      // Still running - continue polling
+      // Still running — update progress message based on current agent
+      const agentLabels = { alpha: 'Scanning PubMed articles…', beta: 'Summarising key findings…', gamma: 'Writing shareable content…', delta: 'Building content cards…' };
+      const curAgent = data.current_agent || '';
+      const loadMsg = document.querySelector('#ra-loading-state-2 p');
+      if (loadMsg && agentLabels[curAgent]) loadMsg.textContent = agentLabels[curAgent];
       setTimeout(() => raPollDynamicResults(runId), 2000);
     }
 
