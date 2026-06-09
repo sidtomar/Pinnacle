@@ -3377,10 +3377,9 @@ function switchRole(role, skipHash){
   ROLE=role;
   document.getElementById('role-switcher').classList.remove('open');
 
-  // Show/hide PMT·MA switcher options — hidden for admin (no role switching)
-  const adminMode = role === 'admin';
-  document.getElementById('rd-pmt').style.display = adminMode ? 'none' : '';
-  document.getElementById('rd-ma').style.display  = adminMode ? 'none' : '';
+  // Always show role switching options (admin can test other roles)
+  document.getElementById('rd-pmt').style.display = '';
+  document.getElementById('rd-ma').style.display  = '';
   document.getElementById('rd-pmt').classList.toggle('selected', role==='pmt');
   document.getElementById('rd-ma').classList.toggle('selected',  role==='ma');
   document.getElementById('chk-pmt').style.display = role==='pmt' ? 'block' : 'none';
