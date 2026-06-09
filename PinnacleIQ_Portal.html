@@ -8090,10 +8090,10 @@ async function raDownloadDatabase() {
       // WhatsApp summary: use dedicated field, fallback to short_article excerpt or summary
       const whatsappSummary = item.whatsapp_summary || item.short_article || item.summary || '';
 
-      // Abstract: use summary/description
-      const abstract = item.summary || item.description || '';
+      // Abstract: use original PubMed abstract from Alpha, fallback to summary
+      const abstract = item.abstract || item.summary || item.description || '';
 
-      // Date: use publication_date or created_at
+      // Date: use publication_date from Alpha, fallback to created_at
       const dateStr = item.publication_date || (item.created_at ? item.created_at.split('T')[0] : '');
 
       // Return all 15 columns — 'NA' for any missing value
