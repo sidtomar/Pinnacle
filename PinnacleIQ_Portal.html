@@ -7962,11 +7962,11 @@ async function raPollDynamicResults(runId) {
 async function raDisplayDynamicResults(contentIds) {
   const grid = document.getElementById('ra-articles-grid-2');
   grid.innerHTML = '';
-  // Use the same papers-grid layout as the Content Library for visual consistency
-  grid.className = 'papers-grid';
 
   let successCount = 0;
   const papers = [];
+  const papersByTopic = {};
+
   for (const contentId of contentIds) {
     try {
       const res = await fetch(PL_API + '/content/' + contentId);
@@ -7978,7 +7978,14 @@ async function raDisplayDynamicResults(contentIds) {
       // Override src to 'pubmed' so srcPill renders "PubMed" badge (not "Link")
       // Research Agent content is always PubMed-sourced
       paper.src = 'pubmed';
+      paper.topic = item.topic || 'Unknown Topic';
       papers.push(paper);
+
+      // Group by topic
+      if (!papersByTopic[paper.topic]) {
+        papersByTopic[paper.topic] = [];
+      }
+      papersByTopic[paper.topic].push(paper);
     } catch(e) {
       console.error('Error fetching content:', contentId, e);
     }
@@ -7989,8 +7996,33 @@ async function raDisplayDynamicResults(contentIds) {
     if (!ALL_PAPERS.find(x => x.id === p.id)) ALL_PAPERS.unshift(p);
   });
 
-  // Render using the shared Content Library card template
-  grid.innerHTML = papers.map(p => clCardHTML(p)).join('');
+  // Render with topic sections (if multiple topics, show them separately)
+  const hasMultipleTopics = Object.keys(papersByTopic).length > 1;
+  let html = '';
+
+  if (hasMultipleTopics) {
+    // Show each topic in its own section
+    for (const topic in papersByTopic) {
+      html += `
+        <div style="margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e2eaf2;">
+            <span style="font-size:14px;font-weight:700;color:#0f1c2e;">📌 ${topic}</span>
+            <span style="font-size:12px;color:#6b7280;margin-left:auto;">${papersByTopic[topic].length} articles</span>
+          </div>
+          <div class="papers-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            ${papersByTopic[topic].map(p => clCardHTML(p)).join('')}
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    // Single topic or no grouping needed
+    grid.className = 'papers-grid';
+    html = papers.map(p => clCardHTML(p)).join('');
+  }
+
+  grid.innerHTML = html;
+  if (!hasMultipleTopics) grid.className = 'papers-grid';
 
   // Update result metadata
   if (successCount > 0) {
