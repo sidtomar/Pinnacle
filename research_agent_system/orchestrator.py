@@ -360,6 +360,11 @@ def run_pipeline(
                 llm_provider=provider,
                 authors=paper.get("authors", ""),
                 pubmed_link=paper.get("pubmed_link", paper.get("link", "")),
+                pmid=paper.get("pmid", ""),
+                doi=paper.get("doi", ""),
+                published_date=paper.get("published", ""),
+                journal=paper.get("journal", ""),
+                abstract=paper.get("abstract", ""),
             )
             result.content_cards.append(card)
             result.content_card = card   # keep last for legacy

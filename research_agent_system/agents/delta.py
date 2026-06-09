@@ -163,6 +163,11 @@ def run_delta(
     llm_provider: str = "openrouter",
     authors: str = "",   # actual authors from PubMed paper (from Alpha)
     pubmed_link: str = "", # PubMed URL for "Read More" link (from Alpha)
+    pmid: str = "",      # PubMed ID from Alpha
+    doi: str = "",       # DOI from Alpha
+    published_date: str = "", # Publication date from Alpha
+    journal: str = "",   # Journal name from Alpha
+    abstract: str = "",  # Abstract from Alpha
 ) -> dict:
     """
     Run Agent Delta: build a PinnacleContentCard and optionally POST to portal.
@@ -246,10 +251,17 @@ def run_delta(
 
         # ── Doctor-facing article (from Gamma, untouched) ─────────────────────
         "short_article": article,
+        "whatsapp_summary": article,  # WhatsApp-ready short article for report export
 
         # ── Source metadata (from Alpha — actual PubMed paper details) ─────────
-        "authors":       authors,       # actual paper authors e.g. "Packer M, Anker SD, et al."
-        "pubmed_link":   pubmed_link,   # e.g. "https://pubmed.ncbi.nlm.nih.gov/38291234/"
+        "authors":            authors,            # actual paper authors
+        "pubmed_link":        pubmed_link,        # PubMed URL
+        "pmid":               pmid,               # PubMed ID for direct lookup
+        "doi":                doi,                # Digital Object Identifier
+        "publication_date":   published_date,     # Publication date from PubMed
+        "journal":            journal,            # Journal name
+        "abstract":           abstract,           # Full paper abstract
+        "relevant_doctor_specialties": specialty,  # For report filtering
     }
 
     # Validate against Pydantic model (raises ValidationError if schema is wrong)
