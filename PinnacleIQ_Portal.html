@@ -704,6 +704,12 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="rs-arrow"><polyline points="3,5 7,9 11,5"/></svg>
         <div class="role-dropdown" id="role-dropdown" onclick="event.stopPropagation()">
           <div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:.8px;">Switch Role</div>
+          <div class="rd-option" id="rd-admin" onclick="switchRole('admin')">
+            <div class="rd-av av-adm">A1</div>
+            <div><div class="rd-name">Admin1</div><div class="rd-role">System Administrator · ADM</div></div>
+            <div class="rd-check" id="chk-admin" style="display:none;">✓</div>
+          </div>
+          <div class="rd-divider"></div>
           <div class="rd-option selected" id="rd-pmt" onclick="switchRole('pmt')">
             <div class="rd-av av-pmt">J</div>
             <div><div class="rd-name">Jijo</div><div class="rd-role">BU Head · PMT · Life Division</div></div>
