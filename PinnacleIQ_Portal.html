@@ -7975,7 +7975,7 @@ async function raDisplayDynamicResults(contentIds) {
 
   // Update result metadata
   if (successCount > 0) {
-    document.getElementById('ra-results-badge-2').textContent = successCount;
+    document.getElementById('ra-results-badge-2').innerHTML = successCount;
     document.getElementById('ra-res-count-2').textContent = successCount;
     document.getElementById('ra-result-label-2').style.display = 'inline';
     // "Showing X articles" on the right of the results header
