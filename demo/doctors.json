@@ -64,7 +64,9 @@
       "pinnacle_joined": "2025-05-30",
       "last_contacted": "2026-04-15",
       "status": "active",
-      "notes": "High prescriber, responds to WhatsApp; key opinion leader in South Delhi"
+      "notes": "High prescriber, responds to WhatsApp; key opinion leader in South Delhi",
+      "birthday": "1961-02-28",
+      "anniversary": "2025-05-22"
     },
     {
       "id": "DOC002",
@@ -87,7 +89,9 @@
       "pinnacle_joined": "2025-11-08",
       "last_contacted": "2026-05-08",
       "status": "active",
-      "notes": "Strong follower of evidence-based updates; prefers concise cards"
+      "notes": "Strong follower of evidence-based updates; prefers concise cards",
+      "birthday": "1986-04-26",
+      "anniversary": "2021-02-23"
     },
     {
       "id": "DOC003",
@@ -110,7 +114,9 @@
       "pinnacle_joined": "2025-11-14",
       "last_contacted": "2026-03-18",
       "status": "active",
-      "notes": "Active on email; attends monthly CME religiously"
+      "notes": "Active on email; attends monthly CME religiously",
+      "birthday": "1958-10-08",
+      "anniversary": "2023-10-31"
     },
     {
       "id": "DOC004",
@@ -133,7 +139,9 @@
       "pinnacle_joined": "2025-08-27",
       "last_contacted": "2026-04-19",
       "status": "active",
-      "notes": "Very engaged; shares Pinnacle cards with resident doctors"
+      "notes": "Very engaged; shares Pinnacle cards with resident doctors",
+      "birthday": "1974-01-18",
+      "anniversary": "2025-02-18"
     },
     {
       "id": "DOC005",
@@ -156,7 +164,9 @@
       "pinnacle_joined": "2025-03-30",
       "last_contacted": "2026-04-11",
       "status": "active",
-      "notes": "Mid-tier; growing practice; open to new therapy updates"
+      "notes": "Mid-tier; growing practice; open to new therapy updates",
+      "birthday": "1988-04-30",
+      "anniversary": "2009-11-06"
     },
     {
       "id": "DOC006",
@@ -179,7 +189,9 @@
       "pinnacle_joined": "2025-07-05",
       "last_contacted": "2026-04-17",
       "status": "active",
-      "notes": "Highest patient volume in cluster; very receptive to GP content"
+      "notes": "Highest patient volume in cluster; very receptive to GP content",
+      "birthday": "2000-10-15",
+      "anniversary": "2019-11-30"
     },
     {
       "id": "DOC007",
@@ -202,7 +214,9 @@
       "pinnacle_joined": "2025-10-19",
       "last_contacted": "2026-04-21",
       "status": "active",
-      "notes": "Prefers detailed PDF reports; influential in peer group"
+      "notes": "Prefers detailed PDF reports; influential in peer group",
+      "birthday": "1957-10-08",
+      "anniversary": "2012-04-23"
     },
     {
       "id": "DOC008",
@@ -225,7 +239,9 @@
       "pinnacle_joined": "2025-12-14",
       "last_contacted": "2026-04-13",
       "status": "active",
-      "notes": "Focuses on elderly care; interested in polypharmacy content"
+      "notes": "Focuses on elderly care; interested in polypharmacy content",
+      "birthday": "1973-10-30",
+      "anniversary": "2017-01-05"
     },
     {
       "id": "DOC009",
@@ -248,7 +264,9 @@
       "pinnacle_joined": "2025-06-01",
       "last_contacted": "2026-05-12",
       "status": "active",
-      "notes": "Young, tech-savvy; high WhatsApp engagement rate"
+      "notes": "Young, tech-savvy; high WhatsApp engagement rate",
+      "birthday": "1991-12-25",
+      "anniversary": "2012-06-24"
     },
     {
       "id": "DOC010",
@@ -271,7 +289,9 @@
       "pinnacle_joined": "2025-05-26",
       "last_contacted": "2026-03-24",
       "status": "active",
-      "notes": "New to Pinnacle; interested in lifestyle disease updates"
+      "notes": "New to Pinnacle; interested in lifestyle disease updates",
+      "birthday": "1984-03-21",
+      "anniversary": "2019-06-23"
     },
     {
       "id": "DOC011",
@@ -294,7 +314,9 @@
       "pinnacle_joined": "2025-05-28",
       "last_contacted": "2026-04-12",
       "status": "active",
-      "notes": "Top KOL; influential at national cardiology conferences"
+      "notes": "Top KOL; influential at national cardiology conferences",
+      "birthday": "1995-02-18",
+      "anniversary": "2013-02-20"
     },
     {
       "id": "DOC012",
@@ -317,7 +339,9 @@
       "pinnacle_joined": "2025-05-27",
       "last_contacted": "2026-03-23",
       "status": "active",
-      "notes": "Heart failure specialist; keen on SGLT2i and HFpEF updates"
+      "notes": "Heart failure specialist; keen on SGLT2i and HFpEF updates",
+      "birthday": "1979-06-27",
+      "anniversary": "2006-05-17"
     },
     {
       "id": "DOC013",
@@ -340,7 +364,9 @@
       "pinnacle_joined": "2025-07-31",
       "last_contacted": "2026-05-12",
       "status": "active",
-      "notes": "Academic leader; prefers journal-style evidence summaries"
+      "notes": "Academic leader; prefers journal-style evidence summaries",
+      "birthday": "1999-08-25",
+      "anniversary": "2008-03-05"
     },
     {
       "id": "DOC014",
@@ -363,7 +389,9 @@
       "pinnacle_joined": "2025-11-05",
       "last_contacted": "2026-05-08",
       "status": "active",
-      "notes": "Arrhythmia specialist; moderate engagement"
+      "notes": "Arrhythmia specialist; moderate engagement",
+      "birthday": "1977-02-11",
+      "anniversary": "2008-05-31"
     },
     {
       "id": "DOC015",
@@ -386,7 +414,9 @@
       "pinnacle_joined": "2025-02-25",
       "last_contacted": "2026-03-21",
       "status": "active",
-      "notes": "Strong advocate of preventive cardiology; shares content widely"
+      "notes": "Strong advocate of preventive cardiology; shares content widely",
+      "birthday": "1961-11-14",
+      "anniversary": "1997-07-06"
     },
     {
       "id": "DOC016",
@@ -409,7 +439,9 @@
       "pinnacle_joined": "2025-02-11",
       "last_contacted": "2026-05-03",
       "status": "active",
-      "notes": "Young cardiologist building practice; interested in imaging updates"
+      "notes": "Young cardiologist building practice; interested in imaging updates",
+      "birthday": "1965-04-10",
+      "anniversary": "2003-02-06"
     },
     {
       "id": "DOC017",
@@ -432,7 +464,9 @@
       "pinnacle_joined": "2025-01-15",
       "last_contacted": "2026-03-29",
       "status": "active",
-      "notes": "Performs 200+ cath procedures/month; high prescriber for CV drugs"
+      "notes": "Performs 200+ cath procedures/month; high prescriber for CV drugs",
+      "birthday": "1999-12-06",
+      "anniversary": "2018-05-30"
     },
     {
       "id": "DOC018",
@@ -455,7 +489,9 @@
       "pinnacle_joined": "2025-03-31",
       "last_contacted": "2026-05-12",
       "status": "active",
-      "notes": "Covers large referral area in Rajasthan; tier-2 city KOL"
+      "notes": "Covers large referral area in Rajasthan; tier-2 city KOL",
+      "birthday": "1996-04-30",
+      "anniversary": "1998-02-22"
     },
     {
       "id": "DOC019",
@@ -478,7 +514,9 @@
       "pinnacle_joined": "2025-03-05",
       "last_contacted": "2026-04-22",
       "status": "active",
-      "notes": "Academic focus; involved in cardiac rehab research"
+      "notes": "Academic focus; involved in cardiac rehab research",
+      "birthday": "1977-05-24",
+      "anniversary": "2011-11-23"
     },
     {
       "id": "DOC020",
@@ -501,7 +539,9 @@
       "pinnacle_joined": "2025-10-08",
       "last_contacted": "2026-03-15",
       "status": "active",
-      "notes": "TAVI and structural procedures expert; high-value prescriber"
+      "notes": "TAVI and structural procedures expert; high-value prescriber",
+      "birthday": "1978-03-26",
+      "anniversary": "2014-07-02"
     },
     {
       "id": "DOC021",
@@ -524,7 +564,9 @@
       "pinnacle_joined": "2025-05-12",
       "last_contacted": "2026-03-22",
       "status": "active",
-      "notes": "Top diabetologist in Bangalore; prescribes GLP-1 RAs extensively"
+      "notes": "Top diabetologist in Bangalore; prescribes GLP-1 RAs extensively",
+      "birthday": "1988-12-10",
+      "anniversary": "2017-12-27"
     },
     {
       "id": "DOC022",
@@ -547,7 +589,9 @@
       "pinnacle_joined": "2025-10-09",
       "last_contacted": "2026-03-31",
       "status": "active",
-      "notes": "Very engaged with Pinnacle; frequently requests new content"
+      "notes": "Very engaged with Pinnacle; frequently requests new content",
+      "birthday": "1958-11-29",
+      "anniversary": "2023-11-09"
     },
     {
       "id": "DOC023",
@@ -570,7 +614,9 @@
       "pinnacle_joined": "2025-10-07",
       "last_contacted": "2026-05-08",
       "status": "active",
-      "notes": "Obesity focused; interested in tirzepatide and GLP-1 updates"
+      "notes": "Obesity focused; interested in tirzepatide and GLP-1 updates",
+      "birthday": "1961-03-30",
+      "anniversary": "2008-05-06"
     },
     {
       "id": "DOC024",
@@ -593,7 +639,9 @@
       "pinnacle_joined": "2025-12-19",
       "last_contacted": "2026-05-01",
       "status": "active",
-      "notes": "Paediatric diabetes specialist; interested in ADA guideline updates"
+      "notes": "Paediatric diabetes specialist; interested in ADA guideline updates",
+      "birthday": "1991-08-26",
+      "anniversary": "2013-05-20"
     },
     {
       "id": "DOC025",
@@ -616,7 +664,9 @@
       "pinnacle_joined": "2025-02-11",
       "last_contacted": "2026-04-27",
       "status": "active",
-      "notes": "Pioneer in diabetes reversal programs; massive social media following"
+      "notes": "Pioneer in diabetes reversal programs; massive social media following",
+      "birthday": "1961-12-20",
+      "anniversary": "2008-04-23"
     },
     {
       "id": "DOC026",
@@ -639,7 +689,9 @@
       "pinnacle_joined": "2025-02-15",
       "last_contacted": "2026-03-22",
       "status": "active",
-      "notes": "Young specialist; active in patient education; high digital engagement"
+      "notes": "Young specialist; active in patient education; high digital engagement",
+      "birthday": "1958-06-17",
+      "anniversary": "1999-01-30"
     },
     {
       "id": "DOC027",
@@ -662,7 +714,9 @@
       "pinnacle_joined": "2025-05-11",
       "last_contacted": "2026-04-19",
       "status": "active",
-      "notes": "Senior academic; preferred evidence summaries with citations"
+      "notes": "Senior academic; preferred evidence summaries with citations",
+      "birthday": "1987-01-18",
+      "anniversary": "2000-06-11"
     },
     {
       "id": "DOC028",
@@ -685,7 +739,9 @@
       "pinnacle_joined": "2025-09-09",
       "last_contacted": "2026-05-06",
       "status": "active",
-      "notes": "GDM specialist; interested in inositol and PCOS-diabetes overlap"
+      "notes": "GDM specialist; interested in inositol and PCOS-diabetes overlap",
+      "birthday": "1976-05-18",
+      "anniversary": "2023-04-20"
     },
     {
       "id": "DOC029",
@@ -708,7 +764,9 @@
       "pinnacle_joined": "2025-08-14",
       "last_contacted": "2026-05-06",
       "status": "active",
-      "notes": "Insulin optimisation expert; large private practice"
+      "notes": "Insulin optimisation expert; large private practice",
+      "birthday": "1965-06-12",
+      "anniversary": "2019-12-03"
     },
     {
       "id": "DOC030",
@@ -731,7 +789,9 @@
       "pinnacle_joined": "2025-02-10",
       "last_contacted": "2026-05-05",
       "status": "active",
-      "notes": "Nephropathy & retinopathy focus; interested in SGLT2i renal data"
+      "notes": "Nephropathy & retinopathy focus; interested in SGLT2i renal data",
+      "birthday": "1970-07-23",
+      "anniversary": "1997-11-27"
     },
     {
       "id": "DOC031",
@@ -754,7 +814,9 @@
       "pinnacle_joined": "2025-08-27",
       "last_contacted": "2026-04-01",
       "status": "active",
-      "notes": "High-risk pregnancy expert; KOL for north India gynaecology"
+      "notes": "High-risk pregnancy expert; KOL for north India gynaecology",
+      "birthday": "1972-03-15",
+      "anniversary": "2017-03-14"
     },
     {
       "id": "DOC032",
@@ -777,7 +839,9 @@
       "pinnacle_joined": "2025-08-24",
       "last_contacted": "2026-03-27",
       "status": "active",
-      "notes": "PCOS expert; very interested in inositol vs metformin updates"
+      "notes": "PCOS expert; very interested in inositol vs metformin updates",
+      "birthday": "1986-10-16",
+      "anniversary": "2008-05-15"
     },
     {
       "id": "DOC033",
@@ -800,7 +864,9 @@
       "pinnacle_joined": "2025-04-05",
       "last_contacted": "2026-05-06",
       "status": "active",
-      "notes": "National gynaecology body president; highly influential speaker"
+      "notes": "National gynaecology body president; highly influential speaker",
+      "birthday": "1964-08-08",
+      "anniversary": "1997-10-27"
     },
     {
       "id": "DOC034",
@@ -823,7 +889,9 @@
       "pinnacle_joined": "2025-07-23",
       "last_contacted": "2026-03-15",
       "status": "active",
-      "notes": "IVF and reproductive medicine; interested in PCOS fertility data"
+      "notes": "IVF and reproductive medicine; interested in PCOS fertility data",
+      "birthday": "1976-07-05",
+      "anniversary": "2018-03-13"
     },
     {
       "id": "DOC035",
@@ -846,7 +914,9 @@
       "pinnacle_joined": "2026-01-19",
       "last_contacted": "2026-05-16",
       "status": "active",
-      "notes": "Surgical gynaecologist; moderate Pinnacle engagement"
+      "notes": "Surgical gynaecologist; moderate Pinnacle engagement",
+      "birthday": "1969-09-11",
+      "anniversary": "2023-01-26"
     },
     {
       "id": "DOC036",
@@ -869,7 +939,9 @@
       "pinnacle_joined": "2025-10-14",
       "last_contacted": "2026-03-22",
       "status": "active",
-      "notes": "PCOS subspecialist; shares content with junior doctors"
+      "notes": "PCOS subspecialist; shares content with junior doctors",
+      "birthday": "1994-03-21",
+      "anniversary": "2005-03-24"
     },
     {
       "id": "DOC037",
@@ -892,7 +964,9 @@
       "pinnacle_joined": "2025-10-08",
       "last_contacted": "2026-04-04",
       "status": "active",
-      "notes": "Academic centre; trains residents; interested in ANC guideline updates"
+      "notes": "Academic centre; trains residents; interested in ANC guideline updates",
+      "birthday": "1958-08-06",
+      "anniversary": "2006-02-03"
     },
     {
       "id": "DOC038",
@@ -915,7 +989,9 @@
       "pinnacle_joined": "2025-12-21",
       "last_contacted": "2026-04-14",
       "status": "active",
-      "notes": "Senior academic; peer reviewer; prefers full research articles"
+      "notes": "Senior academic; peer reviewer; prefers full research articles",
+      "birthday": "1977-07-16",
+      "anniversary": "2006-08-29"
     },
     {
       "id": "DOC039",
@@ -938,7 +1014,9 @@
       "pinnacle_joined": "2025-02-20",
       "last_contacted": "2026-05-07",
       "status": "active",
-      "notes": "Adolescent and PCOS clinic; interested in inositol for teens"
+      "notes": "Adolescent and PCOS clinic; interested in inositol for teens",
+      "birthday": "1968-05-09",
+      "anniversary": "2008-01-07"
     },
     {
       "id": "DOC040",
@@ -961,7 +1039,9 @@
       "pinnacle_joined": "2025-05-25",
       "last_contacted": "2026-05-04",
       "status": "active",
-      "notes": "National trainer for high-risk OB; Pinnacle early adopter"
+      "notes": "National trainer for high-risk OB; Pinnacle early adopter",
+      "birthday": "1958-03-01",
+      "anniversary": "2004-10-02"
     },
     {
       "id": "DOC041",
@@ -984,7 +1064,9 @@
       "pinnacle_joined": "2025-01-14",
       "last_contacted": "2026-05-12",
       "status": "active",
-      "notes": "Ex-IAP president; very high influence in paediatric community"
+      "notes": "Ex-IAP president; very high influence in paediatric community",
+      "birthday": "1984-11-25",
+      "anniversary": "2015-02-28"
     },
     {
       "id": "DOC042",
@@ -1007,7 +1089,9 @@
       "pinnacle_joined": "2025-03-18",
       "last_contacted": "2026-04-28",
       "status": "active",
-      "notes": "Infection control specialist; interested in vaccine-preventable disease data"
+      "notes": "Infection control specialist; interested in vaccine-preventable disease data",
+      "birthday": "1983-08-12",
+      "anniversary": "2020-08-21"
     },
     {
       "id": "DOC043",
@@ -1030,7 +1114,9 @@
       "pinnacle_joined": "2025-10-15",
       "last_contacted": "2026-04-22",
       "status": "active",
-      "notes": "Adolescent health focus; interested in nutrition and immunity content"
+      "notes": "Adolescent health focus; interested in nutrition and immunity content",
+      "birthday": "2001-05-16",
+      "anniversary": "2009-04-03"
     },
     {
       "id": "DOC044",
@@ -1053,7 +1139,9 @@
       "pinnacle_joined": "2025-05-25",
       "last_contacted": "2026-03-29",
       "status": "active",
-      "notes": "Neonatology expert; interested in preterm nutrition evidence"
+      "notes": "Neonatology expert; interested in preterm nutrition evidence",
+      "birthday": "1969-02-25",
+      "anniversary": "1998-11-18"
     },
     {
       "id": "DOC045",
@@ -1076,7 +1164,9 @@
       "pinnacle_joined": "2025-04-27",
       "last_contacted": "2026-04-27",
       "status": "active",
-      "notes": "Senior paediatrician; vaccine policy researcher"
+      "notes": "Senior paediatrician; vaccine policy researcher",
+      "birthday": "1982-11-25",
+      "anniversary": "2009-11-09"
     },
     {
       "id": "DOC046",
@@ -1099,7 +1189,9 @@
       "pinnacle_joined": "2025-02-05",
       "last_contacted": "2026-03-26",
       "status": "active",
-      "notes": "IAP nutrition expert; key contact for paediatric nutrition content"
+      "notes": "IAP nutrition expert; key contact for paediatric nutrition content",
+      "birthday": "1989-03-21",
+      "anniversary": "2014-03-25"
     },
     {
       "id": "DOC047",
@@ -1122,7 +1214,9 @@
       "pinnacle_joined": "2025-12-02",
       "last_contacted": "2026-04-17",
       "status": "active",
-      "notes": "Child development focus; growing practice"
+      "notes": "Child development focus; growing practice",
+      "birthday": "1967-09-30",
+      "anniversary": "1996-01-02"
     },
     {
       "id": "DOC048",
@@ -1145,7 +1239,9 @@
       "pinnacle_joined": "2025-01-14",
       "last_contacted": "2026-03-29",
       "status": "active",
-      "notes": "Respiratory disease in children; interested in allergy updates"
+      "notes": "Respiratory disease in children; interested in allergy updates",
+      "birthday": "1963-06-16",
+      "anniversary": "2010-01-11"
     },
     {
       "id": "DOC049",
@@ -1168,7 +1264,9 @@
       "pinnacle_joined": "2025-10-19",
       "last_contacted": "2026-04-02",
       "status": "active",
-      "notes": "NICU expert; prescribes nutritional supplements extensively"
+      "notes": "NICU expert; prescribes nutritional supplements extensively",
+      "birthday": "1994-07-06",
+      "anniversary": "1997-06-08"
     },
     {
       "id": "DOC050",
@@ -1191,7 +1289,9 @@
       "pinnacle_joined": "2025-07-12",
       "last_contacted": "2026-04-10",
       "status": "active",
-      "notes": "Onco-haematology; niche specialty; low volume but high engagement"
+      "notes": "Onco-haematology; niche specialty; low volume but high engagement",
+      "birthday": "1986-01-31",
+      "anniversary": "2018-10-19"
     },
     {
       "id": "DOC051",
@@ -1214,7 +1314,9 @@
       "pinnacle_joined": "2025-11-23",
       "last_contacted": "2026-04-03",
       "status": "active",
-      "notes": "World-renowned spine surgeon; Spine Society past president"
+      "notes": "World-renowned spine surgeon; Spine Society past president",
+      "birthday": "1996-02-14",
+      "anniversary": "2002-09-07"
     },
     {
       "id": "DOC052",
@@ -1237,7 +1339,9 @@
       "pinnacle_joined": "2025-06-29",
       "last_contacted": "2026-05-06",
       "status": "active",
-      "notes": "Highest volume TKR surgeon in India; key implant prescriber"
+      "notes": "Highest volume TKR surgeon in India; key implant prescriber",
+      "birthday": "1997-10-01",
+      "anniversary": "2001-03-07"
     },
     {
       "id": "DOC053",
@@ -1260,7 +1364,9 @@
       "pinnacle_joined": "2025-01-29",
       "last_contacted": "2026-05-14",
       "status": "active",
-      "notes": "Celebrity patient surgeon; sports medicine expert; high media presence"
+      "notes": "Celebrity patient surgeon; sports medicine expert; high media presence",
+      "birthday": "1993-12-05",
+      "anniversary": "2010-10-10"
     },
     {
       "id": "DOC054",
@@ -1283,7 +1389,9 @@
       "pinnacle_joined": "2025-05-04",
       "last_contacted": "2026-03-18",
       "status": "active",
-      "notes": "Hip & knee replacement; tier-2 city practice"
+      "notes": "Hip & knee replacement; tier-2 city practice",
+      "birthday": "1991-05-17",
+      "anniversary": "2009-11-08"
     },
     {
       "id": "DOC055",
@@ -1306,7 +1414,9 @@
       "pinnacle_joined": "2025-07-08",
       "last_contacted": "2026-05-19",
       "status": "active",
-      "notes": "Trauma specialist; interested in bone health and osteoporosis content"
+      "notes": "Trauma specialist; interested in bone health and osteoporosis content",
+      "birthday": "1974-04-20",
+      "anniversary": "1996-10-04"
     },
     {
       "id": "DOC056",
@@ -1329,7 +1439,9 @@
       "pinnacle_joined": "2025-04-11",
       "last_contacted": "2026-04-17",
       "status": "active",
-      "notes": "Sports knee surgery expert; large social media following"
+      "notes": "Sports knee surgery expert; large social media following",
+      "birthday": "1957-04-14",
+      "anniversary": "2003-06-10"
     },
     {
       "id": "DOC057",
@@ -1352,7 +1464,9 @@
       "pinnacle_joined": "2025-06-19",
       "last_contacted": "2026-05-09",
       "status": "active",
-      "notes": "Academic; paediatric bone disease focus"
+      "notes": "Academic; paediatric bone disease focus",
+      "birthday": "1976-12-10",
+      "anniversary": "2005-07-12"
     },
     {
       "id": "DOC058",
@@ -1375,7 +1489,9 @@
       "pinnacle_joined": "2026-01-07",
       "last_contacted": "2026-05-09",
       "status": "active",
-      "notes": "Hip replacement expert; Pune KOL"
+      "notes": "Hip replacement expert; Pune KOL",
+      "birthday": "1973-09-23",
+      "anniversary": "2011-03-04"
     },
     {
       "id": "DOC059",
@@ -1398,7 +1514,9 @@
       "pinnacle_joined": "2025-08-18",
       "last_contacted": "2026-03-23",
       "status": "active",
-      "notes": "Chain hospital orthopaedics head; very high prescriber"
+      "notes": "Chain hospital orthopaedics head; very high prescriber",
+      "birthday": "1986-04-27",
+      "anniversary": "2023-06-24"
     },
     {
       "id": "DOC060",
@@ -1421,7 +1539,9 @@
       "pinnacle_joined": "2025-06-12",
       "last_contacted": "2026-05-18",
       "status": "active",
-      "notes": "Upper limb specialist; young growing practice"
+      "notes": "Upper limb specialist; young growing practice",
+      "birthday": "2000-10-29",
+      "anniversary": "2008-04-28"
     },
     {
       "id": "DOC061",
@@ -1444,7 +1564,9 @@
       "pinnacle_joined": "2025-10-20",
       "last_contacted": "2026-03-31",
       "status": "active",
-      "notes": "Retina expert; AIIMS faculty; writes national guidelines"
+      "notes": "Retina expert; AIIMS faculty; writes national guidelines",
+      "birthday": "1964-04-23",
+      "anniversary": "2025-02-07"
     },
     {
       "id": "DOC062",
@@ -1467,7 +1589,9 @@
       "pinnacle_joined": "2025-06-13",
       "last_contacted": "2026-05-05",
       "status": "active",
-      "notes": "Glaucoma subspecialist; interested in IOP management updates"
+      "notes": "Glaucoma subspecialist; interested in IOP management updates",
+      "birthday": "1956-11-20",
+      "anniversary": "2024-04-28"
     },
     {
       "id": "DOC063",
@@ -1490,7 +1614,9 @@
       "pinnacle_joined": "2025-11-16",
       "last_contacted": "2026-04-25",
       "status": "active",
-      "notes": "Uveitis and retina expert; publishes frequently in indexed journals"
+      "notes": "Uveitis and retina expert; publishes frequently in indexed journals",
+      "birthday": "1997-01-18",
+      "anniversary": "1998-06-20"
     },
     {
       "id": "DOC064",
@@ -1513,7 +1639,9 @@
       "pinnacle_joined": "2025-09-09",
       "last_contacted": "2026-04-05",
       "status": "active",
-      "notes": "Aravind system — largest eye hospital network; massive influence"
+      "notes": "Aravind system — largest eye hospital network; massive influence",
+      "birthday": "1997-09-22",
+      "anniversary": "2018-05-24"
     },
     {
       "id": "DOC065",
@@ -1536,7 +1664,9 @@
       "pinnacle_joined": "2025-05-10",
       "last_contacted": "2026-04-23",
       "status": "active",
-      "notes": "Uveitis expert; interested in autoimmune eye disease content"
+      "notes": "Uveitis expert; interested in autoimmune eye disease content",
+      "birthday": "1959-09-07",
+      "anniversary": "2019-10-05"
     },
     {
       "id": "DOC066",
@@ -1559,7 +1689,9 @@
       "pinnacle_joined": "2025-09-10",
       "last_contacted": "2026-03-24",
       "status": "active",
-      "notes": "High-volume cataract surgeon; interested in post-op drug protocols"
+      "notes": "High-volume cataract surgeon; interested in post-op drug protocols",
+      "birthday": "1993-10-21",
+      "anniversary": "2007-09-01"
     },
     {
       "id": "DOC067",
@@ -1582,7 +1714,9 @@
       "pinnacle_joined": "2025-09-20",
       "last_contacted": "2026-05-05",
       "status": "active",
-      "notes": "Sankara Nethralaya director; national cornea transplant leader"
+      "notes": "Sankara Nethralaya director; national cornea transplant leader",
+      "birthday": "1986-09-01",
+      "anniversary": "2000-07-28"
     },
     {
       "id": "DOC068",
@@ -1605,7 +1739,9 @@
       "pinnacle_joined": "2025-08-15",
       "last_contacted": "2026-04-12",
       "status": "active",
-      "notes": "Vitreoretinal surgery expert; researcher and author"
+      "notes": "Vitreoretinal surgery expert; researcher and author",
+      "birthday": "1989-02-19",
+      "anniversary": "2022-12-05"
     },
     {
       "id": "DOC069",
@@ -1628,7 +1764,9 @@
       "pinnacle_joined": "2025-08-31",
       "last_contacted": "2026-04-01",
       "status": "active",
-      "notes": "Paediatric eye disease; interested in childhood myopia content"
+      "notes": "Paediatric eye disease; interested in childhood myopia content",
+      "birthday": "1974-07-02",
+      "anniversary": "2012-07-30"
     },
     {
       "id": "DOC070",
@@ -1651,7 +1789,9 @@
       "pinnacle_joined": "2025-11-19",
       "last_contacted": "2026-05-18",
       "status": "active",
-      "notes": "Glaucoma management; large outreach program in AP/Telangana"
+      "notes": "Glaucoma management; large outreach program in AP/Telangana",
+      "birthday": "1972-01-29",
+      "anniversary": "2004-12-01"
     },
     {
       "id": "DOC071",
@@ -1674,7 +1814,9 @@
       "pinnacle_joined": "2025-05-22",
       "last_contacted": "2026-04-15",
       "status": "active",
-      "notes": "Migraine and headache expert; very active on social media and Pinnacle"
+      "notes": "Migraine and headache expert; very active on social media and Pinnacle",
+      "birthday": "1960-02-21",
+      "anniversary": "2024-07-26"
     },
     {
       "id": "DOC072",
@@ -1697,7 +1839,9 @@
       "pinnacle_joined": "2025-08-23",
       "last_contacted": "2026-03-24",
       "status": "active",
-      "notes": "Stroke unit head; interested in acute stroke management content"
+      "notes": "Stroke unit head; interested in acute stroke management content",
+      "birthday": "1980-02-26",
+      "anniversary": "2018-04-10"
     },
     {
       "id": "DOC073",
@@ -1720,7 +1864,9 @@
       "pinnacle_joined": "2025-02-20",
       "last_contacted": "2026-04-01",
       "status": "active",
-      "notes": "Epilepsy management expert; high prescriber for anti-epileptics"
+      "notes": "Epilepsy management expert; high prescriber for anti-epileptics",
+      "birthday": "1989-10-03",
+      "anniversary": "2011-03-14"
     },
     {
       "id": "DOC074",
@@ -1743,7 +1889,9 @@
       "pinnacle_joined": "2025-02-11",
       "last_contacted": "2026-05-07",
       "status": "active",
-      "notes": "Parkinson's and dementia expert; academic leader"
+      "notes": "Parkinson's and dementia expert; academic leader",
+      "birthday": "1974-04-05",
+      "anniversary": "2017-08-26"
     },
     {
       "id": "DOC075",
@@ -1766,7 +1914,9 @@
       "pinnacle_joined": "2025-04-25",
       "last_contacted": "2026-05-07",
       "status": "active",
-      "notes": "CNS infections specialist; interested in antimicrobial content"
+      "notes": "CNS infections specialist; interested in antimicrobial content",
+      "birthday": "1986-02-09",
+      "anniversary": "2011-10-10"
     },
     {
       "id": "DOC076",
@@ -1789,7 +1939,9 @@
       "pinnacle_joined": "2025-01-13",
       "last_contacted": "2026-04-29",
       "status": "active",
-      "notes": "India's leading Parkinson's researcher; low volume, high influence"
+      "notes": "India's leading Parkinson's researcher; low volume, high influence",
+      "birthday": "1995-01-27",
+      "anniversary": "2005-10-05"
     },
     {
       "id": "DOC077",
@@ -1812,7 +1964,9 @@
       "pinnacle_joined": "2025-09-16",
       "last_contacted": "2026-04-12",
       "status": "active",
-      "notes": "Stroke ICU expert; media spokesperson for neurological emergencies"
+      "notes": "Stroke ICU expert; media spokesperson for neurological emergencies",
+      "birthday": "2001-02-18",
+      "anniversary": "1996-05-02"
     },
     {
       "id": "DOC078",
@@ -1835,7 +1989,9 @@
       "pinnacle_joined": "2025-12-18",
       "last_contacted": "2026-05-05",
       "status": "active",
-      "notes": "MS specialist; interested in DMT updates and neuroimmunology"
+      "notes": "MS specialist; interested in DMT updates and neuroimmunology",
+      "birthday": "1991-07-29",
+      "anniversary": "2010-09-05"
     },
     {
       "id": "DOC079",
@@ -1858,7 +2014,9 @@
       "pinnacle_joined": "2025-11-09",
       "last_contacted": "2026-03-18",
       "status": "active",
-      "notes": "General neurology; good engagement with clinical content"
+      "notes": "General neurology; good engagement with clinical content",
+      "birthday": "1988-07-25",
+      "anniversary": "1997-02-01"
     },
     {
       "id": "DOC080",
@@ -1881,7 +2039,9 @@
       "pinnacle_joined": "2025-02-04",
       "last_contacted": "2026-04-17",
       "status": "active",
-      "notes": "Neuromuscular disease expert; active in MDA India"
+      "notes": "Neuromuscular disease expert; active in MDA India",
+      "birthday": "1991-07-15",
+      "anniversary": "2025-07-20"
     },
     {
       "id": "DOC081",
@@ -1904,7 +2064,9 @@
       "pinnacle_joined": "2025-07-23",
       "last_contacted": "2026-04-19",
       "status": "active",
-      "notes": "Pioneer of renal transplant in India; very high influence"
+      "notes": "Pioneer of renal transplant in India; very high influence",
+      "birthday": "1985-08-22",
+      "anniversary": "2016-08-05"
     },
     {
       "id": "DOC082",
@@ -1927,7 +2089,9 @@
       "pinnacle_joined": "2025-02-05",
       "last_contacted": "2026-04-28",
       "status": "active",
-      "notes": "CKD expert; involved in national renal registry; writes guidelines"
+      "notes": "CKD expert; involved in national renal registry; writes guidelines",
+      "birthday": "1957-10-13",
+      "anniversary": "2004-09-07"
     },
     {
       "id": "DOC083",
@@ -1950,7 +2114,9 @@
       "pinnacle_joined": "2025-01-25",
       "last_contacted": "2026-04-15",
       "status": "active",
-      "notes": "Global CKD researcher; SGLT2i renal protection expert"
+      "notes": "Global CKD researcher; SGLT2i renal protection expert",
+      "birthday": "1992-04-08",
+      "anniversary": "2016-04-22"
     },
     {
       "id": "DOC084",
@@ -1973,7 +2139,9 @@
       "pinnacle_joined": "2025-09-09",
       "last_contacted": "2026-03-29",
       "status": "active",
-      "notes": "Transplant nephrologist; interested in immunosuppressant updates"
+      "notes": "Transplant nephrologist; interested in immunosuppressant updates",
+      "birthday": "1998-10-25",
+      "anniversary": "2002-10-06"
     },
     {
       "id": "DOC085",
@@ -1996,7 +2164,9 @@
       "pinnacle_joined": "2025-11-16",
       "last_contacted": "2026-03-29",
       "status": "active",
-      "notes": "AV fistula and dialysis access expert; good Pinnacle engagement"
+      "notes": "AV fistula and dialysis access expert; good Pinnacle engagement",
+      "birthday": "1998-06-11",
+      "anniversary": "2024-01-27"
     },
     {
       "id": "DOC086",
@@ -2019,7 +2189,9 @@
       "pinnacle_joined": "2025-10-31",
       "last_contacted": "2026-05-02",
       "status": "active",
-      "notes": "Glomerulonephritis specialist; academic focus"
+      "notes": "Glomerulonephritis specialist; academic focus",
+      "birthday": "1964-09-02",
+      "anniversary": "2009-09-30"
     },
     {
       "id": "DOC087",
@@ -2042,7 +2214,9 @@
       "pinnacle_joined": "2026-01-01",
       "last_contacted": "2026-04-22",
       "status": "active",
-      "notes": "CKD-hypertension overlap; interested in SGLT2i renal data"
+      "notes": "CKD-hypertension overlap; interested in SGLT2i renal data",
+      "birthday": "1991-01-31",
+      "anniversary": "2009-02-12"
     },
     {
       "id": "DOC088",
@@ -2065,7 +2239,9 @@
       "pinnacle_joined": "2025-07-18",
       "last_contacted": "2026-03-23",
       "status": "active",
-      "notes": "Good engagement; part of Medanta's large nephrology team"
+      "notes": "Good engagement; part of Medanta's large nephrology team",
+      "birthday": "1990-02-06",
+      "anniversary": "2006-02-05"
     },
     {
       "id": "DOC089",
@@ -2088,7 +2264,9 @@
       "pinnacle_joined": "2025-08-19",
       "last_contacted": "2026-04-30",
       "status": "active",
-      "notes": "Paediatric kidney disease; young specialist; growing network"
+      "notes": "Paediatric kidney disease; young specialist; growing network",
+      "birthday": "1958-05-02",
+      "anniversary": "2013-03-04"
     },
     {
       "id": "DOC090",
@@ -2111,7 +2289,9 @@
       "pinnacle_joined": "2025-11-21",
       "last_contacted": "2026-05-22",
       "status": "active",
-      "notes": "Academic transplant centre; key prescriber in UP/Bihar catchment"
+      "notes": "Academic transplant centre; key prescriber in UP/Bihar catchment",
+      "birthday": "1965-05-08",
+      "anniversary": "2007-11-02"
     },
     {
       "id": "DOC091",
@@ -2134,7 +2314,9 @@
       "pinnacle_joined": "2025-06-24",
       "last_contacted": "2026-04-15",
       "status": "active",
-      "notes": "High-volume practice; interested in acne biologics and retinoid updates"
+      "notes": "High-volume practice; interested in acne biologics and retinoid updates",
+      "birthday": "1999-11-15",
+      "anniversary": "2023-08-04"
     },
     {
       "id": "DOC092",
@@ -2157,7 +2339,9 @@
       "pinnacle_joined": "2025-11-18",
       "last_contacted": "2026-05-02",
       "status": "active",
-      "notes": "Cosmetic procedures expert; writes IADVL guidelines"
+      "notes": "Cosmetic procedures expert; writes IADVL guidelines",
+      "birthday": "1959-10-27",
+      "anniversary": "2007-09-26"
     },
     {
       "id": "DOC093",
@@ -2180,7 +2364,9 @@
       "pinnacle_joined": "2025-09-16",
       "last_contacted": "2026-04-11",
       "status": "active",
-      "notes": "Paediatric skin conditions; interested in atopic dermatitis content"
+      "notes": "Paediatric skin conditions; interested in atopic dermatitis content",
+      "birthday": "1981-05-15",
+      "anniversary": "2019-12-10"
     },
     {
       "id": "DOC094",
@@ -2203,7 +2389,9 @@
       "pinnacle_joined": "2025-01-15",
       "last_contacted": "2026-05-20",
       "status": "active",
-      "notes": "Hair loss and alopecia specialist; moderate engagement"
+      "notes": "Hair loss and alopecia specialist; moderate engagement",
+      "birthday": "1956-06-10",
+      "anniversary": "2018-05-17"
     },
     {
       "id": "DOC095",
@@ -2226,7 +2414,9 @@
       "pinnacle_joined": "2025-10-21",
       "last_contacted": "2026-04-14",
       "status": "active",
-      "notes": "Melasma and vitiligo; interested in topical agent updates"
+      "notes": "Melasma and vitiligo; interested in topical agent updates",
+      "birthday": "1976-03-09",
+      "anniversary": "2004-11-27"
     },
     {
       "id": "DOC096",
@@ -2249,7 +2439,9 @@
       "pinnacle_joined": "2025-06-09",
       "last_contacted": "2026-04-12",
       "status": "active",
-      "notes": "Acne treatment KOL; writes chapters in Indian dermatology texts"
+      "notes": "Acne treatment KOL; writes chapters in Indian dermatology texts",
+      "birthday": "1982-08-24",
+      "anniversary": "2015-02-08"
     },
     {
       "id": "DOC097",
@@ -2272,7 +2464,9 @@
       "pinnacle_joined": "2025-10-20",
       "last_contacted": "2026-05-21",
       "status": "active",
-      "notes": "High-volume tier-2 practice; interested in antifungal & acne content"
+      "notes": "High-volume tier-2 practice; interested in antifungal & acne content",
+      "birthday": "2001-08-24",
+      "anniversary": "2006-10-17"
     },
     {
       "id": "DOC098",
@@ -2295,7 +2489,9 @@
       "pinnacle_joined": "2025-08-30",
       "last_contacted": "2026-04-18",
       "status": "active",
-      "notes": "Laser and aesthetic focus; interested in cosmeceutical updates"
+      "notes": "Laser and aesthetic focus; interested in cosmeceutical updates",
+      "birthday": "1995-02-08",
+      "anniversary": "2008-04-20"
     },
     {
       "id": "DOC099",
@@ -2318,7 +2514,9 @@
       "pinnacle_joined": "2025-03-12",
       "last_contacted": "2026-05-22",
       "status": "active",
-      "notes": "Hair transplant pioneer in India; high media visibility"
+      "notes": "Hair transplant pioneer in India; high media visibility",
+      "birthday": "1969-05-17",
+      "anniversary": "2021-06-29"
     },
     {
       "id": "DOC100",
@@ -2341,7 +2539,9 @@
       "pinnacle_joined": "2026-01-15",
       "last_contacted": "2026-05-21",
       "status": "active",
-      "notes": "Biologics in psoriasis expert; interested in IL-17/IL-23 updates"
+      "notes": "Biologics in psoriasis expert; interested in IL-17/IL-23 updates",
+      "birthday": "1997-05-07",
+      "anniversary": "2014-05-27"
     }
   ]
 }
