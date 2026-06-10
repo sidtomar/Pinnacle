@@ -20,7 +20,7 @@
 # │  "demo"       → All sources ON (for management demos)      │
 # │  "production" → Only production_enabled sources are active  │
 # └─────────────────────────────────────────────────────────────┘
-mode: demo
+mode: production
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -66,6 +66,7 @@ sources:
   # ── SOURCE 3: Databricks Vector Search ──────────────────────
   # Semantic search over MA document library in Databricks.
   # Requires Azure Databricks credentials in .env
+  # DISABLED: Per business requirement, search restricted to PubMed + local docs only
   databricks_vector_search:
     production_enabled: false
     description: "Databricks Vector Search — semantic search over MA library"
@@ -82,6 +83,7 @@ sources:
   # ── SOURCE 4: Tavily Web Search ─────────────────────────────
   # Real-time web search for recent medical articles & clinical data.
   # Requires Tavily API key in .env
+  # DISABLED: Per business requirement, search restricted to PubMed + local docs only
   tavily_web_search:
     production_enabled: false
     description: "Tavily — real-time web search for medical articles"
@@ -95,6 +97,7 @@ sources:
   # ── SOURCE 5: OneDrive (Microsoft Graph API) ────────────────
   # Shared MA documents on OneDrive/SharePoint.
   # Requires Microsoft Azure AD app credentials in .env
+  # DISABLED: Per business requirement, search restricted to PubMed + local docs only
   onedrive:
     production_enabled: false
     description: "OneDrive — shared MA documents via Microsoft Graph API"
@@ -121,19 +124,24 @@ sources:
 #   → Only sources with "production_enabled: true" are active.
 #   → Admin sets each source's flag based on business decision.
 #
+# ✓ CURRENT CONFIGURATION — Production with PubMed + Local repo only:
+#   mode: production
+#   pubmed:                    production_enabled: true
+#   local_content_repo:        production_enabled: true
+#   databricks_vector_search:  production_enabled: false
+#   tavily_web_search:         production_enabled: false
+#   onedrive:                  production_enabled: false
+#
+# This satisfies business requirement:
+#   • Primary: Search PubMed for peer-reviewed medical literature
+#   • Secondary: Use local MA documents if available
+#   • Disabled: All web search sources (Tavily, Databricks, OneDrive)
+#
 # EXAMPLE — Production with PubMed + Databricks only:
 #   mode: production
 #   pubmed:                    production_enabled: true
 #   local_content_repo:        production_enabled: false
 #   databricks_vector_search:  production_enabled: true   # + set .env creds
-#   tavily_web_search:         production_enabled: false
-#   onedrive:                  production_enabled: false
-#
-# EXAMPLE — Production with PubMed + Local repo only:
-#   mode: production
-#   pubmed:                    production_enabled: true
-#   local_content_repo:        production_enabled: true
-#   databricks_vector_search:  production_enabled: false
 #   tavily_web_search:         production_enabled: false
 #   onedrive:                  production_enabled: false
 # ═══════════════════════════════════════════════════════════════

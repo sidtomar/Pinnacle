@@ -3714,7 +3714,7 @@ function clCardHTML(p){
     : '';
   const actions=isMA
     ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
-       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
+       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">View</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
   // ── Publication details block ──────────────────────────────────────────────
@@ -3765,7 +3765,7 @@ function clRowHTML(p){
     : '';
   const actions=isMA
     ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
-       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
+       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">View</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
   return`<div class="pr" onclick="${isMA?`openMADetail(${idArg})`:`openCVModal(${idArg})`}">
