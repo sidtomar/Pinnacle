@@ -1440,7 +1440,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-ai-badge{margin-left:auto;display:flex;align-items:center;gap:5px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#b8912a;}
         .ra-panel-divider{height:1px;background:#e2eaf2;margin:16px 24px 0;}
         .ra-panel-body{padding:20px 24px 24px;}
-        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto auto;gap:12px;align-items:end;margin-bottom:0;}
+        .ra-filter-grid{display:grid;grid-template-columns:0.9fr 0.9fr 0.9fr auto auto auto;gap:12px;align-items:end;margin-bottom:0;}
         .ra-filter-group-search{flex:2.5;min-width:0;}
         .ra-filter-group-date{flex:1.5;min-width:0;}
         .ra-btn-reset{display:flex;align-items:center;gap:5px;background:#fff;color:#6b7280;border:1.5px solid #e2eaf2;border-radius:8px;padding:0 14px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -1571,9 +1571,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="ra-filter-group ra-filter-group-date">
               <label class="ra-filter-label">Publication Date</label>
               <div style="display:flex;align-items:center;gap:6px;">
-                <input class="ra-fuzzy-input" style="height:38px;font-size:12px;" type="date" id="ra-date-from-2" value="2024-01-01">
+                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-from-2" value="2024-01-01">
                 <span style="font-size:10px;color:#6b7280;flex-shrink:0;">→</span>
-                <input class="ra-fuzzy-input" style="height:38px;font-size:12px;" type="date" id="ra-date-to-2" value="2026-06-01">
+                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-to-2" value="2026-06-01">
               </div>
             </div>
             <div class="ra-filter-group" style="justify-content:flex-end;">
@@ -2228,7 +2228,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="padding:20px 24px;flex:1;overflow-y:auto;">
     <div class="impr-hint">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7"/><circle cx="7" cy="9.5" r=".6" fill="currentColor"/></svg>
-      <div>Agent Beta will revise the content using your notes, then Gamma will reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval. Alpha is skipped — research is already done.</div>
+      <div>Your review feedback will be used to revise and improve this article. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval.</div>
     </div>
     <label class="fl">Your Improvement Notes</label>
     <textarea class="impr-ta" id="impr-notes" placeholder="e.g. Fix the empagliflozin dose to 10mg. Reference ESC 2023 HF guidelines specifically. Remove any competitor drug mentions not in our portfolio."></textarea>
@@ -2236,7 +2236,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
     <!-- Pipeline progress (shown while running) -->
     <div class="impr-prog" id="impr-prog">
-      <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">Improvement Pipeline Running</div>
+      <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">Improvement In Progress</div>
       <div class="impr-prog-bar-wrap"><div class="impr-prog-bar" id="impr-prog-bar"></div></div>
       <div class="impr-prog-msg" id="impr-prog-msg">Initialising...</div>
       <div style="margin-top:8px;font-size:11px;color:var(--text4);" id="impr-agent-status"></div>
@@ -2245,7 +2245,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     </div>
   </div>
   <div class="mf">
-    <div style="font-size:11.5px;color:var(--text3);">Alpha skipped · Beta rewrites · Gamma reformats · New version → Pending Review</div>
+    <div style="font-size:11.5px;color:var(--text3);">Improved version → Pending Review</div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
       <button class="btn btn-sm" id="impr-submit-btn"
@@ -3367,9 +3367,16 @@ function toggleRoleDropdown(e){
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
 // Valid page IDs for each role — used to validate hash on load/switch
-const PAGES_MA    = ['content','pipeline','dashboard'];
-const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
-const PAGES_ADMIN = ['research-agent','pipeline'];
+// Feature flag — set true to restore the Research Pipeline menu for all roles
+const SHOW_RESEARCH_PIPELINE = false;
+
+const _PAGES_MA    = ['content','pipeline','dashboard'];
+const _PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
+const _PAGES_ADMIN = ['research-agent','pipeline'];
+// When the flag is off, 'pipeline' is stripped so even direct #pipeline links are blocked
+const PAGES_MA    = SHOW_RESEARCH_PIPELINE ? _PAGES_MA    : _PAGES_MA.filter(p => p !== 'pipeline');
+const PAGES_PMT   = SHOW_RESEARCH_PIPELINE ? _PAGES_PMT   : _PAGES_PMT.filter(p => p !== 'pipeline');
+const PAGES_ADMIN = SHOW_RESEARCH_PIPELINE ? _PAGES_ADMIN : _PAGES_ADMIN.filter(p => p !== 'pipeline');
 
 function _getHashPage(){
   const h = location.hash.replace('#','');
@@ -3457,10 +3464,10 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      ${SHOW_RESEARCH_PIPELINE ? `<div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
-      </div>`;
+      </div>` : ''}`;
     return;
   }
   if(isMA){
@@ -3471,10 +3478,10 @@ function buildSidebar(){
         Content Library
         <span class="nb nb-amber" id="nb-pend">${ALL_PAPERS.filter(p=>p.status==='pending').length}</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      ${SHOW_RESEARCH_PIPELINE ? `<div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
-      </div>
+      </div>` : ''}
       <div class="ni" id="ni-dashboard" onclick="showPage('dashboard')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="6" height="6" rx="1.5"/><rect x="10" y="2" width="6" height="6" rx="1.5"/><rect x="2" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
         Dashboard
@@ -3528,10 +3535,10 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      ${SHOW_RESEARCH_PIPELINE ? `<div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
-      </div>`;
+      </div>` : ''}`;
   }
 }
 
@@ -3710,7 +3717,7 @@ function clCardHTML(p){
   // Handle both numeric (static) and string (API) IDs safely in onclick
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request improvement with review notes">⟳ Improve</button>`
     : '';
   const actions=isMA
     ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
@@ -3761,7 +3768,7 @@ function clRowHTML(p){
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const accClass=p.status==='approved'?'pr-acc-approved':p.status==='pending'?'pr-acc-pending':'pr-acc-rejected';
   const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request improvement with review notes">⟳ Improve</button>`
     : '';
   const actions=isMA
     ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
@@ -3913,9 +3920,9 @@ async function _triggerImprovementFromReject(apiId, notes) {
       body: JSON.stringify({notes: notes, reviewer:'Dr. Prashant Agarwal (MA)'})
     });
     if(!res.ok) throw new Error();
-    toast('⟳','Agents are working on a revised version — check Research Pipeline');
+    toast('⟳','A revised version is being prepared — it will appear in Pending Review');
     if(typeof loadRecentRuns==='function') setTimeout(loadRecentRuns, 2000);
-  } catch(e){ toast('❌','Could not trigger agents — check API connection'); }
+  } catch(e){ toast('❌','Could not start improvement — check API connection'); }
 }
 function regenSummary(){const ta=document.getElementById('ma-summary');ta.style.opacity='.4';ta.value='Regenerating…';setTimeout(()=>{const p=ALL_PAPERS.find(x=>x.id===CUR_ID);ta.value=p?p.sum:'';ta.style.opacity='1';toast('✨','Summary regenerated by AI');},1400);}
 
@@ -6459,6 +6466,7 @@ function startNotifPolling() {
 
 /* ══ IMPROVEMENT REQUEST ══ */
 let _imprContentId = null;
+let _imprNotes = '';   // review feedback shown in the generic progress message
 let _imprRunId = null;
 let _imprPollTimer = null;
 
@@ -6504,8 +6512,10 @@ async function submitImprovementRequest() {
     }
     const data = await res.json();
     _imprRunId = data.run_id;
+    _imprNotes = notes;
     document.getElementById('impr-prog').classList.add('show');
-    btn.innerHTML = 'Pipeline running...';
+    document.getElementById('impr-prog-msg').textContent = 'Improving the article as per review feedback: "' + notes + '"';
+    btn.innerHTML = 'Improving...';
     document.getElementById('impr-close-btn').textContent = 'Close';
     pollImprovementProgress();
   } catch (e) {
@@ -6583,12 +6593,10 @@ function pollImprovementProgress() {
       const data = await res.json();
       const pct = data.progress || 0;
       document.getElementById('impr-prog-bar').style.width = pct + '%';
-      document.getElementById('impr-prog-msg').textContent = data.status_msg || '';
-      document.getElementById('impr-agent-status').textContent =
-        data.current_agent ? 'Agent running: ' + data.current_agent.charAt(0).toUpperCase() + data.current_agent.slice(1) : '';
-      // Render live agent outputs
-      const outEl = document.getElementById('impr-agent-outputs');
-      if (outEl) outEl.innerHTML = _renderImprOutputs(data.agent_outputs || {}, data.current_agent || '');
+      // Generic progress message — internal agent names are not shown to reviewers
+      document.getElementById('impr-prog-msg').textContent = 'Improving the article as per review feedback: "' + _imprNotes + '"';
+      document.getElementById('impr-agent-status').textContent = '';
+      document.getElementById('impr-agent-outputs').innerHTML = '';
 
       if (data.status === 'completed') {
         clearInterval(_imprPollTimer);
@@ -6600,7 +6608,7 @@ function pollImprovementProgress() {
         clearInterval(_imprPollTimer);
         document.getElementById('impr-submit-btn').disabled = false;
         document.getElementById('impr-submit-btn').innerHTML = 'Retry';
-        toast('❌', data.status_msg || 'Pipeline error');
+        toast('❌', 'Improvement failed — please try again');
       }
     } catch (e) {}
   }, 2000);
@@ -7090,7 +7098,7 @@ function renderSharingReport() {
     const emptyMsg = hasFilters
       ? 'No records match the selected filters. <a href="#" onclick="clearSRFilters();return false;" style="color:var(--blue);text-decoration:underline;">Clear filters</a>'
       : SR_DATA.length === 0
-        ? 'No sharing records yet. Share an AI Pipeline article (from Research Pipeline → ✅ Approved) to see it here.'
+        ? 'No sharing records yet. Share an approved AI article to see it here.'
         : 'No records match the selected filters.';
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text4);">${emptyMsg}</td></tr>`;
     const foot = document.getElementById('sr-footer');

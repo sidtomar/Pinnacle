@@ -51,3 +51,5 @@ Type 2 Diabetes - Gastroenterology (treatment guidelines) | Gastroenterology | G
 Type 2 Diabetes - Gastroenterology (treatment guidelines) | Diabetology | GLP-1 Therapy
 General Research - Diabetology | Diabetology | Diabetology
 Hypertension - Cardiology | Cardiology | Hypertension
+Heart Failure - Multiple Therapies | General Medicine | General
+Heart Failure - Cardiology | Cardiology | Cardiology
