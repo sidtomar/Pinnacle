@@ -2931,11 +2931,11 @@ Would love your thoughts at your convenience!
 <div class="ov" id="bcast-ov" onclick="if(event.target===this)closeOv('bcast-ov')">
 <div class="modal bcast-modal">
   <div class="bcast-hdr">
-    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;position:relative;z-index:1;" id="bcast-icon-hdr">🪔</div>
+    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;position:relative;z-index:1;" id="bcast-icon-hdr">📅</div>
     <div style="flex:1;position:relative;z-index:1;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.38);text-transform:uppercase;margin-bottom:4px;" id="bcast-occ-type">Festival Broadcast</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;margin-bottom:3px;" id="bcast-occ-name">Diwali Greetings</div>
-      <div style="font-size:11.5px;color:rgba(255,255,255,.55);" id="bcast-occ-date">October 2026</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.38);text-transform:uppercase;margin-bottom:4px;" id="bcast-occ-type">Occasion Broadcast</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;margin-bottom:3px;" id="bcast-occ-name">Loading...</div>
+      <div style="font-size:11.5px;color:rgba(255,255,255,.55);" id="bcast-occ-date"></div>
     </div>
     <button onclick="closeOv('bcast-ov')" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;transition:background .15s;" onmouseenter="this.style.background='rgba(255,255,255,.22)'" onmouseleave="this.style.background='rgba(255,255,255,.12)'">
       <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="10" y2="10"/><line x1="10" y1="1" x2="1" y2="10"/></svg>
@@ -2974,14 +2974,14 @@ Would love your thoughts at your convenience!
     <div class="bcast-right">
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;">Message</div>
       <!-- Channel -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <div class="mcb on" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">💬</div><div class="mcb-lbl">WhatsApp</div></div>
-        <div class="mcb" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">✉️</div><div class="mcb-lbl">Email</div></div>
-        <div class="mcb" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">📱</div><div class="mcb-lbl">Both</div></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;" id="bcast-ch-btns">
+        <div class="mcb on" data-ch="whatsapp" onclick="switchBcastChannel('whatsapp')" style="flex:1;"><div class="mcb-icon">💬</div><div class="mcb-lbl">WhatsApp</div></div>
+        <div class="mcb" data-ch="email" onclick="switchBcastChannel('email')" style="flex:1;"><div class="mcb-icon">✉️</div><div class="mcb-lbl">Email</div></div>
+        <div class="mcb" data-ch="both" onclick="switchBcastChannel('both')" style="flex:1;"><div class="mcb-icon">📱</div><div class="mcb-lbl">Both</div></div>
       </div>
       <!-- AI drafted preview -->
       <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:7px;"><span>Message Preview</span><span class="ai-b">AI Drafted</span></div>
-      <div style="background:#E8F5E9;border-radius:12px;padding:12px;border:1px solid #C8E6C9;margin-bottom:12px;">
+      <div id="bcast-preview-container" style="background:#E8F5E9;border-radius:12px;padding:12px;border:1px solid #C8E6C9;margin-bottom:12px;">
         <div class="wa-bbl-prev" id="bcast-preview">Loading…</div>
       </div>
       <!-- Edit -->
@@ -3010,99 +3010,7 @@ Would love your thoughts at your convenience!
 </div>
 </div>
 
-<!-- ════ BROADCAST MODAL ════ -->
-<style>
-.bcast-modal{width:780px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;}
-.bcast-occ-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
-.doc-sel-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:16px;font-size:11.5px;font-weight:500;color:var(--text2);}
-.doc-sel-chip button{background:none;border:none;cursor:pointer;color:var(--text4);font-size:14px;line-height:1;}
-.doc-sel-chip button:hover{color:var(--red);}
-.bcast-doctor-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background .12s;}
-.bcast-doctor-row:hover{background:var(--surface2);}
-.bcast-doctor-row.bdr-sel{background:var(--blue-bg);}
-.bcast-ch-btn{border-color:var(--border);background:var(--surface);color:var(--text1);}
-.bcast-ch-btn:hover{border-color:var(--navy);background:var(--blue-bg);box-shadow:var(--s1);}
-.bcast-ch-btn.on{border-color:var(--navy);background:var(--blue-bg);color:var(--navy);font-weight:700;}
-</style>
-<div class="ov" id="bcast-ov" onclick="if(event.target===this)closeOv('bcast-ov')">
-<div class="modal bcast-modal">
-  <!-- Header -->
-  <div class="mh" style="background:linear-gradient(135deg,var(--navy),var(--navy3));border-bottom:none;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-30px;right:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,42,.18) 0%,transparent 70%);pointer-events:none;"></div>
-    <div id="bcast-hdr-icon" style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative;z-index:1;"></div>
-    <div style="flex:1;position:relative;z-index:1;">
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;" id="bcast-hdr-title">Broadcast Message</div>
-      <div style="font-size:11.5px;color:rgba(255,255,255,.55);" id="bcast-hdr-sub">AI-drafted · personalise and send to selected doctors</div>
-    </div>
-    <div class="mc" onclick="closeOv('bcast-ov')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;position:relative;z-index:1;flex-shrink:0;align-self:flex-start;"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="10" y2="10"/><line x1="10" y1="1" x2="1" y2="10"/></svg></div>
-  </div>
-
-  <div style="flex:1;overflow-y:auto;padding:20px 24px;">
-    <!-- Occasion chip -->
-    <div style="margin-bottom:16px;">
-      <span class="bcast-occ-chip" id="bcast-occ-chip" style="background:var(--blue-bg);color:var(--navy);">📅 Occasion</span>
-    </div>
-
-    <!-- Two-col: left=doctors, right=message -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-
-      <!-- Left: Doctor selection -->
-      <div>
-        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;display:flex;align-items:center;gap:7px;">
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5.5l.8 2.4H9L7 4.6l.8 2.4L5.5 5.8l-2.3 1.2.8-2.4L2 2.9H4.7L5.5.5z" fill="#7C3AED" opacity=".9"/></svg>
-          AI Recommended Doctors
-          <span id="bcast-sel-count" style="background:var(--navy);color:#fff;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;">0</span>
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px;">
-          <input type="text" placeholder="Search doctors…" id="bcast-doc-search" oninput="renderBcastDocs()" style="width:100%;border:none;outline:none;background:transparent;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text1);">
-        </div>
-        <div id="bcast-doc-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);"></div>
-        <div style="margin-top:8px;display:flex;gap:8px;">
-          <button class="btn btn-outline btn-xs" onclick="selectAllBcastDocs()">Select All Relevant</button>
-          <button class="btn btn-ghost btn-xs" onclick="clearBcastDocs()">Clear</button>
-        </div>
-      </div>
-
-      <!-- Right: Message -->
-      <div>
-        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;display:flex;align-items:center;gap:7px;">
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10.5 1L1 4.5l3.5 2 1.5 3.5 4.5-9z"/></svg>
-          Message <span class="ai-b">AI Drafted</span>
-        </div>
-        <!-- WA preview bubble -->
-        <div id="bcast-preview-container" style="background:#E8F5E9;border-radius:12px;padding:10px 12px;margin-bottom:10px;border:1px solid #C8E6C9;">
-          <div id="bcast-preview" style="background:#fff;border-radius:10px 10px 10px 0;padding:10px 12px;font-size:12px;line-height:1.7;color:var(--text1);box-shadow:0 1px 3px rgba(0,0,0,.08);white-space:pre-wrap;max-height:120px;overflow-y:auto;"></div>
-        </div>
-        <textarea class="fta" id="bcast-msg" style="min-height:100px;font-size:12px;" oninput="document.getElementById('bcast-preview').textContent=this.value"></textarea>
-        <!-- Channel -->
-        <div style="display:flex;gap:7px;margin-top:10px;" id="bcast-ch-btns">
-          <div class="bcast-ch-btn on" data-ch="whatsapp" onclick="switchBcastChannel('whatsapp')" style="flex:1;padding:10px 8px;font-size:11px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;text-align:center;"><div style="font-size:16px;margin-bottom:2px;">💬</div><div style="font-weight:700;">WhatsApp</div></div>
-          <div class="bcast-ch-btn" data-ch="email" onclick="switchBcastChannel('email')" style="flex:1;padding:10px 8px;font-size:11px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;text-align:center;"><div style="font-size:16px;margin-bottom:2px;">✉️</div><div style="font-weight:700;">Email</div></div>
-          <div class="bcast-ch-btn" data-ch="both" onclick="switchBcastChannel('both')" style="flex:1;padding:10px 8px;font-size:11px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;text-align:center;"><div style="font-size:16px;margin-bottom:2px;">📱</div><div style="font-weight:700;">Both</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Selected recipients pills -->
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Sending To</div>
-      <div id="bcast-recip-pills" style="display:flex;gap:6px;flex-wrap:wrap;min-height:28px;"></div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <div class="mf" style="background:var(--surface2);">
-    <div style="font-size:12px;color:var(--text3);" id="bcast-send-summary">Select doctors to continue</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline btn-sm" onclick="closeOv('bcast-ov')">Cancel</button>
-      <button class="btn btn-navy" id="bcast-send-btn" onclick="sendBroadcast()" disabled style="opacity:.5;">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>
-        Broadcast
-      </button>
-    </div>
-  </div>
-</div>
-</div>
+<!-- duplicate modal removed -->
 
 <div id="toast"><span id="ti">✅</span><span id="tm">Done</span></div>
 
@@ -5766,13 +5674,24 @@ function openBroadcast(occId){
     : DOCTORS;
   relevant.forEach(d=>BCAST_SEL_DOCS.add(d.id));
 
-  // Header
-  document.getElementById('bcast-hdr-icon').textContent=occ.icon;
-  document.getElementById('bcast-hdr-title').textContent=occ.name;
-  document.getElementById('bcast-hdr-sub').textContent=`${BCAST_SEL_DOCS.size} doctors pre-selected · AI-drafted ${window.BCAST_CHANNEL === 'whatsapp' ? 'WhatsApp' : 'Email'} message`;
-  const bgStyle=occ.color.includes('gradient')?occ.color:`linear-gradient(135deg,${occ.color},${occ.color})`;
-  document.getElementById('bcast-occ-chip').style.cssText=`background:${occ.color};color:${occ.c};`;
-  document.getElementById('bcast-occ-chip').innerHTML=`${occ.icon} ${occ.name}`;
+  // Header — set title dynamically from occasion
+  document.getElementById('bcast-icon-hdr').textContent=occ.icon;
+  const occDate = new Date(occ.date);
+  const NM=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('bcast-occ-type').textContent = occ.tag === 'national' ? 'Festival Broadcast' : 'Medical Occasion';
+  document.getElementById('bcast-occ-name').textContent = occ.name;
+  document.getElementById('bcast-occ-date').textContent = NM[occDate.getMonth()] + ' ' + occDate.getFullYear();
+
+  // Reset channel buttons to WhatsApp default
+  document.querySelectorAll('#bcast-ch-btns .mcb').forEach(btn=>btn.classList.remove('on'));
+  const waBtn = document.querySelector('#bcast-ch-btns .mcb[data-ch="whatsapp"]');
+  if(waBtn) waBtn.classList.add('on');
+
+  // Reset preview container to WhatsApp style
+  const pc = document.getElementById('bcast-preview-container');
+  if(pc){ pc.style.background='#E8F5E9'; pc.style.border='1px solid #C8E6C9'; pc.style.borderRadius='12px'; }
+  const pb = document.getElementById('bcast-preview');
+  if(pb){ pb.style.borderRadius='10px 10px 10px 0'; }
 
   // Message (use msgWhatsApp by default, fallback to msg)
   const firstDoc=DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
@@ -5830,11 +5749,11 @@ function switchBcastChannel(channel){
     previewBox.style.boxShadow='0 1px 3px rgba(0,0,0,.08)';
   }
 
-  // Update channel button styles
-  document.querySelectorAll('#bcast-ch-btns .bcast-ch-btn').forEach(btn=>{
+  // Update channel button styles (supports both .mcb and .bcast-ch-btn classes)
+  document.querySelectorAll('#bcast-ch-btns [data-ch]').forEach(btn=>{
     btn.classList.remove('on');
   });
-  document.querySelector(`#bcast-ch-btns .bcast-ch-btn[data-ch="${channel}"]`)?.classList.add('on');
+  document.querySelector(`#bcast-ch-btns [data-ch="${channel}"]`)?.classList.add('on');
 }
 
 function renderBcastDocs(){
