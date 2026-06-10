@@ -296,12 +296,50 @@ def _build_specialty_sheet(wb: Workbook, specialty: str, items: list, report_dat
     ws.freeze_panes = "A4"
 
 
-def generate_business_report(items: list) -> io.BytesIO:
+def _build_search_summary(wb: Workbook, items: list, search_params: dict = None):
+    """Build the 'Search Summary' metadata sheet."""
+    ws = wb.create_sheet("Search Summary", 0)  # Insert as first sheet
+
+    search_params = search_params or {}
+    now = datetime.now(timezone.utc)
+    generated_time = now.strftime("%m/%d/%Y, %I:%M:%S %p")
+
+    # Get summary data from search params or defaults
+    therapy_area = search_params.get('therapy_area', 'All')
+    disease = search_params.get('disease', 'All')
+    keywords = search_params.get('keywords', 'None selected')
+    date_from = search_params.get('date_from', '2024-01-01')
+    date_to = search_params.get('date_to', '2026-06-01')
+
+    # Data rows
+    summary_data = [
+        ("PinnacleIQ Research Export", ""),
+        ("Generated on:", generated_time),
+        ("Therapy Area:", therapy_area),
+        ("Disease:", disease),
+        ("Keywords:", keywords),
+        ("Date From:", date_from),
+        ("Date To:", date_to),
+        ("Total Articles:", len(items)),
+    ]
+
+    # Write data
+    for row_idx, (label, value) in enumerate(summary_data, 1):
+        ws.cell(row=row_idx, column=1, value=label).font = Font(name="Arial", size=11, bold=True)
+        ws.cell(row=row_idx, column=2, value=value).font = Font(name="Arial", size=11)
+        ws.row_dimensions[row_idx].height = 20
+
+    ws.column_dimensions["A"].width = 25
+    ws.column_dimensions["B"].width = 50
+
+
+def generate_business_report(items: list, search_params: dict = None) -> io.BytesIO:
     """
-    Generate the full PinnacleIQ Business Report as an in-memory Excel file.
+    Generate the PinnacleIQ Research Report as an Excel file with 2 sheets.
 
     Args:
         items: List of content_items dicts from the store.
+        search_params: Dict with search criteria (therapy_area, disease, keywords, date_from, date_to).
 
     Returns:
         BytesIO buffer containing the .xlsx file.
@@ -311,16 +349,32 @@ def generate_business_report(items: list) -> io.BytesIO:
 
     wb = Workbook()
 
-    # 1. All Publications
-    _build_all_publications(wb, items, report_date)
+    # 1. Search Summary (inserted first)
+    _build_search_summary(wb, items, search_params or {})
 
-    # 2. Summary
-    _build_summary(wb, items, report_date)
+    # 2. Rename first sheet to "PubMed Research Database" and build it
+    ws = wb.create_sheet("PubMed Research Database", 1)
+    wb.active = ws
 
-    # 3. Per-specialty tabs
     specialties = sorted(set(i.get("specialty", "General") for i in items))
-    for spec in specialties:
-        _build_specialty_sheet(wb, spec, items, report_date)
+    spec_count = len(specialties)
+    total = len(items)
+
+    title = f"PinnacleIQ — PubMed Research Database — {report_date}"
+    subtitle = f"PubMed | {spec_count} Specialties | {total} articles | Tags & Doctor Relevance included"
+
+    _write_title_rows(ws, title, subtitle)
+    _write_column_headers(ws)
+
+    rows = [_map_item_to_row(item, idx + 1) for idx, item in enumerate(items)]
+    _write_data_rows(ws, rows)
+
+    # Freeze panes below header
+    ws.freeze_panes = "A4"
+
+    # Remove the default first sheet if it exists
+    if "Sheet" in wb.sheetnames:
+        del wb["Sheet"]
 
     # Write to buffer
     buf = io.BytesIO()

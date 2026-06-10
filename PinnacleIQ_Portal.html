@@ -1602,7 +1602,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
           <!-- ACTIONS (Export CSV hidden until results load) -->
           <div class="ra-action-row" style="margin-top:12px;">
-            <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;">⬇ Export CSV</button>
+            <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;" onclick="raExportResults()">⬇ Export Excel</button>
             <span class="ra-result-label" id="ra-result-label-2" style="display:none;">Showing <span id="ra-res-count-2">0</span> articles</span>
           </div>
 
@@ -7919,6 +7919,60 @@ async function raRunDynamicSearch() {
     document.getElementById('ra-date-to-2').disabled = false;
     document.getElementById('ra-results-badge-2').textContent = '0';
     toast('❌', 'Search failed: ' + e.message);
+  }
+}
+
+async function raExportResults() {
+  // Get search parameters from context
+  const context = window.RA_SEARCH_CONTEXT || {};
+  const therapyArea = context.therapy || '';
+  const disease = context.disease || '';
+  const keywords = context.keywords || '';
+  const dateFrom = context.dateFrom || '2024-01-01';
+  const dateTo = context.dateTo || '2026-06-01';
+
+  const btn = document.getElementById('ra-csv-btn-2');
+  if (!btn) return;
+
+  const origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Generating...';
+
+  try {
+    // Build query parameters
+    const params = new URLSearchParams({
+      therapy_area: therapyArea,
+      disease: disease,
+      keywords: keywords,
+      date_from: dateFrom,
+      date_to: dateTo
+    });
+
+    const response = await fetch(`${PL_API}/report/download?${params.toString()}`);
+    if (!response.ok) {
+      throw new Error('Failed to download report');
+    }
+
+    const blob = await response.blob();
+    const cd = response.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'PinnacleIQ_Research_Report.xlsx';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    toast('✅', 'Report downloaded successfully');
+  } catch (e) {
+    toast('❌', 'Download failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origHTML;
   }
 }
 

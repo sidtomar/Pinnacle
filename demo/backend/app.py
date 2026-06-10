@@ -738,10 +738,15 @@ def doctor_sync_status():
 def download_business_report(
     status: Optional[str] = None,
     specialty: Optional[str] = None,
+    therapy_area: Optional[str] = None,
+    disease: Optional[str] = None,
+    keywords: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
 ):
     """
-    Generate and download the PinnacleIQ Business Report as an Excel file.
-    Optional filters: status (approved, pending_review, etc.), specialty.
+    Generate and download the PinnacleIQ Research Report as an Excel file.
+    Optional filters: status, specialty, therapy_area, disease, keywords, date_from, date_to.
     """
     from datetime import datetime, timezone
 
@@ -749,9 +754,18 @@ def download_business_report(
     if not items:
         raise HTTPException(404, "No content items found for the given filters.")
 
-    buf = generate_business_report(items)
+    # Build search summary data
+    search_params = {
+        'therapy_area': therapy_area or 'All',
+        'disease': disease or 'All',
+        'keywords': keywords or 'None selected',
+        'date_from': date_from or '2024-01-01',
+        'date_to': date_to or '2026-06-01',
+    }
+
+    buf = generate_business_report(items, search_params)
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    filename = f"PinnacleIQ_PubMed_Repository_{date_str}.xlsx"
+    filename = f"PinnacleIQ_PubMed_Database_{date_str}.xlsx"
 
     return StreamingResponse(
         buf,
