@@ -3020,6 +3020,9 @@ Would love your thoughts at your convenience!
 .bcast-doctor-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background .12s;}
 .bcast-doctor-row:hover{background:var(--surface2);}
 .bcast-doctor-row.bdr-sel{background:var(--blue-bg);}
+.bcast-ch-btn{border-color:var(--border);background:var(--surface);color:var(--text1);}
+.bcast-ch-btn:hover{border-color:var(--navy);background:var(--blue-bg);box-shadow:var(--s1);}
+.bcast-ch-btn.on{border-color:var(--navy);background:var(--blue-bg);color:var(--navy);font-weight:700;}
 </style>
 <div class="ov" id="bcast-ov" onclick="if(event.target===this)closeOv('bcast-ov')">
 <div class="modal bcast-modal">
@@ -3073,9 +3076,8 @@ Would love your thoughts at your convenience!
         <textarea class="fta" id="bcast-msg" style="min-height:100px;font-size:12px;" oninput="document.getElementById('bcast-preview').textContent=this.value"></textarea>
         <!-- Channel -->
         <div style="display:flex;gap:7px;margin-top:10px;" id="bcast-ch-btns">
-          <div class="mcb on" onclick="selMCh(this)" style="flex:1;padding:8px;font-size:11px;border-radius:9px;"><div style="font-size:16px;margin-bottom:2px;">💬</div><div>WhatsApp</div></div>
-          <div class="mcb" onclick="selMCh(this)" style="flex:1;padding:8px;font-size:11px;border-radius:9px;"><div style="font-size:16px;margin-bottom:2px;">✉️</div><div>Email</div></div>
-          <div class="mcb" onclick="selMCh(this)" style="flex:1;padding:8px;font-size:11px;border-radius:9px;"><div style="font-size:16px;margin-bottom:2px;">📱</div><div>Both</div></div>
+          <div class="bcast-ch-btn on" data-ch="whatsapp" onclick="switchBcastChannel('whatsapp')" style="flex:1;padding:10px 8px;font-size:11px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;text-align:center;"><div style="font-size:16px;margin-bottom:2px;">💬</div><div style="font-weight:700;">WhatsApp</div></div>
+          <div class="bcast-ch-btn" data-ch="email" onclick="switchBcastChannel('email')" style="flex:1;padding:10px 8px;font-size:11px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;text-align:center;"><div style="font-size:16px;margin-bottom:2px;">✉️</div><div style="font-weight:700;">Email</div></div>
         </div>
       </div>
     </div>
@@ -5644,46 +5646,60 @@ function confirmSendAndComplete(){
 const OCCASIONS = [
   // UPCOMING (May–June 2026)
   {id:'o1',  date:'2026-05-04', name:"World Asthma Day",        icon:'🫁', color:'#EFF6FF', c:'#1E40AF', tag:'medical',   specialty:['Physician','Pulmonology'],
-   msg:`Dear Dr. {first},\n\nWishing you a meaningful World Asthma Day! Your efforts in managing respiratory health make a real difference to patients' lives.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nWishing you a meaningful World Asthma Day! Your efforts in managing respiratory health make a real difference to patients' lives.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Asthma Day, Dr. {first}! 🫁\n\nYour expertise in respiratory care makes a real difference. Thank you for your dedication to patient health! 👏\n\n— Team Life, Mankind Pharma`,
    stat:'3 days away'},
   {id:'o2',  date:'2026-05-08', name:"World Thalassaemia Day",  icon:'🩸', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['Haematology','Physician'],
-   msg:`Dear Dr. {first},\n\nOn World Thalassaemia Day, we salute your commitment to patients living with this condition. Your dedication inspires us.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nOn World Thalassaemia Day, we salute your commitment to patients living with this condition. Your dedication to improving their quality of life and pioneering new therapies inspires us all.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Thalassaemia Day, Dr. {first}! 🩸\n\nYour dedication to supporting thalassaemia patients makes a profound difference. Thank you for your compassionate care! 🙏\n\n— Team Life, Mankind Pharma`,
    stat:'7 days away'},
   {id:'o3',  date:'2026-05-12', name:"International Nurses Day",icon:'💉', color:'#ECFDF5', c:'#065F46', tag:'medical',   specialty:null,
-   msg:`Dear Dr. {first},\n\nHappy International Nurses Day! A moment to appreciate the incredible teams you lead and the care they provide every day.\n\nWith gratitude,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nHappy International Nurses Day! A moment to appreciate the incredible nursing teams you lead and the exceptional care they provide every day to our patients.\n\nWith gratitude,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy International Nurses Day! 💉\n\nTo all our incredible healthcare warriors—your compassion and dedication save lives every single day! 👏🙏\n\n— Team Life, Mankind Pharma`,
    stat:'11 days away'},
   {id:'o4',  date:'2026-06-01', name:"World Milk Day",          icon:'🥛', color:'#FFFBEB', c:'#92400E', tag:'medical',   specialty:['Paediatrics','Gynaecology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nHappy World Milk Day! Nutrition starts early — a reminder of the foundational role you play in guiding families toward healthier futures.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nHappy World Milk Day! As we celebrate the nutritional foundation of health, we recognize your vital role in guiding families toward healthier, more nourished futures through evidence-based nutrition counseling.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Milk Day, Dr. {first}! 🥛\n\nNutrition starts early! Thank you for guiding families toward healthier lifestyles. Your impact is immeasurable! 💪\n\n— Team Life, Mankind Pharma`,
    stat:'This month'},
   {id:'o5',  date:'2026-06-14', name:"World Blood Donor Day",   icon:'❤️', color:'#FEF2F2', c:'#991B1B', tag:'medical',   specialty:['Haematology','Cardiology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nOn World Blood Donor Day, we recognise your crucial role in promoting safe transfusion practices and patient care.\n\nWith respect,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nOn World Blood Donor Day, we recognise your crucial role in promoting safe transfusion practices, educating patients on blood donation, and advancing patient care through your clinical expertise.\n\nWith respect,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Blood Donor Day, Dr. {first}! ❤️\n\nYour work in promoting safe blood donation saves lives every day. Thank you for your dedication! 🙏\n\n— Team Life, Mankind Pharma`,
    stat:'This month'},
   {id:'o6',  date:'2026-07-01', name:"Doctors' Day",            icon:'👨‍⚕️', color:'linear-gradient(135deg,#EBF0F8,#DBEAFE)', c:'var(--navy)', tag:'medical', specialty:null, featured:true,
-   msg:`Dear Dr. {first},\n\nHappy National Doctors' Day! 🎉\n\nThank you for your tireless dedication, your healing hands and your compassionate care. Mankind Pharma is proud to partner with you in your mission.\n\nWith deep gratitude and respect,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nHappy National Doctors' Day! 🎉\n\nThank you for your tireless dedication, your healing hands and your compassionate care. Your commitment to patient wellbeing is truly exceptional. Mankind Pharma is proud to partner with you in your noble mission to serve humanity.\n\nWith deep gratitude and respect,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy Doctors' Day, Dr. {first}! 👨‍⚕️🎉\n\nYour dedication, compassion, and healing touch change lives every day. Thank you for being an amazing doctor! 👏❤️\n\n— Team Life, Mankind Pharma`,
    stat:'Next month'},
   {id:'o7',  date:'2026-07-28', name:"World Hepatitis Day",     icon:'🟡', color:'#FFFBEB', c:'#92400E', tag:'medical',   specialty:['Gastroenterology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nOn World Hepatitis Day, we appreciate your work in diagnosis and management. Your clinical expertise is vital in the fight against viral hepatitis.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nOn World Hepatitis Day, we appreciate your work in diagnosis, management and awareness of viral hepatitis. Your clinical expertise and patient education efforts are vital in the global fight against this disease.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Hepatitis Day, Dr. {first}! 🟡\n\nYour expertise in hepatitis management and patient care makes a real difference. Thank you for your dedication! 🙏\n\n— Team Life, Mankind Pharma`,
    stat:'July'},
   {id:'o8',  date:'2026-08-12', name:"World Organ Donation Day",icon:'🫀', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['Cardiology','Physician'],
-   msg:`Dear Dr. {first},\n\nOn World Organ Donation Day, we salute your role in supporting life-saving interventions and educating patients on the gift of life.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nOn World Organ Donation Day, we salute your role in supporting life-saving organ transplant interventions and in educating patients on the precious gift of life through organ donation.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Organ Donation Day, Dr. {first}! 🫀\n\nYour role in saving lives through organ transplantation is truly remarkable. Thank you for giving the gift of life! 🙏\n\n— Team Life, Mankind Pharma`,
    stat:'August'},
   {id:'o9',  date:'2026-09-29', name:"World Heart Day",         icon:'💓', color:'#FEF2F2', c:'#991B1B', tag:'medical',   specialty:['Cardiology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nHappy World Heart Day! Your dedication to cardiovascular health saves lives every day. We are proud to support your practice.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nHappy World Heart Day! Your dedication to cardiovascular health, disease prevention, and patient care saves lives every day. We are proud to support your practice and your mission.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Heart Day, Dr. {first}! 💓\n\nYour commitment to heart health saves lives every single day. Thank you for your incredible dedication! 👏❤️\n\n— Team Life, Mankind Pharma`,
    stat:'September'},
   {id:'o10', date:'2026-10-02', name:"Gandhi Jayanti",          icon:'🇮🇳', color:'#ECFDF5', c:'#065F46', tag:'national',  specialty:null,
-   msg:`Dear Dr. {first},\n\nOn the occasion of Gandhi Jayanti, wishing you peace, purpose and continued service to the nation's health.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nOn the occasion of Gandhi Jayanti, we wish you peace, purpose and continued service to the nation's health and wellbeing. Your dedication embodies the spirit of compassionate healthcare.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy Gandhi Jayanti, Dr. {first}! 🇮🇳\n\nWishing you peace, wisdom, and continued service to the nation's health. Your dedication is truly inspiring! 🙏\n\n— Team Life, Mankind Pharma`,
    stat:'October'},
   {id:'o11', date:'2026-10-20', name:"Diwali",                  icon:'🪔', color:'#FFFBEB', c:'#92400E', tag:'national',  specialty:null, featured:true,
-   msg:`Dear Dr. {first},\n\nWishing you and your family a very Happy Diwali! 🪔✨\n\nMay this festival of lights illuminate your life with joy, good health and prosperity.\n\nWith warm Diwali wishes,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nWishing you and your family a very Happy Diwali! 🪔✨\n\nMay this festival of lights illuminate your life with joy, good health, prosperity and happiness. Thank you for the light you bring to your patients' lives through your compassionate care.\n\nWith warm Diwali wishes,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy Diwali, Dr. {first}! 🪔✨\n\nMay the festival of lights bring joy, health, and happiness to you and your family! 🎆🙏\n\n— Team Life, Mankind Pharma`,
    stat:'October'},
   {id:'o12', date:'2026-11-14', name:"Children's Day / World Diabetes Day", icon:'🩺', color:'#EFF6FF', c:'#1E40AF', tag:'medical', specialty:['Paediatrics','Diabetology','Endocrinology'],
-   msg:`Dear Dr. {first},\n\nOn World Diabetes Day, we acknowledge your pivotal role in managing and preventing diabetes across generations. Your patient-first approach sets the standard.\n\nWith admiration,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nOn World Diabetes Day, we acknowledge your pivotal role in managing and preventing diabetes across all age groups. Your patient-centric approach to care and health education sets the gold standard in endocrinology.\n\nWith admiration,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World Diabetes Day, Dr. {first}! 🩺\n\nYour expertise in diabetes management and prevention changes lives. Thank you for empowering patients with knowledge and care! 🙏\n\n— Team Life, Mankind Pharma`,
    stat:'November'},
   {id:'o13', date:'2026-12-01', name:"World AIDS Day",          icon:'🎗️', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['General Medicine','Physician'],
-   msg:`Dear Dr. {first},\n\nOn World AIDS Day, we stand with you in the fight against HIV/AIDS and commend your work in patient care and awareness.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nOn World AIDS Day, we stand with you in the fight against HIV/AIDS. We commend your work in patient care, treatment adherence support, and public awareness in this ongoing battle.\n\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy World AIDS Day, Dr. {first}! 🎗️\n\nYour dedication to HIV/AIDS care and patient support is invaluable. Together we create hope! 🙏❤️\n\n— Team Life, Mankind Pharma`,
    stat:'December'},
   {id:'o14', date:'2026-03-14', name:"Holi",                   icon:'🎨', color:'#F5F3FF', c:'#5B21B6', tag:'national',  specialty:null,
-   msg:`Dear Dr. {first},\n\nWishing you and your family a vibrant and joyful Holi! 🎨\n\nMay the colours of good health, happiness and success fill your life this season.\n\nWith colourful wishes,\n— Jijo, Team Life · Mankind Pharma`,
+   msgEmail:`Dear Dr. {first},\n\nWishing you and your family a vibrant and joyful Holi! 🎨\n\nMay the colours of good health, happiness, success and good fortune fill your life and practice this season.\n\nWith colourful wishes,\n— Jijo, Team Life · Mankind Pharma`,
+   msgWhatsApp:`Happy Holi, Dr. {first}! 🎨\n\nMay this festival of colors bring joy, health, and happiness to you and your loved ones! 🌈🎉\n\n— Team Life, Mankind Pharma`,
    stat:'March 2027'},
 ];
 
@@ -5741,6 +5757,7 @@ function renderOccasions(){
 function openBroadcast(occId){
   const occ = OCCASIONS.find(o=>o.id===occId); if(!occ) return;
   BCAST_OCC_ID=occId; BCAST_SEL_DOCS=new Set();
+  window.BCAST_CHANNEL = 'whatsapp'; // Default to WhatsApp
 
   // Pre-select relevant doctors
   const relevant = occ.specialty
@@ -5751,15 +5768,16 @@ function openBroadcast(occId){
   // Header
   document.getElementById('bcast-hdr-icon').textContent=occ.icon;
   document.getElementById('bcast-hdr-title').textContent=occ.name;
-  document.getElementById('bcast-hdr-sub').textContent=`${BCAST_SEL_DOCS.size} doctors pre-selected · AI-drafted message`;
+  document.getElementById('bcast-hdr-sub').textContent=`${BCAST_SEL_DOCS.size} doctors pre-selected · AI-drafted ${window.BCAST_CHANNEL === 'whatsapp' ? 'WhatsApp' : 'Email'} message`;
   const bgStyle=occ.color.includes('gradient')?occ.color:`linear-gradient(135deg,${occ.color},${occ.color})`;
   document.getElementById('bcast-occ-chip').style.cssText=`background:${occ.color};color:${occ.c};`;
   document.getElementById('bcast-occ-chip').innerHTML=`${occ.icon} ${occ.name}`;
 
-  // Message
+  // Message (use msgWhatsApp by default, fallback to msg)
   const firstDoc=DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
   const sampleFirst=firstDoc?firstDoc.name.replace('Dr.','').trim().split(' ')[0]:'Doctor';
-  const msg=occ.msg.replace('{first}',sampleFirst);
+  const msgText = (window.BCAST_CHANNEL === 'whatsapp' ? occ.msgWhatsApp : occ.msgEmail) || occ.msg;
+  const msg = msgText.replace('{first}', sampleFirst);
   document.getElementById('bcast-msg').value=msg;
   document.getElementById('bcast-preview').textContent=msg;
 
@@ -5768,6 +5786,34 @@ function openBroadcast(occId){
   updateBcastSummary();
 
   openOv('bcast-ov');
+}
+
+function switchBcastChannel(channel){
+  window.BCAST_CHANNEL = channel;
+  const occ = OCCASIONS.find(o=>o.id===BCAST_OCC_ID);
+  if(!occ) return;
+
+  // Update header
+  const chLabel = channel === 'whatsapp' ? 'WhatsApp' : channel === 'email' ? 'Email' : 'WhatsApp & Email';
+  document.getElementById('bcast-hdr-sub').textContent=`${BCAST_SEL_DOCS.size} doctors pre-selected · AI-drafted ${chLabel} message`;
+
+  // Update message
+  const firstDoc=DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
+  const sampleFirst=firstDoc?firstDoc.name.replace('Dr.','').trim().split(' ')[0]:'Doctor';
+  let msgText = '';
+  if(channel === 'whatsapp') msgText = occ.msgWhatsApp || occ.msg;
+  else if(channel === 'email') msgText = occ.msgEmail || occ.msg;
+  else msgText = (occ.msgWhatsApp || occ.msg);
+
+  const msg = msgText.replace('{first}', sampleFirst);
+  document.getElementById('bcast-msg').value=msg;
+  document.getElementById('bcast-preview').textContent=msg;
+
+  // Update channel button styles
+  document.querySelectorAll('#bcast-ch-btns .bcast-ch-btn').forEach(btn=>{
+    btn.classList.remove('on');
+  });
+  document.querySelector(`#bcast-ch-btns .bcast-ch-btn[data-ch="${channel}"]`)?.classList.add('on');
 }
 
 function renderBcastDocs(){
