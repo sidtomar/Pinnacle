@@ -3070,7 +3070,7 @@ Would love your thoughts at your convenience!
           Message <span class="ai-b">AI Drafted</span>
         </div>
         <!-- WA preview bubble -->
-        <div style="background:#E8F5E9;border-radius:12px;padding:10px 12px;margin-bottom:10px;border:1px solid #C8E6C9;">
+        <div id="bcast-preview-container" style="background:#E8F5E9;border-radius:12px;padding:10px 12px;margin-bottom:10px;border:1px solid #C8E6C9;">
           <div id="bcast-preview" style="background:#fff;border-radius:10px 10px 10px 0;padding:10px 12px;font-size:12px;line-height:1.7;color:var(--text1);box-shadow:0 1px 3px rgba(0,0,0,.08);white-space:pre-wrap;max-height:120px;overflow-y:auto;"></div>
         </div>
         <textarea class="fta" id="bcast-msg" style="min-height:100px;font-size:12px;" oninput="document.getElementById('bcast-preview').textContent=this.value"></textarea>
@@ -5811,17 +5811,23 @@ function switchBcastChannel(channel){
   document.getElementById('bcast-preview').textContent=msg;
 
   // Update preview styling based on channel
-  const previewContainer = document.querySelector('#bcast-preview').parentElement;
+  const previewContainer = document.getElementById('bcast-preview-container');
+  const previewBox = document.getElementById('bcast-preview');
+
   if(channel === 'email') {
     previewContainer.style.background='#f5f5f5';
     previewContainer.style.border='1px solid #ddd';
-    document.getElementById('bcast-preview').style.background='#fff';
-    document.getElementById('bcast-preview').style.borderRadius='0';
+    previewContainer.style.borderRadius='8px';
+    previewBox.style.background='#fff';
+    previewBox.style.borderRadius='6px';
+    previewBox.style.boxShadow='0 1px 2px rgba(0,0,0,.05)';
   } else {
     previewContainer.style.background='#E8F5E9';
     previewContainer.style.border='1px solid #C8E6C9';
-    document.getElementById('bcast-preview').style.background='#fff';
-    document.getElementById('bcast-preview').style.borderRadius='10px 10px 10px 0';
+    previewContainer.style.borderRadius='12px';
+    previewBox.style.background='#fff';
+    previewBox.style.borderRadius='10px 10px 10px 0';
+    previewBox.style.boxShadow='0 1px 3px rgba(0,0,0,.08)';
   }
 
   // Update channel button styles
