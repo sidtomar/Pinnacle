@@ -3299,7 +3299,7 @@ async function loadDoctorsFromAPI() {
 }
 function _spinPath(){ return '<path d="M10 6A4 4 0 1 1 6 2"/><path d="M10 2v4h-4"/>'; }
 
-/* ── Populate Birthday & Anniversary Tasks (TODAY ONLY) ──────────────────────── */
+/* ── Populate Birthday & Anniversary Tasks (Next 7 Days) ──────────────────────── */
 function populateBirthdayAnniversaryTasks() {
   if (!DOCTORS || !DOCTORS.length) return;
 
@@ -3307,25 +3307,40 @@ function populateBirthdayAnniversaryTasks() {
   const annivTasks = [];
 
   DOCTORS.forEach(doc => {
-    // Only show birthdays/anniversaries for TODAY (daysAhead === 0)
-    if (doc.birthday && doc.birthdayDaysAhead === 0) {
+    // Show birthdays/anniversaries for next 7 days (daysAhead 0-7)
+    if (doc.birthday && doc.birthdayDaysAhead !== undefined && doc.birthdayDaysAhead >= 0 && doc.birthdayDaysAhead <= 7) {
+      const daysAhead = doc.birthdayDaysAhead;
+      let priority = 'upcoming';
+      if (daysAhead === 0) priority = 'urgent';
+      else if (daysAhead <= 2) priority = 'recommended';
+
+      const daysText = daysAhead === 0 ? 'Today!' : daysAhead + ' day' + (daysAhead !== 1 ? 's' : '') + ' away';
+
       bdTasks.push({
         id: 'bd-' + doc.id,
         docId: doc.id,
         type: 'birthday',
-        priority: 'urgent',  // Always urgent for today's birthday
+        priority: priority,
         title: doc.name + ' Birthday',
-        description: 'Today!'
+        description: daysText
       });
     }
-    if (doc.anniversary && doc.anniversaryDaysAhead === 0) {
+
+    if (doc.anniversary && doc.anniversaryDaysAhead !== undefined && doc.anniversaryDaysAhead >= 0 && doc.anniversaryDaysAhead <= 7) {
+      const daysAhead = doc.anniversaryDaysAhead;
+      let priority = 'upcoming';
+      if (daysAhead === 0) priority = 'urgent';
+      else if (daysAhead <= 2) priority = 'recommended';
+
+      const daysText = daysAhead === 0 ? 'Today!' : daysAhead + ' day' + (daysAhead !== 1 ? 's' : '') + ' away';
+
       annivTasks.push({
         id: 'anniv-' + doc.id,
         docId: doc.id,
         type: 'anniversary',
-        priority: 'urgent',  // Always urgent for today's anniversary
+        priority: priority,
         title: doc.name + ' Anniversary',
-        description: 'Today!'
+        description: daysText
       });
     }
   });
