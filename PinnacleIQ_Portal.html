@@ -5852,14 +5852,35 @@ function toggleBcastDoc(docId){
   else BCAST_SEL_DOCS.add(docId);
   renderBcastDocs();
   updateBcastSummary();
+  updateBcastMessagePreview();  // Update preview when doctor selection changes
+}
+
+function updateBcastMessagePreview(){
+  const occ = OCCASIONS.find(o=>o.id===BCAST_OCC_ID);
+  if(!occ) return;
+
+  // Get the first selected doctor to preview message
+  const firstDoc = DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
+  const sampleFirst = firstDoc ? firstDoc.name.replace('Dr.','').trim().split(' ')[0] : 'Doctor';
+
+  // Get current channel
+  const channel = window.BCAST_CHANNEL || 'whatsapp';
+  let msgText = '';
+  if(channel === 'whatsapp') msgText = occ.msgWhatsApp || occ.msg;
+  else if(channel === 'email') msgText = occ.msgEmail || occ.msg;
+  else msgText = (occ.msgWhatsApp || occ.msg);
+
+  const msg = msgText.replace('{first}', sampleFirst);
+  document.getElementById('bcast-msg').value = msg;
+  document.getElementById('bcast-preview').textContent = msg;
 }
 function selectAllBcastDocs(){
   const occ=OCCASIONS.find(o=>o.id===BCAST_OCC_ID);
   const relevant=occ?.specialty?DOCTORS.filter(d=>occ.specialty.some(sp=>d.spec.toLowerCase().includes(sp.toLowerCase().slice(0,5)))):DOCTORS;
   relevant.forEach(d=>BCAST_SEL_DOCS.add(d.id));
-  renderBcastDocs(); updateBcastSummary();
+  renderBcastDocs(); updateBcastSummary(); updateBcastMessagePreview();
 }
-function clearBcastDocs(){ BCAST_SEL_DOCS.clear(); renderBcastDocs(); updateBcastSummary(); }
+function clearBcastDocs(){ BCAST_SEL_DOCS.clear(); renderBcastDocs(); updateBcastSummary(); updateBcastMessagePreview(); }
 
 function updateBcastSummary(){
   const n=BCAST_SEL_DOCS.size;
