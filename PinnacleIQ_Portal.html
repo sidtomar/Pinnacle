@@ -7855,6 +7855,12 @@ async function raRunDynamicSearch() {
   document.getElementById('ra-articles-grid-2').innerHTML = '';
   document.getElementById('ra-empty-state-2').classList.remove('show');
   document.getElementById('ra-search-btn-2').disabled = true;
+  // Disable filter inputs during search
+  document.getElementById('ra-therapy-2').disabled = true;
+  document.getElementById('ra-disease-2').disabled = true;
+  document.getElementById('ra-keywords-2').disabled = true;
+  document.getElementById('ra-date-from-2').disabled = true;
+  document.getElementById('ra-date-to-2').disabled = true;
   document.getElementById('ra-results-badge-2').innerHTML = '<span class="ra-badge-spinner"></span>';
   document.getElementById('ra-showing-count-2').style.display = 'none';
   document.getElementById('ra-ma-review-footer-2').style.display = 'none';
@@ -7897,6 +7903,12 @@ async function raRunDynamicSearch() {
   } catch(e) {
     document.getElementById('ra-loading-state-2').classList.remove('show');
     document.getElementById('ra-search-btn-2').disabled = false;
+    // Re-enable filter inputs on error
+    document.getElementById('ra-therapy-2').disabled = false;
+    document.getElementById('ra-disease-2').disabled = false;
+    document.getElementById('ra-keywords-2').disabled = false;
+    document.getElementById('ra-date-from-2').disabled = false;
+    document.getElementById('ra-date-to-2').disabled = false;
     document.getElementById('ra-results-badge-2').textContent = '0';
     toast('❌', 'Search failed: ' + e.message);
   }
@@ -8018,6 +8030,15 @@ async function raDisplayDynamicResults(contentIds) {
 
   grid.innerHTML = html;
   if (!hasMultipleTopics) grid.className = 'papers-grid';
+
+  // Hide loading state and re-enable filter inputs now that results are displayed
+  document.getElementById('ra-loading-state-2').classList.remove('show');
+  document.getElementById('ra-search-btn-2').disabled = false;
+  document.getElementById('ra-therapy-2').disabled = false;
+  document.getElementById('ra-disease-2').disabled = false;
+  document.getElementById('ra-keywords-2').disabled = false;
+  document.getElementById('ra-date-from-2').disabled = false;
+  document.getElementById('ra-date-to-2').disabled = false;
 
   // Update result metadata
   if (successCount > 0) {
