@@ -823,7 +823,6 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
           <div class="stab" onclick="setTodayTab('urgent',this)">Urgent <span class="tc" id="tc-urgent">4</span></div>
           <div class="stab" onclick="setTodayTab('recommended',this)">Recommended <span class="tc" id="tc-rec">3</span></div>
           <div class="stab" onclick="setTodayTab('upcoming',this)">Upcoming <span class="tc" id="tc-up">2</span></div>
-          <div class="stab" onclick="setTodayTab('birthdays',this)">Birthdays & Anniversaries <span class="tc" id="tc-bd">0</span></div>
           <div class="stab" onclick="setTodayTab('done',this)">Done <span class="tc" id="tc-done">0</span></div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text3);">
@@ -3300,54 +3299,39 @@ async function loadDoctorsFromAPI() {
 }
 function _spinPath(){ return '<path d="M10 6A4 4 0 1 1 6 2"/><path d="M10 2v4h-4"/>'; }
 
-/* ── Populate Birthday & Anniversary Tasks ──────────────────────────────────── */
+/* ── Populate Birthday & Anniversary Tasks (TODAY ONLY) ──────────────────────── */
 function populateBirthdayAnniversaryTasks() {
   if (!DOCTORS || !DOCTORS.length) return;
 
-  const today = new Date();
   const bdTasks = [];
   const annivTasks = [];
 
   DOCTORS.forEach(doc => {
-    if (doc.birthday && doc.birthdayDaysAhead !== undefined) {
-      const daysAhead = doc.birthdayDaysAhead;
-      if (daysAhead >= 0 && daysAhead <= 7) {
-        const priority = daysAhead === 0 ? 'urgent' : daysAhead <= 2 ? 'urgent' : 'upcoming';
-        bdTasks.push({
-          id: 'bd-' + doc.id,
-          docId: doc.id,
-          type: 'birthday',
-          priority: priority,
-          daysAhead: daysAhead,
-          title: doc.name + ' Birthday',
-          description: daysAhead === 0 ? 'Today!' : daysAhead + ' day' + (daysAhead !== 1 ? 's' : '') + ' away'
-        });
-      }
+    // Only show birthdays/anniversaries for TODAY (daysAhead === 0)
+    if (doc.birthday && doc.birthdayDaysAhead === 0) {
+      bdTasks.push({
+        id: 'bd-' + doc.id,
+        docId: doc.id,
+        type: 'birthday',
+        priority: 'urgent',  // Always urgent for today's birthday
+        title: doc.name + ' Birthday',
+        description: 'Today!'
+      });
     }
-    if (doc.anniversary && doc.anniversaryDaysAhead !== undefined) {
-      const daysAhead = doc.anniversaryDaysAhead;
-      if (daysAhead >= 0 && daysAhead <= 7) {
-        const priority = daysAhead === 0 ? 'urgent' : daysAhead <= 2 ? 'recommended' : 'upcoming';
-        annivTasks.push({
-          id: 'anniv-' + doc.id,
-          docId: doc.id,
-          type: 'anniversary',
-          priority: priority,
-          daysAhead: daysAhead,
-          title: doc.name + ' Anniversary',
-          description: daysAhead === 0 ? 'Today!' : daysAhead + ' day' + (daysAhead !== 1 ? 's' : '') + ' away'
-        });
-      }
+    if (doc.anniversary && doc.anniversaryDaysAhead === 0) {
+      annivTasks.push({
+        id: 'anniv-' + doc.id,
+        docId: doc.id,
+        type: 'anniversary',
+        priority: 'urgent',  // Always urgent for today's anniversary
+        title: doc.name + ' Anniversary',
+        description: 'Today!'
+      });
     }
   });
 
   // Add birthday and anniversary tasks to TODAY_TASKS
   TODAY_TASKS = TODAY_TASKS.concat(bdTasks).concat(annivTasks);
-
-  // Update tab count for birthdays & anniversaries
-  const bdAnnivCount = bdTasks.length + annivTasks.length;
-  const bdAnnivTab = document.getElementById('tc-bd');
-  if (bdAnnivTab) bdAnnivTab.textContent = bdAnnivCount;
 }
 
 /* ── Refresh KPI row from live DOCTORS array ─────────────────────────────────── */
@@ -5263,7 +5247,6 @@ function renderToday(){
     if(TODAY_TAB==='urgent') return t.priority==='urgent';
     if(TODAY_TAB==='recommended') return t.priority==='recommended';
     if(TODAY_TAB==='upcoming') return t.priority==='upcoming';
-    if(TODAY_TAB==='birthdays') return t.type==='birthday' || t.type==='anniversary';
     return true;
   });
 
@@ -5288,9 +5271,6 @@ function renderToday(){
     const n = TODAY_TASKS.filter(t=>!TODAY_DONE.has(t.id)&&(tab==='all'||t.priority===tab)).length;
     document.getElementById('tc-'+tab.replace('recommended','rec').replace('upcoming','up')).textContent=n;
   });
-  const bdCount = TODAY_TASKS.filter(t=>!TODAY_DONE.has(t.id)&&(t.type==='birthday'||t.type==='anniversary')).length;
-  const bdEl = document.getElementById('tc-bd');
-  if(bdEl) bdEl.textContent = bdCount;
   document.getElementById('tc-done').textContent = doneCount;
 
   const container = document.getElementById('today-task-list');
