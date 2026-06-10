@@ -1440,7 +1440,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-ai-badge{margin-left:auto;display:flex;align-items:center;gap:5px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#b8912a;}
         .ra-panel-divider{height:1px;background:#e2eaf2;margin:16px 24px 0;}
         .ra-panel-body{padding:20px 24px 24px;}
-        .ra-filter-grid{display:grid;grid-template-columns:1.5fr 1.5fr 1.6fr 0.9fr auto auto;gap:12px;align-items:end;margin-bottom:0;}
+        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto auto;gap:12px;align-items:end;margin-bottom:0;}
+        .ra-filter-group-search{flex:2;min-width:0;}
+        .ra-filter-group-date{flex:0.8;min-width:0;}
         .ra-btn-reset{display:flex;align-items:center;gap:5px;background:#fff;color:#6b7280;border:1.5px solid #e2eaf2;border-radius:8px;padding:0 14px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
         .ra-btn-reset:hover{border-color:#94a3b8;color:#374151;background:#f8fafc;}
         .ra-filter-group{display:flex;flex-direction:column;gap:6px;position:relative;}
@@ -1551,27 +1553,27 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
           <!-- FILTER GRID (with inline Search button) -->
           <div class="ra-filter-grid">
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-search">
               <label class="ra-filter-label">Therapy Area <span class="ra-req">*</span></label>
               <input class="ra-fuzzy-input" id="ra-therapy-2" placeholder="Search therapy…" autocomplete="off" oninput="raShowDropdown('therapy')">
               <div class="ra-dropdown hidden" id="ra-dropdown-therapy"></div>
             </div>
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-search">
               <label class="ra-filter-label">Disease <span class="ra-req">*</span></label>
               <input class="ra-fuzzy-input" id="ra-disease-2" placeholder="Search disease…" autocomplete="off" oninput="raShowDropdown('disease')">
               <div class="ra-dropdown hidden" id="ra-dropdown-disease"></div>
             </div>
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-search">
               <label class="ra-filter-label">Keywords</label>
               <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type…" autocomplete="off" oninput="raShowDropdown('keywords')" onkeydown="if(event.key==='Enter'){raAddKeywordChip();event.preventDefault();}">
               <div class="ra-dropdown hidden" id="ra-dropdown-keywords"></div>
             </div>
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-date">
               <label class="ra-filter-label">Publication Date</label>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2024-01-01">
-                <span style="font-size:11px;color:#6b7280;flex-shrink:0;">→</span>
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2" value="2026-06-01">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input class="ra-fuzzy-input" style="height:38px;font-size:12px;" type="date" id="ra-date-from-2" value="2024-01-01">
+                <span style="font-size:10px;color:#6b7280;flex-shrink:0;">→</span>
+                <input class="ra-fuzzy-input" style="height:38px;font-size:12px;" type="date" id="ra-date-to-2" value="2026-06-01">
               </div>
             </div>
             <div class="ra-filter-group" style="justify-content:flex-end;">
