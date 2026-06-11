@@ -53,3 +53,8 @@ General Research - Diabetology | Diabetology | Diabetology
 Hypertension - Cardiology | Cardiology | Hypertension
 Heart Failure - Multiple Therapies | General Medicine | General
 Heart Failure - Cardiology | Cardiology | Cardiology
+Migraine - Endocrinology (treatment guidelines) | Endocrinology | Endocrinology
+Migraine - Endocrinology (treatment guidelines, antihypertensive therapy advances, hypertension drug approval, SGLT2 inhibitors) | Endocrinology | Endocrinology
+Heart Failure - Cardiology (SGLT2 inhibitors) | Cardiology | Heart Failure
+General Research - Endocrinology (SGLT2 inhibitors) | Endocrinology | Endocrinology
+Atrial Fibrillation - Cardiology | Cardiology | Cardiology

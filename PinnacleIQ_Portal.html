@@ -1442,6 +1442,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-panel-body{padding:20px 24px 24px;}
         .ra-filter-grid{display:grid;grid-template-columns:0.9fr 0.9fr 0.9fr auto auto auto;gap:12px;align-items:end;margin-bottom:0;}
         .ra-filter-group-search{flex:2.5;min-width:0;}
+        .ra-filter-group-search::after{content:'';position:absolute;right:12px;bottom:14px;width:8px;height:8px;border-right:2px solid #94a3b8;border-bottom:2px solid #94a3b8;transform:rotate(45deg);pointer-events:none;transition:transform .15s;}
         .ra-filter-group-date{flex:1.5;min-width:0;}
         .ra-btn-reset{display:flex;align-items:center;gap:5px;background:#fff;color:#6b7280;border:1.5px solid #e2eaf2;border-radius:8px;padding:0 14px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
         .ra-btn-reset:hover{border-color:#94a3b8;color:#374151;background:#f8fafc;}
@@ -3001,7 +3002,7 @@ Would love your thoughts at your convenience!
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-outline btn-sm" onclick="closeOv('bcast-ov')">Cancel</button>
-      <button class="btn" onclick="sendBroadcast()" style="background:linear-gradient(135deg,#4C1D95,#6D28D9);color:#fff;font-weight:700;">
+      <button class="btn" id="bcast-send-btn" onclick="sendBroadcast()" style="background:linear-gradient(135deg,#4C1D95,#6D28D9);color:#fff;font-weight:700;">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>
         <span id="bcast-send-lbl">Send Broadcast</span>
       </button>
@@ -5713,9 +5714,8 @@ function switchBcastChannel(channel){
   const occ = OCCASIONS.find(o=>o.id===BCAST_OCC_ID);
   if(!occ) return;
 
-  // Update header
-  const chLabel = channel === 'whatsapp' ? 'WhatsApp' : channel === 'email' ? 'Email' : 'WhatsApp & Email';
-  document.getElementById('bcast-hdr-sub').textContent=`${BCAST_SEL_DOCS.size} doctors pre-selected · AI-drafted ${chLabel} message`;
+  // Update message preview with the correct channel template
+
 
   // Update message
   const firstDoc=DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
@@ -5824,7 +5824,8 @@ function clearBcastDocs(){ BCAST_SEL_DOCS.clear(); renderBcastDocs(); updateBcas
 
 function updateBcastSummary(){
   const n=BCAST_SEL_DOCS.size;
-  document.getElementById('bcast-sel-count').textContent=n;
+  const countChip=document.getElementById('bcast-count-chip');
+  if(countChip) countChip.textContent=n>0?`${n} doctor${n!==1?'s':''} selected`:'No doctors selected';
   const pills=document.getElementById('bcast-recip-pills');
   if(pills){
     const shown=[...BCAST_SEL_DOCS].slice(0,6).map(id=>{const d=DOCTORS.find(x=>x.id===id);return d?`<span class="doc-sel-chip">${d.init} ${d.name}<button onclick="toggleBcastDoc(${d.id})">×</button></span>`:''}).join('');

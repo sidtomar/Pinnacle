@@ -1,12 +1,16 @@
 
 [KEYWORDS]
-treatment guidelines [RECENT:20260610042012]
-
-antihypertensive therapy advances [RECENT:20260610084601]
+hypertension drug approval [RECENT:20260610162523]
+hypertensive therapy advances [RECENT:20260610162511]
+hypertension drug approval [RECENT:20260610162523]
+SGLT2 inhibitors [RECENT:20260610173519]
+cardiovascular outcomes [RECENT:20260610170829]
 [THERAPY_AREA]
 Diabetology [RECENT:20260610045541]
-Cardiology [RECENT:20260610115336]
-Endocrinology [RECENT:20260610113613]
+Cardiology [RECENT:20260610174230]
+Endocrinology [RECENT:20260611031117]
 
 [DISEASE]
 Heart Failure [RECENT:20260610115336]
+Migraine [RECENT:20260611031115]
+Atrial Fibrillation [RECENT:20260610174230]

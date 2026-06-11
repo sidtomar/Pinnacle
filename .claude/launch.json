@@ -6,7 +6,8 @@
       "runtimeExecutable": "python3.12",
       "runtimeArgs": ["-m", "uvicorn", "app:app", "--reload", "--port", "8010"],
       "port": 8010,
-      "cwd": "demo/backend"
+      "cwd": "demo/backend",
+      "autoPort": false
     }
   ]
 }
