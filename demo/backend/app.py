@@ -40,11 +40,29 @@ import scheduler as sched
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 app = FastAPI(title="PinnacleIQ Research API", version="1.0.0")
+
+# Configure CORS: restrict to specific origins to prevent CSRF attacks
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else [
+    "http://localhost:5173",      # Vite dev server (React frontend)
+    "http://localhost:3000",      # Alt dev port
+    "http://localhost:8010",      # Same-origin API requests
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
+
+# In production, add Railway deployment URL
+if not os.getenv("VITE_FRONTEND_URL"):
+    # Try to infer from environment — Railway sets RAILWAY_PUBLIC_DOMAIN
+    railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN")
+    if railway_domain:
+        allowed_origins.append(f"https://{railway_domain}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 from pathlib import Path
