@@ -58,3 +58,14 @@ Migraine - Endocrinology (treatment guidelines, antihypertensive therapy advance
 Heart Failure - Cardiology (SGLT2 inhibitors) | Cardiology | Heart Failure
 General Research - Endocrinology (SGLT2 inhibitors) | Endocrinology | Endocrinology
 Atrial Fibrillation - Cardiology | Cardiology | Cardiology
+Test Topic | Cardiology | Cardiology
+General Research - Cardiology (ACE inhibitors) | Cardiology | Cardiology
+Hypertension - Diabetology | Diabetology | Diabetology
+Hypertension - Diabetology (cardiovascular outcomes) | Diabetology | Diabetology
+Hypertension in Diabetology | Diabetology | Diabetology
+GLP-1 in Type 2 Diabetes | Diabetology | Type 2 Diabetes
+Hypertension Management | Cardiology | Heart Failure
+Heart Failure - Diabetology (SGLT2 inhibitors) | Diabetology | Diabetology
+General Research - Gynecology | Gynecology | Gynecology
+Hypertension - Paediatrics (hypertension drug approval) | Paediatrics | Paediatrics
+Hypertension - hypertension drug approval (antihypertensive therapy advances) | hypertension drug approval | hypertension drug approval

@@ -43,9 +43,10 @@ app.add_middleware(
 
 from pathlib import Path
 from datetime import datetime
-TOPICS_FILE   = Path(__file__).parent.parent / "topics.txt"
-DOCTORS_FILE  = Path(__file__).parent.parent / "doctors.json"
-FILTERS_FILE  = Path(__file__).parent.parent / "filter_suggestions.txt"
+TOPICS_FILE     = Path(__file__).parent.parent / "topics.txt"
+DOCTORS_FILE    = Path(__file__).parent.parent / "doctors.json"
+FILTERS_FILE    = Path(__file__).parent.parent / "filter_suggestions.txt"
+OCCASIONS_FILE  = Path(__file__).parent.parent / "occasions.json"
 
 
 def _parse_topics_text(text: str) -> list[dict]:
@@ -343,6 +344,15 @@ def get_doctor(doctor_id: str):
     if not doc:
         raise HTTPException(404, f"Doctor {doctor_id} not found")
     return doc
+
+
+@app.get("/occasions")
+def get_occasions():
+    """Return the occasions list for Occasion Hub and Today's Tasks."""
+    if not OCCASIONS_FILE.exists():
+        return {"occasions": []}
+    data = json.loads(OCCASIONS_FILE.read_text(encoding="utf-8"))
+    return {"occasions": data.get("occasions", [])}
 
 
 @app.get("/topics")

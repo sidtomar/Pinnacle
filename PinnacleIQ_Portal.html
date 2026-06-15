@@ -1572,9 +1572,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="ra-filter-group ra-filter-group-date">
               <label class="ra-filter-label">Publication Date</label>
               <div style="display:flex;align-items:center;gap:6px;">
-                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-from-2" value="2024-01-01">
+                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-from-2" value="2020-04-01">
                 <span style="font-size:10px;color:#6b7280;flex-shrink:0;">→</span>
-                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-to-2" value="2026-06-01">
+                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-to-2">
               </div>
             </div>
             <div class="ra-filter-group" style="justify-content:flex-end;">
@@ -2923,6 +2923,12 @@ Would love your thoughts at your convenience!
 .doc-chip.dc-sel{background:var(--navy);color:#fff;border-color:var(--navy);}
 .doc-chip .dc-x{opacity:.5;cursor:pointer;font-size:12px;}
 .doc-chip .dc-x:hover{opacity:1;color:var(--red);}
+.doc-sel-chip{display:inline-flex;align-items:center;gap:4px;background:var(--navy);color:#fff;padding:4px 10px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+.doc-sel-chip button{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:13px;padding:0 0 0 3px;line-height:1;}
+.doc-sel-chip button:hover{color:#fff;}
+.bcast-doctor-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border);}
+.bcast-doctor-row:hover{background:var(--surface2);}
+.bcast-doctor-row.bdr-sel{background:var(--blue-bg);}
 .seg-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;background:var(--surface);color:var(--text2);}
 .seg-btn:hover{border-color:var(--navy);color:var(--navy);}
 .seg-btn.sb-on{background:var(--purple-bg);color:var(--purple);border-color:#DDD6FE;}
@@ -2950,13 +2956,7 @@ Would love your thoughts at your convenience!
       <!-- Quick segments -->
       <div style="margin-bottom:14px;">
         <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Quick Select by Segment</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="bcast-segs">
-          <button class="seg-btn sb-on" onclick="toggleBcastSeg('all',this)">All Pinnacle (50)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('gynaec',this)">Gynaecologists (8)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('cardio',this)">Cardiologists (6)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('paeds',this)">Paediatricians (5)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('aplus',this)">A+ Only (22)</button>
-        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="bcast-segs"></div>
       </div>
       <!-- Doctor chips -->
       <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
@@ -2966,6 +2966,7 @@ Would love your thoughts at your convenience!
       <div style="display:flex;gap:4px;flex-wrap:wrap;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;min-height:60px;margin-bottom:10px;" id="bcast-doc-chips"></div>
       <!-- Mini doctor selector -->
       <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;margin-top:12px;">Add Doctor</div>
+      <div style="margin-bottom:8px;"><input type="text" id="bcast-doc-search" placeholder="Search doctor…" oninput="renderBcastDocs()" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;background:var(--surface);" /></div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;max-height:180px;overflow-y:auto;">
         <div id="bcast-doc-list" style="display:flex;flex-direction:column;"></div>
       </div>
@@ -2990,7 +2991,7 @@ Would love your thoughts at your convenience!
       <textarea class="fta" id="bcast-msg" style="min-height:96px;width:100%;margin-bottom:10px;" oninput="document.getElementById('bcast-preview').textContent=this.value"></textarea>
       <div style="background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--blue);display:flex;gap:7px;align-items:flex-start;">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="6.5" cy="6.5" r="5.5"/><line x1="6.5" y1="4" x2="6.5" y2="6.5"/><circle cx="6.5" cy="9" r=".6" fill="currentColor"/></svg>
-        <span>Each message will be personalised with the doctor's name. Use {name} as a placeholder if not already present.</span>
+        <span>Each message will be personalised with the doctor's name. Use {first} as a placeholder if not already present.</span>
       </div>
     </div>
   </div>
@@ -3031,6 +3032,11 @@ let ALL_PAPERS = [
   {id:11,status:'rejected',src:'link',title:'Are Antidepressants Safe in Pregnancy? A Controversial Review',journal:'Medical News Today (Blog)',year:'2025',month:'Feb',authors:'Unknown',date:'2025-02-28',cat:'Gynaecology',therapy:'High-risk Pregnancy',sub:'Review Article',rel:'Low',tags:['Antidepressants','Pregnancy'],rec:'All Gynaecologists',abstract:'Blog post, conflicting opinions, no proper citations.',sum:'Non-peer-reviewed blog. Not suitable.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-28',rejNote:'Not peer-reviewed. Medical News Today is a news aggregator, not a journal.'},
   {id:12,status:'rejected',src:'pubmed',title:'European Hypertension Pharmacotherapy: 2024 Update',journal:'Blood Pressure Journal',year:'2024',month:'Apr',authors:'European Hypertension Society',pmid:'38290123',date:'2025-02-15',cat:'Cardiology',therapy:'Hypertension',sub:'Guideline / Consensus',rel:'Medium',tags:['Hypertension','European Guidelines'],rec:'All Cardiologists',abstract:'European hypertension guideline update. Limited Indian applicability.',sum:'European guideline — limited Indian relevance, different drug availability.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-15',rejNote:'European cohorts, limited Indian relevance. Recommend Indian Hypertension Society guidelines.'},
 ];
+
+// Snapshot of the 12 demo seed papers. Used ONLY as a fallback when the backend
+// /content API is unreachable or returns no items. When real pipeline content
+// exists, the Content Library shows ONLY that content (production-like).
+const SEED_PAPERS = ALL_PAPERS.slice();
 
 // Doctors from Pinnacle Content Engine + expanded with DMS / next-action data
 // Populated from API on first visit to Doctor Directory; 12 entries below act as fallback
@@ -3190,10 +3196,11 @@ async function loadDoctorsFromAPI() {
     DOCTORS = (data.doctors || []).map(mapAPIDoctor);
     DOCTORS_LOADED = true;
     DOCTORS_LAST_FETCH = new Date();
-    updateDoctorKPIs();
-    populateDoctorFilters(data);
-    populateBirthdayAnniversaryTasks();  // Add birthday/anniversary tasks
-    renderDocs();
+    // Helpers are non-critical — isolate each so a throw cannot prevent rendering
+    try { buildEngEventsForAllDoctors(); } catch(he) { console.warn('buildEngEvents:', he); }
+    try { updateDoctorKPIs(); } catch(he) { console.warn('updateDoctorKPIs:', he); }
+    try { populateDoctorFilters(data); } catch(he) { console.warn('populateDoctorFilters:', he); }
+    try { populateBirthdayAnniversaryTasks(); } catch(he) { console.warn('birthdayAnniversaryTasks:', he); }
   } catch(e) {
     if (!DOCTORS_LOADED) {
       // Only show error banner on first load; on refresh failure keep existing table
@@ -3201,64 +3208,19 @@ async function loadDoctorsFromAPI() {
         + '<div style="color:var(--amber);font-size:13px;font-weight:600;margin-bottom:6px;">⚠️ Could not reach backend API on localhost:8000</div>'
         + '<div style="color:var(--text3);font-size:12px;">Run <strong>START_DEMO.bat</strong> to start the server — showing cached data below.</div>'
         + '</td></tr>';
-      renderDocs(); // still renders the 12 fallback doctors
     }
-    // On refresh failure: silently keep existing data; just update count line
-    updateDocCntLine();
   } finally {
+    // Always render — shows API data if DOCTORS was populated, otherwise 12 fallback doctors
+    renderDocs();
+    updateDocCntLine();
     if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">'+_spinPath()+'</svg> Refresh'; }
   }
 }
 function _spinPath(){ return '<path d="M10 6A4 4 0 1 1 6 2"/><path d="M10 2v4h-4"/>'; }
 
-/* ── Populate Birthday & Anniversary Tasks (Next 7 Days) ──────────────────────── */
+/* ── Populate Birthday & Anniversary Tasks — now handled by generateTodayTasks() ── */
 function populateBirthdayAnniversaryTasks() {
-  if (!DOCTORS || !DOCTORS.length) return;
-
-  const bdTasks = [];
-  const annivTasks = [];
-
-  DOCTORS.forEach(doc => {
-    // Show birthdays/anniversaries for next 7 days (daysAhead 0-7)
-    if (doc.birthday && doc.birthdayDaysAhead !== undefined && doc.birthdayDaysAhead >= 0 && doc.birthdayDaysAhead <= 7) {
-      const daysAhead = doc.birthdayDaysAhead;
-      let priority = 'upcoming';
-      if (daysAhead === 0) priority = 'urgent';
-      else if (daysAhead <= 2) priority = 'recommended';
-
-      const daysText = daysAhead === 0 ? 'Today!' : daysAhead + ' day' + (daysAhead !== 1 ? 's' : '') + ' away';
-
-      bdTasks.push({
-        id: 'bd-' + doc.id,
-        docId: doc.id,
-        type: 'birthday',
-        priority: priority,
-        title: doc.name + ' Birthday',
-        description: daysText
-      });
-    }
-
-    if (doc.anniversary && doc.anniversaryDaysAhead !== undefined && doc.anniversaryDaysAhead >= 0 && doc.anniversaryDaysAhead <= 7) {
-      const daysAhead = doc.anniversaryDaysAhead;
-      let priority = 'upcoming';
-      if (daysAhead === 0) priority = 'urgent';
-      else if (daysAhead <= 2) priority = 'recommended';
-
-      const daysText = daysAhead === 0 ? 'Today!' : daysAhead + ' day' + (daysAhead !== 1 ? 's' : '') + ' away';
-
-      annivTasks.push({
-        id: 'anniv-' + doc.id,
-        docId: doc.id,
-        type: 'anniversary',
-        priority: priority,
-        title: doc.name + ' Anniversary',
-        description: daysText
-      });
-    }
-  });
-
-  // Add birthday and anniversary tasks to TODAY_TASKS
-  TODAY_TASKS = TODAY_TASKS.concat(bdTasks).concat(annivTasks);
+  generateTodayTasks();
 }
 
 /* ── Refresh KPI row from live DOCTORS array ─────────────────────────────────── */
@@ -3422,6 +3384,7 @@ function switchRole(role, skipHash){
                    : role==='admin' ? 'research-agent'
                    : role==='pmt'   ? 'today' : 'content';
   showPage(targetPage, skipHash);
+  if(typeof rebuildAllPapers === 'function') rebuildAllPapers();  // real pipeline content for all roles
   buildCLKpis();
   buildCLTabs();
   buildSidebarFooter();
@@ -3955,7 +3918,14 @@ function getDocsFiltered(){
 function renderDocs(){
   const list=getDocsFiltered();
   updateDocCntLine(list.length);
-  document.getElementById('doc-tbody').innerHTML=list.map(docRowHTML).join('');
+  const tbody=document.getElementById('doc-tbody');
+  if(!tbody) return;
+  const rows=[];
+  list.forEach(d=>{
+    try{ rows.push(docRowHTML(d)); }
+    catch(e){ console.error('docRowHTML error for',d&&d.id,d&&d.name,e); }
+  });
+  tbody.innerHTML=rows.join('');
 }
 function updateDocCntLine(cnt){
   const list = (cnt !== undefined) ? {length:cnt} : getDocsFiltered();
@@ -4014,24 +3984,66 @@ function docRowHTML(d){
 /* ══ ENGAGEMENT CALENDAR ══ */
 let EC_YEAR=2026, EC_MONTH=4; // 0-indexed May=4
 
-// Per-doctor engagement events (keyed by docId)
-const ENG_EVENTS = {
-  1: [ // Dr. Jayesh Shah
-    {date:'2026-05-04', type:'mr_visit',     label:'MR Visit — Ramesh Nair',
-     products:'DYNADUO, DYNAGLIPT, Glykind', eDetailDuration:'1 min 45 sec',
-     itemsGiven:'Pen, Doctor Pad', samplesGiven:'DYNADUO-20 (2 strips)', jointVisit:'NA'},
-    {date:'2026-05-08', type:'content_sent', label:'SGLT2 paper sent via WhatsApp', channel:'WhatsApp', response:'Opened in 12 min'},
-    {date:'2026-04-22', type:'mr_visit',     label:'MR Visit — quarterly review',
-     products:'DYNADUO, SGLT-D', eDetailDuration:'2 min 10 sec',
-     itemsGiven:'Notepad, Pen', samplesGiven:'NA', jointVisit:'Area Mgr — Suresh Patel'},
-    {date:'2026-04-08', type:'content_sent', label:'GLP-1 paper sent via Email', channel:'Email', response:'Opened same day'},
-    {date:'2026-05-12', type:'personal',     label:'Birthday 🎂'},
-    {date:'2026-05-15', type:'cme',          label:'Endocrinology CME — invite sent'},
-    {date:'2026-05-22', type:'mr_visit',     label:'MR Visit (scheduled)',
-     products:'DYNADUO, Glykind', eDetailDuration:'—', itemsGiven:'—', samplesGiven:'—', jointVisit:'NA'},
-  ],
-};
-let LOG_EVENTS = {}; // user-logged entries {docId: [{date,type,label}]}
+let ENG_EVENTS = {};
+let LOG_EVENTS = {};
+
+function generateEngEvents(doc) {
+  if (!doc) return [];
+  const events = [];
+  const today = new Date();
+  const MRS = ['Ramesh Nair','Amit Verma','Prashant Das','Suresh Raj','Kiran Patel',
+               'Neha Shinde','Anjana Pillai','Ravi Kumar','Suman Das','Vijay Mehta'];
+  const mr = MRS[(doc.id - 1) % MRS.length];
+  const specProducts = {
+    'Diabetology':'DYNADUO, DYNAGLIPT, Glykind', 'Cardiology':'TELHIM, DYNADUO, Amlokind',
+    'Endocrinology':'DYNADUO, Thyrokind, SGLT-D', 'Gynaecology':'Progekind, Mifekind, Calshine',
+    'General Medicine':'DYNADUO, Amlokind, Azikind', 'Paediatrics':'Cefkind, Ivekind, Calshine',
+    'Neurology':'Oxykind, Gabakind, Methylkind', 'Nephrology':'DYNADUO, SGLT-D, Telhim',
+    'Dermatology':'Retikind, Clobeta, Itrakind', 'Ophthalmology':'Moxi-D, Nepakind, Lubrikind',
+    'Orthopaedics':'Calshine-D3, Diclokind, Methylkind'
+  };
+  const products = specProducts[doc.spec] || 'DYNADUO, Amlokind';
+
+  // Last contacted → content_sent event
+  if (doc.last && doc.last !== 'Never') {
+    const parts = doc.last.match(/(\d+)\s+(\w+)\s+(\d+)/);
+    if (parts) {
+      const M = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+      const lastDate = new Date(parseInt(parts[3]), M[parts[2]]||0, parseInt(parts[1]));
+      const ds = lastDate.toISOString().slice(0,10);
+      events.push({date:ds, type:'content_sent', label:doc.spec+' paper sent via WhatsApp', channel:'WhatsApp', response:'Opened'});
+      const mrDate = new Date(lastDate); mrDate.setDate(mrDate.getDate() - 5);
+      if (mrDate.getTime() > today.getTime() - 90*86400000) {
+        events.push({date:mrDate.toISOString().slice(0,10), type:'mr_visit', label:'MR Visit — '+mr, products:products, eDetailDuration:'2 min', itemsGiven:'Pen, Doctor Pad', samplesGiven:'—', jointVisit:'NA'});
+      }
+    }
+  }
+
+  // Birthday → personal event
+  if (doc.birthday) {
+    const bd = new Date(doc.birthday);
+    const thisYearBd = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
+    events.push({date:thisYearBd.toISOString().slice(0,10), type:'personal', label:'Birthday 🎂'});
+  }
+
+  // Anniversary → personal event
+  if (doc.anniversary) {
+    const an = new Date(doc.anniversary);
+    const thisYearAn = new Date(today.getFullYear(), an.getMonth(), an.getDate());
+    events.push({date:thisYearAn.toISOString().slice(0,10), type:'personal', label:'Anniversary 💍'});
+  }
+
+  // Scheduled MR visit in next 2 weeks
+  const nextVisit = new Date(today); nextVisit.setDate(nextVisit.getDate() + 10 + (doc.id % 7));
+  events.push({date:nextVisit.toISOString().slice(0,10), type:'mr_visit', label:'MR Visit (scheduled) — '+mr, products:products, eDetailDuration:'—', itemsGiven:'—', samplesGiven:'—', jointVisit:'NA'});
+
+  return events;
+}
+
+function buildEngEventsForAllDoctors() {
+  ENG_EVENTS = {};
+  DOCTORS.forEach(d => { ENG_EVENTS[d.id] = generateEngEvents(d); });
+}
 
 function getDocEvents(docId){
   const base = ENG_EVENTS[docId]||[];
@@ -4281,9 +4293,14 @@ function openDoc360(id){
   document.getElementById('d360-last-visit').textContent=d.last||'—';
   // CRM panel
   if(document.getElementById('crm-mr')) document.getElementById('crm-mr').textContent=d.mr||'—';
+  if(document.getElementById('crm-last-visit')) document.getElementById('crm-last-visit').textContent=d.last||'—';
   if(document.getElementById('crm-dm')) document.getElementById('crm-dm').textContent='₹'+d.dm.toLocaleString('en-IN');
-  if(document.getElementById('crm-dms-cur')) document.getElementById('crm-dms-cur').textContent=fmtMoney(d.dms)+' ↑';
+  const dmsPrev = Math.round(d.dms * (0.85 + (d.id % 10)*0.02));
+  if(document.getElementById('crm-dms-prev')) document.getElementById('crm-dms-prev').textContent=fmtMoney(dmsPrev);
+  if(document.getElementById('crm-dms-cur')) document.getElementById('crm-dms-cur').textContent=fmtMoney(d.dms)+(d.dms>dmsPrev?' ↑':' ↓');
   if(document.getElementById('crm-real')) document.getElementById('crm-real').textContent=d.real+'%';
+  const specProducts={'Diabetology':'DYNADUO · DYNAGLIPT · Glykind','Cardiology':'TELHIM · DYNADUO · Amlokind','Endocrinology':'DYNADUO · Thyrokind · SGLT-D','Gynaecology':'Progekind · Mifekind · Calshine','General Medicine':'DYNADUO · Amlokind · Azikind','Paediatrics':'Cefkind · Ivekind · Calshine','Neurology':'Oxykind · Gabakind · Methylkind','Nephrology':'DYNADUO · SGLT-D · Telhim','Dermatology':'Retikind · Clobeta · Itrakind','Ophthalmology':'Moxi-D · Nepakind · Lubrikind','Orthopaedics':'Calshine-D3 · Diclokind · Methylkind'};
+  if(document.getElementById('crm-products')) document.getElementById('crm-products').textContent=specProducts[d.spec]||'DYNADUO · Amlokind';
   const gap=d.dm-d.dms;
   if(document.getElementById('crm-gap')) document.getElementById('crm-gap').textContent=fmtMoney(gap)+'/month';
   // Overview interest tags
@@ -4297,7 +4314,7 @@ function openDoc360(id){
   if(document.getElementById('d360-clinic-full')) document.getElementById('d360-clinic-full').textContent=d.clinic||`${d.name.replace('Dr.','').trim()}'s Clinic, ${d.city}`;
   if(document.getElementById('d360-interests')) document.getElementById('d360-interests').textContent=(d.interests||[]).join(' · ')||d.spec;
   // Full engagement calendar (mini-cal in Personal tab removed)
-  EC_MONTH=4; EC_YEAR=2026;
+  const _now = new Date(); EC_MONTH=_now.getMonth(); EC_YEAR=_now.getFullYear();
   renderEngCal(id);
   set360Tab('overview', document.querySelector('.tab360'));
   showPage('360');
@@ -4307,25 +4324,47 @@ function buildMiniCal(){
   const grid=document.getElementById('d360-cal-grid');
   const eventsEl=document.getElementById('d360-cal-events');
   if(!grid) return;
-  // May 2026 starts Thursday (day 4 in 0-indexed Sun=0)
-  const startDay=4;
-  const days=31;
-  const events={12:{label:'Birthday 🎂',color:'#FEF3C7',dot:'#F59E0B'},15:{label:'CME Invite',color:'#DBEAFE',dot:'var(--blue)'},4:{label:'Today',color:'var(--surface)'},22:{label:'MR Visit',color:'#D1FAE5',dot:'var(--green)'}};
+  const doc = DOCTORS.find(d=>d.id===CUR_DOC_ID);
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const startDay = new Date(year, month, 1).getDay();
+  const days = new Date(year, month+1, 0).getDate();
+  const todayDate = now.getDate();
+  const docEvents = getDocEvents(CUR_DOC_ID);
+  const dayMap = {};
+  const eventList = [];
+  const typeStyle = {personal:{color:'#FEF3C7',dot:'#F59E0B'},content_sent:{color:'#DBEAFE',dot:'var(--blue)'},mr_visit:{color:'#D1FAE5',dot:'var(--green)'}};
+  docEvents.forEach(ev => {
+    const ed = new Date(ev.date);
+    if (ed.getFullYear()===year && ed.getMonth()===month) {
+      const dd = ed.getDate();
+      const st = typeStyle[ev.type]||typeStyle.content_sent;
+      dayMap[dd] = {label:ev.label, color:st.color, dot:st.dot};
+      eventList.push({day:dd, label:ev.label, dot:st.dot, type:ev.type});
+    }
+  });
   let html='';
   for(let i=0;i<startDay;i++) html+=`<div class="mini-cal-day empty-day"></div>`;
   for(let d=1;d<=days;d++){
-    const ev=events[d];
-    const isToday=d===4;
+    const ev=dayMap[d];
+    const isToday=d===todayDate;
     html+=`<div class="mini-cal-day${isToday?' today-day':''}" style="${ev?.color?'background:'+ev.color+';':''}" title="${ev?.label||''}">
       <span style="font-size:10.5px;">${d}</span>
       ${ev?.dot?`<div class="cal-dot-row"><div class="cal-d" style="background:${ev.dot};"></div></div>`:''}
     </div>`;
   }
   grid.innerHTML=html;
-  if(eventsEl) eventsEl.innerHTML=`
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);"><div style="width:8px;height:8px;border-radius:2px;background:#F59E0B;flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">12 May — <strong>Birthday</strong></div><button class="cta-wa-btn" style="margin-left:auto;padding:3px 8px;font-size:10px;" onclick="openQuickWish(DOCTORS.find(d=>d.id==CUR_DOC_ID)||DOCTORS[0],'birthday')">Wish</button></div>
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);"><div style="width:8px;height:8px;border-radius:2px;background:var(--blue);flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">15 May — CME Endocrinology Summit</div></div>
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;"><div style="width:8px;height:8px;border-radius:2px;background:var(--green);flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">22 May — MR Visit (scheduled)</div></div>`;
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(eventsEl) {
+    if (!eventList.length) {
+      eventsEl.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0;">No events this month</div>';
+    } else {
+      eventsEl.innerHTML = eventList.sort((a,b)=>a.day-b.day).slice(0,4).map(ev => {
+        const wishBtn = ev.type==='personal' && ev.label.includes('Birthday') ? `<button class="cta-wa-btn" style="margin-left:auto;padding:3px 8px;font-size:10px;" onclick="openQuickWish(DOCTORS.find(d=>d.id==CUR_DOC_ID)||DOCTORS[0],'birthday')">Wish</button>` : '';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);"><div style="width:8px;height:8px;border-radius:2px;background:${ev.dot};flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">${ev.day} ${monthNames[month]} — ${ev.label}</div>${wishBtn}</div>`;
+      }).join('');
+    }
+  }
 }
 
 function set360Tab(tab,el){
@@ -5125,38 +5164,99 @@ function openQuickWish(doc, type){
 let TODAY_TAB = 'all';
 let TODAY_DONE = new Set(); // task ids marked done
 
-const TODAY_TASKS = [
-  // URGENT
-  {id:'t1', priority:'urgent', type:'birthday',      docId:7,   icon:'🎂', title:'Birthday tomorrow',
-   reason:'Dr. Priya Nair · A+ · Gynaecologist · Bangalore · Score 81',
-   action:'Send Birthday Wish', hint:'2 May 2026 · Consider sending a bouquet via Ferns N Petals'},
-  {id:'t2', priority:'urgent', type:'overdue',       docId:5,   icon:'🚨', title:'Never received content',
-   reason:'Dr. S.K. Singh · A+ · Endocrinologist · Varanasi · Score 18',
-   action:'Send First Paper', hint:'Engagement score critically low — first send overdue since onboarding'},
-  {id:'t3', priority:'urgent', type:'overdue',       docId:3,   icon:'⚠️', title:'31 days without engagement',
-   reason:'Dr. Giridhari Jena · A · Cardiologist · Bhubaneswar · Score 44',
-   action:'Re-engage Now', hint:'Last sent: Telmisartan Trial · 22 Mar 2026 — now 31 days overdue'},
-  {id:'t4', priority:'urgent', type:'overdue',       docId:12,  icon:'⚠️', title:'48 days without engagement',
-   reason:'Dr. Deepa Krishnan · A · Gynaecologist · Kolkata · Score 38',
-   action:'Re-engage Now', hint:'At-risk status · DMS declining · Immediate attention needed'},
-  // RECOMMENDED
-  {id:'t5', priority:'recommended', type:'content',  docId:1,   icon:'📄', title:'New SGLT2 paper — interest match',
-   reason:'Dr. Jayesh Shah · A+ · Diabetologist · Hyderabad · Score 82',
-   action:'Share Paper', hint:'SGLT2 Inhibitors Meta-Analysis matches his clinical interests in T2DM and SGLT2'},
-  {id:'t6', priority:'recommended', type:'content',  docId:8,   icon:'📄', title:'New PCOS paper — research match',
-   reason:'Dr. Kavita Joshi · A · Gynaecologist · Pune · Score 76',
-   action:'Share Paper', hint:'GLP-1 in PCOS study matches her published research interests'},
-  {id:'t7', priority:'recommended', type:'congratulate', docId:8, icon:'🏆', title:'Published a new paper',
-   reason:'Dr. Kavita Joshi co-authored "PCOS and Hormonal Interventions" — JOGI, March 2026',
-   action:'Send Congratulations', hint:'Great relationship-building opportunity — she rarely gets recognized'},
-  // UPCOMING
-  {id:'t8', priority:'upcoming', type:'anniversary', docId:10,  icon:'💍', title:'Anniversary in 3 days',
-   reason:'Dr. Arvind Patel · A+ · Paediatrician · Ahmedabad · Score 79',
-   action:'Prepare Wish', hint:'3 May 2026 · Consider sending flowers or a memento via Ferns N Petals'},
-  {id:'t9', priority:'upcoming', type:'event',       docId:6,   icon:'🎓', title:'Endocrinology CME in 7 days',
-   reason:'Dr. Madhukar Rai · A+ · Endocrinologist · Varanasi · Score 76',
-   action:'Send CME Invite', hint:'May 8 CME on insulin resistance — directly relevant to his interests'},
-];
+let TODAY_TASKS = [];
+
+function generateTodayTasks() {
+  if (!DOCTORS || !DOCTORS.length) return;
+  const urgent = [], recommended = [], upcoming = [];
+  let tid = 1;
+  const mkReason = d => d.name + ' · ' + d.cat + ' · ' + d.spec + ' · ' + d.city + ' · Score ' + d.score;
+
+  // ── Collect candidates per type ──────────────────────────────────────────
+
+  // Birthday tasks
+  DOCTORS.forEach(d => {
+    if (d.birthdayDaysAhead === undefined || d.birthdayDaysAhead < 0) return;
+    if (d.birthdayDaysAhead <= 1) {
+      const dText = d.birthdayDaysAhead === 0 ? 'Birthday today!' : 'Birthday tomorrow';
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'birthday', docId:d.id, icon:'🎂',
+        title: dText, reason: mkReason(d), action:'Send Birthday Wish',
+        hint: 'Consider sending a bouquet via Ferns N Petals' });
+    } else if (d.birthdayDaysAhead <= 4) {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'birthday', docId:d.id, icon:'🎂',
+        title: 'Birthday in '+d.birthdayDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Plan ahead — prepare a personalised birthday greeting' });
+    } else if (d.birthdayDaysAhead <= 7) {
+      upcoming.push({ id:'tg-'+(tid++), priority:'upcoming', type:'birthday', docId:d.id, icon:'🎂',
+        title: 'Birthday in '+d.birthdayDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Plan ahead — prepare a personalised birthday greeting' });
+    }
+  });
+
+  // Anniversary tasks
+  DOCTORS.forEach(d => {
+    if (d.anniversaryDaysAhead === undefined || d.anniversaryDaysAhead < 0) return;
+    if (d.anniversaryDaysAhead <= 1) {
+      const aText = d.anniversaryDaysAhead === 0 ? 'Anniversary today!' : 'Anniversary tomorrow';
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'anniversary', docId:d.id, icon:'💍',
+        title: aText, reason: mkReason(d), action:'Send Anniversary Wish',
+        hint: 'Consider sending flowers or a memento via Ferns N Petals' });
+    } else if (d.anniversaryDaysAhead <= 4) {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'anniversary', docId:d.id, icon:'💍',
+        title: 'Anniversary in '+d.anniversaryDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Consider sending flowers or a memento' });
+    } else if (d.anniversaryDaysAhead <= 7) {
+      upcoming.push({ id:'tg-'+(tid++), priority:'upcoming', type:'anniversary', docId:d.id, icon:'💍',
+        title: 'Anniversary in '+d.anniversaryDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Plan ahead — prepare a personalised anniversary greeting' });
+    }
+  });
+
+  // Overdue / never contacted — sort by worst first
+  const overdueDocs = DOCTORS.filter(d => d.days > 30).sort((a,b) => b.days - a.days);
+  overdueDocs.forEach(d => {
+    if (d.days >= 999) {
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'overdue', docId:d.id, icon:'🚨',
+        title: 'Never received content', reason: mkReason(d), action:'Send First Paper',
+        hint: 'Engagement score critically low — first send overdue since onboarding' });
+    } else if (d.days > 45) {
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'overdue', docId:d.id, icon:'⚠️',
+        title: d.days+' days without engagement', reason: mkReason(d), action:'Re-engage Now',
+        hint: 'At-risk status · DMS declining · Immediate attention needed' });
+    } else {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'overdue', docId:d.id, icon:'⚠️',
+        title: d.days+' days without engagement', reason: mkReason(d), action:'Re-engage Now',
+        hint: 'Last contacted '+d.last+' — re-engage before the gap widens' });
+    }
+  });
+
+  // Content match — top engaged doctors with matching approved papers
+  const contentDocs = DOCTORS.filter(d => d.score >= 60 && d.days <= 30 && d.interests && d.interests.length)
+    .sort((a,b) => b.score - a.score);
+  contentDocs.forEach(d => {
+    const matchedPaper = (typeof ALL_PAPERS !== 'undefined' ? ALL_PAPERS : []).find(p => {
+      if (p.status !== 'approved') return false;
+      const pCat = (p.cat||'').toLowerCase(), pTh = (p.therapy||'').toLowerCase();
+      return d.interests.some(i => pCat.includes(i.slice(0,4)) || pTh.includes(i.slice(0,4)));
+    });
+    if (matchedPaper) {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'content', docId:d.id, icon:'📄',
+        title: 'New '+d.spec+' paper — interest match', reason: mkReason(d), action:'Share Paper',
+        hint: matchedPaper.title.slice(0,80)+' — matches clinical interests' });
+    }
+  });
+
+  // ── Cap each bucket to match design proportions ──────────────────────────
+  const MAX_URGENT = 4, MAX_REC = 3, MAX_UP = 2;
+
+  TODAY_TASKS = [
+    ...urgent.slice(0, MAX_URGENT),
+    ...recommended.slice(0, MAX_REC),
+    ...upcoming.slice(0, MAX_UP),
+  ];
+  TODAY_DONE = new Set();
+  if (typeof renderToday === 'function') renderToday();
+}
 
 function setTodayTab(tab, el){
   TODAY_TAB = tab;
@@ -5166,6 +5266,13 @@ function setTodayTab(tab, el){
 }
 
 function renderToday(){
+  const container = document.getElementById('today-task-list');
+  if (!DOCTORS_LOADED && !TODAY_TASKS.length) {
+    if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Loading doctor data…</div>';
+    loadDoctorsFromAPI();
+    return;
+  }
+
   const filtered = TODAY_TASKS.filter(t=>{
     const done = TODAY_DONE.has(t.id);
     if(TODAY_TAB==='done') return done;
@@ -5199,8 +5306,6 @@ function renderToday(){
     document.getElementById('tc-'+tab.replace('recommended','rec').replace('upcoming','up')).textContent=n;
   });
   document.getElementById('tc-done').textContent = doneCount;
-
-  const container = document.getElementById('today-task-list');
 
   if(filtered.length===0 && TODAY_TAB!=='done'){
     container.innerHTML='';
@@ -5553,65 +5658,22 @@ function confirmSendAndComplete(){
 
 /* ══════════════════════ OCCASION HUB ══════════════════════ */
 
-const OCCASIONS = [
-  // UPCOMING (May–June 2026)
-  {id:'o1',  date:'2026-05-04', name:"World Asthma Day",        icon:'🫁', color:'#EFF6FF', c:'#1E40AF', tag:'medical',   specialty:['Physician','Pulmonology'],
-   msgEmail:`Dear Dr. {first},\n\nWishing you a meaningful World Asthma Day! Your efforts in managing respiratory health make a real difference to patients' lives.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Asthma Day, Dr. {first}! 🫁\n\nYour expertise in respiratory care makes a real difference. Thank you for your dedication to patient health! 👏\n\n— Team Life, Mankind Pharma`,
-   stat:'3 days away'},
-  {id:'o2',  date:'2026-05-08', name:"World Thalassaemia Day",  icon:'🩸', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['Haematology','Physician'],
-   msgEmail:`Dear Dr. {first},\n\nOn World Thalassaemia Day, we salute your commitment to patients living with this condition. Your dedication to improving their quality of life and pioneering new therapies inspires us all.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Thalassaemia Day, Dr. {first}! 🩸\n\nYour dedication to supporting thalassaemia patients makes a profound difference. Thank you for your compassionate care! 🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'7 days away'},
-  {id:'o3',  date:'2026-05-12', name:"International Nurses Day",icon:'💉', color:'#ECFDF5', c:'#065F46', tag:'medical',   specialty:null,
-   msgEmail:`Dear Dr. {first},\n\nHappy International Nurses Day! A moment to appreciate the incredible nursing teams you lead and the exceptional care they provide every day to our patients.\n\nWith gratitude,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy International Nurses Day! 💉\n\nTo all our incredible healthcare warriors—your compassion and dedication save lives every single day! 👏🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'11 days away'},
-  {id:'o4',  date:'2026-06-01', name:"World Milk Day",          icon:'🥛', color:'#FFFBEB', c:'#92400E', tag:'medical',   specialty:['Paediatrics','Gynaecology','General Medicine'],
-   msgEmail:`Dear Dr. {first},\n\nHappy World Milk Day! As we celebrate the nutritional foundation of health, we recognize your vital role in guiding families toward healthier, more nourished futures through evidence-based nutrition counseling.\n\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Milk Day, Dr. {first}! 🥛\n\nNutrition starts early! Thank you for guiding families toward healthier lifestyles. Your impact is immeasurable! 💪\n\n— Team Life, Mankind Pharma`,
-   stat:'This month'},
-  {id:'o5',  date:'2026-06-14', name:"World Blood Donor Day",   icon:'❤️', color:'#FEF2F2', c:'#991B1B', tag:'medical',   specialty:['Haematology','Cardiology','General Medicine'],
-   msgEmail:`Dear Dr. {first},\n\nOn World Blood Donor Day, we recognise your crucial role in promoting safe transfusion practices, educating patients on blood donation, and advancing patient care through your clinical expertise.\n\nWith respect,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Blood Donor Day, Dr. {first}! ❤️\n\nYour work in promoting safe blood donation saves lives every day. Thank you for your dedication! 🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'This month'},
-  {id:'o6',  date:'2026-07-01', name:"Doctors' Day",            icon:'👨‍⚕️', color:'linear-gradient(135deg,#EBF0F8,#DBEAFE)', c:'var(--navy)', tag:'medical', specialty:null, featured:true,
-   msgEmail:`Dear Dr. {first},\n\nHappy National Doctors' Day! 🎉\n\nThank you for your tireless dedication, your healing hands and your compassionate care. Your commitment to patient wellbeing is truly exceptional. Mankind Pharma is proud to partner with you in your noble mission to serve humanity.\n\nWith deep gratitude and respect,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy Doctors' Day, Dr. {first}! 👨‍⚕️🎉\n\nYour dedication, compassion, and healing touch change lives every day. Thank you for being an amazing doctor! 👏❤️\n\n— Team Life, Mankind Pharma`,
-   stat:'Next month'},
-  {id:'o7',  date:'2026-07-28', name:"World Hepatitis Day",     icon:'🟡', color:'#FFFBEB', c:'#92400E', tag:'medical',   specialty:['Gastroenterology','General Medicine'],
-   msgEmail:`Dear Dr. {first},\n\nOn World Hepatitis Day, we appreciate your work in diagnosis, management and awareness of viral hepatitis. Your clinical expertise and patient education efforts are vital in the global fight against this disease.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Hepatitis Day, Dr. {first}! 🟡\n\nYour expertise in hepatitis management and patient care makes a real difference. Thank you for your dedication! 🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'July'},
-  {id:'o8',  date:'2026-08-12', name:"World Organ Donation Day",icon:'🫀', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['Cardiology','Physician'],
-   msgEmail:`Dear Dr. {first},\n\nOn World Organ Donation Day, we salute your role in supporting life-saving organ transplant interventions and in educating patients on the precious gift of life through organ donation.\n\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Organ Donation Day, Dr. {first}! 🫀\n\nYour role in saving lives through organ transplantation is truly remarkable. Thank you for giving the gift of life! 🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'August'},
-  {id:'o9',  date:'2026-09-29', name:"World Heart Day",         icon:'💓', color:'#FEF2F2', c:'#991B1B', tag:'medical',   specialty:['Cardiology','General Medicine'],
-   msgEmail:`Dear Dr. {first},\n\nHappy World Heart Day! Your dedication to cardiovascular health, disease prevention, and patient care saves lives every day. We are proud to support your practice and your mission.\n\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Heart Day, Dr. {first}! 💓\n\nYour commitment to heart health saves lives every single day. Thank you for your incredible dedication! 👏❤️\n\n— Team Life, Mankind Pharma`,
-   stat:'September'},
-  {id:'o10', date:'2026-10-02', name:"Gandhi Jayanti",          icon:'🇮🇳', color:'#ECFDF5', c:'#065F46', tag:'national',  specialty:null,
-   msgEmail:`Dear Dr. {first},\n\nOn the occasion of Gandhi Jayanti, we wish you peace, purpose and continued service to the nation's health and wellbeing. Your dedication embodies the spirit of compassionate healthcare.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy Gandhi Jayanti, Dr. {first}! 🇮🇳\n\nWishing you peace, wisdom, and continued service to the nation's health. Your dedication is truly inspiring! 🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'October'},
-  {id:'o11', date:'2026-10-20', name:"Diwali",                  icon:'🪔', color:'#FFFBEB', c:'#92400E', tag:'national',  specialty:null, featured:true,
-   msgEmail:`Dear Dr. {first},\n\nWishing you and your family a very Happy Diwali! 🪔✨\n\nMay this festival of lights illuminate your life with joy, good health, prosperity and happiness. Thank you for the light you bring to your patients' lives through your compassionate care.\n\nWith warm Diwali wishes,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy Diwali, Dr. {first}! 🪔✨\n\nMay the festival of lights bring joy, health, and happiness to you and your family! 🎆🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'October'},
-  {id:'o12', date:'2026-11-14', name:"Children's Day / World Diabetes Day", icon:'🩺', color:'#EFF6FF', c:'#1E40AF', tag:'medical', specialty:['Paediatrics','Diabetology','Endocrinology'],
-   msgEmail:`Dear Dr. {first},\n\nOn World Diabetes Day, we acknowledge your pivotal role in managing and preventing diabetes across all age groups. Your patient-centric approach to care and health education sets the gold standard in endocrinology.\n\nWith admiration,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World Diabetes Day, Dr. {first}! 🩺\n\nYour expertise in diabetes management and prevention changes lives. Thank you for empowering patients with knowledge and care! 🙏\n\n— Team Life, Mankind Pharma`,
-   stat:'November'},
-  {id:'o13', date:'2026-12-01', name:"World AIDS Day",          icon:'🎗️', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['General Medicine','Physician'],
-   msgEmail:`Dear Dr. {first},\n\nOn World AIDS Day, we stand with you in the fight against HIV/AIDS. We commend your work in patient care, treatment adherence support, and public awareness in this ongoing battle.\n\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy World AIDS Day, Dr. {first}! 🎗️\n\nYour dedication to HIV/AIDS care and patient support is invaluable. Together we create hope! 🙏❤️\n\n— Team Life, Mankind Pharma`,
-   stat:'December'},
-  {id:'o14', date:'2026-03-14', name:"Holi",                   icon:'🎨', color:'#F5F3FF', c:'#5B21B6', tag:'national',  specialty:null,
-   msgEmail:`Dear Dr. {first},\n\nWishing you and your family a vibrant and joyful Holi! 🎨\n\nMay the colours of good health, happiness, success and good fortune fill your life and practice this season.\n\nWith colourful wishes,\n— Jijo, Team Life · Mankind Pharma`,
-   msgWhatsApp:`Happy Holi, Dr. {first}! 🎨\n\nMay this festival of colors bring joy, health, and happiness to you and your loved ones! 🌈🎉\n\n— Team Life, Mankind Pharma`,
-   stat:'March 2027'},
-];
+let OCCASIONS = [];
+let OCCASIONS_LOADED = false;
+
+async function loadOccasionsFromAPI() {
+  try {
+    const resp = await fetch(PL_API + '/occasions?_t=' + Date.now());
+    if (!resp.ok) throw new Error('API returned ' + resp.status);
+    const data = await resp.json();
+    OCCASIONS = data.occasions || [];
+    OCCASIONS_LOADED = true;
+    if (document.getElementById('occ-grid')) renderOccasions();
+  } catch(e) {
+    console.warn('[Occasions] API fetch failed, using empty list:', e.message);
+    OCCASIONS = [];
+  }
+}
 
 let OCC_TAB = 'upcoming';
 let BCAST_SEL_DOCS = new Set();
@@ -5625,14 +5687,31 @@ function setOccTab(tab, el){
 }
 
 function renderOccasions(){
-  const now = new Date('2026-05-01');
+  const now = new Date();
+  const curMonth = now.getMonth(), curYear = now.getFullYear();
+
+  // Dynamic "occasions this month" counter
+  const thisMonthCount = OCCASIONS.filter(o=>{
+    const d=new Date(o.date); return d.getMonth()===curMonth && d.getFullYear()===curYear && d>=now;
+  }).length;
+  const cEl=document.getElementById('occ-next-count'); if(cEl) cEl.textContent=thisMonthCount;
+
+  // Dynamic month range label
+  const NM_S=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dates=OCCASIONS.filter(o=>new Date(o.date)>=now).map(o=>new Date(o.date));
+  const lbl=document.getElementById('occ-month-label');
+  if(lbl && dates.length){
+    const minM=Math.min(...dates.map(d=>d.getMonth())), maxM=Math.max(...dates.map(d=>d.getMonth()));
+    lbl.textContent = minM===maxM ? `${NM_S[minM]} ${curYear}` : `${NM_S[minM]}–${NM_S[maxM]} ${curYear}`;
+  }
+
   let list = OCCASIONS.filter(o=>{
     if(OCC_TAB==='upcoming') return new Date(o.date)>=now;
     if(OCC_TAB==='medical')  return o.tag==='medical';
     if(OCC_TAB==='national') return o.tag==='national';
     return true;
   });
-  if(OCC_TAB==='upcoming') list=list.slice(0,9); // show next 9
+  if(OCC_TAB==='upcoming') list=list.slice(0,9);
 
   const grid = document.getElementById('occ-grid');
   if(!grid) return;
@@ -5698,11 +5777,12 @@ function openBroadcast(occId){
   const firstDoc=DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
   const sampleFirst=firstDoc?firstDoc.name.replace('Dr.','').trim().split(' ')[0]:'Doctor';
   const msgText = (window.BCAST_CHANNEL === 'whatsapp' ? occ.msgWhatsApp : occ.msgEmail) || occ.msg;
-  const msg = msgText.replace('{first}', sampleFirst);
+  const msg = msgText.replace('{first}', sampleFirst).replace('{name}', sampleFirst);
   document.getElementById('bcast-msg').value=msg;
   document.getElementById('bcast-preview').textContent=msg;
 
-  // Render doc list
+  // Render doc list & segments
+  renderBcastSegs();
   renderBcastDocs();
   updateBcastSummary();
 
@@ -5725,7 +5805,7 @@ function switchBcastChannel(channel){
   else if(channel === 'email') msgText = occ.msgEmail || occ.msg;
   else msgText = (occ.msgWhatsApp || occ.msg);
 
-  const msg = msgText.replace('{first}', sampleFirst);
+  const msg = msgText.replace('{first}', sampleFirst).replace('{name}', sampleFirst);
   document.getElementById('bcast-msg').value=msg;
   document.getElementById('bcast-preview').textContent=msg;
 
@@ -5810,7 +5890,7 @@ function updateBcastMessagePreview(){
   else if(channel === 'email') msgText = occ.msgEmail || occ.msg;
   else msgText = (occ.msgWhatsApp || occ.msg);
 
-  const msg = msgText.replace('{first}', sampleFirst);
+  const msg = msgText.replace('{first}', sampleFirst).replace('{name}', sampleFirst);
   document.getElementById('bcast-msg').value = msg;
   document.getElementById('bcast-preview').textContent = msg;
 }
@@ -5826,7 +5906,7 @@ function updateBcastSummary(){
   const n=BCAST_SEL_DOCS.size;
   const countChip=document.getElementById('bcast-count-chip');
   if(countChip) countChip.textContent=n>0?`${n} doctor${n!==1?'s':''} selected`:'No doctors selected';
-  const pills=document.getElementById('bcast-recip-pills');
+  const pills=document.getElementById('bcast-doc-chips');
   if(pills){
     const shown=[...BCAST_SEL_DOCS].slice(0,6).map(id=>{const d=DOCTORS.find(x=>x.id===id);return d?`<span class="doc-sel-chip">${d.init} ${d.name}<button onclick="toggleBcastDoc(${d.id})">×</button></span>`:''}).join('');
     const more=BCAST_SEL_DOCS.size>6?`<span class="doc-sel-chip">+${BCAST_SEL_DOCS.size-6} more</span>`:'';
@@ -5836,6 +5916,36 @@ function updateBcastSummary(){
   const sum=document.getElementById('bcast-send-summary');
   if(btn){btn.disabled=n===0;btn.style.opacity=n>0?'1':'.5';}
   if(sum) sum.textContent=n>0?`Sending to ${n} doctor${n!==1?'s':''}…`:'Select doctors to continue';
+}
+
+function renderBcastSegs(){
+  const el=document.getElementById('bcast-segs'); if(!el) return;
+  const total=DOCTORS.length;
+  const gynaec=DOCTORS.filter(d=>d.spec.toLowerCase().includes('gynae')).length;
+  const cardio=DOCTORS.filter(d=>d.spec.toLowerCase().includes('cardi')).length;
+  const paeds=DOCTORS.filter(d=>d.spec.toLowerCase().includes('paedi')).length;
+  const aplus=DOCTORS.filter(d=>d.cat==='A+').length;
+  const segs=[
+    {key:'all',label:`All Pinnacle (${total})`},
+    {key:'gynaec',label:`Gynaecologists (${gynaec})`},
+    {key:'cardio',label:`Cardiologists (${cardio})`},
+    {key:'paeds',label:`Paediatricians (${paeds})`},
+    {key:'aplus',label:`A+ Only (${aplus})`}
+  ];
+  el.innerHTML=segs.map(s=>`<button class="seg-btn${s.key==='all'?' sb-on':''}" onclick="toggleBcastSeg('${s.key}',this)">${s.label}</button>`).join('');
+}
+
+function toggleBcastSeg(seg,btn){
+  document.querySelectorAll('#bcast-segs .seg-btn').forEach(b=>b.classList.remove('sb-on'));
+  if(btn) btn.classList.add('sb-on');
+  BCAST_SEL_DOCS.clear();
+  let pool=DOCTORS;
+  if(seg==='gynaec') pool=DOCTORS.filter(d=>d.spec.toLowerCase().includes('gynae'));
+  else if(seg==='cardio') pool=DOCTORS.filter(d=>d.spec.toLowerCase().includes('cardi'));
+  else if(seg==='paeds') pool=DOCTORS.filter(d=>d.spec.toLowerCase().includes('paedi'));
+  else if(seg==='aplus') pool=DOCTORS.filter(d=>d.cat==='A+');
+  pool.forEach(d=>BCAST_SEL_DOCS.add(d.id));
+  renderBcastDocs(); updateBcastSummary(); updateBcastMessagePreview();
 }
 
 function sendBroadcast(){
@@ -7501,8 +7611,17 @@ function mapAPIItemToPaper(item) {
   };
 }
 
-/* ══ LOAD CONTENT FROM API — merges into ALL_PAPERS ══ */
+/* ══ LOAD CONTENT FROM API — composes ALL_PAPERS by role ══ */
 let _apiContent = [];
+let _apiPapers  = [];   // mapped pipeline content from the backend (empty if API down)
+
+/* Compose ALL_PAPERS — production-like: show ONLY real pipeline content for every role.
+   PMT's (= BU Head) approved-only Content Library is therefore empty until the MA team
+   approves the first article — a one-time state by design. The demo seeds are kept ONLY
+   as an offline fallback for when the backend is unreachable or returns no content. */
+function rebuildAllPapers() {
+  ALL_PAPERS = (_apiPapers.length > 0) ? _apiPapers.slice() : SEED_PAPERS.slice();
+}
 
 async function loadContentFromAPI() {
   try {
@@ -7510,21 +7629,15 @@ async function loadContentFromAPI() {
     if (!res.ok) return;
     const data = await res.json();
     _apiContent = data.items || [];
-
-    // Remove any previously merged API items to prevent duplicates on re-fetch
-    ALL_PAPERS = ALL_PAPERS.filter(p => !p._apiSource);
-
-    // Convert and prepend so pipeline content appears at the top
-    const mapped = _apiContent.map(mapAPIItemToPaper);
-    ALL_PAPERS = [...mapped, ...ALL_PAPERS];
-
-    // Refresh counts, tabs and the full card list
-    buildCLTabs();
-    buildCLKpis();
-    renderCL();
+    _apiPapers  = _apiContent.map(mapAPIItemToPaper);
+    rebuildAllPapers();
   } catch (e) {
-    // Silent fail — static demo data still renders when API is down
+    // API unreachable — fall back to demo seeds for every role
+    _apiPapers = [];
+    rebuildAllPapers();
   }
+  // Refresh counts, tabs and the full card list
+  try { buildCLTabs(); buildCLKpis(); renderCL(); } catch (_) {}
 }
 
 function renderAPIContent() {
@@ -7605,6 +7718,12 @@ function doLogout() {
 }
 
 function initApp() {
+  // Set Research Agent end date to yesterday (dynamic, never stale)
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = yesterday.toISOString().slice(0, 10);
+  const toEl = document.getElementById('ra-date-to-2');
+  if (toEl) toEl.value = yStr;
+
   const loggedIn = localStorage.getItem('pinnacle_logged_in') === 'true';
   const userId   = localStorage.getItem('pinnacle_user_id');
   const savedRole= localStorage.getItem('pinnacle_role') || 'pmt';
@@ -7612,7 +7731,7 @@ function initApp() {
     CURRENT_USER = USERS_DB.find(u => u.id === userId) || null;
     document.getElementById('login-screen').style.display = 'none';
     switchRole(_getHashRole() || savedRole);
-    setTimeout(() => { startNotifPolling(); loadSchedulerStatus(); loadContentFromAPI(); }, 1200);
+    setTimeout(() => { startNotifPolling(); loadSchedulerStatus(); loadContentFromAPI(); loadOccasionsFromAPI(); }, 1200);
   } else {
     document.getElementById('login-screen').style.display = 'flex';
   }
@@ -8063,9 +8182,14 @@ async function raPollDynamicResults(runId) {
     const data = await response.json();
 
     if (data.status === 'completed') {
-      // Pipeline complete - fetch and display articles
+      // Pipeline complete - re-enable all controls immediately
       document.getElementById('ra-loading-state-2').classList.remove('show');
       document.getElementById('ra-search-btn-2').disabled = false;
+      document.getElementById('ra-therapy-2').disabled = false;
+      document.getElementById('ra-disease-2').disabled = false;
+      document.getElementById('ra-keywords-2').disabled = false;
+      document.getElementById('ra-date-from-2').disabled = false;
+      document.getElementById('ra-date-to-2').disabled = false;
 
       // Fetch all generated content cards
       if (data.all_content_ids && data.all_content_ids.length > 0) {
@@ -8073,6 +8197,7 @@ async function raPollDynamicResults(runId) {
       } else if (data.content_id) {
         raDisplayDynamicResults([data.content_id]);
       } else {
+        document.getElementById('ra-results-badge-2').textContent = '0';
         document.getElementById('ra-empty-state-2').classList.add('show');
       }
 
@@ -8080,6 +8205,12 @@ async function raPollDynamicResults(runId) {
       // Pipeline failed
       document.getElementById('ra-loading-state-2').classList.remove('show');
       document.getElementById('ra-search-btn-2').disabled = false;
+      document.getElementById('ra-therapy-2').disabled = false;
+      document.getElementById('ra-disease-2').disabled = false;
+      document.getElementById('ra-keywords-2').disabled = false;
+      document.getElementById('ra-date-from-2').disabled = false;
+      document.getElementById('ra-date-to-2').disabled = false;
+      document.getElementById('ra-results-badge-2').textContent = '0';
       document.getElementById('ra-empty-state-2').classList.add('show');
       toast('❌', 'Pipeline processing failed');
 
@@ -8089,10 +8220,8 @@ async function raPollDynamicResults(runId) {
       const curAgent = data.current_agent || '';
       const loadMsg = document.querySelector('#ra-loading-state-2 p');
       if (loadMsg && agentLabels[curAgent]) loadMsg.textContent = agentLabels[curAgent];
-      // Hide large loading spinner after Alpha completes (after first agent)
-      if (curAgent !== 'alpha' && curAgent !== '') {
-        document.getElementById('ra-loading-state-2').classList.remove('show');
-      }
+      // Keep spinner visible throughout the entire pipeline run
+      document.getElementById('ra-loading-state-2').classList.add('show');
       setTimeout(() => raPollDynamicResults(runId), 2000);
     }
 
@@ -8182,6 +8311,7 @@ async function raDisplayDynamicResults(contentIds) {
     document.getElementById('ra-results-badge-2').innerHTML = successCount;
     document.getElementById('ra-res-count-2').textContent = successCount;
     document.getElementById('ra-result-label-2').style.display = 'inline';
+    document.getElementById('ra-csv-btn-2').style.display = 'inline-flex';
     // "Showing X articles" on the right of the results header
     document.getElementById('ra-showing-num-2').textContent = successCount;
     document.getElementById('ra-showing-count-2').style.display = 'inline';
@@ -8204,8 +8334,9 @@ function raResetForm(suffix = '') {
   document.getElementById(`ra-therapy${suffix_str}`).value = '';
   document.getElementById(`ra-disease${suffix_str}`).value = '';
   document.getElementById(`ra-keywords${suffix_str}`).value = '';
-  document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
-  document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
+  const _yesterday = new Date(); _yesterday.setDate(_yesterday.getDate() - 1);
+  document.getElementById(`ra-date-from${suffix_str}`).value = '2020-04-01';
+  document.getElementById(`ra-date-to${suffix_str}`).value = _yesterday.toISOString().slice(0, 10);
   document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
   // Clear keyword chips and active filters (UI only, not results)
   raClearAllFilters();
