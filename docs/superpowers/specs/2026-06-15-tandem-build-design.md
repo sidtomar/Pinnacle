@@ -1,4 +1,4 @@
-# tandem-build — Superpowers-plans / GSD-builds skill with a design-system gate
+# akshay — Superpowers-plans / GSD-builds skill with a design-system gate
 
 > **Status:** Approved design (2026-06-15). Ready for implementation planning.
 > **Author:** Siddhartha (with Claude)
@@ -37,8 +37,8 @@ Two mature systems already exist on this machine:
 
 ## Skill identity
 
-- **Name (placeholder):** `tandem-build`
-- **Location:** `D:\claude\.claude\skills\tandem-build\` (alongside the `gsd-*` skills; personal
+- **Name:** `akshay`
+- **Location:** `D:\claude\.claude\skills\akshay\` (alongside the `gsd-*` skills; personal
   skills directory for Claude Code).
 - **Type:** Discipline-enforcing orchestrator skill (the gate is a rule that must resist
   rationalization).
@@ -169,7 +169,6 @@ Governed by `superpowers:writing-skills` — TDD for skills. After the spec is a
 
 ## Open questions for spec review
 
-- Final skill name (`tandem-build` is a placeholder).
 - Linter language: Node `.mjs` (assumed) vs Python, depending on what the target environment
   reliably has.
 - Whether greenfield scaffolding should reuse `gsd-new-project` or a lighter inline scaffold.
