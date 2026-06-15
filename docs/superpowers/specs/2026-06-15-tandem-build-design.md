@@ -45,7 +45,7 @@ Two mature systems already exist on this machine:
 - **Owned files:**
   - `SKILL.md` — the orchestration workflow
   - `design-system.schema.md` — schema + field reference for the design-system artifact
-  - `lint-design-system.mjs` — the automated completeness linter the gate runs
+  - `lint-design-system.py` — the automated completeness linter the gate runs (Python)
 
 ## Pipeline
 
@@ -69,8 +69,8 @@ is the non-negotiable gate.
 
 **0. Preflight.** Determine whether the target is greenfield (new app) or an existing codebase.
 Ensure work happens in an isolated worktree via `superpowers:using-git-worktrees`. For
-greenfield, initialize the minimum GSD scaffold needed for `gsd-plan-phase`/`gsd-execute-phase`
-(roadmap + phase). For existing codebases, detect the established patterns and the existing
+greenfield, invoke `gsd-new-project` to establish the full GSD scaffold (roadmap, milestone,
+`.planning/` structure). For existing codebases, detect the established patterns and the existing
 `.planning/` state if present.
 
 **1. Plan (Superpowers).** Invoke `superpowers:brainstorming` to produce the spec, then
@@ -131,7 +131,7 @@ components:              # required, >= 1 entry
 <prose per component: variants, states, accessibility notes>
 ```
 
-### Linter contract (`lint-design-system.mjs`)
+### Linter contract (`lint-design-system.py`)
 
 Deterministic, no network. Exit 0 only if ALL hold:
 - File parses as YAML-frontmatter + markdown.
@@ -154,7 +154,7 @@ Governed by `superpowers:writing-skills` — TDD for skills. After the spec is a
 2. **Plan** — `superpowers:writing-plans` produces a bite-sized implementation plan.
 3. **RED** — baseline pressure-test: run a subagent through the pipeline WITHOUT the skill and
    watch it skip or rush the design system under time pressure; record exact rationalizations.
-4. **GREEN** — write `SKILL.md` + `design-system.schema.md` + `lint-design-system.mjs` that close
+4. **GREEN** — write `SKILL.md` + `design-system.schema.md` + `lint-design-system.py` that close
    those specific rationalizations; re-run the scenario and confirm the gate holds.
 5. **REFACTOR** — find new loopholes, add explicit counters, build the rationalization table and
    red-flags list, re-test until bulletproof.
@@ -167,8 +167,11 @@ Governed by `superpowers:writing-skills` — TDD for skills. After the spec is a
   human approval step, not an automated one.
 - No multi-project / portfolio orchestration; one project per run.
 
-## Open questions for spec review
+## Decisions closed
 
-- Linter language: Node `.mjs` (assumed) vs Python, depending on what the target environment
-  reliably has.
-- Whether greenfield scaffolding should reuse `gsd-new-project` or a lighter inline scaffold.
+All design decisions resolved. No open questions remain.
+
+| Decision | Choice |
+|----------|--------|
+| Linter language | Python (`lint-design-system.py`) |
+| Greenfield scaffolding | Reuse `gsd-new-project` |
