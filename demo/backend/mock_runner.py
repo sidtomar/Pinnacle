@@ -2,7 +2,8 @@
 Mock pipeline runner — generates realistic content instantly for demo purposes.
 No LLM API calls needed. Real runner can be swapped in for production.
 """
-import time, random
+import time, random, hashlib
+from datetime import date, timedelta
 
 # ── Pre-built mock content per topic keyword ──────────────────────────────────
 
@@ -561,139 +562,10 @@ def _generic_internal_docs(topic: str) -> list:
 
 
 def _generic_sources(topic: str, specialty: str, therapy_area: str) -> list:
-    """Fallback sources for topics not in ALPHA_SOURCES.
-
-    Each source carries its OWN study_type, tags and pub_date so the per-paper
-    cards built downstream are distinguishable rather than all sharing the
-    topic-level metadata.
-    """
+    """Fallback sources for topics not in ALPHA_SOURCES."""
     keyword = topic.split()[0]
-    # Use realistic PubMed PMIDs so Read More links work properly
-    import hashlib
-    from datetime import date, timedelta
     base_hash = int(hashlib.md5(topic.encode()).hexdigest()[:8], 16) % 90000000 + 10000000
-
-    # Common tags shared by every paper — dedupe specialty/therapy_area when equal.
-    common_tags = [keyword, specialty]
-    if therapy_area and therapy_area.strip().casefold() != specialty.strip().casefold():
-        common_tags.append(therapy_area)
-
-    # Spread publication dates across the ~18 months before the most recent anchor
-    # so each card shows a distinct, realistic (past) date instead of "today".
-    anchor = date(2025, 12, 15)
-    spreads = [40, 118, 196, 281, 359, 454, 547]
-    jitter = base_hash % 30
-
-    def _src_date(i: int) -> str:
-        return (anchor - timedelta(days=spreads[i] + jitter)).isoformat()
-
-    # Per-source descriptors — each study design gets its own study_type, tags,
-    # evidence grade, key findings and recommendations so no two cards are alike.
-    descriptors = [
-        {
-            "study_type": "Systematic Review",
-            "tags": ["Systematic Review", "Meta-Analysis"],
-            "evidence_quality": "High — pooled meta-analysis of 14 RCTs (n=21,400); GRADE: High. All sources within 24 months.",
-            "key_findings": [
-                f"Pooled analysis of 14 RCTs (n=21,400) confirms efficacy of {keyword} in {therapy_area}",
-                "Treatment effect consistent across subgroups, including South Asian populations",
-                "Number needed to treat (NNT) of 12 for the composite primary endpoint",
-                "Favourable safety profile with no unexpected signals across the pooled cohort",
-            ],
-            "recommendations": [
-                f"Adopt {keyword} as a Level 1A evidence-based option supported by meta-analytic data",
-                f"Apply the pooled findings to guideline-directed therapy in {therapy_area}",
-                "Prefer agents with consistent subgroup efficacy for diverse Indian populations",
-            ],
-        },
-        {
-            "study_type": "Clinical Guidelines",
-            "tags": ["Clinical Guidelines", "2025 Update"],
-            "evidence_quality": "High — consensus clinical practice guideline with graded recommendations; GRADE: High.",
-            "key_findings": [
-                f"2025 {specialty} society guidelines recommend proactive, guideline-directed management",
-                f"Combination therapy preferred over sequential monotherapy for {therapy_area}",
-                "Earlier treatment initiation endorsed based on accumulated trial evidence",
-            ],
-            "recommendations": [
-                f"Align practice with the updated 2025 {specialty} society guideline algorithm",
-                "Initiate combination therapy earlier per the revised treatment pathway",
-                "Re-assess treatment targets at every review per guideline cadence",
-            ],
-        },
-        {
-            "study_type": "Cohort Study",
-            "tags": ["Cohort Study", "Indian Population"],
-            "evidence_quality": "Moderate — prospective observational cohort (n=1,840); GRADE: Moderate.",
-            "key_findings": [
-                f"Indian multicentre cohort (n=1,840) confirms {keyword} efficacy matching global trial data",
-                "Locally relevant dosing and tolerability profile established for Indian patients",
-                "Real-world adherence and outcomes consistent with controlled-trial settings",
-            ],
-            "recommendations": [
-                f"Use Indian cohort data to guide locally adapted dosing in {specialty} practice",
-                "Counsel patients using India-specific tolerability evidence",
-            ],
-        },
-        {
-            "study_type": "Real-World Evidence",
-            "tags": ["Real-World Evidence", "Registry Data"],
-            "evidence_quality": "Moderate — registry-based real-world evidence (n=8,200); GRADE: Moderate.",
-            "key_findings": [
-                "Registry data (n=8,200) shows 40% improvement in primary outcomes vs standard of care",
-                f"Once-daily regimens improved adherence in routine {specialty} practice",
-                "Effectiveness sustained outside the controlled-trial environment",
-            ],
-            "recommendations": [
-                "Favour once-daily regimens to maximise real-world adherence",
-                "Apply registry outcomes when counselling on expected real-world benefit",
-            ],
-        },
-        {
-            "study_type": "Randomised Controlled Trial",
-            "tags": ["RCT", "Phase 3"],
-            "evidence_quality": "High — Phase 3 randomised controlled trial (n=3,200); GRADE: High.",
-            "key_findings": [
-                f"Phase 3 RCT (n=3,200) demonstrates sustained benefit of {keyword} at 52 weeks",
-                "Improved patient-reported outcomes versus the comparator arm",
-                "Long-term efficacy and safety confirmed over extended follow-up",
-            ],
-            "recommendations": [
-                f"Consider {keyword} for eligible patients based on Level 1B randomised evidence",
-                "Monitor patient-reported outcomes at 3 and 6 months per trial protocol",
-            ],
-        },
-        {
-            "study_type": "Systematic Review",
-            "tags": ["Cochrane Review", "High-Certainty"],
-            "evidence_quality": "High — Cochrane high-certainty synthesis of 28 RCTs; GRADE: High.",
-            "key_findings": [
-                f"Cochrane synthesis of 28 RCTs: {keyword} reduces primary outcomes by 35% vs placebo",
-                "High-certainty evidence with low risk of bias across included trials",
-                f"Benefit consistent across {therapy_area} patient subgroups",
-            ],
-            "recommendations": [
-                "Treat Cochrane high-certainty evidence as a strong basis for practice change",
-                f"Prioritise {keyword} where the synthesis confirms net clinical benefit",
-            ],
-        },
-        {
-            "study_type": "Expert Review",
-            "tags": ["Expert Review", "Emerging Evidence"],
-            "evidence_quality": "Moderate — expert narrative review of emerging evidence; GRADE: Low-Moderate.",
-            "key_findings": [
-                f"Expert consensus highlights emerging evidence for {keyword} in {therapy_area}",
-                "Focus on optimal patient selection and sequencing of therapy",
-                "Identifies evidence gaps requiring future Phase 3 confirmation",
-            ],
-            "recommendations": [
-                "Use expert guidance for patient selection while awaiting confirmatory trials",
-                "Individualise therapy where high-certainty evidence is still emerging",
-            ],
-        },
-    ]
-
-    sources = [
+    return [
         {
             "title": f"2025 Systematic Review: {topic} — 14 RCTs, n=21,400",
             "authors": f"International {specialty} Research Consortium, et al.",
@@ -739,30 +611,119 @@ def _generic_sources(topic: str, specialty: str, therapy_area: str) -> list:
         {
             "title": f"Expert Review & Clinical Insights: {keyword} in 2025 — Emerging Evidence",
             "authors": "Williams MJ, Chen L, Prabhu N, et al.",
-            "journal": f"Nature Medicine / Current Opinion in {specialty}",
+            "journal": "Nature Medicine / Current Opinion in {specialty}",
             "url": f"https://pubmed.ncbi.nlm.nih.gov/{base_hash + 6}/",
             "snippet": f"Expert consensus review highlights emerging evidence for {keyword} in {therapy_area}, with focus on patient selection and optimizing outcomes",
         },
     ]
 
-    # Attach distinct study_type, tags, date, evidence grade, findings and
-    # recommendations to each source.
-    for i, src in enumerate(sources):
-        d = descriptors[i]
-        src["study_type"]       = d["study_type"]
-        src["tags"]             = common_tags + d["tags"]
-        src["pub_date"]         = _src_date(i)
-        src["evidence_quality"] = d["evidence_quality"]
-        src["key_findings"]     = d["key_findings"]
-        src["recommendations"]  = d["recommendations"]
 
-    return sources
+def _enrich_sources(sources: list, topic: str, specialty: str, therapy_area: str) -> list:
+    """
+    Add per-source metadata fields to any source list that lacks them.
+    Covers both ALPHA_SOURCES (curated) and _generic_sources (fallback) paths.
+    Fields added: pub_date, study_type, evidence_quality, tags, key_findings, recommendations.
+    Already-enriched sources (have pub_date) are returned unchanged.
+    """
+    # Deterministic base date anchored to ~1 month ago so dates stay fresh
+    anchor = date.today() - timedelta(days=30)
+    # Per-source date offsets (days back from anchor) — spread over ~18 months
+    offsets = [0, 45, 90, 150, 210, 300, 400, 500, 560, 620]
+
+    # Study-type inference from title + journal keywords
+    def _infer_study_type(src: dict) -> str:
+        text = (src.get("title", "") + " " + src.get("journal", "")).lower()
+        if any(k in text for k in ("meta-analysis", "systematic review", "cochrane", "evidence synthesis")):
+            return "Meta-Analysis / Systematic Review"
+        if any(k in text for k in ("guideline", "consensus", "recommendation", "society", "esc ", "ada", "easd", "who ", "eshre")):
+            return "Guideline / Consensus"
+        if any(k in text for k in ("rct", "randomised", "randomized", "trial", "phase 3", "phase 2", "phase iii", "phase ii", "clinicaltrials")):
+            return "Clinical Trial / RCT"
+        if any(k in text for k in ("registry", "real-world", "cohort", "observational", "multicentre", "multi-centre", "indian", "real world")):
+            return "Real-World Evidence / Cohort Study"
+        if any(k in text for k in ("review", "expert", "opinion", "insight", "scopus", "embase", "analysis")):
+            return "Review / Expert Analysis"
+        return "Observational Study"
+
+    evidence_map = {
+        "Meta-Analysis / Systematic Review":  "High — pooled RCT evidence, Cochrane-grade",
+        "Guideline / Consensus":              "High — Society-endorsed, expert consensus",
+        "Clinical Trial / RCT":               "High — randomised, double-blind, multi-centre",
+        "Real-World Evidence / Cohort Study": "Moderate — real-world registry, large n",
+        "Review / Expert Analysis":           "Moderate — expert synthesis, peer-reviewed",
+        "Observational Study":                "Moderate — observational design, hypothesis-generating",
+    }
+
+    enriched = []
+    for i, src in enumerate(sources):
+        if src.get("pub_date"):          # already enriched (generic path)
+            enriched.append(src)
+            continue
+
+        src = dict(src)                  # don't mutate the global ALPHA_SOURCES
+        study_type = _infer_study_type(src)
+        offset_days = offsets[i % len(offsets)]
+        pub_date = (anchor - timedelta(days=offset_days)).isoformat()
+
+        # Build tags from therapy_area, specialty, study_type keyword, and title keyword
+        title_words = [w for w in src.get("title", "").split() if len(w) > 4 and w[0].isupper()]
+        tag_kw = title_words[0] if title_words else specialty
+        common_tags = [therapy_area]
+        if specialty.casefold() != therapy_area.casefold():
+            common_tags.append(specialty)
+        tags = list(dict.fromkeys(common_tags + [tag_kw, study_type.split("/")[0].strip()]))
+
+        # Key findings from snippet — split on ; or ,
+        snippet = src.get("snippet", "")
+        bullets = [s.strip() for s in snippet.replace(";", ",").split(",") if len(s.strip()) > 20][:3]
+        while len(bullets) < 2:
+            bullets.append(f"See full paper for additional findings on {therapy_area}")
+        key_findings = bullets
+
+        # Recommendations tailored by study type
+        recs_by_type = {
+            "Meta-Analysis / Systematic Review": [
+                f"Apply pooled findings to update local {therapy_area} protocols",
+                f"Use evidence grade when counselling {specialty} colleagues on treatment choice",
+            ],
+            "Guideline / Consensus": [
+                f"Align prescribing practice with updated {therapy_area} guidelines",
+                f"Share guideline highlights with your {specialty} team at next grand rounds",
+            ],
+            "Clinical Trial / RCT": [
+                f"Identify eligible {therapy_area} patients for this treatment approach",
+                f"Monitor for endpoints highlighted in this trial at follow-up visits",
+            ],
+            "Real-World Evidence / Cohort Study": [
+                f"Validate real-world findings against your own {therapy_area} patient outcomes",
+                f"Use registry data to support formulary or insurance discussions",
+            ],
+            "Review / Expert Analysis": [
+                f"Use expert insights to refine your {therapy_area} patient selection criteria",
+                f"Share key takeaways with {specialty} trainees and residents",
+            ],
+            "Observational Study": [
+                f"Treat as hypothesis-generating; complement with RCT data for {therapy_area}",
+                f"Consider for audit of current {therapy_area} practice against observed benchmarks",
+            ],
+        }
+        recommendations = recs_by_type.get(study_type, recs_by_type["Observational Study"])
+
+        src.update({
+            "pub_date":        pub_date,
+            "study_type":      study_type,
+            "evidence_quality": evidence_map[study_type],
+            "tags":            tags,
+            "key_findings":    key_findings,
+            "recommendations": recommendations,
+        })
+        enriched.append(src)
+
+    return enriched
 
 
 # Generic fallback template for any topic not in MOCK_LIBRARY
 def _generic_content(topic: str, specialty: str, therapy_area: str) -> dict:
-    from datetime import datetime
-    import hashlib
     # Generate stable PMID/DOI from topic for consistent Read More links
     base_hash = int(hashlib.md5(topic.encode()).hexdigest()[:8], 16) % 90000000 + 10000000
     gen_pmid = str(base_hash)
@@ -853,7 +814,7 @@ def _generic_content(topic: str, specialty: str, therapy_area: str) -> dict:
         "tags": [keyword, specialty, therapy_area, "RCT", "Indian Population", "2025 Guidelines"],
         "sub_category": "Review Article",
         "source_journals": f"PubMed Central / NCBI · Indian Journal of Medical Research · International Journal of {specialty}",
-        "publication_date": datetime.now().strftime("%Y-%m-%d"),
+        "publication_date": (date.today() - timedelta(days=45)).strftime("%Y-%m-%d"),
         "specialty": specialty,
         "therapy_area": therapy_area,
         "relevant_doctor_specialties": f"{specialty}, Internal Medicine, General Practice",
@@ -883,7 +844,8 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
     # ── Determine content, sources, and internal docs upfront ────────────────
     key = next((k for k in MOCK_LIBRARY if k.upper() in topic.upper()), None)
     content       = MOCK_LIBRARY[key] if key else _generic_content(topic, specialty, therapy_area)
-    sources       = ALPHA_SOURCES.get(key) if key else _generic_sources(topic, specialty, therapy_area)
+    _raw_sources  = ALPHA_SOURCES.get(key) if key else _generic_sources(topic, specialty, therapy_area)
+    sources       = _enrich_sources(_raw_sources, topic, specialty, therapy_area)
     internal_docs = ALPHA_INTERNAL_DOCS.get(key) if key else _generic_internal_docs(topic)
 
     # DEBUG: Log which path was taken
@@ -1266,19 +1228,15 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
             "title":        src_title[:120],
             "specialty":    content.get("specialty", specialty),
             "therapy_area": content.get("therapy_area", therapy_area),
-            "sub_category": src.get("study_type") or content.get("sub_category", "Review Article"),
-            "tags":         src.get("tags") or content.get("tags", [topic.split()[0], specialty, therapy_area]),
+            "sub_category": content.get("sub_category", "Review Article"),
+            "tags":         content.get("tags", [topic.split()[0], specialty, therapy_area]),
             "summary":      src_snippet[:300] if src_snippet else content.get("summary", ""),
             # Clinical content
-            "key_findings":      src.get("key_findings") or content.get("key_findings", []),
-            # Use the per-paper insight Gamma already produced for THIS source,
-            # not the shared topic-level template.
-            "clinical_insights": (gamma_insights[i]["clinical_insight"]
-                                  if i < len(gamma_insights)
-                                  else content.get("clinical_insights", "")),
-            "recommendations":   src.get("recommendations") or content.get("recommendations", []),
+            "key_findings":      content.get("key_findings", []),
+            "clinical_insights": content.get("clinical_insights", ""),
+            "recommendations":   content.get("recommendations", []),
             "emerging_trends":   content.get("emerging_trends", []),
-            "evidence_quality":  src.get("evidence_quality") or content.get("evidence_quality", ""),
+            "evidence_quality":  content.get("evidence_quality", ""),
             "short_article":     paper_article,
             # ── All 15 business-required metadata fields ──
             "authors":           src_authors,                                             # Authors
@@ -1286,7 +1244,7 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
             "source_journals":   src_journal,                                             # Journal
             "pmid":              pmid,                                                    # PMID
             "doi":               paper_doi,                                               # DOI
-            "publication_date":  src.get("pub_date") or content.get("publication_date"),     # Date
+            "publication_date":  content.get("publication_date"),                          # Date
             "relevant_doctor_specialties": content.get("relevant_doctor_specialties",      # Relevant Doctor Specialties
                                            f"{specialty}, Internal Medicine, General Practice"),
             "whatsapp_summary":  paper_wa_summary,                                        # WhatsApp Summary
