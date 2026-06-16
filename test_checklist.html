@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PinnacleIQ — Test Checklist</title>
+<style>
+:root {
+  --navy:#0D1F3C;--navy2:#162E56;
+  --gold:#B8912A;--gold2:#D4A843;
+  --green:#047857;--green-bg:#ECFDF5;--green-bd:#A7F3D0;
+  --red:#B91C1C;--red-bg:#FEF2F2;--red-bd:#FCA5A5;
+  --amber:#B45309;--amber-bg:#FFFBEB;--amber-bd:#FCD34D;
+  --blue:#1D4ED8;--blue-bg:#EFF6FF;--blue-bd:#BFDBFE;
+  --gray-bg:#F3F4F6;--gray-bd:#D1D5DB;
+  --border:#E3E8F2;--text1:#0D1B2A;--text2:#374151;--text3:#6B7280;--text4:#9CA3AF;
+  --surface:#fff;--surface2:#F6F8FC;
+  --r:8px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--surface2);color:var(--text1);font-size:13px;line-height:1.5;}
+button{font-family:inherit;cursor:pointer;border:none;}
+
+/* ── TOP BAR ── */
+#topbar{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+#topbar h1{font-size:16px;font-weight:700;letter-spacing:-.3px;}
+#topbar .sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px;}
+.stat-chips{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;}
+.stat-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.sc-total{background:rgba(255,255,255,.1);color:#fff;}
+.sc-pass{background:var(--green-bg);color:var(--green);}
+.sc-fail{background:var(--red-bg);color:var(--red);}
+.sc-skip{background:var(--gray-bg);color:var(--text3);}
+.sc-blocked{background:var(--amber-bg);color:var(--amber);}
+.sc-pct{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-weight:800;}
+
+/* ── PROGRESS BAR ── */
+#prog-wrap{height:4px;background:rgba(255,255,255,.1);}
+#prog-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s ease;width:0%;}
+
+/* ── CONTROLS ── */
+#controls{padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:57px;z-index:90;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.ctl-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+select,input[type=text]{font-family:inherit;font-size:12px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text1);outline:none;}
+select:focus,input[type=text]:focus{border-color:var(--navy);}
+.btn-ctl{font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:6px;transition:all .15s;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text2);}
+.btn-outline:hover{border-color:var(--navy);color:var(--navy);}
+.btn-gold{background:var(--gold);color:#fff;border:none;}
+.btn-gold:hover{background:var(--gold2);}
+.btn-danger{background:var(--red);color:#fff;border:none;}
+.btn-danger:hover{background:#991b1b;}
+
+/* ── SECTIONS ── */
+.section{margin:16px 24px 0;}
+.section-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--navy);color:#fff;border-radius:var(--r) var(--r) 0 0;cursor:pointer;user-select:none;}
+.section-header h2{font-size:13px;font-weight:700;flex:1;}
+.section-header .sec-counts{display:flex;gap:6px;}
+.sec-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.sb-total{background:rgba(255,255,255,.15);color:#fff;}
+.sb-pass{background:var(--green-bg);color:var(--green);}
+.sb-fail{background:var(--red-bg);color:var(--red);}
+.sb-blocked{background:var(--amber-bg);color:var(--amber);}
+.chevron{font-size:12px;color:rgba(255,255,255,.5);transition:transform .2s;}
+.section.collapsed .chevron{transform:rotate(-90deg);}
+.section.collapsed .section-body{display:none;}
+
+/* ── TABLE ── */
+.section-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--surface2);padding:8px 10px;text-align:left;font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1.5px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:.5px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+tbody tr.hidden{display:none;}
+td{padding:8px 10px;vertical-align:middle;}
+td.id-cell{font-family:monospace;font-size:11px;font-weight:700;color:var(--text3);white-space:nowrap;width:70px;}
+td.desc-cell{font-size:12.5px;color:var(--text1);min-width:220px;}
+td.exp-cell{font-size:11.5px;color:var(--text3);min-width:200px;}
+td.role-cell{white-space:nowrap;}
+td.status-cell{white-space:nowrap;width:220px;}
+td.notes-cell{width:180px;}
+
+/* ── ROLE BADGES ── */
+.role-badge{display:inline-flex;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;}
+.r-ma{background:var(--blue-bg);color:var(--blue);}
+.r-pmt{background:#FEF3C7;color:#92400E;}
+.r-admin{background:#F5F3FF;color:#6D28D9;}
+.r-all{background:var(--gray-bg);color:var(--text3);}
+.r-api{background:#FCE7F3;color:#BE185D;}
+
+/* ── STATUS BUTTONS ── */
+.status-btns{display:flex;gap:4px;}
+.sbtn{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:5px;border:1.5px solid transparent;transition:all .12s;cursor:pointer;}
+.sbtn-pass{border-color:var(--green-bd);color:var(--green);background:transparent;}
+.sbtn-pass:hover,.sbtn-pass.active{background:var(--green);color:#fff;border-color:var(--green);}
+.sbtn-fail{border-color:var(--red-bd);color:var(--red);background:transparent;}
+.sbtn-fail:hover,.sbtn-fail.active{background:var(--red);color:#fff;border-color:var(--red);}
+.sbtn-skip{border-color:var(--gray-bd);color:var(--text3);background:transparent;}
+.sbtn-skip:hover,.sbtn-skip.active{background:var(--text3);color:#fff;border-color:var(--text3);}
+.sbtn-blocked{border-color:var(--amber-bd);color:var(--amber);background:transparent;}
+.sbtn-blocked:hover,.sbtn-blocked.active{background:var(--amber);color:#fff;border-color:var(--amber);}
+
+/* ── NOTES ── */
+.notes-inp{width:100%;font-family:inherit;font-size:11px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;color:var(--text2);background:var(--surface);resize:none;height:36px;outline:none;transition:border-color .15s;}
+.notes-inp:focus{border-color:var(--navy);height:60px;}
+
+/* ── ROW STATUS COLOURING ── */
+tr.status-pass{background:#F0FDF4;}
+tr.status-fail{background:#FFF5F5;}
+tr.status-blocked{background:#FFFBEB;}
+tr.status-skip{background:#F9FAFB;}
+
+/* ── EXPORT ── */
+#export-area{margin:16px 24px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+#save-msg{font-size:11px;color:var(--green);font-weight:600;opacity:0;transition:opacity .3s;}
+
+/* ── LAST SECTION MARGIN ── */
+.section:last-of-type{margin-bottom:0;}
+#footer{padding:16px 24px;font-size:11px;color:var(--text4);border-top:1px solid var(--border);margin-top:20px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div>
+    <h1>PinnacleIQ — Test Checklist</h1>
+    <div class="sub">All screens · All roles · Session: <span id="session-date"></span></div>
+  </div>
+  <div class="stat-chips">
+    <div class="stat-chip sc-total">Total: <strong id="cnt-total">0</strong></div>
+    <div class="stat-chip sc-pass">✓ Pass: <strong id="cnt-pass">0</strong></div>
+    <div class="stat-chip sc-fail">✕ Fail: <strong id="cnt-fail">0</strong></div>
+    <div class="stat-chip sc-blocked">⚠ Blocked: <strong id="cnt-blocked">0</strong></div>
+    <div class="stat-chip sc-skip">— Skip: <strong id="cnt-skip">0</strong></div>
+    <div class="stat-chip sc-pct" id="pct-chip">0% done</div>
+  </div>
+</div>
+<div id="prog-wrap"><div id="prog-bar"></div></div>
+
+<div id="controls">
+  <span class="ctl-label">Filter:</span>
+  <select id="flt-section" onchange="applyFilters()">
+    <option value="">All Screens</option>
+    <option value="Login">Login</option>
+    <option value="Content Library">Content Library</option>
+    <option value="Doctor Directory">Doctor Directory</option>
+    <option value="Doctor 360">Doctor 360°</option>
+    <option value="Today Tasks">Today's Tasks</option>
+    <option value="Occasion Hub">Occasion Hub</option>
+    <option value="Analytics">Analytics</option>
+    <option value="Research Agent">Research Agent</option>
+    <option value="Research Pipeline">Research Pipeline</option>
+    <option value="Admin Dashboard">Admin Dashboard</option>
+    <option value="Notifications">Notifications</option>
+    <option value="MA Detail">MA Content Detail</option>
+    <option value="Share Modal">Share Modal</option>
+    <option value="Modals">Modals</option>
+    <option value="Backend API">Backend API</option>
+    <option value="Navigation">Navigation</option>
+  </select>
+  <select id="flt-status" onchange="applyFilters()">
+    <option value="">All Statuses</option>
+    <option value="pass">Pass</option>
+    <option value="fail">Fail</option>
+    <option value="blocked">Blocked</option>
+    <option value="skip">Skip</option>
+    <option value="untested">Not Tested</option>
+  </select>
+  <select id="flt-role" onchange="applyFilters()">
+    <option value="">All Roles</option>
+    <option value="MA">MA</option>
+    <option value="PMT">BU Head / PMT</option>
+    <option value="Admin">Admin</option>
+    <option value="All">All Roles</option>
+    <option value="API">API</option>
+  </select>
+  <input type="text" id="flt-search" placeholder="Search test cases…" oninput="applyFilters()" style="min-width:200px;">
+  <button class="btn-ctl btn-outline" onclick="clearFilters()">Clear</button>
+  <button class="btn-ctl btn-gold" onclick="exportCSV()">↓ Export CSV</button>
+  <button class="btn-ctl btn-danger" onclick="resetAll()">Reset All</button>
+  <span id="save-msg">✓ Saved</span>
+</div>
+
+<div id="sections-container"></div>
+
+<div id="export-area">
+  <span style="font-size:12px;color:var(--text3);">State auto-saves to browser localStorage. Use <strong>Export CSV</strong> to save externally or share results.</span>
+</div>
+
+<div id="footer">PinnacleIQ Test Checklist · Generated 2026-06-15 · <span id="cnt-total2">0</span> test cases across 16 screens and workflows</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// TEST DATA
+// ════════════════════════════════════════════════════════
+const TESTS = [
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+{s:'Login',id:'L-01',role:'All',desc:'Valid MA login',exp:'Sidebar shows MA role, lands on Content Library'},
+{s:'Login',id:'L-02',role:'All',desc:'Valid BU Head login',exp:'Sidebar shows PMT role, lands on Today\'s Tasks'},
+{s:'Login',id:'L-03',role:'All',desc:'Valid Admin login',exp:'Sidebar shows Admin role, lands on Research Agent'},
+{s:'Login',id:'L-04',role:'All',desc:'Wrong password',exp:'Inline error: "Incorrect password. Please try again." — no navigation'},
+{s:'Login',id:'L-05',role:'All',desc:'Unknown email',exp:'Inline error: "No account found with that email address."'},
+{s:'Login',id:'L-06',role:'All',desc:'Empty email submit',exp:'Error: "Please enter your email address."'},
+{s:'Login',id:'L-07',role:'All',desc:'Empty password submit',exp:'Error: "Please enter your password."'},
+{s:'Login',id:'L-08',role:'All',desc:'Enter key submits form',exp:'Same result as clicking Sign in'},
+{s:'Login',id:'L-09',role:'All',desc:'Session persistence after tab close',exp:'App reopens on last page without showing login screen'},
+{s:'Login',id:'L-10',role:'All',desc:'Sign out clears session',exp:'Returns to login screen; localStorage cleared'},
+
+// ── CONTENT LIBRARY — MA ────────────────────────────────────────────────────
+{s:'Content Library',id:'CL-01',role:'MA',desc:'Default tab on load',exp:'"All" tab active; shows all statuses'},
+{s:'Content Library',id:'CL-02',role:'MA',desc:'Switch to "Pending" tab',exp:'Only status=pending cards visible'},
+{s:'Content Library',id:'CL-03',role:'MA',desc:'Switch to "Approved" tab',exp:'Only status=approved cards'},
+{s:'Content Library',id:'CL-04',role:'MA',desc:'Switch to "Rejected" tab',exp:'Only status=rejected cards'},
+{s:'Content Library',id:'CL-05',role:'MA',desc:'Switch to "Improvement" tab',exp:'Only status=improvement_requested cards'},
+{s:'Content Library',id:'CL-06',role:'MA',desc:'Search by title keyword',exp:'Filtered list updates; count updates'},
+{s:'Content Library',id:'CL-07',role:'MA',desc:'Filter by specialty/category',exp:'Only cards matching category shown'},
+{s:'Content Library',id:'CL-08',role:'MA',desc:'Filter by therapy area',exp:'Cross-filtered with active tab'},
+{s:'Content Library',id:'CL-09',role:'MA',desc:'Filter by source (AI Pipeline / PubMed)',exp:'Narrows to selected source'},
+{s:'Content Library',id:'CL-10',role:'MA',desc:'Date range filter (from/to)',exp:'Cards outside range excluded'},
+{s:'Content Library',id:'CL-11',role:'MA',desc:'Sort: Newest First (default)',exp:'Most recent pub_date / _createdAt at top'},
+{s:'Content Library',id:'CL-12',role:'MA',desc:'Sort: Oldest First',exp:'Oldest card at top'},
+{s:'Content Library',id:'CL-13',role:'MA',desc:'Clear filters resets all fields',exp:'All filters reset; full list reappears'},
+{s:'Content Library',id:'CL-14',role:'MA',desc:'Grid / List toggle preserves data',exp:'Cards re-render in correct layout without data loss'},
+{s:'Content Library',id:'CL-15',role:'MA',desc:'Card tag badges: 3 distinct values',exp:'Specialty ≠ disease ≠ evidence quality (no duplicates)'},
+{s:'Content Library',id:'CL-16',role:'MA',desc:'Quick Approve on pending card',exp:'Card disappears from Pending tab; reappears in Approved; toast confirms'},
+{s:'Content Library',id:'CL-17',role:'MA',desc:'Open card detail slide-in',exp:'Full detail with title, summary, metadata, action buttons shown'},
+{s:'Content Library',id:'CL-18',role:'MA',desc:'Approve already-approved card (idempotent)',exp:'No HTTP 400; metadata saves; success toast'},
+{s:'Content Library',id:'CL-19',role:'MA',desc:'Zero results state',exp:'"No content found. Try adjusting your filters" shown'},
+{s:'Content Library',id:'CL-20',role:'MA',desc:'API content merged with seed cards',exp:'Pipeline cards appear alongside seed cards with consistent tag display'},
+{s:'Content Library',id:'CL-21',role:'MA',desc:'MA banner visible',exp:'Blue "Medical Affairs View" banner visible at top'},
+{s:'Content Library',id:'CL-22',role:'MA',desc:'KPI strip shows MA counts',exp:'Pending/Approved/Rejected counts match actual data'},
+{s:'Content Library',id:'CL-23',role:'MA',desc:'Improve button: only on API cards, pending/rejected',exp:'Improve button absent on static/seed cards; absent on approved cards'},
+{s:'Content Library',id:'CL-24',role:'PMT',desc:'Library loads empty before any MA approval',exp:'No cards visible until MA approves at least one'},
+{s:'Content Library',id:'CL-25',role:'PMT',desc:'Only approved cards visible for PMT',exp:'No pending/rejected cards shown'},
+{s:'Content Library',id:'CL-26',role:'PMT',desc:'No Approve/Reject buttons for PMT',exp:'Only "View" and "Share" buttons on each card'},
+{s:'Content Library',id:'CL-27',role:'PMT',desc:'PMT tabs are specialty-based, not status',exp:'Tabs filter by cat (Cardiology, Gynaecology, etc.)'},
+{s:'Content Library',id:'CL-28',role:'PMT',desc:'MA banner hidden for PMT',exp:'No MA banner visible'},
+{s:'Content Library',id:'CL-29',role:'All',desc:'"Apply" button required for dropdowns',exp:'Specialty/therapy/source/sort changes require Apply click to take effect'},
+{s:'Content Library',id:'CL-30',role:'MA',desc:'List view card actions still work',exp:'Quick-approve and Open buttons functional in list layout'},
+{s:'Content Library',id:'CL-31',role:'All',desc:'UUID vs numeric card ID safety',exp:'Seed cards (numeric) and API cards (UUID) both open detail without JS error'},
+
+// ── DOCTOR DIRECTORY ─────────────────────────────────────────────────────────
+{s:'Doctor Directory',id:'D-01',role:'PMT',desc:'Page load shows 100 doctors from API',exp:'Count "50 Life Division" KPI card; all rows rendered'},
+{s:'Doctor Directory',id:'D-02',role:'PMT',desc:'KPI strip: 5 cards render',exp:'Total, A+ Doctors, Engaged 30d, At Risk, Avg Score all show values'},
+{s:'Doctor Directory',id:'D-03',role:'PMT',desc:'Filter by specialty',exp:'List narrows to matching specialty'},
+{s:'Doctor Directory',id:'D-04',role:'PMT',desc:'Filter by city',exp:'City filter cross-works with specialty'},
+{s:'Doctor Directory',id:'D-05',role:'PMT',desc:'Filter by category (A+/A)',exp:'Only matching category shown'},
+{s:'Doctor Directory',id:'D-06',role:'PMT',desc:'Filter by status (Engaged/Moderate/At Risk)',exp:'Only matching engagement tier shown'},
+{s:'Doctor Directory',id:'D-07',role:'PMT',desc:'Free-text search by doctor name',exp:'Partial name match narrows list; count updates'},
+{s:'Doctor Directory',id:'D-08',role:'PMT',desc:'Free-text search by hospital/city',exp:'Hospital/city in search field works'},
+{s:'Doctor Directory',id:'D-09',role:'PMT',desc:'Combination of 3+ filters',exp:'Intersection applied correctly'},
+{s:'Doctor Directory',id:'D-10',role:'PMT',desc:'No results state',exp:'Empty state shown; no JS error'},
+{s:'Doctor Directory',id:'D-11',role:'PMT',desc:'Click doctor row → opens Doctor 360°',exp:'360° opens for that specific doctor'},
+{s:'Doctor Directory',id:'D-12',role:'PMT',desc:'Sort by DM & DMS column',exp:'Sorted descending first; click again → ascending'},
+{s:'Doctor Directory',id:'D-13',role:'PMT',desc:'Sort by SOW column',exp:'Share-of-wallet sort works both directions'},
+{s:'Doctor Directory',id:'D-14',role:'PMT',desc:'Sort by Score column',exp:'Engagement score sort works both directions'},
+{s:'Doctor Directory',id:'D-15',role:'PMT',desc:'Clear filters button',exp:'All filters reset; all 100 doctors shown'},
+{s:'Doctor Directory',id:'D-16',role:'PMT',desc:'Refresh button calls API again',exp:'loadDoctorsFromAPI() re-fetches; list updates'},
+{s:'Doctor Directory',id:'D-17',role:'PMT',desc:'"Sync from Databricks" button',exp:'syncDoctorsFromDatabricks() called; sync status badge updates'},
+{s:'Doctor Directory',id:'D-18',role:'PMT',desc:'Sync info badge shows timestamp',exp:'#doc-sync-info shows last-synced time after sync'},
+{s:'Doctor Directory',id:'D-19',role:'PMT',desc:'Recommended Next Action column shows AI text',exp:'Column not empty for most doctors'},
+{s:'Doctor Directory',id:'D-20',role:'PMT',desc:'"Send" action from doctor row',exp:'openSendForDoc(docId) opens share modal pre-filled with that doctor'},
+{s:'Doctor Directory',id:'D-21',role:'PMT',desc:'API unavailable: graceful error',exp:'Empty state or error message; no unhandled JS exception'},
+
+// ── DOCTOR 360° ──────────────────────────────────────────────────────────────
+{s:'Doctor 360',id:'360-01',role:'PMT',desc:'Open from directory: correct doctor loaded',exp:'Name, specialty, hospital match clicked doctor'},
+{s:'Doctor 360',id:'360-02',role:'PMT',desc:'Open from sidebar: last-viewed doctor',exp:'Last-viewed or first doctor shown; no error'},
+{s:'Doctor 360',id:'360-03',role:'PMT',desc:'4 KPI cards render',exp:'Last MR Visit, SOW, DMS This Month, Content Sent all populated'},
+{s:'Doctor 360',id:'360-04',role:'PMT',desc:'Engagement score shown',exp:'Score number and label visible in header'},
+{s:'Doctor 360',id:'360-05',role:'PMT',desc:'"Back to Directory" button',exp:'showPage(\'doctors\') navigates back; directory filter state preserved'},
+{s:'Doctor 360',id:'360-06',role:'PMT',desc:'Division badge shown',exp:'#d360-div-badge shows correct division'},
+{s:'Doctor 360',id:'360-07',role:'PMT',desc:'Overview tab: Quick Profile card',exp:'Qualification, clinic, interests, channel, MR name, division all populated'},
+{s:'Doctor 360',id:'360-08',role:'PMT',desc:'Overview tab: AI Interest Profile',exp:'Interest tags rendered; basis text shown'},
+{s:'Doctor 360',id:'360-09',role:'PMT',desc:'Overview tab: Personal Info & Occasions',exp:'Birthday with countdown badge, Anniversary date visible'},
+{s:'Doctor 360',id:'360-10',role:'PMT',desc:'Birthday "Wish" button opens Quick Wish modal',exp:'Modal pre-populated with doctor name and birthday type'},
+{s:'Doctor 360',id:'360-11',role:'PMT',desc:'Anniversary "Wish" button opens modal',exp:'Modal pre-filled for anniversary type'},
+{s:'Doctor 360',id:'360-12',role:'PMT',desc:'"Cake" gift button',exp:'openOv(\'qw-ov\') with physical gift type selected'},
+{s:'Doctor 360',id:'360-13',role:'PMT',desc:'"Message" button on preferred channel',exp:'Toast "Opening WhatsApp…" triggered'},
+{s:'Doctor 360',id:'360-14',role:'PMT',desc:'Header WhatsApp button',exp:'Quick Wish modal opens'},
+{s:'Doctor 360',id:'360-15',role:'PMT',desc:'Header Gift button',exp:'Quick Wish modal opens with gift type'},
+{s:'Doctor 360',id:'360-16',role:'PMT',desc:'Superman Intel tab: CRM data populated',exp:'MR Name, last visit, visits L3M, eDetailing, DM/DMS figures from doctor data'},
+{s:'Doctor 360',id:'360-17',role:'PMT',desc:'Superman Intel tab: DMS trend chart',exp:'SVG chart renders for correct doctor; DM target dashed line and legend visible'},
+{s:'Doctor 360',id:'360-18',role:'PMT',desc:'Superman Intel tab: SOW gap shown',exp:'₹ gap figure correct and updates per doctor'},
+{s:'Doctor 360',id:'360-19',role:'PMT',desc:'Content Sent tab: history timeline',exp:'Content items shared with this doctor shown; no cross-contamination'},
+{s:'Doctor 360',id:'360-20',role:'PMT',desc:'Content Sent tab: channel engagement rates',exp:'WhatsApp/Email/MR follow-up bars rendered'},
+{s:'Doctor 360',id:'360-21',role:'PMT',desc:'Content Sent tab: AI Insight block',exp:'Frequency recommendation shown (e.g. "every 10–14 days")'},
+{s:'Doctor 360',id:'360-22',role:'PMT',desc:'"Send New Content to this Doctor" button',exp:'openContentPickerForDoc(CUR_DOC_ID) opens content picker modal'},
+{s:'Doctor 360',id:'360-23',role:'PMT',desc:'Engagement Calendar: current month grid',exp:'Calendar populates with correct days-of-week alignment'},
+{s:'Doctor 360',id:'360-24',role:'PMT',desc:'Calendar: event pills on correct days',exp:'MR visits, content sent, birthdays, CME shown as coloured pills'},
+{s:'Doctor 360',id:'360-25',role:'PMT',desc:'Calendar: previous month navigation',exp:'‹ button changes month label and re-renders grid'},
+{s:'Doctor 360',id:'360-26',role:'PMT',desc:'Calendar: next month navigation',exp:'› button advances month correctly'},
+{s:'Doctor 360',id:'360-27',role:'PMT',desc:'Calendar: "Today" button',exp:'Returns to current month; today cell highlighted'},
+{s:'Doctor 360',id:'360-28',role:'PMT',desc:'Calendar: "Log Visit / Event" button',exp:'openLogVisitModal() opens log entry modal'},
+{s:'Doctor 360',id:'360-29',role:'PMT',desc:'Calendar: click a day opens log modal',exp:'Log modal pre-filled with clicked date'},
+{s:'Doctor 360',id:'360-30',role:'PMT',desc:'Calendar: today cell highlighted',exp:'Gold border and "TODAY" label on today\'s cell'},
+{s:'Doctor 360',id:'360-31',role:'PMT',desc:'Calendar: other-month days greyed out',exp:'Days from prev/next month muted; not clickable'},
+{s:'Doctor 360',id:'360-32',role:'PMT',desc:'Calendar: upcoming engagements panel',exp:'#ec-upcoming-list shows chronological next events'},
+{s:'Doctor 360',id:'360-33',role:'PMT',desc:'Calendar: AI Engagement Insights block',exp:'"Healthy cadence" / "Birthday opportunity" cards shown'},
+{s:'Doctor 360',id:'360-34',role:'PMT',desc:'Calendar: 6-item legend visible',exp:'Personal / Content Sent / MR Visit / CME / Phone / Festival all shown'},
+
+// ── TODAY'S TASKS ────────────────────────────────────────────────────────────
+{s:'Today Tasks',id:'T-01',role:'PMT',desc:'PMT lands on Today\'s Tasks after login',exp:'Page rendered immediately as default for PMT'},
+{s:'Today Tasks',id:'T-02',role:'PMT',desc:'Header stat chips show correct counts',exp:'tsc-urgent, tsc-rec, tsc-up2 match visible tasks'},
+{s:'Today Tasks',id:'T-03',role:'PMT',desc:'Tab: All shows all tasks with count',exp:'"All" tab count matches total task list'},
+{s:'Today Tasks',id:'T-04',role:'PMT',desc:'Tab: Urgent filters correctly',exp:'Only urgent priority tasks shown'},
+{s:'Today Tasks',id:'T-05',role:'PMT',desc:'Tab: Recommended filters correctly',exp:'Only recommended tasks shown'},
+{s:'Today Tasks',id:'T-06',role:'PMT',desc:'Tab: Upcoming filters correctly',exp:'Only upcoming tasks shown'},
+{s:'Today Tasks',id:'T-07',role:'PMT',desc:'Tab: Done starts at 0',exp:'"Done" tab count is 0 on fresh load'},
+{s:'Today Tasks',id:'T-08',role:'PMT',desc:'Completing a task updates progress bar',exp:'"X of 9 done" counter increments; progress bar fills proportionally'},
+{s:'Today Tasks',id:'T-09',role:'PMT',desc:'Completed task moves to Done tab',exp:'Done count increments; task disappears from active tabs'},
+{s:'Today Tasks',id:'T-10',role:'PMT',desc:'All-done state celebration screen',exp:'#today-empty "All done for today 🎉" shown; task list hidden'},
+{s:'Today Tasks',id:'T-11',role:'PMT',desc:'"AI-generated · refreshes daily" label visible',exp:'Label shown below tabs; non-interactive'},
+{s:'Today Tasks',id:'T-12',role:'PMT',desc:'Quick-share from task opens share modal',exp:'Share modal opens for correct content/doctor pair'},
+{s:'Today Tasks',id:'T-13',role:'PMT',desc:'Tasks reflect pending actions for the day',exp:'Doctors without recent content shown as action items'},
+
+// ── OCCASION HUB ─────────────────────────────────────────────────────────────
+{s:'Occasion Hub',id:'O-01',role:'PMT',desc:'Page loads with occasion cards grid',exp:'3-column card grid renders; no layout overflow'},
+{s:'Occasion Hub',id:'O-02',role:'PMT',desc:'"Occasions this month" counter accurate',exp:'#occ-next-count reflects actual upcoming occasions count'},
+{s:'Occasion Hub',id:'O-03',role:'PMT',desc:'Tab: "Upcoming" (default)',exp:'Chronological future occasions shown'},
+{s:'Occasion Hub',id:'O-04',role:'PMT',desc:'Tab: "Medical Days"',exp:'Only medical awareness days shown'},
+{s:'Occasion Hub',id:'O-05',role:'PMT',desc:'Tab: "National & Cultural"',exp:'Only national/cultural occasions shown'},
+{s:'Occasion Hub',id:'O-06',role:'PMT',desc:'Tab: "All Occasions"',exp:'Full unfiltered list shown'},
+{s:'Occasion Hub',id:'O-07',role:'PMT',desc:'Month range label correct',exp:'#occ-month-label shows correct date span'},
+{s:'Occasion Hub',id:'O-08',role:'PMT',desc:'Occasion card data complete',exp:'Each card shows date, type, title; no blank cards'},
+{s:'Occasion Hub',id:'O-09',role:'PMT',desc:'Broadcast from occasion opens doctor selection',exp:'Mass-share modal/flow triggered from occasion card'},
+{s:'Occasion Hub',id:'O-10',role:'PMT',desc:'Broadcast docs tab shows content',exp:'renderBcastDocs() shows content cards suitable for the occasion'},
+
+// ── ANALYTICS ────────────────────────────────────────────────────────────────
+{s:'Analytics',id:'A-01',role:'PMT',desc:'Page load triggers render',exp:'KPI cards populated from data'},
+{s:'Analytics',id:'A-02',role:'PMT',desc:'4 KPI cards render correctly',exp:'All metric cards show values; no overflow'},
+{s:'Analytics',id:'A-03',role:'PMT',desc:'AI Insight block rendered',exp:'Purple insight card with title and body visible'},
+{s:'Analytics',id:'A-04',role:'PMT',desc:'Period: Last 3 months',exp:'KPIs and table update with narrower date range'},
+{s:'Analytics',id:'A-05',role:'PMT',desc:'Period: Last 6 months (default)',exp:'Default period selected and data shown'},
+{s:'Analytics',id:'A-06',role:'PMT',desc:'Period: Last 12 months',exp:'Wider date range data shown'},
+{s:'Analytics',id:'A-07',role:'PMT',desc:'Period: Year to Date',exp:'YTD data shown'},
+{s:'Analytics',id:'A-08',role:'PMT',desc:'Export CSV downloads file',exp:'exportAnalyticsCSV() triggers browser download; file non-empty'},
+{s:'Analytics',id:'A-09',role:'PMT',desc:'Column picker modal opens',exp:'openColPicker() shows column list in 2-column grid'},
+{s:'Analytics',id:'A-10',role:'PMT',desc:'Column picker: deselect a column',exp:'Column disappears from table; count badge decrements'},
+{s:'Analytics',id:'A-11',role:'PMT',desc:'Column picker: re-select a column',exp:'Column reappears in table'},
+{s:'Analytics',id:'A-12',role:'PMT',desc:'Column remove (×) in header',exp:'Hover shows × button; clicking removes that column'},
+{s:'Analytics',id:'A-13',role:'PMT',desc:'Filter by specialty',exp:'an-spec narrows table to matching specialty'},
+{s:'Analytics',id:'A-14',role:'PMT',desc:'Filter by division',exp:'an-div filter works'},
+{s:'Analytics',id:'A-15',role:'PMT',desc:'Filter by category (A+/A/B)',exp:'Only matching doctor category shown'},
+{s:'Analytics',id:'A-16',role:'PMT',desc:'Filter: Trending up only',exp:'Only up-trending doctors shown'},
+{s:'Analytics',id:'A-17',role:'PMT',desc:'Filter: Flat trend',exp:'Only flat-trend doctors shown'},
+{s:'Analytics',id:'A-18',role:'PMT',desc:'Filter: Declining trend',exp:'Only down-trend doctors shown'},
+{s:'Analytics',id:'A-19',role:'PMT',desc:'Search by doctor name / MR / city',exp:'an-q filters table correctly across all fields'},
+{s:'Analytics',id:'A-20',role:'PMT',desc:'Combined 3+ filters',exp:'Intersection applied; #an-count updates correctly'},
+{s:'Analytics',id:'A-21',role:'PMT',desc:'Click doctor row → Doctor 360°',exp:'Doctor 360° opens for clicked doctor'},
+{s:'Analytics',id:'A-22',role:'PMT',desc:'Sticky first column on horizontal scroll',exp:'Doctor name column stays fixed'},
+{s:'Analytics',id:'A-23',role:'PMT',desc:'Sort by column header',exp:'Sort asc/desc; gold arrow indicator visible'},
+{s:'Analytics',id:'A-24',role:'PMT',desc:'Totals row in footer',exp:'#an-totals shows aggregated totals'},
+{s:'Analytics',id:'A-25',role:'PMT',desc:'DMS progress bars proportional',exp:'Bar widths correct relative to DM potential'},
+{s:'Analytics',id:'A-26',role:'PMT',desc:'"Showing X doctors" count updates',exp:'#an-count reflects filtered row count'},
+
+// ── RESEARCH AGENT ────────────────────────────────────────────────────────────
+{s:'Research Agent',id:'RA-01',role:'MA',desc:'Filter dropdowns load from API',exp:'Therapy area, disease, keywords populated from /filters/suggestions'},
+{s:'Research Agent',id:'RA-02',role:'MA',desc:'Recent terms appear first in dropdown',exp:'User\'s last 5 searched terms at top of each dropdown'},
+{s:'Research Agent',id:'RA-03',role:'MA',desc:'Run pipeline: curated GLP-1 topic',exp:'Cards generated with distinct pub_dates, study_types, tags'},
+{s:'Research Agent',id:'RA-04',role:'MA',desc:'Run pipeline: curated SGLT2 topic',exp:'3 distinct sources with unique content'},
+{s:'Research Agent',id:'RA-05',role:'MA',desc:'Run pipeline: curated PCOS topic',exp:'3 distinct sources with unique content'},
+{s:'Research Agent',id:'RA-06',role:'MA',desc:'Run pipeline: generic free-text topic',exp:'Pipeline runs; cards generated for custom topic'},
+{s:'Research Agent',id:'RA-07',role:'MA',desc:'Card tag display: disease ≠ specialty',exp:'No duplicate badge text (regression test for CL-15 fix)'},
+{s:'Research Agent',id:'RA-08',role:'MA',desc:'New filter term persisted',exp:'After new search → term appears in dropdown on next load'},
+{s:'Research Agent',id:'RA-09',role:'MA',desc:'Run with blank topic field',exp:'Validation error shown; API not called'},
+{s:'Research Agent',id:'RA-10',role:'MA',desc:'Results appear in Content Library as Pending',exp:'Pipeline cards visible in CL Pending tab after run'},
+{s:'Research Agent',id:'RA-11',role:'MA',desc:'Curated run: _enrich_sources idempotent',exp:'Running twice for same topic doesn\'t double-enrich; ALPHA_SOURCES not mutated'},
+{s:'Research Agent',id:'RA-12',role:'MA',desc:'Keyword multi-select chips',exp:'Adding multiple keywords creates chip tags; each has × to remove'},
+{s:'Research Agent',id:'RA-13',role:'MA',desc:'Remove individual keyword chip',exp:'Clicking × removes only that keyword; others remain'},
+{s:'Research Agent',id:'RA-14',role:'MA',desc:'Active filter chips shown below form',exp:'Selected therapy/disease show as chips with label and ×'},
+{s:'Research Agent',id:'RA-15',role:'MA',desc:'"Clear All" removes all chips',exp:'All filter chips and input values reset'},
+{s:'Research Agent',id:'RA-16',role:'MA',desc:'Dropdown autocomplete on typing',exp:'Typing in therapy input filters dropdown in real-time'},
+{s:'Research Agent',id:'RA-17',role:'MA',desc:'Dropdown closes on outside click',exp:'Clicking outside dropdown closes it without selecting'},
+{s:'Research Agent',id:'RA-18',role:'MA',desc:'Result card rank badges shown',exp:'ra-card-rank number visible per result card'},
+{s:'Research Agent',id:'RA-19',role:'MA',desc:'Already-approved cards show green badge',exp:'"✓ Approved" badge on previously approved result cards'},
+{s:'Research Agent',id:'RA-20',role:'MA',desc:'Result count label updates',exp:'ra-result-label shows "X results found" after run'},
+
+// ── RESEARCH PIPELINE ─────────────────────────────────────────────────────────
+{s:'Research Pipeline',id:'PL-01',role:'MA',desc:'Topics queue populates from /topics',exp:'Left panel shows topic list; count badge correct'},
+{s:'Research Pipeline',id:'PL-02',role:'MA',desc:'"Refresh Topics" button',exp:'plRefreshTopics() re-fetches /topics; list updates'},
+{s:'Research Pipeline',id:'PL-03',role:'MA',desc:'Select topic from queue pre-fills config',exp:'Clicking topic sets specialty/therapy dropdowns'},
+{s:'Research Pipeline',id:'PL-04',role:'MA',desc:'Specialty config dropdown',exp:'pl-specialty select changes run configuration'},
+{s:'Research Pipeline',id:'PL-05',role:'MA',desc:'Therapy area config dropdown',exp:'pl-therapy select changes therapy area'},
+{s:'Research Pipeline',id:'PL-06',role:'MA',desc:'"Run Pipeline" button starts run',exp:'plRunPipeline() called; agent UI activates'},
+{s:'Research Pipeline',id:'PL-07',role:'MA',desc:'Run button disabled during pipeline run',exp:'Button greyed out while running; re-enabled on completion/failure'},
+{s:'Research Pipeline',id:'PL-08',role:'MA',desc:'Vertical connector line appears on run',exp:'#pl-vline shows connecting the 4 agent rows'},
+{s:'Research Pipeline',id:'PL-09',role:'MA',desc:'Alpha agent status: Waiting → Running → Done',exp:'Status pill transitions correctly through stages'},
+{s:'Research Pipeline',id:'PL-10',role:'MA',desc:'Beta agent starts after Alpha completes',exp:'Beta pill shows "Waiting" while Alpha runs; activates after'},
+{s:'Research Pipeline',id:'PL-11',role:'MA',desc:'Gamma agent starts after Beta',exp:'Sequential activation confirmed'},
+{s:'Research Pipeline',id:'PL-12',role:'MA',desc:'Delta agent is last; marks completion',exp:'Delta "Done" = pipeline complete'},
+{s:'Research Pipeline',id:'PL-13',role:'MA',desc:'Agent log messages show in real-time',exp:'pl-log-alpha etc. show status messages as pipeline progresses'},
+{s:'Research Pipeline',id:'PL-14',role:'MA',desc:'Overall progress bar animates',exp:'pl-prog-bar width: 0% → 100% as agents complete'},
+{s:'Research Pipeline',id:'PL-15',role:'MA',desc:'Progress percentage label updates',exp:'pl-overall-pct shows 25% / 50% / 75% / 100% at each stage'},
+{s:'Research Pipeline',id:'PL-16',role:'MA',desc:'Idle message visible before any run',exp:'"Select a topic and click Run Pipeline to start" shown'},
+{s:'Research Pipeline',id:'PL-17',role:'MA',desc:'Result card: Summary tab populated',exp:'Title, summary, clinical insights, evidence quality all shown'},
+{s:'Research Pipeline',id:'PL-18',role:'MA',desc:'Result card: Key Findings tab',exp:'Findings list + recommendations + emerging trends rendered'},
+{s:'Research Pipeline',id:'PL-19',role:'MA',desc:'Result card: Short Article tab',exp:'WhatsApp-ready article text displayed'},
+{s:'Research Pipeline',id:'PL-20',role:'MA',desc:'Result card: Full JSON tab',exp:'Dark-background JSON pre block renders; valid JSON'},
+{s:'Research Pipeline',id:'PL-21',role:'MA',desc:'"Copy Article" copies to clipboard',exp:'plCopy(\'article\') copies text; toast confirms'},
+{s:'Research Pipeline',id:'PL-22',role:'MA',desc:'"Copy JSON" copies to clipboard',exp:'plCopy(\'json\') copies JSON; toast confirms'},
+{s:'Research Pipeline',id:'PL-23',role:'MA',desc:'"Saved · Pending MA Review" footer',exp:'Green checkmark footer appears after run completes'},
+{s:'Research Pipeline',id:'PL-24',role:'MA',desc:'"Review in Library →" switches role + page',exp:'switchRole(\'ma\'); showPage(\'content\') — MA role + Content Library opens'},
+{s:'Research Pipeline',id:'PL-25',role:'MA',desc:'"Run Another Topic" resets state',exp:'plResetForNewRun(): result card hidden, agent pills → Waiting, Run enabled'},
+{s:'Research Pipeline',id:'PL-26',role:'MA',desc:'Result badges: specialty + therapy area',exp:'Both badges shown in result card header'},
+{s:'Research Pipeline',id:'PL-27',role:'MA',desc:'Recent Activity section loads on page open',exp:'loadRecentRuns() called; list populates from /pipeline/runs'},
+{s:'Research Pipeline',id:'PL-28',role:'MA',desc:'Recent Activity: Refresh button',exp:'Manual refresh re-fetches run list'},
+{s:'Research Pipeline',id:'PL-29',role:'MA',desc:'Recent Activity: failed run displayed',exp:'Error state run rendered; not silently omitted'},
+{s:'Research Pipeline',id:'PL-30',role:'MA',desc:'Pipeline run status polling stops on completion',exp:'No infinite polling after terminal state (completed/failed)'},
+
+// ── ADMIN DASHBOARD ───────────────────────────────────────────────────────────
+{s:'Admin Dashboard',id:'AD-01',role:'Admin',desc:'Page load triggers both report loads',exp:'loadDemoReport() + loadSharingReport() both called'},
+{s:'Admin Dashboard',id:'AD-02',role:'Admin',desc:'5 KPI cards render with values',exp:'Articles Created, AI-Generated, MA Approved, Doctors Reached, Total Shares all populated'},
+{s:'Admin Dashboard',id:'AD-03',role:'Admin',desc:'KPI: approval rate sub-label',exp:'dm-k-appr-rate shows e.g. "82% approved"'},
+{s:'Admin Dashboard',id:'AD-04',role:'Admin',desc:'KPI: AI-generated % sub-label',exp:'dm-k-ai-pct shows e.g. "67% of total"'},
+{s:'Admin Dashboard',id:'AD-05',role:'Admin',desc:'Click "Articles Created" KPI → detail table',exp:'showDMDetail(\'total\'): table lists all articles'},
+{s:'Admin Dashboard',id:'AD-06',role:'Admin',desc:'Click "AI-Generated" KPI → detail table',exp:'showDMDetail(\'ai\'): table shows pipeline-generated cards only'},
+{s:'Admin Dashboard',id:'AD-07',role:'Admin',desc:'Click "MA Approved" KPI → detail table',exp:'showDMDetail(\'approved\'): approved cards with reviewer and date'},
+{s:'Admin Dashboard',id:'AD-08',role:'Admin',desc:'Click "Doctors Reached" KPI → detail table',exp:'showDMDetail(\'doctors\'): unique doctors who received a share'},
+{s:'Admin Dashboard',id:'AD-09',role:'Admin',desc:'Click "Total Shares" KPI → detail table',exp:'showDMDetail(\'shares\'): all share log entries'},
+{s:'Admin Dashboard',id:'AD-10',role:'Admin',desc:'Detail table close button works',exp:'closeDMDetail() collapses detail; no stale table from prior click'},
+{s:'Admin Dashboard',id:'AD-11',role:'Admin',desc:'Only one detail table open at a time',exp:'Clicking second KPI replaces first detail; not stacked'},
+{s:'Admin Dashboard',id:'AD-12',role:'Admin',desc:'Content Pipeline Status bars',exp:'Pending/Approved/Rejected/Improvement bars with correct counts'},
+{s:'Admin Dashboard',id:'AD-13',role:'Admin',desc:'Sharing Activity bars (channel)',exp:'WhatsApp vs. Email share counts rendered as bars'},
+{s:'Admin Dashboard',id:'AD-14',role:'Admin',desc:'AI Pipeline Performance stats',exp:'Run counts, avg time, success rate displayed'},
+{s:'Admin Dashboard',id:'AD-15',role:'Admin',desc:'Doctor Coverage by Specialty bars',exp:'Per-specialty coverage bars render'},
+{s:'Admin Dashboard',id:'AD-16',role:'Admin',desc:'Sharing Report: 4 mini KPIs',exp:'Total Shares / Unique Articles / Unique Doctors / This Month populated'},
+{s:'Admin Dashboard',id:'AD-17',role:'Admin',desc:'Sharing Report table loads',exp:'loadSharingReport() populates sr-tbody with share log rows'},
+{s:'Admin Dashboard',id:'AD-18',role:'Admin',desc:'Sharing Report: filter by article title',exp:'sr-f-article live-filters table rows'},
+{s:'Admin Dashboard',id:'AD-19',role:'Admin',desc:'Sharing Report: filter by creation date',exp:'sr-f-created date filters by created ≥ date'},
+{s:'Admin Dashboard',id:'AD-20',role:'Admin',desc:'Sharing Report: filter by review date',exp:'sr-f-reviewed date filter works'},
+{s:'Admin Dashboard',id:'AD-21',role:'Admin',desc:'Sharing Report: filter by shared date',exp:'sr-f-shared date filter works'},
+{s:'Admin Dashboard',id:'AD-22',role:'Admin',desc:'Sharing Report: filter by doctor/specialty',exp:'sr-f-party text filter on party details column'},
+{s:'Admin Dashboard',id:'AD-23',role:'Admin',desc:'Sharing Report: channel dropdown filter',exp:'WhatsApp/Email dropdown narrows by channel badge'},
+{s:'Admin Dashboard',id:'AD-24',role:'Admin',desc:'Sharing Report: clear all filters',exp:'"Clear" resets all 6 inline sharing report filters'},
+{s:'Admin Dashboard',id:'AD-25',role:'Admin',desc:'Sharing Report: channel badges styled',exp:'WhatsApp = green badge; Email = blue badge'},
+{s:'Admin Dashboard',id:'AD-26',role:'Admin',desc:'Sharing Report: Export CSV',exp:'exportSharingReport() triggers browser download of filtered data'},
+{s:'Admin Dashboard',id:'AD-27',role:'Admin',desc:'Download Report (Excel)',exp:'downloadExcelReport() calls GET /report/download; file downloads'},
+{s:'Admin Dashboard',id:'AD-28',role:'Admin',desc:'"Refresh Data" button updates timestamp',exp:'loadDemoReport() re-fetches; #dm-last-refresh timestamp updates'},
+{s:'Admin Dashboard',id:'AD-29',role:'Admin',desc:'Recent Activity Timeline: last 10 events',exp:'#dm-timeline shows pipeline runs, approvals, shares in order'},
+{s:'Admin Dashboard',id:'AD-30',role:'Admin',desc:'Scheduler status displayed',exp:'Job names, last-run, next-run shown from /scheduler/status'},
+{s:'Admin Dashboard',id:'AD-31',role:'Admin',desc:'Scheduler job history shown',exp:'Last 10 job run outcomes listed'},
+{s:'Admin Dashboard',id:'AD-32',role:'Admin',desc:'"Run Now" for doctor sync',exp:'POST /scheduler/run-now/doctor_sync called; toast confirms'},
+{s:'Admin Dashboard',id:'AD-33',role:'Admin',desc:'"Run Now" for content generation',exp:'POST /scheduler/run-now/content_generation called; toast confirms'},
+{s:'Admin Dashboard',id:'AD-34',role:'Admin',desc:'Admin role guard: PMT cannot access',exp:'Dashboard nav item not shown in PMT sidebar'},
+{s:'Admin Dashboard',id:'AD-35',role:'Admin',desc:'Admin role guard: MA cannot access',exp:'Dashboard nav item not shown in MA sidebar'},
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+{s:'Notifications',id:'N-01',role:'All',desc:'Notifications polled on login',exp:'startNotifPolling() begins; bell icon shows unread count'},
+{s:'Notifications',id:'N-02',role:'MA',desc:'MA receives notification after pipeline run',exp:'New notification appears after content is generated'},
+{s:'Notifications',id:'N-03',role:'PMT',desc:'BU Head notified when MA approves',exp:'After MA approves, PMT notification appears'},
+{s:'Notifications',id:'N-04',role:'All',desc:'Mark notification as read',exp:'POST /notifications/{id}/read called; count badge decrements'},
+{s:'Notifications',id:'N-05',role:'All',desc:'All-read state: badge disappears',exp:'Badge gone when all notifications read'},
+{s:'Notifications',id:'N-06',role:'All',desc:'Notification panel renders list',exp:'renderNotifList() shows all unread items'},
+
+// ── MA CONTENT DETAIL ─────────────────────────────────────────────────────────
+{s:'MA Detail',id:'MA-01',role:'MA',desc:'Open pending card detail',exp:'Full summary, metadata fields, Approve + Reject + Improve buttons shown'},
+{s:'MA Detail',id:'MA-02',role:'MA',desc:'Edit metadata: specialty, therapy area, tags',exp:'All fields editable in form'},
+{s:'MA Detail',id:'MA-03',role:'MA',desc:'Edit summary text',exp:'Summary textarea editable'},
+{s:'MA Detail',id:'MA-04',role:'MA',desc:'Save Changes: two-step PATCH then approve',exp:'PATCH /content/{id} then POST /approve; both succeed with distinct toasts'},
+{s:'MA Detail',id:'MA-05',role:'MA',desc:'Save on already-approved card (idempotent)',exp:'No 400 error; metadata saved; success toast'},
+{s:'MA Detail',id:'MA-06',role:'MA',desc:'Reject with reason',exp:'Reason field required; POST /reject called; card moves to Rejected tab'},
+{s:'MA Detail',id:'MA-07',role:'MA',desc:'Reject with empty reason',exp:'Validation error shown; API not called'},
+{s:'MA Detail',id:'MA-08',role:'MA',desc:'Request Improvement: notes required',exp:'Notes field required; POST /request-improvement called; run_id returned'},
+{s:'MA Detail',id:'MA-09',role:'MA',desc:'Improvement on approved card blocked',exp:'API returns 400; error toast shown'},
+{s:'MA Detail',id:'MA-10',role:'MA',desc:'Reviewer name persisted after approve',exp:'/content/{id} shows reviewer field populated'},
+{s:'MA Detail',id:'MA-11',role:'MA',desc:'Improvement notes stored in versions',exp:'/content/{id}/versions shows improvement notes in history'},
+{s:'MA Detail',id:'MA-12',role:'MA',desc:'Improvement on rejected card allowed',exp:'POST /request-improvement succeeds on rejected status'},
+{s:'MA Detail',id:'MA-13',role:'MA',desc:'Status badge updates in detail view after action',exp:'Status label changes immediately on approve/reject without page reload'},
+
+// ── SHARE MODAL ───────────────────────────────────────────────────────────────
+{s:'Share Modal',id:'SH-01',role:'PMT',desc:'Open from content card',exp:'Doctor search input + channel selector + Send shown'},
+{s:'Share Modal',id:'SH-02',role:'PMT',desc:'Search doctor by name',exp:'Filtered list from /doctors?q=... appears'},
+{s:'Share Modal',id:'SH-03',role:'PMT',desc:'Select doctor from results',exp:'Doctor highlighted; share button enabled'},
+{s:'Share Modal',id:'SH-04',role:'PMT',desc:'Send via WhatsApp',exp:'POST /content/{id}/share with channel=whatsapp; toast shown'},
+{s:'Share Modal',id:'SH-05',role:'PMT',desc:'Send via Email',exp:'channel=email used correctly'},
+{s:'Share Modal',id:'SH-06',role:'PMT',desc:'Send without selecting doctor',exp:'Validation error; API not called'},
+{s:'Share Modal',id:'SH-07',role:'PMT',desc:'Share logged in share-logs',exp:'GET /share-logs reflects new entry'},
+{s:'Share Modal',id:'SH-08',role:'PMT',desc:'Open from Doctor 360° "Send New Content"',exp:'Doctor pre-selected; content list shows approved cards'},
+
+// ── MODALS: QUICK WISH ────────────────────────────────────────────────────────
+{s:'Modals',id:'QW-01',role:'PMT',desc:'Quick Wish modal opens for birthday',exp:'Pre-populated with doctor name; birthday type selected'},
+{s:'Modals',id:'QW-02',role:'PMT',desc:'Quick Wish modal opens for anniversary',exp:'Anniversary type pre-selected'},
+{s:'Modals',id:'QW-03',role:'PMT',desc:'WhatsApp wish send works',exp:'Sent via WhatsApp; toast confirms'},
+{s:'Modals',id:'QW-04',role:'PMT',desc:'Gift type selection (Cake)',exp:'Physical gift type selector shows options'},
+{s:'Modals',id:'QW-05',role:'PMT',desc:'Close by clicking backdrop',exp:'closeOv(\'qw-ov\') dismisses modal; no orphaned overlays'},
+
+// ── MODALS: CONTENT PICKER ────────────────────────────────────────────────────
+{s:'Modals',id:'CP-01',role:'PMT',desc:'Content Picker opens from Doctor 360°',exp:'Doctor pre-selected; content list shows approved cards'},
+{s:'Modals',id:'CP-02',role:'PMT',desc:'Content filtering in picker',exp:'Search/filter narrows content list'},
+{s:'Modals',id:'CP-03',role:'PMT',desc:'Select content + confirm send',exp:'POST /content/{id}/share called with pre-filled doctor_id'},
+{s:'Modals',id:'CP-04',role:'PMT',desc:'Close without sending',exp:'No API call; modal dismisses cleanly'},
+
+// ── MODALS: LOG VISIT ─────────────────────────────────────────────────────────
+{s:'Modals',id:'LV-01',role:'PMT',desc:'Log Visit modal opens from calendar button',exp:'Current doctor pre-selected; date defaults to today'},
+{s:'Modals',id:'LV-02',role:'PMT',desc:'Opens with pre-filled date when clicking a day',exp:'Date pre-filled with clicked day'},
+{s:'Modals',id:'LV-03',role:'PMT',desc:'Event type selection (visit/CME/call etc.)',exp:'Pill selector shows all types; selection highlights chosen'},
+{s:'Modals',id:'LV-04',role:'PMT',desc:'Submit log entry',exp:'Entry saved; calendar re-renders with event pill on correct date'},
+{s:'Modals',id:'LV-05',role:'PMT',desc:'Required fields validation',exp:'Cannot submit without event type selected; validation shown'},
+
+// ── MODALS: COLUMN PICKER (ANALYTICS) ────────────────────────────────────────
+{s:'Modals',id:'CPA-01',role:'PMT',desc:'Column picker opens from "Columns (N)" button',exp:'Grid of toggleable column items shown in groups'},
+{s:'Modals',id:'CPA-02',role:'PMT',desc:'Columns organised into groups',exp:'Group headers visible; columns nested under groups'},
+{s:'Modals',id:'CPA-03',role:'PMT',desc:'Deselect a column removes it from table',exp:'Column disappears from analytics table; count badge decrements'},
+{s:'Modals',id:'CPA-04',role:'PMT',desc:'Re-select a column restores it',exp:'Column reappears in table at appropriate position'},
+{s:'Modals',id:'CPA-05',role:'PMT',desc:'Column picker close applies selection',exp:'Analytics table reflects final selection after closing picker'},
+
+// ── BACKEND API ───────────────────────────────────────────────────────────────
+{s:'Backend API',id:'API-01',role:'API',desc:'GET /content?status=pending_review',exp:'Only pending_review items returned'},
+{s:'Backend API',id:'API-02',role:'API',desc:'PATCH /content/{id} — partial metadata update',exp:'Only provided fields updated; 404 on unknown ID; 400 on empty body'},
+{s:'Backend API',id:'API-03',role:'API',desc:'POST /approve on improvement_requested status',exp:'Allowed — transitions correctly to approved'},
+{s:'Backend API',id:'API-04',role:'API',desc:'POST /request-improvement on rejected status',exp:'Allowed — transitions to improvement_requested; run_id returned'},
+{s:'Backend API',id:'API-05',role:'API',desc:'POST /request-improvement on approved status',exp:'Returns 400 — correctly blocked'},
+{s:'Backend API',id:'API-06',role:'API',desc:'POST /request-improvement with empty notes',exp:'Returns 400 with "notes are required" message'},
+{s:'Backend API',id:'API-07',role:'API',desc:'GET /content/{id}/versions',exp:'Returns root_id + versions array; parent_id chain resolved'},
+{s:'Backend API',id:'API-08',role:'API',desc:'GET /share-logs?content_id={id}',exp:'Returns only logs for that content_id'},
+{s:'Backend API',id:'API-09',role:'API',desc:'GET /notifications?unread_only=true',exp:'Returns only notifications without read_at'},
+{s:'Backend API',id:'API-10',role:'API',desc:'GET /notifications?division={div}',exp:'Filters by division correctly'},
+{s:'Backend API',id:'API-11',role:'API',desc:'GET /scheduler/status includes job history',exp:'Response contains job_history array of last 10 entries'},
+{s:'Backend API',id:'API-12',role:'API',desc:'POST /sync/doctors?division={div}',exp:'Division-filtered sync; source field indicates demo vs. Databricks'},
+{s:'Backend API',id:'API-13',role:'API',desc:'GET /filters/suggestions response structure',exp:'{therapy_area:{recent:[],defaults:[]}, disease:{...}, keywords:{...}}'},
+{s:'Backend API',id:'API-14',role:'API',desc:'POST /filters/suggestions promotes existing term',exp:'Existing default term promoted to [RECENT] with updated timestamp'},
+{s:'Backend API',id:'API-15',role:'API',desc:'POST /pipeline/run duplicate topic',exp:'Two separate run IDs created; both tracked independently'},
+{s:'Backend API',id:'API-16',role:'API',desc:'GET / health endpoint',exp:'Returns {status:"ok", service:"PinnacleIQ Research API", store:"sqlite"}'},
+
+// ── NAVIGATION / UX ───────────────────────────────────────────────────────────
+{s:'Navigation',id:'NAV-01',role:'All',desc:'Default page per role on login',exp:'MA → content; PMT → today; Admin → research-agent'},
+{s:'Navigation',id:'NAV-02',role:'All',desc:'URL hash persists page on refresh',exp:'location.hash = role/page; browser refresh returns to same page'},
+{s:'Navigation',id:'NAV-03',role:'All',desc:'Browser back / forward button',exp:'hashchange event: correct role + page restored'},
+{s:'Navigation',id:'NAV-04',role:'All',desc:'Hash with wrong role prefix handled',exp:'Graceful role switch or fallback; no JS error'},
+{s:'Navigation',id:'NAV-05',role:'All',desc:'Role switcher dropdown opens and closes',exp:'Click opens dropdown; click outside closes it'},
+{s:'Navigation',id:'NAV-06',role:'All',desc:'Role switcher: current role has checkmark',exp:'rd-check ✓ icon visible on active role in dropdown'},
+{s:'Navigation',id:'NAV-07',role:'All',desc:'Mobile: sidebar closes after navigation',exp:'window.innerWidth ≤ 768 → sidebar closes after showPage()'},
+{s:'Navigation',id:'NAV-08',role:'All',desc:'openCurrentDoc360() with no prior doctor',exp:'Falls back to DOCTORS[0]; 360° opens without error'},
+{s:'Navigation',id:'NAV-09',role:'All',desc:'Toast notifications appear and auto-dismiss',exp:'Toasts appear bottom-right; auto-dismiss after ~3s'},
+{s:'Navigation',id:'NAV-10',role:'All',desc:'Multiple rapid toasts stack correctly',exp:'Multiple toasts stack without overlap or z-index issues'},
+{s:'Navigation',id:'NAV-11',role:'All',desc:'Sign Out button visible in sidebar for all roles',exp:'Sign Out link visible regardless of current role'},
+{s:'Navigation',id:'NAV-12',role:'All',desc:'Topbar breadcrumb updates per page',exp:'#tb-cur shows correct page name on navigation'},
+];
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const STORAGE_KEY = 'pinnacleiq_test_state_v2';
+let state = {};
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { state = {}; }
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const el = document.getElementById('save-msg');
+  el.style.opacity = 1;
+  setTimeout(() => el.style.opacity = 0, 1500);
+}
+function getStatus(id) { return (state[id] && state[id].status) || 'untested'; }
+function getNotes(id)  { return (state[id] && state[id].notes)  || ''; }
+
+function setStatus(id, status) {
+  if (!state[id]) state[id] = {};
+  state[id].status = (state[id].status === status) ? 'untested' : status;
+  saveState();
+  refreshRow(id);
+  updateSummary();
+}
+function setNotes(id, notes) {
+  if (!state[id]) state[id] = {};
+  state[id].notes = notes;
+  saveState();
+}
+
+// ════════════════════════════════════════════════════════
+// SECTIONS
+// ════════════════════════════════════════════════════════
+const SECTIONS = [
+  {key:'Login',         label:'Screen 1 — Login',                   role:'All'},
+  {key:'Content Library', label:'Screen 2 — Content Library',       role:'MA / PMT'},
+  {key:'Doctor Directory',label:'Screen 3 — Doctor Directory',      role:'PMT'},
+  {key:'Doctor 360',    label:'Screen 4 — Doctor 360°',             role:'PMT'},
+  {key:'Today Tasks',   label:'Screen 5 — Today\'s Tasks',          role:'PMT'},
+  {key:'Occasion Hub',  label:'Screen 6 — Occasion Hub',            role:'PMT'},
+  {key:'Analytics',     label:'Screen 7 — Analytics',               role:'PMT'},
+  {key:'Research Agent',label:'Screen 8 — Research Agent',          role:'MA / Admin'},
+  {key:'Research Pipeline',label:'Screen 9 — Research Pipeline',    role:'MA / Admin'},
+  {key:'Admin Dashboard',label:'Screen 10 — Admin Dashboard',       role:'Admin'},
+  {key:'Notifications', label:'Screen 11 — Notifications',          role:'All'},
+  {key:'MA Detail',     label:'Screen 12 — MA Content Detail',      role:'MA'},
+  {key:'Share Modal',   label:'Screen 13 — Share Modal',            role:'PMT'},
+  {key:'Modals',        label:'Modals — Quick Wish / Content Picker / Log Visit / Column Picker', role:'PMT'},
+  {key:'Backend API',   label:'Backend API — Endpoint Tests',       role:'API'},
+  {key:'Navigation',    label:'Navigation & Cross-Cutting UX',      role:'All'},
+];
+
+// ════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════
+function roleBadge(role) {
+  const map = {MA:'r-ma',PMT:'r-pmt',Admin:'r-admin',All:'r-all',API:'r-api'};
+  return `<span class="role-badge ${map[role]||'r-all'}">${role}</span>`;
+}
+
+function statusButtons(id) {
+  const cur = getStatus(id);
+  return `<div class="status-btns">
+    <button class="sbtn sbtn-pass ${cur==='pass'?'active':''}" onclick="setStatus('${id}','pass')">✓ Pass</button>
+    <button class="sbtn sbtn-fail ${cur==='fail'?'active':''}" onclick="setStatus('${id}','fail')">✕ Fail</button>
+    <button class="sbtn sbtn-blocked ${cur==='blocked'?'active':''}" onclick="setStatus('${id}','blocked')">⚠ Blocked</button>
+    <button class="sbtn sbtn-skip ${cur==='skip'?'active':''}" onclick="setStatus('${id}','skip')">— Skip</button>
+  </div>`;
+}
+
+function buildSections() {
+  const container = document.getElementById('sections-container');
+  container.innerHTML = '';
+  SECTIONS.forEach(sec => {
+    const tests = TESTS.filter(t => t.s === sec.key);
+    const div = document.createElement('div');
+    div.className = 'section';
+    div.dataset.section = sec.key;
+    div.innerHTML = `
+      <div class="section-header" onclick="toggleSection(this)">
+        <h2>${sec.label}</h2>
+        <div class="sec-counts" id="sec-counts-${sec.key.replace(/\s/g,'_')}"></div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="section-body">
+        <table>
+          <thead><tr>
+            <th>ID</th>
+            <th>Test Case / Scenario</th>
+            <th>Expected Result</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr></thead>
+          <tbody id="tbody-${sec.key.replace(/\s/g,'_')}">
+            ${tests.map(t => renderRow(t)).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function renderRow(t) {
+  const s = getStatus(t.id);
+  const cls = s !== 'untested' ? `status-${s}` : '';
+  return `<tr id="row-${t.id}" class="${cls}" data-section="${t.s}" data-role="${t.role}" data-desc="${t.desc.toLowerCase()}" data-status="${s}">
+    <td class="id-cell">${t.id}</td>
+    <td class="desc-cell">${t.desc}</td>
+    <td class="exp-cell">${t.exp}</td>
+    <td class="role-cell">${roleBadge(t.role)}</td>
+    <td class="status-cell">${statusButtons(t.id)}</td>
+    <td class="notes-cell"><textarea class="notes-inp" placeholder="Notes…" onchange="setNotes('${t.id}',this.value)">${getNotes(t.id)}</textarea></td>
+  </tr>`;
+}
+
+function refreshRow(id) {
+  const row = document.getElementById('row-' + id);
+  if (!row) return;
+  const s = getStatus(id);
+  row.className = s !== 'untested' ? `status-${s}` : '';
+  row.dataset.status = s;
+  row.querySelector('.status-cell').innerHTML = statusButtons(id);
+}
+
+function toggleSection(hdr) {
+  hdr.closest('.section').classList.toggle('collapsed');
+}
+
+// ════════════════════════════════════════════════════════
+// SUMMARY
+// ════════════════════════════════════════════════════════
+function updateSummary() {
+  const total = TESTS.length;
+  let pass=0, fail=0, skip=0, blocked=0;
+  TESTS.forEach(t => {
+    const s = getStatus(t.id);
+    if(s==='pass') pass++;
+    else if(s==='fail') fail++;
+    else if(s==='skip') skip++;
+    else if(s==='blocked') blocked++;
+  });
+  const done = pass + fail + skip + blocked;
+  const pct = Math.round(done/total*100);
+
+  document.getElementById('cnt-total').textContent = total;
+  document.getElementById('cnt-total2').textContent = total;
+  document.getElementById('cnt-pass').textContent = pass;
+  document.getElementById('cnt-fail').textContent = fail;
+  document.getElementById('cnt-skip').textContent = skip;
+  document.getElementById('cnt-blocked').textContent = blocked;
+  document.getElementById('pct-chip').textContent = pct + '% done';
+  document.getElementById('prog-bar').style.width = pct + '%';
+
+  // Section badges
+  SECTIONS.forEach(sec => {
+    const tests = TESTS.filter(t => t.s === sec.key);
+    const p = tests.filter(t => getStatus(t.id)==='pass').length;
+    const f = tests.filter(t => getStatus(t.id)==='fail').length;
+    const b = tests.filter(t => getStatus(t.id)==='blocked').length;
+    const el = document.getElementById('sec-counts-' + sec.key.replace(/\s/g,'_'));
+    if(el) el.innerHTML = `
+      <span class="sec-badge sb-total">${tests.length}</span>
+      ${p?`<span class="sec-badge sb-pass">✓ ${p}</span>`:''}
+      ${f?`<span class="sec-badge sb-fail">✕ ${f}</span>`:''}
+      ${b?`<span class="sec-badge sb-blocked">⚠ ${b}</span>`:''}
+    `;
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// FILTERS
+// ════════════════════════════════════════════════════════
+function applyFilters() {
+  const sec = document.getElementById('flt-section').value;
+  const status = document.getElementById('flt-status').value;
+  const role = document.getElementById('flt-role').value;
+  const q = document.getElementById('flt-search').value.toLowerCase();
+
+  document.querySelectorAll('tbody tr').forEach(row => {
+    const ms = !sec || row.dataset.section === sec;
+    const mr = !role || row.dataset.role === role;
+    const mst = !status || row.dataset.status === status;
+    const mq = !q || row.dataset.desc.includes(q) || row.cells[0].textContent.toLowerCase().includes(q);
+    row.classList.toggle('hidden', !(ms && mr && mst && mq));
+  });
+
+  // Show/hide sections with no visible rows
+  document.querySelectorAll('.section').forEach(s => {
+    const visible = Array.from(s.querySelectorAll('tbody tr')).some(r => !r.classList.contains('hidden'));
+    s.style.display = visible ? '' : 'none';
+  });
+}
+
+function clearFilters() {
+  document.getElementById('flt-section').value = '';
+  document.getElementById('flt-status').value = '';
+  document.getElementById('flt-role').value = '';
+  document.getElementById('flt-search').value = '';
+  applyFilters();
+}
+
+// ════════════════════════════════════════════════════════
+// EXPORT CSV
+// ════════════════════════════════════════════════════════
+function exportCSV() {
+  const header = ['ID','Screen','Role','Description','Expected','Status','Notes'];
+  const rows = TESTS.map(t => [
+    t.id, t.s, t.role,
+    '"' + t.desc.replace(/"/g,'""') + '"',
+    '"' + t.exp.replace(/"/g,'""') + '"',
+    getStatus(t.id),
+    '"' + getNotes(t.id).replace(/"/g,'""') + '"'
+  ].join(','));
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'pinnacleiq_test_checklist_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ════════════════════════════════════════════════════════
+// RESET
+// ════════════════════════════════════════════════════════
+function resetAll() {
+  if(!confirm('Reset ALL test statuses and notes? This cannot be undone.')) return;
+  state = {};
+  saveState();
+  buildSections();
+  updateSummary();
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+document.getElementById('session-date').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+loadState();
+buildSections();
+updateSummary();
+</script>
+</body>
+</html>
