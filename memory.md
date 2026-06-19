@@ -4,6 +4,21 @@
 > **Last updated:** 2026-06-19 (end of day) | All fixes merged to `main` at `D:\Codebase\Pinnacle`
 
 ---
+---
+
+## 0. Development Workflow (ALWAYS FOLLOW)
+
+**Rule 1 — All code changes go in `D:\Codebase\Pinnacle` only.**
+Never edit the worktree or any other location unless explicitly asked.
+User reviews code in VSCode from the local repo — changes elsewhere are invisible.
+
+**Rule 2 — Update `memory.md` after every change.**
+
+**Rule 3 — Git process: feature branch first, then main.**
+- Create `feat/<name>` branch → commit work there
+- Only merge to `main` when user explicitly asks to "check in the code"
+- Never commit directly to `main`
+
 
 ## 1. What Is This Project?
 
