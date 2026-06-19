@@ -43,10 +43,9 @@ app.add_middleware(
 
 from pathlib import Path
 from datetime import datetime
-TOPICS_FILE     = Path(__file__).parent.parent / "topics.txt"
-DOCTORS_FILE    = Path(__file__).parent.parent / "doctors.json"
-FILTERS_FILE    = Path(__file__).parent.parent / "filter_suggestions.txt"
-OCCASIONS_FILE  = Path(__file__).parent.parent / "occasions.json"
+TOPICS_FILE   = Path(__file__).parent.parent / "topics.txt"
+DOCTORS_FILE  = Path(__file__).parent.parent / "doctors.json"
+FILTERS_FILE  = Path(__file__).parent.parent / "filter_suggestions.txt"
 
 
 def _parse_topics_text(text: str) -> list[dict]:
@@ -272,6 +271,15 @@ class RunRequest(BaseModel):
 class ApproveRequest(BaseModel):
     reviewer: Optional[str] = "Dr. Prashant Agarwal (MA)"
 
+class UpdateMetadataRequest(BaseModel):
+    specialty:                  Optional[str] = None
+    therapy_area:               Optional[str] = None
+    sub_category:               Optional[str] = None
+    tags:                       Optional[list] = None
+    evidence_quality:           Optional[str] = None
+    summary:                    Optional[str] = None
+    relevant_doctor_specialties: Optional[str] = None
+
 class RejectRequest(BaseModel):
     reason: str
     reviewer: Optional[str] = "Dr. Prashant Agarwal (MA)"
@@ -344,15 +352,6 @@ def get_doctor(doctor_id: str):
     if not doc:
         raise HTTPException(404, f"Doctor {doctor_id} not found")
     return doc
-
-
-@app.get("/occasions")
-def get_occasions():
-    """Return the occasions list for Occasion Hub and Today's Tasks."""
-    if not OCCASIONS_FILE.exists():
-        return {"occasions": []}
-    data = json.loads(OCCASIONS_FILE.read_text(encoding="utf-8"))
-    return {"occasions": data.get("occasions", [])}
 
 
 @app.get("/topics")
@@ -544,20 +543,33 @@ def approve_content(content_id: str, req: ApproveRequest):
     item = store.get_content(content_id)
     if not item:
         raise HTTPException(404, "Content not found")
-    if item.get("status") not in ("pending_review", "improvement_requested"):
-        raise HTTPException(400, f"Content is already '{item.get('status')}'")
     store.approve(content_id, reviewer=req.reviewer)
-    # Notify BU Head that content is approved and ready to share
-    try:
-        notify_bu_content_approved(
-            store,
-            content_id,
-            item.get("title", content_id),
-            item.get("division", "All"),
-        )
-    except Exception as e:
-        print(f"[App] Approval notification failed: {e}")
+    # Only notify BU Head when moving from pending → approved (not on re-approve)
+    if item.get("status") in ("pending_review", "improvement_requested"):
+        try:
+            notify_bu_content_approved(
+                store,
+                content_id,
+                item.get("title", content_id),
+                item.get("division", "All"),
+            )
+        except Exception as e:
+            print(f"[App] Approval notification failed: {e}")
     return {"message": "Content approved. Now available for BU Head to share.", "content_id": content_id}
+
+
+@app.patch("/content/{content_id}")
+def update_content_metadata(content_id: str, req: UpdateMetadataRequest):
+    """MA edits categorisation fields (specialty, therapy_area, sub_category, tags, etc.)
+    on any card regardless of status. Separate from approve/reject workflow."""
+    item = store.get_content(content_id)
+    if not item:
+        raise HTTPException(404, "Content not found")
+    fields = {k: v for k, v in req.model_dump().items() if v is not None}
+    updated = store.update_metadata(content_id, fields)
+    if not updated:
+        raise HTTPException(400, "No valid fields to update")
+    return {"message": "Content metadata updated.", "content_id": content_id, "updated_fields": list(fields.keys())}
 
 
 @app.post("/content/{content_id}/reject")

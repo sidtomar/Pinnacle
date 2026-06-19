@@ -69,3 +69,9 @@ Heart Failure - Diabetology (SGLT2 inhibitors) | Diabetology | Diabetology
 General Research - Gynecology | Gynecology | Gynecology
 Hypertension - Paediatrics (hypertension drug approval) | Paediatrics | Paediatrics
 Hypertension - hypertension drug approval (antihypertensive therapy advances) | hypertension drug approval | hypertension drug approval
+Coronary Artery Disease (CAD) - Cardiology | Cardiology | Cardiology
+GLP-1 - GLP-1 Therapy | GLP-1 Therapy | GLP-1 Therapy
+GLP-1 - cardiology | cardiology | cardiology
+Insulin Resistance in Metabolic Syndrome: 2025 Consensus - GLP-1 Therapy | GLP-1 Therapy | GLP-1 Therapy
+Type 2 Diabetes - Diabetology (cardiovascular outcomes) | Diabetology | Diabetology
+Type 2 Diabetes - Diabetology (antihypertensive therapy advances) | Diabetology | Diabetology

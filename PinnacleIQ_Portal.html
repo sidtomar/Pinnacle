@@ -3793,20 +3793,47 @@ function rmTag(t){CUR_TAGS=CUR_TAGS.filter(x=>x!==t);renderTags();}
 function onTagKey(e){if(e.key==='Enter'||e.key===','){e.preventDefault();const v=e.target.value.trim();if(v&&!CUR_TAGS.includes(v)){CUR_TAGS.push(v);renderTags();}else e.target.value='';}}
 function setRel(r,el){CUR_REL=r;document.querySelectorAll('#ma-rel-opts .rel-opt').forEach(o=>o.className='rel-opt');el.classList.add(r==='High'?'rel-h':r==='Medium'?'rel-m':'rel-l');}
 
-function doApprove(){
+async function doApprove(){
   const p=ALL_PAPERS.find(x=>x.id===CUR_ID); if(!p) return;
+  const editedMeta = {
+    specialty:    document.getElementById('ma-cat').value     || undefined,
+    therapy_area: document.getElementById('ma-therapy').value || undefined,
+    sub_category: document.getElementById('ma-sub').value     || undefined,
+    summary:      document.getElementById('ma-summary').value || undefined,
+    tags:         CUR_TAGS.length ? [...CUR_TAGS] : undefined,
+  };
   if(p._apiSource){
-    // API-sourced item: persist approval to backend
-    fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})})
-    .then(r=>{if(!r.ok)throw new Error('API error');p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);})
-    .catch(()=>toast('❌','Approval failed — check API connection'));
+    try {
+      // 1. Save metadata edits (PATCH) — works regardless of current status
+      const hasMeta = Object.values(editedMeta).some(v => v !== undefined);
+      if(hasMeta){
+        const mr = await fetch(PL_API+'/content/'+p._apiId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(editedMeta)});
+        if(!mr.ok) throw new Error('Metadata save failed');
+      }
+      // 2. Set status to approved (idempotent)
+      const ar = await fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})});
+      if(!ar.ok) throw new Error('Approval failed');
+      // 3. Sync local state
+      p.status='approved'; p.rev='Dr. Prashant Agarwal'; p.revDate=new Date().toISOString().slice(0,10);
+      if(editedMeta.specialty)    p.cat     = editedMeta.specialty;
+      if(editedMeta.therapy_area) p.therapy = editedMeta.therapy_area;
+      if(editedMeta.sub_category) p.sub     = editedMeta.sub_category;
+      if(editedMeta.summary)      p.sum     = editedMeta.summary;
+      if(editedMeta.tags)         p.tags    = [...CUR_TAGS];
+      p.rel = CUR_REL || p.rel;
+      updCounts(); renderCL(); closeOv('ma-ov');
+      toast('✅',`"${p.title.slice(0,44)}…" saved and live for PMT!`);
+    } catch(e){
+      toast('❌', e.message || 'Save failed — check API connection');
+    }
     return;
   }
-  p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);
+  // Static paper — in-memory only
+  p.status='approved'; p.rev='Dr. Prashant Agarwal'; p.revDate=new Date().toISOString().slice(0,10);
   p.sum=document.getElementById('ma-summary').value;
-  p.cat=document.getElementById('ma-cat').value;p.therapy=document.getElementById('ma-therapy').value;
-  p.sub=document.getElementById('ma-sub').value;p.rel=CUR_REL||p.rel;p.tags=[...CUR_TAGS];
-  updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);
+  p.cat=document.getElementById('ma-cat').value; p.therapy=document.getElementById('ma-therapy').value;
+  p.sub=document.getElementById('ma-sub').value; p.rel=CUR_REL||p.rel; p.tags=[...CUR_TAGS];
+  updCounts(); renderCL(); closeOv('ma-ov'); toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);
 }
 function quickApprove(id){
   const p=ALL_PAPERS.find(x=>x.id===id);if(!p)return;
