@@ -11,6 +11,12 @@ The API code never touches SQLite or Databricks directly —
 it only calls the store abstraction. So migration = one env var change.
 """
 import sys, os, json
+from pathlib import Path
+
+# Pin the SQLite DB to this file's directory so it never drifts with CWD.
+# Must be set before get_store() is called.
+_HERE = Path(__file__).resolve().parent
+os.environ.setdefault("SQLITE_DB_PATH", str(_HERE / "pinnacleiq_demo.db"))
 
 # Allow importing from research_agent_system/store/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "research_agent_system"))
