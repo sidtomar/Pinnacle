@@ -352,6 +352,31 @@ def get_topics():
     return {"topics": topics, "count": len(topics)}
 
 
+# ── Occasions ─────────────────────────────────────────────────────────────────
+
+_OCCASIONS = [
+    {"id":"o1",  "date":"2026-05-04","name":"World Asthma Day",                "icon":"🫁","color":"#EFF6FF","c":"#1E40AF","tag":"medical",  "specialty":["Physician","Pulmonology"],                            "stat":"3 days away",  "msg":"Dear Dr. {first},\n\nWishing you a meaningful World Asthma Day! Your efforts in managing respiratory health make a real difference to patients' lives.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o2",  "date":"2026-05-08","name":"World Thalassaemia Day",           "icon":"🩸","color":"#FDF2F8","c":"#9D174D","tag":"medical",  "specialty":["Haematology","Physician"],                            "stat":"7 days away",  "msg":"Dear Dr. {first},\n\nOn World Thalassaemia Day, we salute your commitment to patients living with this condition. Your dedication inspires us.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o3",  "date":"2026-05-12","name":"International Nurses Day",         "icon":"💉","color":"#ECFDF5","c":"#065F46","tag":"medical",  "specialty":None,                                                   "stat":"11 days away", "msg":"Dear Dr. {first},\n\nHappy International Nurses Day! A moment to appreciate the incredible teams you lead and the care they provide every day.\n\nWith gratitude,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o4",  "date":"2026-06-01","name":"World Milk Day",                   "icon":"🥛","color":"#FFFBEB","c":"#92400E","tag":"medical",  "specialty":["Paediatrics","Gynaecology","General Medicine"],       "stat":"This month",   "msg":"Dear Dr. {first},\n\nHappy World Milk Day! Nutrition starts early — a reminder of the foundational role you play in guiding families toward healthier futures.\n\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o5",  "date":"2026-06-14","name":"World Blood Donor Day",            "icon":"❤️","color":"#FEF2F2","c":"#991B1B","tag":"medical",  "specialty":["Haematology","Cardiology","General Medicine"],        "stat":"This month",   "msg":"Dear Dr. {first},\n\nOn World Blood Donor Day, we recognise your crucial role in promoting safe transfusion practices and patient care.\n\nWith respect,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o6",  "date":"2026-07-01","name":"Doctors' Day",                     "icon":"👨‍⚕️","color":"linear-gradient(135deg,#EBF0F8,#DBEAFE)","c":"var(--navy)","tag":"national","specialty":None,"featured":True,"stat":"Next month",   "msg":"Dear Dr. {first},\n\nHappy National Doctors' Day! 🎉\n\nThank you for your tireless dedication, your healing hands and your compassionate care. Mankind Pharma is proud to partner with you in your mission.\n\nWith deep gratitude and respect,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o7",  "date":"2026-07-28","name":"World Hepatitis Day",              "icon":"🟡","color":"#FFFBEB","c":"#92400E","tag":"medical",  "specialty":["Gastroenterology","General Medicine"],                "stat":"July",         "msg":"Dear Dr. {first},\n\nOn World Hepatitis Day, we appreciate your work in diagnosis and management. Your clinical expertise is vital in the fight against viral hepatitis.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o8",  "date":"2026-08-12","name":"World Organ Donation Day",         "icon":"🫀","color":"#FDF2F8","c":"#9D174D","tag":"medical",  "specialty":["Cardiology","Physician"],                             "stat":"August",       "msg":"Dear Dr. {first},\n\nOn World Organ Donation Day, we salute your role in supporting life-saving interventions and educating patients on the gift of life.\n\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o9",  "date":"2026-09-29","name":"World Heart Day",                  "icon":"💓","color":"#FEF2F2","c":"#991B1B","tag":"medical",  "specialty":["Cardiology","General Medicine"],                      "stat":"September",    "msg":"Dear Dr. {first},\n\nHappy World Heart Day! Your dedication to cardiovascular health saves lives every day. We are proud to support your practice.\n\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o10", "date":"2026-10-02","name":"Gandhi Jayanti",                   "icon":"🇮🇳","color":"#ECFDF5","c":"#065F46","tag":"national", "specialty":None,                                                  "stat":"October",      "msg":"Dear Dr. {first},\n\nOn the occasion of Gandhi Jayanti, wishing you peace, purpose and continued service to the nation's health.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o11", "date":"2026-10-20","name":"Diwali",                           "icon":"🪔","color":"#FFFBEB","c":"#92400E","tag":"national", "specialty":None, "featured":True,                                  "stat":"October",      "msg":"Dear Dr. {first},\n\nWishing you and your family a very Happy Diwali! 🪔✨\n\nMay this festival of lights illuminate your life with joy, good health and prosperity.\n\nWith warm Diwali wishes,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o12", "date":"2026-11-14","name":"Children's Day / World Diabetes Day","icon":"🩺","color":"#EFF6FF","c":"#1E40AF","tag":"medical","specialty":["Paediatrics","Diabetology","Endocrinology"],          "stat":"November",     "msg":"Dear Dr. {first},\n\nOn World Diabetes Day, we acknowledge your pivotal role in managing and preventing diabetes across generations. Your patient-first approach sets the standard.\n\nWith admiration,\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o13", "date":"2026-12-01","name":"World AIDS Day",                   "icon":"🎗️","color":"#FDF2F8","c":"#9D174D","tag":"medical",  "specialty":["General Medicine","Physician"],                       "stat":"December",     "msg":"Dear Dr. {first},\n\nOn World AIDS Day, we stand with you in the fight against HIV/AIDS and commend your work in patient care and awareness.\n\n— Jijo, Team Life · Mankind Pharma"},
+    {"id":"o14", "date":"2027-03-14","name":"Holi",                             "icon":"🎨","color":"#F5F3FF","c":"#5B21B6","tag":"national", "specialty":None,                                                  "stat":"March 2027",   "msg":"Dear Dr. {first},\n\nWishing you and your family a vibrant and joyful Holi! 🎨\n\nMay the colours of good health, happiness and success fill your life this season.\n\nWith colourful wishes,\n— Jijo, Team Life · Mankind Pharma"},
+]
+
+@app.get("/occasions")
+def get_occasions():
+    """Return the occasions calendar for the Occasion Hub."""
+    return {"occasions": _OCCASIONS, "count": len(_OCCASIONS)}
+
+
 # ── Filter Suggestions endpoints ─────────────────────────────────────────────
 
 @app.get("/filters/suggestions")
@@ -760,9 +785,21 @@ def download_business_report(
     )
 
 
+# ── Serve portal HTML ─────────────────────────────────────────────────────────
+from fastapi.responses import FileResponse as _FileResponse
+
+PORTAL_HTML = Path(__file__).parent.parent.parent / "PinnacleIQ_Portal.html"
+
+@app.get("/portal", include_in_schema=False)
+@app.get("/app",    include_in_schema=False)
+async def serve_portal():
+    if PORTAL_HTML.exists():
+        return _FileResponse(str(PORTAL_HTML), media_type="text/html")
+    return {"error": "Portal HTML not found at " + str(PORTAL_HTML)}
+
+
 # ── Serve React SPA (for production/Railway deployment) ───────────────────────
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse as _FileResponse
 
 REACT_DIST = Path(__file__).parent.parent.parent / "react-app" / "dist"
 
