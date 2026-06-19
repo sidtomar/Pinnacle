@@ -248,11 +248,29 @@ class SQLiteStore(BaseStore):
 
     # ── MA Workflow ───────────────────────────────────────────────────────────
 
+    def update_metadata(self, content_id: str, fields: dict) -> bool:
+        """Update editable metadata fields on a content card. Returns True if a row was updated."""
+        allowed = {"specialty", "therapy_area", "sub_category", "tags",
+                   "evidence_quality", "summary", "relevant_doctor_specialties"}
+        updates = {k: v for k, v in fields.items() if k in allowed}
+        if not updates:
+            return False
+        conn = self._conn()
+        parts, vals = [], []
+        for k, v in updates.items():
+            parts.append(f"{k}=?")
+            vals.append(self._serialize(v) if isinstance(v, (list, dict)) else v)
+        vals.append(content_id)
+        cur = conn.execute(f"UPDATE content_items SET {', '.join(parts)} WHERE id=?", vals)
+        conn.commit()
+        conn.close()
+        return cur.rowcount > 0
+
     def approve(self, content_id: str, reviewer: str = "MA Reviewer") -> None:
         conn = self._conn()
         conn.execute(
-            "UPDATE content_items SET status='approved', reviewed_at=? WHERE id=?",
-            (self._now(), content_id)
+            "UPDATE content_items SET status='approved', reviewed_at=?, reviewer=? WHERE id=?",
+            (self._now(), reviewer, content_id)
         )
         conn.commit()
         conn.close()

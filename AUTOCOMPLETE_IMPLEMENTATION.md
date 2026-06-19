@@ -55,7 +55,7 @@ Each filter field now includes a dropdown container:
 <div class="ra-filter-group">
   <label class="ra-filter-label">Keywords</label>
   <input class="ra-fuzzy-input" id="ra-keywords-2" 
-         placeholder="Search or type, press Enter…" autocomplete="off" 
+         placeholder="Type Keyword…" autocomplete="off" 
          oninput="raShowDropdown('keywords')">
   <div class="ra-dropdown hidden" id="ra-dropdown-keywords"></div>
 </div>

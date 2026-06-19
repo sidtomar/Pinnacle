@@ -271,6 +271,15 @@ class RunRequest(BaseModel):
 class ApproveRequest(BaseModel):
     reviewer: Optional[str] = "Dr. Prashant Agarwal (MA)"
 
+class UpdateMetadataRequest(BaseModel):
+    specialty:                  Optional[str] = None
+    therapy_area:               Optional[str] = None
+    sub_category:               Optional[str] = None
+    tags:                       Optional[list] = None
+    evidence_quality:           Optional[str] = None
+    summary:                    Optional[str] = None
+    relevant_doctor_specialties: Optional[str] = None
+
 class RejectRequest(BaseModel):
     reason: str
     reviewer: Optional[str] = "Dr. Prashant Agarwal (MA)"
@@ -534,20 +543,33 @@ def approve_content(content_id: str, req: ApproveRequest):
     item = store.get_content(content_id)
     if not item:
         raise HTTPException(404, "Content not found")
-    if item.get("status") not in ("pending_review", "improvement_requested"):
-        raise HTTPException(400, f"Content is already '{item.get('status')}'")
     store.approve(content_id, reviewer=req.reviewer)
-    # Notify BU Head that content is approved and ready to share
-    try:
-        notify_bu_content_approved(
-            store,
-            content_id,
-            item.get("title", content_id),
-            item.get("division", "All"),
-        )
-    except Exception as e:
-        print(f"[App] Approval notification failed: {e}")
+    # Only notify BU Head when moving from pending → approved (not on re-approve)
+    if item.get("status") in ("pending_review", "improvement_requested"):
+        try:
+            notify_bu_content_approved(
+                store,
+                content_id,
+                item.get("title", content_id),
+                item.get("division", "All"),
+            )
+        except Exception as e:
+            print(f"[App] Approval notification failed: {e}")
     return {"message": "Content approved. Now available for BU Head to share.", "content_id": content_id}
+
+
+@app.patch("/content/{content_id}")
+def update_content_metadata(content_id: str, req: UpdateMetadataRequest):
+    """MA edits categorisation fields (specialty, therapy_area, sub_category, tags, etc.)
+    on any card regardless of status. Separate from approve/reject workflow."""
+    item = store.get_content(content_id)
+    if not item:
+        raise HTTPException(404, "Content not found")
+    fields = {k: v for k, v in req.model_dump().items() if v is not None}
+    updated = store.update_metadata(content_id, fields)
+    if not updated:
+        raise HTTPException(400, "No valid fields to update")
+    return {"message": "Content metadata updated.", "content_id": content_id, "updated_fields": list(fields.keys())}
 
 
 @app.post("/content/{content_id}/reject")
@@ -738,10 +760,15 @@ def doctor_sync_status():
 def download_business_report(
     status: Optional[str] = None,
     specialty: Optional[str] = None,
+    therapy_area: Optional[str] = None,
+    disease: Optional[str] = None,
+    keywords: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
 ):
     """
-    Generate and download the PinnacleIQ Business Report as an Excel file.
-    Optional filters: status (approved, pending_review, etc.), specialty.
+    Generate and download the PinnacleIQ Research Report as an Excel file.
+    Optional filters: status, specialty, therapy_area, disease, keywords, date_from, date_to.
     """
     from datetime import datetime, timezone
 
@@ -749,9 +776,18 @@ def download_business_report(
     if not items:
         raise HTTPException(404, "No content items found for the given filters.")
 
-    buf = generate_business_report(items)
+    # Build search summary data
+    search_params = {
+        'therapy_area': therapy_area or 'All',
+        'disease': disease or 'All',
+        'keywords': keywords or 'None selected',
+        'date_from': date_from or '2024-01-01',
+        'date_to': date_to or '2026-06-01',
+    }
+
+    buf = generate_business_report(items, search_params)
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    filename = f"PinnacleIQ_PubMed_Repository_{date_str}.xlsx"
+    filename = f"PinnacleIQ_PubMed_Database_{date_str}.xlsx"
 
     return StreamingResponse(
         buf,

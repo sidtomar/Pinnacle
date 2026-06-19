@@ -642,6 +642,16 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     </div>
 
     <button class="login-submit" id="login-btn" onclick="doLogin()">Sign in</button>
+
+    <div style="margin-top:24px;padding:14px;background:#f0f4f9;border-radius:8px;border-left:4px solid #0f1c2e;">
+      <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Demo Accounts</div>
+      <div style="font-size:12px;color:#374151;line-height:1.6;">
+        <div><strong>Admin:</strong> admin1@mankind.in / Test</div>
+        <div><strong>BU Head:</strong> jijo@mankind.in / Test</div>
+        <div><strong>MA:</strong> prashant.agarwal@mankind.in / Test</div>
+      </div>
+    </div>
+
     <p class="login-footer-txt">© 2026 PinnacleIQ &nbsp;·&nbsp; Mankind Pharma &nbsp;·&nbsp; All rights reserved</p>
   </div>
 </div>
@@ -694,6 +704,12 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="rs-arrow"><polyline points="3,5 7,9 11,5"/></svg>
         <div class="role-dropdown" id="role-dropdown" onclick="event.stopPropagation()">
           <div style="padding:8px 12px 4px;font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:.8px;">Switch Role</div>
+          <div class="rd-option" id="rd-admin" onclick="switchRole('admin')">
+            <div class="rd-av av-adm">A1</div>
+            <div><div class="rd-name">Admin1</div><div class="rd-role">System Administrator · ADM</div></div>
+            <div class="rd-check" id="chk-admin" style="display:none;">✓</div>
+          </div>
+          <div class="rd-divider"></div>
           <div class="rd-option selected" id="rd-pmt" onclick="switchRole('pmt')">
             <div class="rd-av av-pmt">J</div>
             <div><div class="rd-name">Jijo</div><div class="rd-role">BU Head · PMT · Life Division</div></div>
@@ -1424,13 +1440,17 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-ai-badge{margin-left:auto;display:flex;align-items:center;gap:5px;background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#b8912a;}
         .ra-panel-divider{height:1px;background:#e2eaf2;margin:16px 24px 0;}
         .ra-panel-body{padding:20px 24px 24px;}
-        .ra-filter-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.2fr auto auto;gap:12px;align-items:end;margin-bottom:0;}
+        .ra-filter-grid{display:grid;grid-template-columns:0.9fr 0.9fr 0.9fr auto auto auto;gap:12px;align-items:end;margin-bottom:0;}
+        .ra-filter-group-search{flex:2.5;min-width:0;}
+        .ra-filter-group-search::after{content:'';position:absolute;right:12px;bottom:14px;width:8px;height:8px;border-right:2px solid #94a3b8;border-bottom:2px solid #94a3b8;transform:rotate(45deg);pointer-events:none;transition:transform .15s;}
+        .ra-filter-group-date{flex:1.5;min-width:0;}
         .ra-btn-reset{display:flex;align-items:center;gap:5px;background:#fff;color:#6b7280;border:1.5px solid #e2eaf2;border-radius:8px;padding:0 14px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
         .ra-btn-reset:hover{border-color:#94a3b8;color:#374151;background:#f8fafc;}
         .ra-filter-group{display:flex;flex-direction:column;gap:6px;position:relative;}
         .ra-filter-label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.07em;}
         .ra-req{color:#b8912a;margin-left:2px;}
         .ra-fuzzy-input{width:100%;height:38px;padding:0 36px 0 12px;border:1.5px solid #e2eaf2;border-radius:6px;background:#f9fbfd;font-family:'DM Sans',sans-serif;font-size:13px;color:#1a2e42;outline:none;transition:all .15s;cursor:pointer;}
+        .ra-fuzzy-input::placeholder{font-size:11px;color:#9ca3af;}
         .ra-fuzzy-input:focus{border-color:#b8912a;background:#fff;box-shadow:0 0 0 3px rgba(240,180,41,.12);}
         .ra-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2eaf2;border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(15,28,46,.12);}
         .ra-dropdown.hidden{display:none;}
@@ -1493,6 +1513,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         .ra-loading{display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:16px;}
         .ra-loading.show{display:flex;}
         .ra-spinner{width:36px;height:36px;border:3px solid #e2eaf2;border-top-color:#0f1c2e;border-radius:50%;animation:spin .8s linear infinite;}
+        .ra-badge-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;}
         @keyframes spin{to{transform:rotate(360deg);}}
         .ra-empty{display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px;gap:10px;}
         .ra-empty.show{display:flex;}
@@ -1533,27 +1554,27 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
           <!-- FILTER GRID (with inline Search button) -->
           <div class="ra-filter-grid">
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-search">
               <label class="ra-filter-label">Therapy Area <span class="ra-req">*</span></label>
               <input class="ra-fuzzy-input" id="ra-therapy-2" placeholder="Search therapy…" autocomplete="off" oninput="raShowDropdown('therapy')">
               <div class="ra-dropdown hidden" id="ra-dropdown-therapy"></div>
             </div>
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-search">
               <label class="ra-filter-label">Disease <span class="ra-req">*</span></label>
               <input class="ra-fuzzy-input" id="ra-disease-2" placeholder="Search disease…" autocomplete="off" oninput="raShowDropdown('disease')">
               <div class="ra-dropdown hidden" id="ra-dropdown-disease"></div>
             </div>
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-search">
               <label class="ra-filter-label">Keywords</label>
-              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type, press Enter…" autocomplete="off" oninput="raShowDropdown('keywords')" onkeydown="if(event.key==='Enter'){raAddKeywordChip();event.preventDefault();}">
+              <input class="ra-fuzzy-input" id="ra-keywords-2" placeholder="Search or type…" autocomplete="off" onfocus="raShowDropdown('keywords')" oninput="raShowDropdown('keywords')" onkeydown="if(event.key==='Enter'){raAddKeywordChip();event.preventDefault();}">
               <div class="ra-dropdown hidden" id="ra-dropdown-keywords"></div>
             </div>
-            <div class="ra-filter-group">
+            <div class="ra-filter-group ra-filter-group-date">
               <label class="ra-filter-label">Publication Date</label>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2024-01-01">
-                <span style="font-size:11px;color:#6b7280;flex-shrink:0;">→</span>
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2" value="2026-06-01">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-from-2" value="2020-04-01">
+                <span style="font-size:10px;color:#6b7280;flex-shrink:0;">→</span>
+                <input class="ra-fuzzy-input" style="width:104px;height:38px;font-size:12px;padding:0 1px;text-align:left;" type="date" id="ra-date-to-2">
               </div>
             </div>
             <div class="ra-filter-group" style="justify-content:flex-end;">
@@ -1582,7 +1603,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
           <!-- ACTIONS (Export CSV hidden until results load) -->
           <div class="ra-action-row" style="margin-top:12px;">
-            <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;">⬇ Export CSV</button>
+            <button class="ra-btn-secondary" id="ra-csv-btn-2" style="display:none;" onclick="raExportResults()">⬇ Export Excel</button>
             <span class="ra-result-label" id="ra-result-label-2" style="display:none;">Showing <span id="ra-res-count-2">0</span> articles</span>
           </div>
 
@@ -2208,7 +2229,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="padding:20px 24px;flex:1;overflow-y:auto;">
     <div class="impr-hint">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7"/><circle cx="7" cy="9.5" r=".6" fill="currentColor"/></svg>
-      <div>Agent Beta will revise the content using your notes, then Gamma will reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval. Alpha is skipped — research is already done.</div>
+      <div>Your review feedback will be used to revise and improve this article. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval.</div>
     </div>
     <label class="fl">Your Improvement Notes</label>
     <textarea class="impr-ta" id="impr-notes" placeholder="e.g. Fix the empagliflozin dose to 10mg. Reference ESC 2023 HF guidelines specifically. Remove any competitor drug mentions not in our portfolio."></textarea>
@@ -2216,7 +2237,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
     <!-- Pipeline progress (shown while running) -->
     <div class="impr-prog" id="impr-prog">
-      <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">Improvement Pipeline Running</div>
+      <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">Improvement In Progress</div>
       <div class="impr-prog-bar-wrap"><div class="impr-prog-bar" id="impr-prog-bar"></div></div>
       <div class="impr-prog-msg" id="impr-prog-msg">Initialising...</div>
       <div style="margin-top:8px;font-size:11px;color:var(--text4);" id="impr-agent-status"></div>
@@ -2225,7 +2246,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     </div>
   </div>
   <div class="mf">
-    <div style="font-size:11.5px;color:var(--text3);">Alpha skipped · Beta rewrites · Gamma reformats · New version → Pending Review</div>
+    <div style="font-size:11.5px;color:var(--text3);">Improved version → Pending Review</div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
       <button class="btn btn-sm" id="impr-submit-btn"
@@ -2902,6 +2923,12 @@ Would love your thoughts at your convenience!
 .doc-chip.dc-sel{background:var(--navy);color:#fff;border-color:var(--navy);}
 .doc-chip .dc-x{opacity:.5;cursor:pointer;font-size:12px;}
 .doc-chip .dc-x:hover{opacity:1;color:var(--red);}
+.doc-sel-chip{display:inline-flex;align-items:center;gap:4px;background:var(--navy);color:#fff;padding:4px 10px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+.doc-sel-chip button{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:13px;padding:0 0 0 3px;line-height:1;}
+.doc-sel-chip button:hover{color:#fff;}
+.bcast-doctor-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border);}
+.bcast-doctor-row:hover{background:var(--surface2);}
+.bcast-doctor-row.bdr-sel{background:var(--blue-bg);}
 .seg-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;background:var(--surface);color:var(--text2);}
 .seg-btn:hover{border-color:var(--navy);color:var(--navy);}
 .seg-btn.sb-on{background:var(--purple-bg);color:var(--purple);border-color:#DDD6FE;}
@@ -2911,11 +2938,11 @@ Would love your thoughts at your convenience!
 <div class="ov" id="bcast-ov" onclick="if(event.target===this)closeOv('bcast-ov')">
 <div class="modal bcast-modal">
   <div class="bcast-hdr">
-    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;position:relative;z-index:1;" id="bcast-icon-hdr">🪔</div>
+    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;position:relative;z-index:1;" id="bcast-icon-hdr">📅</div>
     <div style="flex:1;position:relative;z-index:1;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.38);text-transform:uppercase;margin-bottom:4px;" id="bcast-occ-type">Festival Broadcast</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;margin-bottom:3px;" id="bcast-occ-name">Diwali Greetings</div>
-      <div style="font-size:11.5px;color:rgba(255,255,255,.55);" id="bcast-occ-date">October 2026</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.38);text-transform:uppercase;margin-bottom:4px;" id="bcast-occ-type">Occasion Broadcast</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;margin-bottom:3px;" id="bcast-occ-name">Loading...</div>
+      <div style="font-size:11.5px;color:rgba(255,255,255,.55);" id="bcast-occ-date"></div>
     </div>
     <button onclick="closeOv('bcast-ov')" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;transition:background .15s;" onmouseenter="this.style.background='rgba(255,255,255,.22)'" onmouseleave="this.style.background='rgba(255,255,255,.12)'">
       <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="10" y2="10"/><line x1="10" y1="1" x2="1" y2="10"/></svg>
@@ -2929,13 +2956,7 @@ Would love your thoughts at your convenience!
       <!-- Quick segments -->
       <div style="margin-bottom:14px;">
         <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Quick Select by Segment</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="bcast-segs">
-          <button class="seg-btn sb-on" onclick="toggleBcastSeg('all',this)">All Pinnacle (50)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('gynaec',this)">Gynaecologists (8)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('cardio',this)">Cardiologists (6)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('paeds',this)">Paediatricians (5)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('aplus',this)">A+ Only (22)</button>
-        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="bcast-segs"></div>
       </div>
       <!-- Doctor chips -->
       <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
@@ -2945,6 +2966,7 @@ Would love your thoughts at your convenience!
       <div style="display:flex;gap:4px;flex-wrap:wrap;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;min-height:60px;margin-bottom:10px;" id="bcast-doc-chips"></div>
       <!-- Mini doctor selector -->
       <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;margin-top:12px;">Add Doctor</div>
+      <div style="margin-bottom:8px;"><input type="text" id="bcast-doc-search" placeholder="Search doctor…" oninput="renderBcastDocs()" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;background:var(--surface);" /></div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;max-height:180px;overflow-y:auto;">
         <div id="bcast-doc-list" style="display:flex;flex-direction:column;"></div>
       </div>
@@ -2954,14 +2976,14 @@ Would love your thoughts at your convenience!
     <div class="bcast-right">
       <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;">Message</div>
       <!-- Channel -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <div class="mcb on" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">💬</div><div class="mcb-lbl">WhatsApp</div></div>
-        <div class="mcb" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">✉️</div><div class="mcb-lbl">Email</div></div>
-        <div class="mcb" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">📱</div><div class="mcb-lbl">Both</div></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;" id="bcast-ch-btns">
+        <div class="mcb on" data-ch="whatsapp" onclick="switchBcastChannel('whatsapp')" style="flex:1;"><div class="mcb-icon">💬</div><div class="mcb-lbl">WhatsApp</div></div>
+        <div class="mcb" data-ch="email" onclick="switchBcastChannel('email')" style="flex:1;"><div class="mcb-icon">✉️</div><div class="mcb-lbl">Email</div></div>
+        <div class="mcb" data-ch="both" onclick="switchBcastChannel('both')" style="flex:1;"><div class="mcb-icon">📱</div><div class="mcb-lbl">Both</div></div>
       </div>
       <!-- AI drafted preview -->
       <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:7px;"><span>Message Preview</span><span class="ai-b">AI Drafted</span></div>
-      <div style="background:#E8F5E9;border-radius:12px;padding:12px;border:1px solid #C8E6C9;margin-bottom:12px;">
+      <div id="bcast-preview-container" style="background:#E8F5E9;border-radius:12px;padding:12px;border:1px solid #C8E6C9;margin-bottom:12px;">
         <div class="wa-bbl-prev" id="bcast-preview">Loading…</div>
       </div>
       <!-- Edit -->
@@ -2969,7 +2991,7 @@ Would love your thoughts at your convenience!
       <textarea class="fta" id="bcast-msg" style="min-height:96px;width:100%;margin-bottom:10px;" oninput="document.getElementById('bcast-preview').textContent=this.value"></textarea>
       <div style="background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--blue);display:flex;gap:7px;align-items:flex-start;">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="6.5" cy="6.5" r="5.5"/><line x1="6.5" y1="4" x2="6.5" y2="6.5"/><circle cx="6.5" cy="9" r=".6" fill="currentColor"/></svg>
-        <span>Each message will be personalised with the doctor's name. Use {name} as a placeholder if not already present.</span>
+        <span>Each message will be personalised with the doctor's name. Use {first} as a placeholder if not already present.</span>
       </div>
     </div>
   </div>
@@ -2981,7 +3003,7 @@ Would love your thoughts at your convenience!
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-outline btn-sm" onclick="closeOv('bcast-ov')">Cancel</button>
-      <button class="btn" onclick="sendBroadcast()" style="background:linear-gradient(135deg,#4C1D95,#6D28D9);color:#fff;font-weight:700;">
+      <button class="btn" id="bcast-send-btn" onclick="sendBroadcast()" style="background:linear-gradient(135deg,#4C1D95,#6D28D9);color:#fff;font-weight:700;">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>
         <span id="bcast-send-lbl">Send Broadcast</span>
       </button>
@@ -2990,96 +3012,7 @@ Would love your thoughts at your convenience!
 </div>
 </div>
 
-<!-- ════ BROADCAST MODAL ════ -->
-<style>
-.bcast-modal{width:780px;max-width:96vw;max-height:92vh;display:flex;flex-direction:column;}
-.bcast-occ-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
-.doc-sel-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:16px;font-size:11.5px;font-weight:500;color:var(--text2);}
-.doc-sel-chip button{background:none;border:none;cursor:pointer;color:var(--text4);font-size:14px;line-height:1;}
-.doc-sel-chip button:hover{color:var(--red);}
-.bcast-doctor-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background .12s;}
-.bcast-doctor-row:hover{background:var(--surface2);}
-.bcast-doctor-row.bdr-sel{background:var(--blue-bg);}
-</style>
-<div class="ov" id="bcast-ov" onclick="if(event.target===this)closeOv('bcast-ov')">
-<div class="modal bcast-modal">
-  <!-- Header -->
-  <div class="mh" style="background:linear-gradient(135deg,var(--navy),var(--navy3));border-bottom:none;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-30px;right:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,42,.18) 0%,transparent 70%);pointer-events:none;"></div>
-    <div id="bcast-hdr-icon" style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative;z-index:1;"></div>
-    <div style="flex:1;position:relative;z-index:1;">
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;" id="bcast-hdr-title">Broadcast Message</div>
-      <div style="font-size:11.5px;color:rgba(255,255,255,.55);" id="bcast-hdr-sub">AI-drafted · personalise and send to selected doctors</div>
-    </div>
-    <div class="mc" onclick="closeOv('bcast-ov')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;position:relative;z-index:1;flex-shrink:0;align-self:flex-start;"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="10" y2="10"/><line x1="10" y1="1" x2="1" y2="10"/></svg></div>
-  </div>
-
-  <div style="flex:1;overflow-y:auto;padding:20px 24px;">
-    <!-- Occasion chip -->
-    <div style="margin-bottom:16px;">
-      <span class="bcast-occ-chip" id="bcast-occ-chip" style="background:var(--blue-bg);color:var(--navy);">📅 Occasion</span>
-    </div>
-
-    <!-- Two-col: left=doctors, right=message -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-
-      <!-- Left: Doctor selection -->
-      <div>
-        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;display:flex;align-items:center;gap:7px;">
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5.5l.8 2.4H9L7 4.6l.8 2.4L5.5 5.8l-2.3 1.2.8-2.4L2 2.9H4.7L5.5.5z" fill="#7C3AED" opacity=".9"/></svg>
-          AI Recommended Doctors
-          <span id="bcast-sel-count" style="background:var(--navy);color:#fff;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;">0</span>
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px;">
-          <input type="text" placeholder="Search doctors…" id="bcast-doc-search" oninput="renderBcastDocs()" style="width:100%;border:none;outline:none;background:transparent;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text1);">
-        </div>
-        <div id="bcast-doc-list" style="max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;background:var(--surface);"></div>
-        <div style="margin-top:8px;display:flex;gap:8px;">
-          <button class="btn btn-outline btn-xs" onclick="selectAllBcastDocs()">Select All Relevant</button>
-          <button class="btn btn-ghost btn-xs" onclick="clearBcastDocs()">Clear</button>
-        </div>
-      </div>
-
-      <!-- Right: Message -->
-      <div>
-        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;display:flex;align-items:center;gap:7px;">
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10.5 1L1 4.5l3.5 2 1.5 3.5 4.5-9z"/></svg>
-          Message <span class="ai-b">AI Drafted</span>
-        </div>
-        <!-- WA preview bubble -->
-        <div style="background:#E8F5E9;border-radius:12px;padding:10px 12px;margin-bottom:10px;border:1px solid #C8E6C9;">
-          <div id="bcast-preview" style="background:#fff;border-radius:10px 10px 10px 0;padding:10px 12px;font-size:12px;line-height:1.7;color:var(--text1);box-shadow:0 1px 3px rgba(0,0,0,.08);white-space:pre-wrap;max-height:120px;overflow-y:auto;"></div>
-        </div>
-        <textarea class="fta" id="bcast-msg" style="min-height:100px;font-size:12px;" oninput="document.getElementById('bcast-preview').textContent=this.value"></textarea>
-        <!-- Channel -->
-        <div style="display:flex;gap:7px;margin-top:10px;" id="bcast-ch-btns">
-          <div class="mcb on" onclick="selMCh(this)" style="flex:1;padding:8px;font-size:11px;border-radius:9px;"><div style="font-size:16px;margin-bottom:2px;">💬</div><div>WhatsApp</div></div>
-          <div class="mcb" onclick="selMCh(this)" style="flex:1;padding:8px;font-size:11px;border-radius:9px;"><div style="font-size:16px;margin-bottom:2px;">✉️</div><div>Email</div></div>
-          <div class="mcb" onclick="selMCh(this)" style="flex:1;padding:8px;font-size:11px;border-radius:9px;"><div style="font-size:16px;margin-bottom:2px;">📱</div><div>Both</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Selected recipients pills -->
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Sending To</div>
-      <div id="bcast-recip-pills" style="display:flex;gap:6px;flex-wrap:wrap;min-height:28px;"></div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <div class="mf" style="background:var(--surface2);">
-    <div style="font-size:12px;color:var(--text3);" id="bcast-send-summary">Select doctors to continue</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline btn-sm" onclick="closeOv('bcast-ov')">Cancel</button>
-      <button class="btn btn-navy" id="bcast-send-btn" onclick="sendBroadcast()" disabled style="opacity:.5;">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>
-        Broadcast
-      </button>
-    </div>
-  </div>
-</div>
-</div>
+<!-- duplicate modal removed -->
 
 <div id="toast"><span id="ti">✅</span><span id="tm">Done</span></div>
 
@@ -3099,6 +3032,11 @@ let ALL_PAPERS = [
   {id:11,status:'rejected',src:'link',title:'Are Antidepressants Safe in Pregnancy? A Controversial Review',journal:'Medical News Today (Blog)',year:'2025',month:'Feb',authors:'Unknown',date:'2025-02-28',cat:'Gynaecology',therapy:'High-risk Pregnancy',sub:'Review Article',rel:'Low',tags:['Antidepressants','Pregnancy'],rec:'All Gynaecologists',abstract:'Blog post, conflicting opinions, no proper citations.',sum:'Non-peer-reviewed blog. Not suitable.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-28',rejNote:'Not peer-reviewed. Medical News Today is a news aggregator, not a journal.'},
   {id:12,status:'rejected',src:'pubmed',title:'European Hypertension Pharmacotherapy: 2024 Update',journal:'Blood Pressure Journal',year:'2024',month:'Apr',authors:'European Hypertension Society',pmid:'38290123',date:'2025-02-15',cat:'Cardiology',therapy:'Hypertension',sub:'Guideline / Consensus',rel:'Medium',tags:['Hypertension','European Guidelines'],rec:'All Cardiologists',abstract:'European hypertension guideline update. Limited Indian applicability.',sum:'European guideline — limited Indian relevance, different drug availability.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-15',rejNote:'European cohorts, limited Indian relevance. Recommend Indian Hypertension Society guidelines.'},
 ];
+
+// Snapshot of the 12 demo seed papers. Used ONLY as a fallback when the backend
+// /content API is unreachable or returns no items. When real pipeline content
+// exists, the Content Library shows ONLY that content (production-like).
+const SEED_PAPERS = ALL_PAPERS.slice();
 
 // Doctors from Pinnacle Content Engine + expanded with DMS / next-action data
 // Populated from API on first visit to Doctor Directory; 12 entries below act as fallback
@@ -3199,27 +3137,43 @@ function mapAPIDoctor(d) {
     'Paediatrics':['paediatric nutrition','vaccination','iron deficiency','growth']
   };
   const interests = intMap[d.specialty] || ['general medicine'];
-  const daysAhead = ((numId - 1) % 14) + 1;
-  const nxtObj = new Date(); nxtObj.setDate(nxtObj.getDate() + daysAhead);
+
+  // Birthday & Anniversary detection
+  let birthdayDaysAhead = 999, anniversaryDaysAhead = 999, nextAction = null;
+  const today = new Date();
+
+  if (d.birthday) {
+    const bday = new Date(d.birthday);
+    const thisYearBday = new Date(today.getFullYear(), bday.getMonth(), bday.getDate());
+    if (thisYearBday < today) thisYearBday.setFullYear(today.getFullYear() + 1);
+    birthdayDaysAhead = Math.floor((thisYearBday - today) / 86400000);
+  }
+  if (d.anniversary) {
+    const anniv = new Date(d.anniversary);
+    const thisYearAnniv = new Date(today.getFullYear(), anniv.getMonth(), anniv.getDate());
+    if (thisYearAnniv < today) thisYearAnniv.setFullYear(today.getFullYear() + 1);
+    anniversaryDaysAhead = Math.floor((thisYearAnniv - today) / 86400000);
+  }
+
+  const daysAhead = Math.min(birthdayDaysAhead, anniversaryDaysAhead);
+  const nxtObj = new Date(); nxtObj.setDate(nxtObj.getDate() + (daysAhead < 999 ? daysAhead : 0));
   const NM = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const nextDate = daysAhead === 0 ? 'Today' : `${nxtObj.getDate()} ${NM[nxtObj.getMonth()]} ${nxtObj.getFullYear()}`;
-  let nextAction;
-  const mod = numId % 10;
+  const nextDate = daysAhead === 0 ? 'Today' : daysAhead < 999 ? `${nxtObj.getDate()} ${NM[nxtObj.getMonth()]} ${nxtObj.getFullYear()}` : 'Upcoming';
+
   if (days > 30) {
     nextAction = {type:'overdue', label: days >= 999 ? 'Never received content — first send overdue' : `No engagement in ${days} days — re-engage now`, icon:'⚠️', urgent:true};
-  } else if (mod === 2) {
+  } else if (birthdayDaysAhead <= 7) {
     nextAction = {type:'birthday', label:'Birthday coming up — send wish + digital gift', icon:'🎂', urgent:true};
-  } else if (mod === 5) {
+  } else if (anniversaryDaysAhead <= 7) {
     nextAction = {type:'anniversary', label:'Practice anniversary — congratulate', icon:'💍', urgent:false};
-  } else if (mod === 7) {
-    nextAction = {type:'event', label:`${d.specialty} CME coming — send invite`, icon:'🎓', urgent:false};
   } else {
-    nextAction = {type:'content', label:`New ${d.sub_specialty||d.specialty} research — share with doctor`, icon:'📄', urgent:(daysAhead===1)};
+    nextAction = {type:'content', label:`New ${d.sub_specialty||d.specialty} research — share with doctor`, icon:'📄', urgent:false};
   }
   return {
     id:numId, name:d.name, init, spec:d.specialty, city:d.city,
     cat, div, dm, dms, real, score, last, days, mr, status,
-    interests, clinic:`${d.hospital}, ${d.city}`, nextDate, nextAction
+    interests, clinic:`${d.hospital}, ${d.city}`, nextDate, nextAction,
+    birthday: d.birthday, anniversary: d.anniversary, birthdayDaysAhead, anniversaryDaysAhead
   };
 }
 
@@ -3242,9 +3196,11 @@ async function loadDoctorsFromAPI() {
     DOCTORS = (data.doctors || []).map(mapAPIDoctor);
     DOCTORS_LOADED = true;
     DOCTORS_LAST_FETCH = new Date();
-    updateDoctorKPIs();
-    populateDoctorFilters(data);
-    renderDocs();
+    // Helpers are non-critical — isolate each so a throw cannot prevent rendering
+    try { buildEngEventsForAllDoctors(); } catch(he) { console.warn('buildEngEvents:', he); }
+    try { updateDoctorKPIs(); } catch(he) { console.warn('updateDoctorKPIs:', he); }
+    try { populateDoctorFilters(data); } catch(he) { console.warn('populateDoctorFilters:', he); }
+    try { populateBirthdayAnniversaryTasks(); } catch(he) { console.warn('birthdayAnniversaryTasks:', he); }
   } catch(e) {
     if (!DOCTORS_LOADED) {
       // Only show error banner on first load; on refresh failure keep existing table
@@ -3252,15 +3208,20 @@ async function loadDoctorsFromAPI() {
         + '<div style="color:var(--amber);font-size:13px;font-weight:600;margin-bottom:6px;">⚠️ Could not reach backend API on localhost:8000</div>'
         + '<div style="color:var(--text3);font-size:12px;">Run <strong>START_DEMO.bat</strong> to start the server — showing cached data below.</div>'
         + '</td></tr>';
-      renderDocs(); // still renders the 12 fallback doctors
     }
-    // On refresh failure: silently keep existing data; just update count line
-    updateDocCntLine();
   } finally {
+    // Always render — shows API data if DOCTORS was populated, otherwise 12 fallback doctors
+    renderDocs();
+    updateDocCntLine();
     if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">'+_spinPath()+'</svg> Refresh'; }
   }
 }
 function _spinPath(){ return '<path d="M10 6A4 4 0 1 1 6 2"/><path d="M10 2v4h-4"/>'; }
+
+/* ── Populate Birthday & Anniversary Tasks — now handled by generateTodayTasks() ── */
+function populateBirthdayAnniversaryTasks() {
+  generateTodayTasks();
+}
 
 /* ── Refresh KPI row from live DOCTORS array ─────────────────────────────────── */
 function updateDoctorKPIs() {
@@ -3347,9 +3308,16 @@ function toggleRoleDropdown(e){
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
 // Valid page IDs for each role — used to validate hash on load/switch
-const PAGES_MA    = ['content','pipeline','dashboard'];
-const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
-const PAGES_ADMIN = ['research-agent','pipeline'];
+// Feature flag — set true to restore the Research Pipeline menu for all roles
+const SHOW_RESEARCH_PIPELINE = false;
+
+const _PAGES_MA    = ['content','pipeline','dashboard'];
+const _PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
+const _PAGES_ADMIN = ['research-agent','pipeline'];
+// When the flag is off, 'pipeline' is stripped so even direct #pipeline links are blocked
+const PAGES_MA    = SHOW_RESEARCH_PIPELINE ? _PAGES_MA    : _PAGES_MA.filter(p => p !== 'pipeline');
+const PAGES_PMT   = SHOW_RESEARCH_PIPELINE ? _PAGES_PMT   : _PAGES_PMT.filter(p => p !== 'pipeline');
+const PAGES_ADMIN = SHOW_RESEARCH_PIPELINE ? _PAGES_ADMIN : _PAGES_ADMIN.filter(p => p !== 'pipeline');
 
 function _getHashPage(){
   const h = location.hash.replace('#','');
@@ -3366,10 +3334,9 @@ function switchRole(role, skipHash){
   ROLE=role;
   document.getElementById('role-switcher').classList.remove('open');
 
-  // Show/hide PMT·MA switcher options — hidden for admin (no role switching)
-  const adminMode = role === 'admin';
-  document.getElementById('rd-pmt').style.display = adminMode ? 'none' : '';
-  document.getElementById('rd-ma').style.display  = adminMode ? 'none' : '';
+  // Always show role switching options (admin can test other roles)
+  document.getElementById('rd-pmt').style.display = '';
+  document.getElementById('rd-ma').style.display  = '';
   document.getElementById('rd-pmt').classList.toggle('selected', role==='pmt');
   document.getElementById('rd-ma').classList.toggle('selected',  role==='ma');
   document.getElementById('chk-pmt').style.display = role==='pmt' ? 'block' : 'none';
@@ -3417,6 +3384,7 @@ function switchRole(role, skipHash){
                    : role==='admin' ? 'research-agent'
                    : role==='pmt'   ? 'today' : 'content';
   showPage(targetPage, skipHash);
+  if(typeof rebuildAllPapers === 'function') rebuildAllPapers();  // real pipeline content for all roles
   buildCLKpis();
   buildCLTabs();
   buildSidebarFooter();
@@ -3438,10 +3406,10 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      ${SHOW_RESEARCH_PIPELINE ? `<div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
-      </div>`;
+      </div>` : ''}`;
     return;
   }
   if(isMA){
@@ -3452,10 +3420,10 @@ function buildSidebar(){
         Content Library
         <span class="nb nb-amber" id="nb-pend">${ALL_PAPERS.filter(p=>p.status==='pending').length}</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      ${SHOW_RESEARCH_PIPELINE ? `<div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
-      </div>
+      </div>` : ''}
       <div class="ni" id="ni-dashboard" onclick="showPage('dashboard')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="6" height="6" rx="1.5"/><rect x="10" y="2" width="6" height="6" rx="1.5"/><rect x="2" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
         Dashboard
@@ -3509,10 +3477,10 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      ${SHOW_RESEARCH_PIPELINE ? `<div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
-      </div>`;
+      </div>` : ''}`;
   }
 }
 
@@ -3691,11 +3659,11 @@ function clCardHTML(p){
   // Handle both numeric (static) and string (API) IDs safely in onclick
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request improvement with review notes">⟳ Improve</button>`
     : '';
   const actions=isMA
     ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
-       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
+       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">View</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
   // ── Publication details block ──────────────────────────────────────────────
@@ -3742,11 +3710,11 @@ function clRowHTML(p){
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const accClass=p.status==='approved'?'pr-acc-approved':p.status==='pending'?'pr-acc-pending':'pr-acc-rejected';
   const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
+    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request improvement with review notes">⟳ Improve</button>`
     : '';
   const actions=isMA
     ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
-       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
+       <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">View</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
   return`<div class="pr" onclick="${isMA?`openMADetail(${idArg})`:`openCVModal(${idArg})`}">
@@ -3825,20 +3793,47 @@ function rmTag(t){CUR_TAGS=CUR_TAGS.filter(x=>x!==t);renderTags();}
 function onTagKey(e){if(e.key==='Enter'||e.key===','){e.preventDefault();const v=e.target.value.trim();if(v&&!CUR_TAGS.includes(v)){CUR_TAGS.push(v);renderTags();}else e.target.value='';}}
 function setRel(r,el){CUR_REL=r;document.querySelectorAll('#ma-rel-opts .rel-opt').forEach(o=>o.className='rel-opt');el.classList.add(r==='High'?'rel-h':r==='Medium'?'rel-m':'rel-l');}
 
-function doApprove(){
+async function doApprove(){
   const p=ALL_PAPERS.find(x=>x.id===CUR_ID); if(!p) return;
+  const editedMeta = {
+    specialty:    document.getElementById('ma-cat').value     || undefined,
+    therapy_area: document.getElementById('ma-therapy').value || undefined,
+    sub_category: document.getElementById('ma-sub').value     || undefined,
+    summary:      document.getElementById('ma-summary').value || undefined,
+    tags:         CUR_TAGS.length ? [...CUR_TAGS] : undefined,
+  };
   if(p._apiSource){
-    // API-sourced item: persist approval to backend
-    fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})})
-    .then(r=>{if(!r.ok)throw new Error('API error');p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);})
-    .catch(()=>toast('❌','Approval failed — check API connection'));
+    try {
+      // 1. Save metadata edits (PATCH) — works regardless of current status
+      const hasMeta = Object.values(editedMeta).some(v => v !== undefined);
+      if(hasMeta){
+        const mr = await fetch(PL_API+'/content/'+p._apiId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(editedMeta)});
+        if(!mr.ok) throw new Error('Metadata save failed');
+      }
+      // 2. Set status to approved (idempotent)
+      const ar = await fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})});
+      if(!ar.ok) throw new Error('Approval failed');
+      // 3. Sync local state
+      p.status='approved'; p.rev='Dr. Prashant Agarwal'; p.revDate=new Date().toISOString().slice(0,10);
+      if(editedMeta.specialty)    p.cat     = editedMeta.specialty;
+      if(editedMeta.therapy_area) p.therapy = editedMeta.therapy_area;
+      if(editedMeta.sub_category) p.sub     = editedMeta.sub_category;
+      if(editedMeta.summary)      p.sum     = editedMeta.summary;
+      if(editedMeta.tags)         p.tags    = [...CUR_TAGS];
+      p.rel = CUR_REL || p.rel;
+      updCounts(); renderCL(); closeOv('ma-ov');
+      toast('✅',`"${p.title.slice(0,44)}…" saved and live for PMT!`);
+    } catch(e){
+      toast('❌', e.message || 'Save failed — check API connection');
+    }
     return;
   }
-  p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);
+  // Static paper — in-memory only
+  p.status='approved'; p.rev='Dr. Prashant Agarwal'; p.revDate=new Date().toISOString().slice(0,10);
   p.sum=document.getElementById('ma-summary').value;
-  p.cat=document.getElementById('ma-cat').value;p.therapy=document.getElementById('ma-therapy').value;
-  p.sub=document.getElementById('ma-sub').value;p.rel=CUR_REL||p.rel;p.tags=[...CUR_TAGS];
-  updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);
+  p.cat=document.getElementById('ma-cat').value; p.therapy=document.getElementById('ma-therapy').value;
+  p.sub=document.getElementById('ma-sub').value; p.rel=CUR_REL||p.rel; p.tags=[...CUR_TAGS];
+  updCounts(); renderCL(); closeOv('ma-ov'); toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);
 }
 function quickApprove(id){
   const p=ALL_PAPERS.find(x=>x.id===id);if(!p)return;
@@ -3894,9 +3889,9 @@ async function _triggerImprovementFromReject(apiId, notes) {
       body: JSON.stringify({notes: notes, reviewer:'Dr. Prashant Agarwal (MA)'})
     });
     if(!res.ok) throw new Error();
-    toast('⟳','Agents are working on a revised version — check Research Pipeline');
+    toast('⟳','A revised version is being prepared — it will appear in Pending Review');
     if(typeof loadRecentRuns==='function') setTimeout(loadRecentRuns, 2000);
-  } catch(e){ toast('❌','Could not trigger agents — check API connection'); }
+  } catch(e){ toast('❌','Could not start improvement — check API connection'); }
 }
 function regenSummary(){const ta=document.getElementById('ma-summary');ta.style.opacity='.4';ta.value='Regenerating…';setTimeout(()=>{const p=ALL_PAPERS.find(x=>x.id===CUR_ID);ta.value=p?p.sum:'';ta.style.opacity='1';toast('✨','Summary regenerated by AI');},1400);}
 
@@ -3950,7 +3945,14 @@ function getDocsFiltered(){
 function renderDocs(){
   const list=getDocsFiltered();
   updateDocCntLine(list.length);
-  document.getElementById('doc-tbody').innerHTML=list.map(docRowHTML).join('');
+  const tbody=document.getElementById('doc-tbody');
+  if(!tbody) return;
+  const rows=[];
+  list.forEach(d=>{
+    try{ rows.push(docRowHTML(d)); }
+    catch(e){ console.error('docRowHTML error for',d&&d.id,d&&d.name,e); }
+  });
+  tbody.innerHTML=rows.join('');
 }
 function updateDocCntLine(cnt){
   const list = (cnt !== undefined) ? {length:cnt} : getDocsFiltered();
@@ -4009,24 +4011,66 @@ function docRowHTML(d){
 /* ══ ENGAGEMENT CALENDAR ══ */
 let EC_YEAR=2026, EC_MONTH=4; // 0-indexed May=4
 
-// Per-doctor engagement events (keyed by docId)
-const ENG_EVENTS = {
-  1: [ // Dr. Jayesh Shah
-    {date:'2026-05-04', type:'mr_visit',     label:'MR Visit — Ramesh Nair',
-     products:'DYNADUO, DYNAGLIPT, Glykind', eDetailDuration:'1 min 45 sec',
-     itemsGiven:'Pen, Doctor Pad', samplesGiven:'DYNADUO-20 (2 strips)', jointVisit:'NA'},
-    {date:'2026-05-08', type:'content_sent', label:'SGLT2 paper sent via WhatsApp', channel:'WhatsApp', response:'Opened in 12 min'},
-    {date:'2026-04-22', type:'mr_visit',     label:'MR Visit — quarterly review',
-     products:'DYNADUO, SGLT-D', eDetailDuration:'2 min 10 sec',
-     itemsGiven:'Notepad, Pen', samplesGiven:'NA', jointVisit:'Area Mgr — Suresh Patel'},
-    {date:'2026-04-08', type:'content_sent', label:'GLP-1 paper sent via Email', channel:'Email', response:'Opened same day'},
-    {date:'2026-05-12', type:'personal',     label:'Birthday 🎂'},
-    {date:'2026-05-15', type:'cme',          label:'Endocrinology CME — invite sent'},
-    {date:'2026-05-22', type:'mr_visit',     label:'MR Visit (scheduled)',
-     products:'DYNADUO, Glykind', eDetailDuration:'—', itemsGiven:'—', samplesGiven:'—', jointVisit:'NA'},
-  ],
-};
-let LOG_EVENTS = {}; // user-logged entries {docId: [{date,type,label}]}
+let ENG_EVENTS = {};
+let LOG_EVENTS = {};
+
+function generateEngEvents(doc) {
+  if (!doc) return [];
+  const events = [];
+  const today = new Date();
+  const MRS = ['Ramesh Nair','Amit Verma','Prashant Das','Suresh Raj','Kiran Patel',
+               'Neha Shinde','Anjana Pillai','Ravi Kumar','Suman Das','Vijay Mehta'];
+  const mr = MRS[(doc.id - 1) % MRS.length];
+  const specProducts = {
+    'Diabetology':'DYNADUO, DYNAGLIPT, Glykind', 'Cardiology':'TELHIM, DYNADUO, Amlokind',
+    'Endocrinology':'DYNADUO, Thyrokind, SGLT-D', 'Gynaecology':'Progekind, Mifekind, Calshine',
+    'General Medicine':'DYNADUO, Amlokind, Azikind', 'Paediatrics':'Cefkind, Ivekind, Calshine',
+    'Neurology':'Oxykind, Gabakind, Methylkind', 'Nephrology':'DYNADUO, SGLT-D, Telhim',
+    'Dermatology':'Retikind, Clobeta, Itrakind', 'Ophthalmology':'Moxi-D, Nepakind, Lubrikind',
+    'Orthopaedics':'Calshine-D3, Diclokind, Methylkind'
+  };
+  const products = specProducts[doc.spec] || 'DYNADUO, Amlokind';
+
+  // Last contacted → content_sent event
+  if (doc.last && doc.last !== 'Never') {
+    const parts = doc.last.match(/(\d+)\s+(\w+)\s+(\d+)/);
+    if (parts) {
+      const M = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+      const lastDate = new Date(parseInt(parts[3]), M[parts[2]]||0, parseInt(parts[1]));
+      const ds = lastDate.toISOString().slice(0,10);
+      events.push({date:ds, type:'content_sent', label:doc.spec+' paper sent via WhatsApp', channel:'WhatsApp', response:'Opened'});
+      const mrDate = new Date(lastDate); mrDate.setDate(mrDate.getDate() - 5);
+      if (mrDate.getTime() > today.getTime() - 90*86400000) {
+        events.push({date:mrDate.toISOString().slice(0,10), type:'mr_visit', label:'MR Visit — '+mr, products:products, eDetailDuration:'2 min', itemsGiven:'Pen, Doctor Pad', samplesGiven:'—', jointVisit:'NA'});
+      }
+    }
+  }
+
+  // Birthday → personal event
+  if (doc.birthday) {
+    const bd = new Date(doc.birthday);
+    const thisYearBd = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
+    events.push({date:thisYearBd.toISOString().slice(0,10), type:'personal', label:'Birthday 🎂'});
+  }
+
+  // Anniversary → personal event
+  if (doc.anniversary) {
+    const an = new Date(doc.anniversary);
+    const thisYearAn = new Date(today.getFullYear(), an.getMonth(), an.getDate());
+    events.push({date:thisYearAn.toISOString().slice(0,10), type:'personal', label:'Anniversary 💍'});
+  }
+
+  // Scheduled MR visit in next 2 weeks
+  const nextVisit = new Date(today); nextVisit.setDate(nextVisit.getDate() + 10 + (doc.id % 7));
+  events.push({date:nextVisit.toISOString().slice(0,10), type:'mr_visit', label:'MR Visit (scheduled) — '+mr, products:products, eDetailDuration:'—', itemsGiven:'—', samplesGiven:'—', jointVisit:'NA'});
+
+  return events;
+}
+
+function buildEngEventsForAllDoctors() {
+  ENG_EVENTS = {};
+  DOCTORS.forEach(d => { ENG_EVENTS[d.id] = generateEngEvents(d); });
+}
 
 function getDocEvents(docId){
   const base = ENG_EVENTS[docId]||[];
@@ -4276,9 +4320,14 @@ function openDoc360(id){
   document.getElementById('d360-last-visit').textContent=d.last||'—';
   // CRM panel
   if(document.getElementById('crm-mr')) document.getElementById('crm-mr').textContent=d.mr||'—';
+  if(document.getElementById('crm-last-visit')) document.getElementById('crm-last-visit').textContent=d.last||'—';
   if(document.getElementById('crm-dm')) document.getElementById('crm-dm').textContent='₹'+d.dm.toLocaleString('en-IN');
-  if(document.getElementById('crm-dms-cur')) document.getElementById('crm-dms-cur').textContent=fmtMoney(d.dms)+' ↑';
+  const dmsPrev = Math.round(d.dms * (0.85 + (d.id % 10)*0.02));
+  if(document.getElementById('crm-dms-prev')) document.getElementById('crm-dms-prev').textContent=fmtMoney(dmsPrev);
+  if(document.getElementById('crm-dms-cur')) document.getElementById('crm-dms-cur').textContent=fmtMoney(d.dms)+(d.dms>dmsPrev?' ↑':' ↓');
   if(document.getElementById('crm-real')) document.getElementById('crm-real').textContent=d.real+'%';
+  const specProducts={'Diabetology':'DYNADUO · DYNAGLIPT · Glykind','Cardiology':'TELHIM · DYNADUO · Amlokind','Endocrinology':'DYNADUO · Thyrokind · SGLT-D','Gynaecology':'Progekind · Mifekind · Calshine','General Medicine':'DYNADUO · Amlokind · Azikind','Paediatrics':'Cefkind · Ivekind · Calshine','Neurology':'Oxykind · Gabakind · Methylkind','Nephrology':'DYNADUO · SGLT-D · Telhim','Dermatology':'Retikind · Clobeta · Itrakind','Ophthalmology':'Moxi-D · Nepakind · Lubrikind','Orthopaedics':'Calshine-D3 · Diclokind · Methylkind'};
+  if(document.getElementById('crm-products')) document.getElementById('crm-products').textContent=specProducts[d.spec]||'DYNADUO · Amlokind';
   const gap=d.dm-d.dms;
   if(document.getElementById('crm-gap')) document.getElementById('crm-gap').textContent=fmtMoney(gap)+'/month';
   // Overview interest tags
@@ -4292,7 +4341,7 @@ function openDoc360(id){
   if(document.getElementById('d360-clinic-full')) document.getElementById('d360-clinic-full').textContent=d.clinic||`${d.name.replace('Dr.','').trim()}'s Clinic, ${d.city}`;
   if(document.getElementById('d360-interests')) document.getElementById('d360-interests').textContent=(d.interests||[]).join(' · ')||d.spec;
   // Full engagement calendar (mini-cal in Personal tab removed)
-  EC_MONTH=4; EC_YEAR=2026;
+  const _now = new Date(); EC_MONTH=_now.getMonth(); EC_YEAR=_now.getFullYear();
   renderEngCal(id);
   set360Tab('overview', document.querySelector('.tab360'));
   showPage('360');
@@ -4302,25 +4351,47 @@ function buildMiniCal(){
   const grid=document.getElementById('d360-cal-grid');
   const eventsEl=document.getElementById('d360-cal-events');
   if(!grid) return;
-  // May 2026 starts Thursday (day 4 in 0-indexed Sun=0)
-  const startDay=4;
-  const days=31;
-  const events={12:{label:'Birthday 🎂',color:'#FEF3C7',dot:'#F59E0B'},15:{label:'CME Invite',color:'#DBEAFE',dot:'var(--blue)'},4:{label:'Today',color:'var(--surface)'},22:{label:'MR Visit',color:'#D1FAE5',dot:'var(--green)'}};
+  const doc = DOCTORS.find(d=>d.id===CUR_DOC_ID);
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const startDay = new Date(year, month, 1).getDay();
+  const days = new Date(year, month+1, 0).getDate();
+  const todayDate = now.getDate();
+  const docEvents = getDocEvents(CUR_DOC_ID);
+  const dayMap = {};
+  const eventList = [];
+  const typeStyle = {personal:{color:'#FEF3C7',dot:'#F59E0B'},content_sent:{color:'#DBEAFE',dot:'var(--blue)'},mr_visit:{color:'#D1FAE5',dot:'var(--green)'}};
+  docEvents.forEach(ev => {
+    const ed = new Date(ev.date);
+    if (ed.getFullYear()===year && ed.getMonth()===month) {
+      const dd = ed.getDate();
+      const st = typeStyle[ev.type]||typeStyle.content_sent;
+      dayMap[dd] = {label:ev.label, color:st.color, dot:st.dot};
+      eventList.push({day:dd, label:ev.label, dot:st.dot, type:ev.type});
+    }
+  });
   let html='';
   for(let i=0;i<startDay;i++) html+=`<div class="mini-cal-day empty-day"></div>`;
   for(let d=1;d<=days;d++){
-    const ev=events[d];
-    const isToday=d===4;
+    const ev=dayMap[d];
+    const isToday=d===todayDate;
     html+=`<div class="mini-cal-day${isToday?' today-day':''}" style="${ev?.color?'background:'+ev.color+';':''}" title="${ev?.label||''}">
       <span style="font-size:10.5px;">${d}</span>
       ${ev?.dot?`<div class="cal-dot-row"><div class="cal-d" style="background:${ev.dot};"></div></div>`:''}
     </div>`;
   }
   grid.innerHTML=html;
-  if(eventsEl) eventsEl.innerHTML=`
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);"><div style="width:8px;height:8px;border-radius:2px;background:#F59E0B;flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">12 May — <strong>Birthday</strong></div><button class="cta-wa-btn" style="margin-left:auto;padding:3px 8px;font-size:10px;" onclick="openQuickWish(DOCTORS.find(d=>d.id==CUR_DOC_ID)||DOCTORS[0],'birthday')">Wish</button></div>
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);"><div style="width:8px;height:8px;border-radius:2px;background:var(--blue);flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">15 May — CME Endocrinology Summit</div></div>
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;"><div style="width:8px;height:8px;border-radius:2px;background:var(--green);flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">22 May — MR Visit (scheduled)</div></div>`;
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(eventsEl) {
+    if (!eventList.length) {
+      eventsEl.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0;">No events this month</div>';
+    } else {
+      eventsEl.innerHTML = eventList.sort((a,b)=>a.day-b.day).slice(0,4).map(ev => {
+        const wishBtn = ev.type==='personal' && ev.label.includes('Birthday') ? `<button class="cta-wa-btn" style="margin-left:auto;padding:3px 8px;font-size:10px;" onclick="openQuickWish(DOCTORS.find(d=>d.id==CUR_DOC_ID)||DOCTORS[0],'birthday')">Wish</button>` : '';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);"><div style="width:8px;height:8px;border-radius:2px;background:${ev.dot};flex-shrink:0;"></div><div style="font-size:12px;color:var(--text1);">${ev.day} ${monthNames[month]} — ${ev.label}</div>${wishBtn}</div>`;
+      }).join('');
+    }
+  }
 }
 
 function set360Tab(tab,el){
@@ -5120,38 +5191,99 @@ function openQuickWish(doc, type){
 let TODAY_TAB = 'all';
 let TODAY_DONE = new Set(); // task ids marked done
 
-const TODAY_TASKS = [
-  // URGENT
-  {id:'t1', priority:'urgent', type:'birthday',      docId:7,   icon:'🎂', title:'Birthday tomorrow',
-   reason:'Dr. Priya Nair · A+ · Gynaecologist · Bangalore · Score 81',
-   action:'Send Birthday Wish', hint:'2 May 2026 · Consider sending a bouquet via Ferns N Petals'},
-  {id:'t2', priority:'urgent', type:'overdue',       docId:5,   icon:'🚨', title:'Never received content',
-   reason:'Dr. S.K. Singh · A+ · Endocrinologist · Varanasi · Score 18',
-   action:'Send First Paper', hint:'Engagement score critically low — first send overdue since onboarding'},
-  {id:'t3', priority:'urgent', type:'overdue',       docId:3,   icon:'⚠️', title:'31 days without engagement',
-   reason:'Dr. Giridhari Jena · A · Cardiologist · Bhubaneswar · Score 44',
-   action:'Re-engage Now', hint:'Last sent: Telmisartan Trial · 22 Mar 2026 — now 31 days overdue'},
-  {id:'t4', priority:'urgent', type:'overdue',       docId:12,  icon:'⚠️', title:'48 days without engagement',
-   reason:'Dr. Deepa Krishnan · A · Gynaecologist · Kolkata · Score 38',
-   action:'Re-engage Now', hint:'At-risk status · DMS declining · Immediate attention needed'},
-  // RECOMMENDED
-  {id:'t5', priority:'recommended', type:'content',  docId:1,   icon:'📄', title:'New SGLT2 paper — interest match',
-   reason:'Dr. Jayesh Shah · A+ · Diabetologist · Hyderabad · Score 82',
-   action:'Share Paper', hint:'SGLT2 Inhibitors Meta-Analysis matches his clinical interests in T2DM and SGLT2'},
-  {id:'t6', priority:'recommended', type:'content',  docId:8,   icon:'📄', title:'New PCOS paper — research match',
-   reason:'Dr. Kavita Joshi · A · Gynaecologist · Pune · Score 76',
-   action:'Share Paper', hint:'GLP-1 in PCOS study matches her published research interests'},
-  {id:'t7', priority:'recommended', type:'congratulate', docId:8, icon:'🏆', title:'Published a new paper',
-   reason:'Dr. Kavita Joshi co-authored "PCOS and Hormonal Interventions" — JOGI, March 2026',
-   action:'Send Congratulations', hint:'Great relationship-building opportunity — she rarely gets recognized'},
-  // UPCOMING
-  {id:'t8', priority:'upcoming', type:'anniversary', docId:10,  icon:'💍', title:'Anniversary in 3 days',
-   reason:'Dr. Arvind Patel · A+ · Paediatrician · Ahmedabad · Score 79',
-   action:'Prepare Wish', hint:'3 May 2026 · Consider sending flowers or a memento via Ferns N Petals'},
-  {id:'t9', priority:'upcoming', type:'event',       docId:6,   icon:'🎓', title:'Endocrinology CME in 7 days',
-   reason:'Dr. Madhukar Rai · A+ · Endocrinologist · Varanasi · Score 76',
-   action:'Send CME Invite', hint:'May 8 CME on insulin resistance — directly relevant to his interests'},
-];
+let TODAY_TASKS = [];
+
+function generateTodayTasks() {
+  if (!DOCTORS || !DOCTORS.length) return;
+  const urgent = [], recommended = [], upcoming = [];
+  let tid = 1;
+  const mkReason = d => d.name + ' · ' + d.cat + ' · ' + d.spec + ' · ' + d.city + ' · Score ' + d.score;
+
+  // ── Collect candidates per type ──────────────────────────────────────────
+
+  // Birthday tasks
+  DOCTORS.forEach(d => {
+    if (d.birthdayDaysAhead === undefined || d.birthdayDaysAhead < 0) return;
+    if (d.birthdayDaysAhead <= 1) {
+      const dText = d.birthdayDaysAhead === 0 ? 'Birthday today!' : 'Birthday tomorrow';
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'birthday', docId:d.id, icon:'🎂',
+        title: dText, reason: mkReason(d), action:'Send Birthday Wish',
+        hint: 'Consider sending a bouquet via Ferns N Petals' });
+    } else if (d.birthdayDaysAhead <= 4) {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'birthday', docId:d.id, icon:'🎂',
+        title: 'Birthday in '+d.birthdayDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Plan ahead — prepare a personalised birthday greeting' });
+    } else if (d.birthdayDaysAhead <= 7) {
+      upcoming.push({ id:'tg-'+(tid++), priority:'upcoming', type:'birthday', docId:d.id, icon:'🎂',
+        title: 'Birthday in '+d.birthdayDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Plan ahead — prepare a personalised birthday greeting' });
+    }
+  });
+
+  // Anniversary tasks
+  DOCTORS.forEach(d => {
+    if (d.anniversaryDaysAhead === undefined || d.anniversaryDaysAhead < 0) return;
+    if (d.anniversaryDaysAhead <= 1) {
+      const aText = d.anniversaryDaysAhead === 0 ? 'Anniversary today!' : 'Anniversary tomorrow';
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'anniversary', docId:d.id, icon:'💍',
+        title: aText, reason: mkReason(d), action:'Send Anniversary Wish',
+        hint: 'Consider sending flowers or a memento via Ferns N Petals' });
+    } else if (d.anniversaryDaysAhead <= 4) {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'anniversary', docId:d.id, icon:'💍',
+        title: 'Anniversary in '+d.anniversaryDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Consider sending flowers or a memento' });
+    } else if (d.anniversaryDaysAhead <= 7) {
+      upcoming.push({ id:'tg-'+(tid++), priority:'upcoming', type:'anniversary', docId:d.id, icon:'💍',
+        title: 'Anniversary in '+d.anniversaryDaysAhead+' days', reason: mkReason(d), action:'Prepare Wish',
+        hint: 'Plan ahead — prepare a personalised anniversary greeting' });
+    }
+  });
+
+  // Overdue / never contacted — sort by worst first
+  const overdueDocs = DOCTORS.filter(d => d.days > 30).sort((a,b) => b.days - a.days);
+  overdueDocs.forEach(d => {
+    if (d.days >= 999) {
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'overdue', docId:d.id, icon:'🚨',
+        title: 'Never received content', reason: mkReason(d), action:'Send First Paper',
+        hint: 'Engagement score critically low — first send overdue since onboarding' });
+    } else if (d.days > 45) {
+      urgent.push({ id:'tg-'+(tid++), priority:'urgent', type:'overdue', docId:d.id, icon:'⚠️',
+        title: d.days+' days without engagement', reason: mkReason(d), action:'Re-engage Now',
+        hint: 'At-risk status · DMS declining · Immediate attention needed' });
+    } else {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'overdue', docId:d.id, icon:'⚠️',
+        title: d.days+' days without engagement', reason: mkReason(d), action:'Re-engage Now',
+        hint: 'Last contacted '+d.last+' — re-engage before the gap widens' });
+    }
+  });
+
+  // Content match — top engaged doctors with matching approved papers
+  const contentDocs = DOCTORS.filter(d => d.score >= 60 && d.days <= 30 && d.interests && d.interests.length)
+    .sort((a,b) => b.score - a.score);
+  contentDocs.forEach(d => {
+    const matchedPaper = (typeof ALL_PAPERS !== 'undefined' ? ALL_PAPERS : []).find(p => {
+      if (p.status !== 'approved') return false;
+      const pCat = (p.cat||'').toLowerCase(), pTh = (p.therapy||'').toLowerCase();
+      return d.interests.some(i => pCat.includes(i.slice(0,4)) || pTh.includes(i.slice(0,4)));
+    });
+    if (matchedPaper) {
+      recommended.push({ id:'tg-'+(tid++), priority:'recommended', type:'content', docId:d.id, icon:'📄',
+        title: 'New '+d.spec+' paper — interest match', reason: mkReason(d), action:'Share Paper',
+        hint: matchedPaper.title.slice(0,80)+' — matches clinical interests' });
+    }
+  });
+
+  // ── Cap each bucket to match design proportions ──────────────────────────
+  const MAX_URGENT = 4, MAX_REC = 3, MAX_UP = 2;
+
+  TODAY_TASKS = [
+    ...urgent.slice(0, MAX_URGENT),
+    ...recommended.slice(0, MAX_REC),
+    ...upcoming.slice(0, MAX_UP),
+  ];
+  TODAY_DONE = new Set();
+  if (typeof renderToday === 'function') renderToday();
+}
 
 function setTodayTab(tab, el){
   TODAY_TAB = tab;
@@ -5161,6 +5293,13 @@ function setTodayTab(tab, el){
 }
 
 function renderToday(){
+  const container = document.getElementById('today-task-list');
+  if (!DOCTORS_LOADED && !TODAY_TASKS.length) {
+    if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Loading doctor data…</div>';
+    loadDoctorsFromAPI();
+    return;
+  }
+
   const filtered = TODAY_TASKS.filter(t=>{
     const done = TODAY_DONE.has(t.id);
     if(TODAY_TAB==='done') return done;
@@ -5194,8 +5333,6 @@ function renderToday(){
     document.getElementById('tc-'+tab.replace('recommended','rec').replace('upcoming','up')).textContent=n;
   });
   document.getElementById('tc-done').textContent = doneCount;
-
-  const container = document.getElementById('today-task-list');
 
   if(filtered.length===0 && TODAY_TAB!=='done'){
     container.innerHTML='';
@@ -5548,51 +5685,22 @@ function confirmSendAndComplete(){
 
 /* ══════════════════════ OCCASION HUB ══════════════════════ */
 
-const OCCASIONS = [
-  // UPCOMING (May–June 2026)
-  {id:'o1',  date:'2026-05-04', name:"World Asthma Day",        icon:'🫁', color:'#EFF6FF', c:'#1E40AF', tag:'medical',   specialty:['Physician','Pulmonology'],
-   msg:`Dear Dr. {first},\n\nWishing you a meaningful World Asthma Day! Your efforts in managing respiratory health make a real difference to patients' lives.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'3 days away'},
-  {id:'o2',  date:'2026-05-08', name:"World Thalassaemia Day",  icon:'🩸', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['Haematology','Physician'],
-   msg:`Dear Dr. {first},\n\nOn World Thalassaemia Day, we salute your commitment to patients living with this condition. Your dedication inspires us.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'7 days away'},
-  {id:'o3',  date:'2026-05-12', name:"International Nurses Day",icon:'💉', color:'#ECFDF5', c:'#065F46', tag:'medical',   specialty:null,
-   msg:`Dear Dr. {first},\n\nHappy International Nurses Day! A moment to appreciate the incredible teams you lead and the care they provide every day.\n\nWith gratitude,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'11 days away'},
-  {id:'o4',  date:'2026-06-01', name:"World Milk Day",          icon:'🥛', color:'#FFFBEB', c:'#92400E', tag:'medical',   specialty:['Paediatrics','Gynaecology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nHappy World Milk Day! Nutrition starts early — a reminder of the foundational role you play in guiding families toward healthier futures.\n\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'This month'},
-  {id:'o5',  date:'2026-06-14', name:"World Blood Donor Day",   icon:'❤️', color:'#FEF2F2', c:'#991B1B', tag:'medical',   specialty:['Haematology','Cardiology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nOn World Blood Donor Day, we recognise your crucial role in promoting safe transfusion practices and patient care.\n\nWith respect,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'This month'},
-  {id:'o6',  date:'2026-07-01', name:"Doctors' Day",            icon:'👨‍⚕️', color:'linear-gradient(135deg,#EBF0F8,#DBEAFE)', c:'var(--navy)', tag:'medical', specialty:null, featured:true,
-   msg:`Dear Dr. {first},\n\nHappy National Doctors' Day! 🎉\n\nThank you for your tireless dedication, your healing hands and your compassionate care. Mankind Pharma is proud to partner with you in your mission.\n\nWith deep gratitude and respect,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'Next month'},
-  {id:'o7',  date:'2026-07-28', name:"World Hepatitis Day",     icon:'🟡', color:'#FFFBEB', c:'#92400E', tag:'medical',   specialty:['Gastroenterology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nOn World Hepatitis Day, we appreciate your work in diagnosis and management. Your clinical expertise is vital in the fight against viral hepatitis.\n\nWarmly,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'July'},
-  {id:'o8',  date:'2026-08-12', name:"World Organ Donation Day",icon:'🫀', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['Cardiology','Physician'],
-   msg:`Dear Dr. {first},\n\nOn World Organ Donation Day, we salute your role in supporting life-saving interventions and educating patients on the gift of life.\n\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'August'},
-  {id:'o9',  date:'2026-09-29', name:"World Heart Day",         icon:'💓', color:'#FEF2F2', c:'#991B1B', tag:'medical',   specialty:['Cardiology','General Medicine'],
-   msg:`Dear Dr. {first},\n\nHappy World Heart Day! Your dedication to cardiovascular health saves lives every day. We are proud to support your practice.\n\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'September'},
-  {id:'o10', date:'2026-10-02', name:"Gandhi Jayanti",          icon:'🇮🇳', color:'#ECFDF5', c:'#065F46', tag:'national',  specialty:null,
-   msg:`Dear Dr. {first},\n\nOn the occasion of Gandhi Jayanti, wishing you peace, purpose and continued service to the nation's health.\n\nWith warm regards,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'October'},
-  {id:'o11', date:'2026-10-20', name:"Diwali",                  icon:'🪔', color:'#FFFBEB', c:'#92400E', tag:'national',  specialty:null, featured:true,
-   msg:`Dear Dr. {first},\n\nWishing you and your family a very Happy Diwali! 🪔✨\n\nMay this festival of lights illuminate your life with joy, good health and prosperity.\n\nWith warm Diwali wishes,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'October'},
-  {id:'o12', date:'2026-11-14', name:"Children's Day / World Diabetes Day", icon:'🩺', color:'#EFF6FF', c:'#1E40AF', tag:'medical', specialty:['Paediatrics','Diabetology','Endocrinology'],
-   msg:`Dear Dr. {first},\n\nOn World Diabetes Day, we acknowledge your pivotal role in managing and preventing diabetes across generations. Your patient-first approach sets the standard.\n\nWith admiration,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'November'},
-  {id:'o13', date:'2026-12-01', name:"World AIDS Day",          icon:'🎗️', color:'#FDF2F8', c:'#9D174D', tag:'medical',   specialty:['General Medicine','Physician'],
-   msg:`Dear Dr. {first},\n\nOn World AIDS Day, we stand with you in the fight against HIV/AIDS and commend your work in patient care and awareness.\n\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'December'},
-  {id:'o14', date:'2026-03-14', name:"Holi",                   icon:'🎨', color:'#F5F3FF', c:'#5B21B6', tag:'national',  specialty:null,
-   msg:`Dear Dr. {first},\n\nWishing you and your family a vibrant and joyful Holi! 🎨\n\nMay the colours of good health, happiness and success fill your life this season.\n\nWith colourful wishes,\n— Jijo, Team Life · Mankind Pharma`,
-   stat:'March 2027'},
-];
+let OCCASIONS = [];
+let OCCASIONS_LOADED = false;
+
+async function loadOccasionsFromAPI() {
+  try {
+    const resp = await fetch(PL_API + '/occasions?_t=' + Date.now());
+    if (!resp.ok) throw new Error('API returned ' + resp.status);
+    const data = await resp.json();
+    OCCASIONS = data.occasions || [];
+    OCCASIONS_LOADED = true;
+    if (document.getElementById('occ-grid')) renderOccasions();
+  } catch(e) {
+    console.warn('[Occasions] API fetch failed, using empty list:', e.message);
+    OCCASIONS = [];
+  }
+}
 
 let OCC_TAB = 'upcoming';
 let BCAST_SEL_DOCS = new Set();
@@ -5606,14 +5714,31 @@ function setOccTab(tab, el){
 }
 
 function renderOccasions(){
-  const now = new Date('2026-05-01');
+  const now = new Date();
+  const curMonth = now.getMonth(), curYear = now.getFullYear();
+
+  // Dynamic "occasions this month" counter
+  const thisMonthCount = OCCASIONS.filter(o=>{
+    const d=new Date(o.date); return d.getMonth()===curMonth && d.getFullYear()===curYear && d>=now;
+  }).length;
+  const cEl=document.getElementById('occ-next-count'); if(cEl) cEl.textContent=thisMonthCount;
+
+  // Dynamic month range label
+  const NM_S=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dates=OCCASIONS.filter(o=>new Date(o.date)>=now).map(o=>new Date(o.date));
+  const lbl=document.getElementById('occ-month-label');
+  if(lbl && dates.length){
+    const minM=Math.min(...dates.map(d=>d.getMonth())), maxM=Math.max(...dates.map(d=>d.getMonth()));
+    lbl.textContent = minM===maxM ? `${NM_S[minM]} ${curYear}` : `${NM_S[minM]}–${NM_S[maxM]} ${curYear}`;
+  }
+
   let list = OCCASIONS.filter(o=>{
     if(OCC_TAB==='upcoming') return new Date(o.date)>=now;
     if(OCC_TAB==='medical')  return o.tag==='medical';
     if(OCC_TAB==='national') return o.tag==='national';
     return true;
   });
-  if(OCC_TAB==='upcoming') list=list.slice(0,9); // show next 9
+  if(OCC_TAB==='upcoming') list=list.slice(0,9);
 
   const grid = document.getElementById('occ-grid');
   if(!grid) return;
@@ -5648,6 +5773,7 @@ function renderOccasions(){
 function openBroadcast(occId){
   const occ = OCCASIONS.find(o=>o.id===occId); if(!occ) return;
   BCAST_OCC_ID=occId; BCAST_SEL_DOCS=new Set();
+  window.BCAST_CHANNEL = 'whatsapp'; // Default to WhatsApp
 
   // Pre-select relevant doctors
   const relevant = occ.specialty
@@ -5655,26 +5781,86 @@ function openBroadcast(occId){
     : DOCTORS;
   relevant.forEach(d=>BCAST_SEL_DOCS.add(d.id));
 
-  // Header
-  document.getElementById('bcast-hdr-icon').textContent=occ.icon;
-  document.getElementById('bcast-hdr-title').textContent=occ.name;
-  document.getElementById('bcast-hdr-sub').textContent=`${BCAST_SEL_DOCS.size} doctors pre-selected · AI-drafted message`;
-  const bgStyle=occ.color.includes('gradient')?occ.color:`linear-gradient(135deg,${occ.color},${occ.color})`;
-  document.getElementById('bcast-occ-chip').style.cssText=`background:${occ.color};color:${occ.c};`;
-  document.getElementById('bcast-occ-chip').innerHTML=`${occ.icon} ${occ.name}`;
+  // Header — set title dynamically from occasion
+  document.getElementById('bcast-icon-hdr').textContent=occ.icon;
+  const occDate = new Date(occ.date);
+  const NM=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('bcast-occ-type').textContent = occ.tag === 'national' ? 'Festival Broadcast' : 'Medical Occasion';
+  document.getElementById('bcast-occ-name').textContent = occ.name;
+  document.getElementById('bcast-occ-date').textContent = NM[occDate.getMonth()] + ' ' + occDate.getFullYear();
 
-  // Message
+  // Reset channel buttons to WhatsApp default
+  document.querySelectorAll('#bcast-ch-btns .mcb').forEach(btn=>btn.classList.remove('on'));
+  const waBtn = document.querySelector('#bcast-ch-btns .mcb[data-ch="whatsapp"]');
+  if(waBtn) waBtn.classList.add('on');
+
+  // Reset preview container to WhatsApp style
+  const pc = document.getElementById('bcast-preview-container');
+  if(pc){ pc.style.background='#E8F5E9'; pc.style.border='1px solid #C8E6C9'; pc.style.borderRadius='12px'; }
+  const pb = document.getElementById('bcast-preview');
+  if(pb){ pb.style.borderRadius='10px 10px 10px 0'; }
+
+  // Message (use msgWhatsApp by default, fallback to msg)
   const firstDoc=DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
   const sampleFirst=firstDoc?firstDoc.name.replace('Dr.','').trim().split(' ')[0]:'Doctor';
-  const msg=occ.msg.replace('{first}',sampleFirst);
+  const msgText = (window.BCAST_CHANNEL === 'whatsapp' ? occ.msgWhatsApp : occ.msgEmail) || occ.msg;
+  const msg = msgText.replace('{first}', sampleFirst).replace('{name}', sampleFirst);
   document.getElementById('bcast-msg').value=msg;
   document.getElementById('bcast-preview').textContent=msg;
 
-  // Render doc list
+  // Render doc list & segments
+  renderBcastSegs();
   renderBcastDocs();
   updateBcastSummary();
 
   openOv('bcast-ov');
+}
+
+function switchBcastChannel(channel){
+  window.BCAST_CHANNEL = channel;
+  const occ = OCCASIONS.find(o=>o.id===BCAST_OCC_ID);
+  if(!occ) return;
+
+  // Update message preview with the correct channel template
+
+
+  // Update message
+  const firstDoc=DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
+  const sampleFirst=firstDoc?firstDoc.name.replace('Dr.','').trim().split(' ')[0]:'Doctor';
+  let msgText = '';
+  if(channel === 'whatsapp') msgText = occ.msgWhatsApp || occ.msg;
+  else if(channel === 'email') msgText = occ.msgEmail || occ.msg;
+  else msgText = (occ.msgWhatsApp || occ.msg);
+
+  const msg = msgText.replace('{first}', sampleFirst).replace('{name}', sampleFirst);
+  document.getElementById('bcast-msg').value=msg;
+  document.getElementById('bcast-preview').textContent=msg;
+
+  // Update preview styling based on channel
+  const previewContainer = document.getElementById('bcast-preview-container');
+  const previewBox = document.getElementById('bcast-preview');
+
+  if(channel === 'email') {
+    previewContainer.style.background='#f5f5f5';
+    previewContainer.style.border='1px solid #ddd';
+    previewContainer.style.borderRadius='8px';
+    previewBox.style.background='#fff';
+    previewBox.style.borderRadius='6px';
+    previewBox.style.boxShadow='0 1px 2px rgba(0,0,0,.05)';
+  } else {
+    previewContainer.style.background='#E8F5E9';
+    previewContainer.style.border='1px solid #C8E6C9';
+    previewContainer.style.borderRadius='12px';
+    previewBox.style.background='#fff';
+    previewBox.style.borderRadius='10px 10px 10px 0';
+    previewBox.style.boxShadow='0 1px 3px rgba(0,0,0,.08)';
+  }
+
+  // Update channel button styles (supports both .mcb and .bcast-ch-btn classes)
+  document.querySelectorAll('#bcast-ch-btns [data-ch]').forEach(btn=>{
+    btn.classList.remove('on');
+  });
+  document.querySelector(`#bcast-ch-btns [data-ch="${channel}"]`)?.classList.add('on');
 }
 
 function renderBcastDocs(){
@@ -5713,19 +5899,41 @@ function toggleBcastDoc(docId){
   else BCAST_SEL_DOCS.add(docId);
   renderBcastDocs();
   updateBcastSummary();
+  updateBcastMessagePreview();  // Update preview when doctor selection changes
+}
+
+function updateBcastMessagePreview(){
+  const occ = OCCASIONS.find(o=>o.id===BCAST_OCC_ID);
+  if(!occ) return;
+
+  // Get the first selected doctor to preview message
+  const firstDoc = DOCTORS.find(d=>BCAST_SEL_DOCS.has(d.id));
+  const sampleFirst = firstDoc ? firstDoc.name.replace('Dr.','').trim().split(' ')[0] : 'Doctor';
+
+  // Get current channel
+  const channel = window.BCAST_CHANNEL || 'whatsapp';
+  let msgText = '';
+  if(channel === 'whatsapp') msgText = occ.msgWhatsApp || occ.msg;
+  else if(channel === 'email') msgText = occ.msgEmail || occ.msg;
+  else msgText = (occ.msgWhatsApp || occ.msg);
+
+  const msg = msgText.replace('{first}', sampleFirst).replace('{name}', sampleFirst);
+  document.getElementById('bcast-msg').value = msg;
+  document.getElementById('bcast-preview').textContent = msg;
 }
 function selectAllBcastDocs(){
   const occ=OCCASIONS.find(o=>o.id===BCAST_OCC_ID);
   const relevant=occ?.specialty?DOCTORS.filter(d=>occ.specialty.some(sp=>d.spec.toLowerCase().includes(sp.toLowerCase().slice(0,5)))):DOCTORS;
   relevant.forEach(d=>BCAST_SEL_DOCS.add(d.id));
-  renderBcastDocs(); updateBcastSummary();
+  renderBcastDocs(); updateBcastSummary(); updateBcastMessagePreview();
 }
-function clearBcastDocs(){ BCAST_SEL_DOCS.clear(); renderBcastDocs(); updateBcastSummary(); }
+function clearBcastDocs(){ BCAST_SEL_DOCS.clear(); renderBcastDocs(); updateBcastSummary(); updateBcastMessagePreview(); }
 
 function updateBcastSummary(){
   const n=BCAST_SEL_DOCS.size;
-  document.getElementById('bcast-sel-count').textContent=n;
-  const pills=document.getElementById('bcast-recip-pills');
+  const countChip=document.getElementById('bcast-count-chip');
+  if(countChip) countChip.textContent=n>0?`${n} doctor${n!==1?'s':''} selected`:'No doctors selected';
+  const pills=document.getElementById('bcast-doc-chips');
   if(pills){
     const shown=[...BCAST_SEL_DOCS].slice(0,6).map(id=>{const d=DOCTORS.find(x=>x.id===id);return d?`<span class="doc-sel-chip">${d.init} ${d.name}<button onclick="toggleBcastDoc(${d.id})">×</button></span>`:''}).join('');
     const more=BCAST_SEL_DOCS.size>6?`<span class="doc-sel-chip">+${BCAST_SEL_DOCS.size-6} more</span>`:'';
@@ -5735,6 +5943,36 @@ function updateBcastSummary(){
   const sum=document.getElementById('bcast-send-summary');
   if(btn){btn.disabled=n===0;btn.style.opacity=n>0?'1':'.5';}
   if(sum) sum.textContent=n>0?`Sending to ${n} doctor${n!==1?'s':''}…`:'Select doctors to continue';
+}
+
+function renderBcastSegs(){
+  const el=document.getElementById('bcast-segs'); if(!el) return;
+  const total=DOCTORS.length;
+  const gynaec=DOCTORS.filter(d=>d.spec.toLowerCase().includes('gynae')).length;
+  const cardio=DOCTORS.filter(d=>d.spec.toLowerCase().includes('cardi')).length;
+  const paeds=DOCTORS.filter(d=>d.spec.toLowerCase().includes('paedi')).length;
+  const aplus=DOCTORS.filter(d=>d.cat==='A+').length;
+  const segs=[
+    {key:'all',label:`All Pinnacle (${total})`},
+    {key:'gynaec',label:`Gynaecologists (${gynaec})`},
+    {key:'cardio',label:`Cardiologists (${cardio})`},
+    {key:'paeds',label:`Paediatricians (${paeds})`},
+    {key:'aplus',label:`A+ Only (${aplus})`}
+  ];
+  el.innerHTML=segs.map(s=>`<button class="seg-btn${s.key==='all'?' sb-on':''}" onclick="toggleBcastSeg('${s.key}',this)">${s.label}</button>`).join('');
+}
+
+function toggleBcastSeg(seg,btn){
+  document.querySelectorAll('#bcast-segs .seg-btn').forEach(b=>b.classList.remove('sb-on'));
+  if(btn) btn.classList.add('sb-on');
+  BCAST_SEL_DOCS.clear();
+  let pool=DOCTORS;
+  if(seg==='gynaec') pool=DOCTORS.filter(d=>d.spec.toLowerCase().includes('gynae'));
+  else if(seg==='cardio') pool=DOCTORS.filter(d=>d.spec.toLowerCase().includes('cardi'));
+  else if(seg==='paeds') pool=DOCTORS.filter(d=>d.spec.toLowerCase().includes('paedi'));
+  else if(seg==='aplus') pool=DOCTORS.filter(d=>d.cat==='A+');
+  pool.forEach(d=>BCAST_SEL_DOCS.add(d.id));
+  renderBcastDocs(); updateBcastSummary(); updateBcastMessagePreview();
 }
 
 function sendBroadcast(){
@@ -6440,6 +6678,7 @@ function startNotifPolling() {
 
 /* ══ IMPROVEMENT REQUEST ══ */
 let _imprContentId = null;
+let _imprNotes = '';   // review feedback shown in the generic progress message
 let _imprRunId = null;
 let _imprPollTimer = null;
 
@@ -6485,8 +6724,10 @@ async function submitImprovementRequest() {
     }
     const data = await res.json();
     _imprRunId = data.run_id;
+    _imprNotes = notes;
     document.getElementById('impr-prog').classList.add('show');
-    btn.innerHTML = 'Pipeline running...';
+    document.getElementById('impr-prog-msg').textContent = 'Improving the article as per review feedback: "' + notes + '"';
+    btn.innerHTML = 'Improving...';
     document.getElementById('impr-close-btn').textContent = 'Close';
     pollImprovementProgress();
   } catch (e) {
@@ -6564,12 +6805,10 @@ function pollImprovementProgress() {
       const data = await res.json();
       const pct = data.progress || 0;
       document.getElementById('impr-prog-bar').style.width = pct + '%';
-      document.getElementById('impr-prog-msg').textContent = data.status_msg || '';
-      document.getElementById('impr-agent-status').textContent =
-        data.current_agent ? 'Agent running: ' + data.current_agent.charAt(0).toUpperCase() + data.current_agent.slice(1) : '';
-      // Render live agent outputs
-      const outEl = document.getElementById('impr-agent-outputs');
-      if (outEl) outEl.innerHTML = _renderImprOutputs(data.agent_outputs || {}, data.current_agent || '');
+      // Generic progress message — internal agent names are not shown to reviewers
+      document.getElementById('impr-prog-msg').textContent = 'Improving the article as per review feedback: "' + _imprNotes + '"';
+      document.getElementById('impr-agent-status').textContent = '';
+      document.getElementById('impr-agent-outputs').innerHTML = '';
 
       if (data.status === 'completed') {
         clearInterval(_imprPollTimer);
@@ -6581,7 +6820,7 @@ function pollImprovementProgress() {
         clearInterval(_imprPollTimer);
         document.getElementById('impr-submit-btn').disabled = false;
         document.getElementById('impr-submit-btn').innerHTML = 'Retry';
-        toast('❌', data.status_msg || 'Pipeline error');
+        toast('❌', 'Improvement failed — please try again');
       }
     } catch (e) {}
   }, 2000);
@@ -7071,7 +7310,7 @@ function renderSharingReport() {
     const emptyMsg = hasFilters
       ? 'No records match the selected filters. <a href="#" onclick="clearSRFilters();return false;" style="color:var(--blue);text-decoration:underline;">Clear filters</a>'
       : SR_DATA.length === 0
-        ? 'No sharing records yet. Share an AI Pipeline article (from Research Pipeline → ✅ Approved) to see it here.'
+        ? 'No sharing records yet. Share an approved AI article to see it here.'
         : 'No records match the selected filters.';
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text4);">${emptyMsg}</td></tr>`;
     const foot = document.getElementById('sr-footer');
@@ -7399,8 +7638,17 @@ function mapAPIItemToPaper(item) {
   };
 }
 
-/* ══ LOAD CONTENT FROM API — merges into ALL_PAPERS ══ */
+/* ══ LOAD CONTENT FROM API — composes ALL_PAPERS by role ══ */
 let _apiContent = [];
+let _apiPapers  = [];   // mapped pipeline content from the backend (empty if API down)
+
+/* Compose ALL_PAPERS — production-like: show ONLY real pipeline content for every role.
+   PMT's (= BU Head) approved-only Content Library is therefore empty until the MA team
+   approves the first article — a one-time state by design. The demo seeds are kept ONLY
+   as an offline fallback for when the backend is unreachable or returns no content. */
+function rebuildAllPapers() {
+  ALL_PAPERS = (_apiPapers.length > 0) ? _apiPapers.slice() : SEED_PAPERS.slice();
+}
 
 async function loadContentFromAPI() {
   try {
@@ -7408,21 +7656,15 @@ async function loadContentFromAPI() {
     if (!res.ok) return;
     const data = await res.json();
     _apiContent = data.items || [];
-
-    // Remove any previously merged API items to prevent duplicates on re-fetch
-    ALL_PAPERS = ALL_PAPERS.filter(p => !p._apiSource);
-
-    // Convert and prepend so pipeline content appears at the top
-    const mapped = _apiContent.map(mapAPIItemToPaper);
-    ALL_PAPERS = [...mapped, ...ALL_PAPERS];
-
-    // Refresh counts, tabs and the full card list
-    buildCLTabs();
-    buildCLKpis();
-    renderCL();
+    _apiPapers  = _apiContent.map(mapAPIItemToPaper);
+    rebuildAllPapers();
   } catch (e) {
-    // Silent fail — static demo data still renders when API is down
+    // API unreachable — fall back to demo seeds for every role
+    _apiPapers = [];
+    rebuildAllPapers();
   }
+  // Refresh counts, tabs and the full card list
+  try { buildCLTabs(); buildCLKpis(); renderCL(); } catch (_) {}
 }
 
 function renderAPIContent() {
@@ -7503,6 +7745,12 @@ function doLogout() {
 }
 
 function initApp() {
+  // Set Research Agent end date to yesterday (dynamic, never stale)
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = yesterday.toISOString().slice(0, 10);
+  const toEl = document.getElementById('ra-date-to-2');
+  if (toEl) toEl.value = yStr;
+
   const loggedIn = localStorage.getItem('pinnacle_logged_in') === 'true';
   const userId   = localStorage.getItem('pinnacle_user_id');
   const savedRole= localStorage.getItem('pinnacle_role') || 'pmt';
@@ -7510,7 +7758,7 @@ function initApp() {
     CURRENT_USER = USERS_DB.find(u => u.id === userId) || null;
     document.getElementById('login-screen').style.display = 'none';
     switchRole(_getHashRole() || savedRole);
-    setTimeout(() => { startNotifPolling(); loadSchedulerStatus(); loadContentFromAPI(); }, 1200);
+    setTimeout(() => { startNotifPolling(); loadSchedulerStatus(); loadContentFromAPI(); loadOccasionsFromAPI(); }, 1200);
   } else {
     document.getElementById('login-screen').style.display = 'flex';
   }
@@ -7544,22 +7792,30 @@ const RA_SECTION_MAP = {
 
 // Load suggestions from backend file (filter_suggestions.txt)
 async function raLoadSuggestions() {
+  const DEFAULTS = {
+    therapy_area: { recent: [], defaults: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology','Dermatology','Paediatrics','Infectious Disease','Neurology','General Medicine'] },
+    disease:      { recent: [], defaults: ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS','Acne','Migraine','Ebola','Hanta Virus'] },
+    keywords:     { recent: [], defaults: ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine','systematic review','statin therapy','SGLT2 inhibitors'] },
+  };
   try {
     const res = await fetch(PL_API + '/filters/suggestions');
     if (res.ok) {
-      RA_SUGGESTIONS_CACHE = await res.json();
+      const backend = await res.json();
+      RA_SUGGESTIONS_CACHE = {};
+      for (const key of Object.keys(DEFAULTS)) {
+        const b = backend[key] || {};
+        const d = DEFAULTS[key];
+        const recentSet = new Set(b.recent || []);
+        const mergedDefaults = [...(d.defaults || [])].filter(t => !recentSet.has(t));
+        RA_SUGGESTIONS_CACHE[key] = { recent: b.recent || [], defaults: mergedDefaults };
+      }
     }
   } catch (e) {
     console.warn('[RA] Could not load filter suggestions from backend, using fallback defaults');
   }
 
-  // Fallback defaults if backend unavailable
   if (!RA_SUGGESTIONS_CACHE) {
-    RA_SUGGESTIONS_CACHE = {
-      therapy_area: { recent: [], defaults: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology'] },
-      disease:      { recent: [], defaults: ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS'] },
-      keywords:     { recent: [], defaults: ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine'] },
-    };
+    RA_SUGGESTIONS_CACHE = DEFAULTS;
   }
 }
 
@@ -7632,18 +7888,10 @@ function raShowDropdown(filterType) {
     dropdown.innerHTML = '<div class="ra-dropdown-empty">No suggestions available</div>';
   } else {
     let html = '';
-    // If not filtering (empty query), show recent header
-    if (!query && recentCount > 0) {
-      html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;">Recent Searches</div>';
-    }
-    filtered.forEach((item, idx) => {
-      // Add separator between recent and defaults when showing full list
-      if (!query && idx === recentCount && recentCount > 0) {
-        html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;border-top:1.5px solid #e2eaf2;">All Suggestions</div>';
-      }
-      const isRecent = !query && idx < recentCount;
-      html += `<div class="ra-dropdown-item${isRecent ? ' selected' : ''}" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
-        ${isRecent ? '🕐 ' : ''}${item}
+    // Show only suggestions (no recent searches)
+    filtered.forEach((item) => {
+      html += `<div class="ra-dropdown-item" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
+        ${item}
       </div>`;
     });
     dropdown.innerHTML = html;
@@ -7836,6 +8084,15 @@ async function raRunDynamicSearch() {
   document.getElementById('ra-articles-grid-2').innerHTML = '';
   document.getElementById('ra-empty-state-2').classList.remove('show');
   document.getElementById('ra-search-btn-2').disabled = true;
+  // Disable filter inputs during search
+  document.getElementById('ra-therapy-2').disabled = true;
+  document.getElementById('ra-disease-2').disabled = true;
+  document.getElementById('ra-keywords-2').disabled = true;
+  document.getElementById('ra-date-from-2').disabled = true;
+  document.getElementById('ra-date-to-2').disabled = true;
+  document.getElementById('ra-results-badge-2').innerHTML = '<span class="ra-badge-spinner"></span>';
+  document.getElementById('ra-showing-count-2').style.display = 'none';
+  document.getElementById('ra-ma-review-footer-2').style.display = 'none';
 
   try {
     // Construct topic from user filters
@@ -7875,7 +8132,68 @@ async function raRunDynamicSearch() {
   } catch(e) {
     document.getElementById('ra-loading-state-2').classList.remove('show');
     document.getElementById('ra-search-btn-2').disabled = false;
+    // Re-enable filter inputs on error
+    document.getElementById('ra-therapy-2').disabled = false;
+    document.getElementById('ra-disease-2').disabled = false;
+    document.getElementById('ra-keywords-2').disabled = false;
+    document.getElementById('ra-date-from-2').disabled = false;
+    document.getElementById('ra-date-to-2').disabled = false;
+    document.getElementById('ra-results-badge-2').textContent = '0';
     toast('❌', 'Search failed: ' + e.message);
+  }
+}
+
+async function raExportResults() {
+  // Get search parameters from context
+  const context = window.RA_SEARCH_CONTEXT || {};
+  const therapyArea = context.therapy || '';
+  const disease = context.disease || '';
+  const keywords = context.keywords || '';
+  const dateFrom = context.dateFrom || '2024-01-01';
+  const dateTo = context.dateTo || '2026-06-01';
+
+  const btn = document.getElementById('ra-csv-btn-2');
+  if (!btn) return;
+
+  const origHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Generating...';
+
+  try {
+    // Build query parameters
+    const params = new URLSearchParams({
+      therapy_area: therapyArea,
+      disease: disease,
+      keywords: keywords,
+      date_from: dateFrom,
+      date_to: dateTo
+    });
+
+    const response = await fetch(`${PL_API}/report/download?${params.toString()}`);
+    if (!response.ok) {
+      throw new Error('Failed to download report');
+    }
+
+    const blob = await response.blob();
+    const cd = response.headers.get('content-disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'PinnacleIQ_Research_Report.xlsx';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    toast('✅', 'Report downloaded successfully');
+  } catch (e) {
+    toast('❌', 'Download failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origHTML;
   }
 }
 
@@ -7891,9 +8209,14 @@ async function raPollDynamicResults(runId) {
     const data = await response.json();
 
     if (data.status === 'completed') {
-      // Pipeline complete - fetch and display articles
+      // Pipeline complete - re-enable all controls immediately
       document.getElementById('ra-loading-state-2').classList.remove('show');
       document.getElementById('ra-search-btn-2').disabled = false;
+      document.getElementById('ra-therapy-2').disabled = false;
+      document.getElementById('ra-disease-2').disabled = false;
+      document.getElementById('ra-keywords-2').disabled = false;
+      document.getElementById('ra-date-from-2').disabled = false;
+      document.getElementById('ra-date-to-2').disabled = false;
 
       // Fetch all generated content cards
       if (data.all_content_ids && data.all_content_ids.length > 0) {
@@ -7901,6 +8224,7 @@ async function raPollDynamicResults(runId) {
       } else if (data.content_id) {
         raDisplayDynamicResults([data.content_id]);
       } else {
+        document.getElementById('ra-results-badge-2').textContent = '0';
         document.getElementById('ra-empty-state-2').classList.add('show');
       }
 
@@ -7908,11 +8232,23 @@ async function raPollDynamicResults(runId) {
       // Pipeline failed
       document.getElementById('ra-loading-state-2').classList.remove('show');
       document.getElementById('ra-search-btn-2').disabled = false;
+      document.getElementById('ra-therapy-2').disabled = false;
+      document.getElementById('ra-disease-2').disabled = false;
+      document.getElementById('ra-keywords-2').disabled = false;
+      document.getElementById('ra-date-from-2').disabled = false;
+      document.getElementById('ra-date-to-2').disabled = false;
+      document.getElementById('ra-results-badge-2').textContent = '0';
       document.getElementById('ra-empty-state-2').classList.add('show');
       toast('❌', 'Pipeline processing failed');
 
     } else {
-      // Still running - continue polling
+      // Still running — update progress message based on current agent
+      const agentLabels = { alpha: 'Scanning PubMed articles…', beta: 'Summarising key findings…', gamma: 'Writing shareable content…', delta: 'Building content cards…' };
+      const curAgent = data.current_agent || '';
+      const loadMsg = document.querySelector('#ra-loading-state-2 p');
+      if (loadMsg && agentLabels[curAgent]) loadMsg.textContent = agentLabels[curAgent];
+      // Keep spinner visible throughout the entire pipeline run
+      document.getElementById('ra-loading-state-2').classList.add('show');
       setTimeout(() => raPollDynamicResults(runId), 2000);
     }
 
@@ -7926,11 +8262,11 @@ async function raPollDynamicResults(runId) {
 async function raDisplayDynamicResults(contentIds) {
   const grid = document.getElementById('ra-articles-grid-2');
   grid.innerHTML = '';
-  // Use the same papers-grid layout as the Content Library for visual consistency
-  grid.className = 'papers-grid';
 
   let successCount = 0;
   const papers = [];
+  const papersByTopic = {};
+
   for (const contentId of contentIds) {
     try {
       const res = await fetch(PL_API + '/content/' + contentId);
@@ -7942,7 +8278,14 @@ async function raDisplayDynamicResults(contentIds) {
       // Override src to 'pubmed' so srcPill renders "PubMed" badge (not "Link")
       // Research Agent content is always PubMed-sourced
       paper.src = 'pubmed';
+      paper.topic = item.topic || 'Unknown Topic';
       papers.push(paper);
+
+      // Group by topic
+      if (!papersByTopic[paper.topic]) {
+        papersByTopic[paper.topic] = [];
+      }
+      papersByTopic[paper.topic].push(paper);
     } catch(e) {
       console.error('Error fetching content:', contentId, e);
     }
@@ -7953,14 +8296,49 @@ async function raDisplayDynamicResults(contentIds) {
     if (!ALL_PAPERS.find(x => x.id === p.id)) ALL_PAPERS.unshift(p);
   });
 
-  // Render using the shared Content Library card template
-  grid.innerHTML = papers.map(p => clCardHTML(p)).join('');
+  // Render with topic sections (if multiple topics, show them separately)
+  const hasMultipleTopics = Object.keys(papersByTopic).length > 1;
+  let html = '';
+
+  if (hasMultipleTopics) {
+    // Show each topic in its own section
+    for (const topic in papersByTopic) {
+      html += `
+        <div style="margin-bottom:28px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #e2eaf2;">
+            <span style="font-size:14px;font-weight:700;color:#0f1c2e;">📌 ${topic}</span>
+            <span style="font-size:12px;color:#6b7280;margin-left:auto;">${papersByTopic[topic].length} articles</span>
+          </div>
+          <div class="papers-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            ${papersByTopic[topic].map(p => clCardHTML(p)).join('')}
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    // Single topic or no grouping needed
+    grid.className = 'papers-grid';
+    html = papers.map(p => clCardHTML(p)).join('');
+  }
+
+  grid.innerHTML = html;
+  if (!hasMultipleTopics) grid.className = 'papers-grid';
+
+  // Hide loading state and re-enable filter inputs now that results are displayed
+  document.getElementById('ra-loading-state-2').classList.remove('show');
+  document.getElementById('ra-search-btn-2').disabled = false;
+  document.getElementById('ra-therapy-2').disabled = false;
+  document.getElementById('ra-disease-2').disabled = false;
+  document.getElementById('ra-keywords-2').disabled = false;
+  document.getElementById('ra-date-from-2').disabled = false;
+  document.getElementById('ra-date-to-2').disabled = false;
 
   // Update result metadata
   if (successCount > 0) {
-    document.getElementById('ra-results-badge-2').textContent = successCount;
+    document.getElementById('ra-results-badge-2').innerHTML = successCount;
     document.getElementById('ra-res-count-2').textContent = successCount;
     document.getElementById('ra-result-label-2').style.display = 'inline';
+    document.getElementById('ra-csv-btn-2').style.display = 'inline-flex';
     // "Showing X articles" on the right of the results header
     document.getElementById('ra-showing-num-2').textContent = successCount;
     document.getElementById('ra-showing-count-2').style.display = 'inline';
@@ -7983,8 +8361,9 @@ function raResetForm(suffix = '') {
   document.getElementById(`ra-therapy${suffix_str}`).value = '';
   document.getElementById(`ra-disease${suffix_str}`).value = '';
   document.getElementById(`ra-keywords${suffix_str}`).value = '';
-  document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
-  document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
+  const _yesterday = new Date(); _yesterday.setDate(_yesterday.getDate() - 1);
+  document.getElementById(`ra-date-from${suffix_str}`).value = '2020-04-01';
+  document.getElementById(`ra-date-to${suffix_str}`).value = _yesterday.toISOString().slice(0, 10);
   document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
   // Clear keyword chips and active filters (UI only, not results)
   raClearAllFilters();
@@ -8054,10 +8433,10 @@ async function raDownloadDatabase() {
       // WhatsApp summary: use dedicated field, fallback to short_article excerpt or summary
       const whatsappSummary = item.whatsapp_summary || item.short_article || item.summary || '';
 
-      // Abstract: use summary/description
-      const abstract = item.summary || item.description || '';
+      // Abstract: use original PubMed abstract from Alpha, fallback to summary
+      const abstract = item.abstract || item.summary || item.description || '';
 
-      // Date: use publication_date or created_at
+      // Date: use publication_date from Alpha, fallback to created_at
       const dateStr = item.publication_date || (item.created_at ? item.created_at.split('T')[0] : '');
 
       // Return all 15 columns — 'NA' for any missing value

@@ -35,3 +35,43 @@ Chronic Kidney Disease - Oncology | Oncology | Oncology
 Coronary Artery Disease (CAD) - Oncology | Oncology | Oncology
 Type 2 Diabetes - Diabetology (GLP-1 clinical outcomes) | Diabetology | Diabetology
 Type 2 Diabetes - Diabetology (randomized controlled trial) | Diabetology | Diabetology
+test | Cardiology | Heart Failure
+General Research - Gastroenterology | Gastroenterology | Gastroenterology
+Hypertension - Cardiology | Cardiology | Cardiology
+Acne - Dermatology | Dermatology | Dermatology
+General Research - Cardiology | Cardiology | Cardiology
+Heart Failure - Oncology | Oncology | Oncology
+Type 2 Diabetes - Diabetology | Diabetology | Diabetology
+General Research - Neurology | Neurology | Neurology
+Dyslipidemia - Endocrinology | Endocrinology | Endocrinology
+Immunotherapy advances in cancer treatment 2024 | Oncology | Immunotherapy
+CAR-T cell therapy development and clinical applications | Hematology/Oncology | Cell Therapy
+General Research - Endocrinology | Endocrinology | Endocrinology
+Type 2 Diabetes - Gastroenterology (treatment guidelines) | Gastroenterology | Gastroenterology
+Type 2 Diabetes - Gastroenterology (treatment guidelines) | Diabetology | GLP-1 Therapy
+General Research - Diabetology | Diabetology | Diabetology
+Hypertension - Cardiology | Cardiology | Hypertension
+Heart Failure - Multiple Therapies | General Medicine | General
+Heart Failure - Cardiology | Cardiology | Cardiology
+Migraine - Endocrinology (treatment guidelines) | Endocrinology | Endocrinology
+Migraine - Endocrinology (treatment guidelines, antihypertensive therapy advances, hypertension drug approval, SGLT2 inhibitors) | Endocrinology | Endocrinology
+Heart Failure - Cardiology (SGLT2 inhibitors) | Cardiology | Heart Failure
+General Research - Endocrinology (SGLT2 inhibitors) | Endocrinology | Endocrinology
+Atrial Fibrillation - Cardiology | Cardiology | Cardiology
+Test Topic | Cardiology | Cardiology
+General Research - Cardiology (ACE inhibitors) | Cardiology | Cardiology
+Hypertension - Diabetology | Diabetology | Diabetology
+Hypertension - Diabetology (cardiovascular outcomes) | Diabetology | Diabetology
+Hypertension in Diabetology | Diabetology | Diabetology
+GLP-1 in Type 2 Diabetes | Diabetology | Type 2 Diabetes
+Hypertension Management | Cardiology | Heart Failure
+Heart Failure - Diabetology (SGLT2 inhibitors) | Diabetology | Diabetology
+General Research - Gynecology | Gynecology | Gynecology
+Hypertension - Paediatrics (hypertension drug approval) | Paediatrics | Paediatrics
+Hypertension - hypertension drug approval (antihypertensive therapy advances) | hypertension drug approval | hypertension drug approval
+Coronary Artery Disease (CAD) - Cardiology | Cardiology | Cardiology
+GLP-1 - GLP-1 Therapy | GLP-1 Therapy | GLP-1 Therapy
+GLP-1 - cardiology | cardiology | cardiology
+Insulin Resistance in Metabolic Syndrome: 2025 Consensus - GLP-1 Therapy | GLP-1 Therapy | GLP-1 Therapy
+Type 2 Diabetes - Diabetology (cardiovascular outcomes) | Diabetology | Diabetology
+Type 2 Diabetes - Diabetology (antihypertensive therapy advances) | Diabetology | Diabetology

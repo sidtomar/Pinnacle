@@ -2,10 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "pinnacle-app",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "9090", "--bind", "0.0.0.0", "--directory", "D:\\Pinnacle"],
-      "port": 9090
+      "name": "pinnacle-backend",
+      "runtimeExecutable": "python3.12",
+      "runtimeArgs": ["-m", "uvicorn", "app:app", "--reload", "--port", "8010"],
+      "port": 8010,
+      "cwd": "demo/backend",
+      "autoPort": false
     }
   ]
 }
