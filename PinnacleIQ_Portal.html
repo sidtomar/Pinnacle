@@ -7554,13 +7554,22 @@ async function raLoadSuggestions() {
     console.warn('[RA] Could not load filter suggestions from backend, using fallback defaults');
   }
 
-  // Fallback defaults if backend unavailable
+  // Hardcoded defaults — always shown when file has no defaults (unseeded or cleared)
+  const HARDCODED_DEFAULTS = {
+    therapy_area: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology','Pulmonology','Nephrology'],
+    disease:      ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS','Asthma','COPD','Hypothyroidism'],
+    keywords:     ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine'],
+  };
   if (!RA_SUGGESTIONS_CACHE) {
-    RA_SUGGESTIONS_CACHE = {
-      therapy_area: { recent: [], defaults: ['Cardiology','Diabetology','Endocrinology','Gynecology','Gastroenterology','Ophthalmology','Oncology','Neurology'] },
-      disease:      { recent: [], defaults: ['Hypertension','Coronary Artery Disease (CAD)','Heart Failure','Atrial Fibrillation','Dyslipidemia','Type 2 Diabetes','PCOS'] },
-      keywords:     { recent: [], defaults: ['antihypertensive therapy advances','hypertension drug approval','cardiovascular outcomes','clinical efficacy','treatment guidelines','latest research','evidence-based medicine'] },
-    };
+    // Full fallback when API unreachable
+    RA_SUGGESTIONS_CACHE = { therapy_area:{recent:[],defaults:HARDCODED_DEFAULTS.therapy_area}, disease:{recent:[],defaults:HARDCODED_DEFAULTS.disease}, keywords:{recent:[],defaults:HARDCODED_DEFAULTS.keywords} };
+  } else {
+    // Merge: fill empty defaults from hardcoded list so dropdowns are never blank
+    for (const section of ['therapy_area','disease','keywords']) {
+      if (!RA_SUGGESTIONS_CACHE[section].defaults || RA_SUGGESTIONS_CACHE[section].defaults.length === 0) {
+        RA_SUGGESTIONS_CACHE[section].defaults = HARDCODED_DEFAULTS[section];
+      }
+    }
   }
 }
 

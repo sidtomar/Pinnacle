@@ -1,3 +1,47 @@
+# PinnacleIQ Filter Suggestions
+# Format: value  OR  value [RECENT:timestamp]
+
+[THERAPY_AREA]
+Cardiology
+Diabetology
+Endocrinology
+Gynecology
+Gastroenterology
+Ophthalmology
+Oncology
+Neurology
+Pulmonology
+Nephrology
+Dermatology
+Orthopaedics
+Paediatrics
+General Medicine
 
 [DISEASE]
-Type 2 Diabetes [RECENT:20260604174045]
+Hypertension
+Coronary Artery Disease (CAD)
+Heart Failure
+Atrial Fibrillation
+Dyslipidemia
+Type 2 Diabetes
+PCOS
+Asthma
+COPD
+Hypothyroidism
+GERD
+Epilepsy
+Depression
+Osteoporosis
+
+[KEYWORDS]
+antihypertensive therapy advances
+hypertension drug approval
+cardiovascular outcomes
+clinical efficacy
+treatment guidelines
+latest research
+evidence-based medicine
+randomised controlled trial
+meta-analysis
+drug safety
+real-world evidence

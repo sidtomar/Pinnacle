@@ -84,6 +84,24 @@ python demo/backend/app.py
 - Key JS vars: `OCCASIONS`, `BCAST_OCC_ID`, `BCAST_SEL_DOCS`, `renderOccasions()`, `setOccTab()`
 - Date reference: uses `new Date('2026-05-01')` as "now" (hardcoded for demo)
 
+#### Research Agent (`showPage('research-agent')`)
+- **Status:** ✅ Fully working (tested 2026-06-19)
+- **Role:** MA only (login: `prashant.agarwal@mankind.in` / Test)
+- Fuzzy-filter search UI: Therapy Area + Disease + Keywords (chips) + Date range
+- Suggestions loaded from `GET /filters/suggestions` → `demo/filter_suggestions.txt`
+- Hardcoded fallback defaults always merged when file returns empty defaults
+- Calls `POST /pipeline/run` → polls `GET /pipeline/status/{runId}` until complete
+- Results rendered as article cards with rank badges; approved cards show green "✓ Approved"
+- "Download Database" button exports pipeline data
+- Key JS vars: `RA_SUGGESTIONS_CACHE`, `raSelectedKeywords`, `RA_SEARCH_CONTEXT`
+- Key JS fns: `raLoadSuggestions()`, `raShowDropdown()`, `raAddKeywordChip()`, `raRemoveKeywordChip()`, `raClearAllFilters()`, `raRunDynamicSearch()`, `raFuzzyMatch()`
+- Validation: requires at least Disease OR Therapy Area before search
+
+#### Pipeline Monitor (`showPage('pipeline')`)
+- **Status:** ✅ Navigable (separate from Research Agent)
+- Shows live agent log: Alpha → Beta → Gamma → Delta
+- Key elements: `pl-log-alpha`, `pl-log-beta`, `pl-log-gamma`, `pl-log-delta`
+
 #### Content Library (`showPage('library')`)
 - PMT sees only MA-approved content (seed-gated)
 - Shares same `GET /content` endpoint as MA view
@@ -144,20 +162,24 @@ python demo/backend/app.py
 | 2026-06-19 | Broadcast modal showed "Diwali Greetings" title for all occasions | Old stale modal `id="bcast-ov"` shadowed new modal's IDs. Renamed old modal to `bcast-ov-removed-placeholder` + `display:none` |
 | 2026-06-19 | Medical/National filter counts wrong (11/3 instead of 10/4) | Doctors' Day (o6) was tagged `medical`, should be `national` — fixed in both `app.py` and HTML |
 | 2026-06-19 | Holi date was 2026-03-14 (already past) | Corrected to 2027-03-14 |
+| 2026-06-19 | Research Agent dropdowns blank — `filter_suggestions.txt` missing | Created seed file with 14 therapy areas, 14 diseases, 11 keywords |
+| 2026-06-19 | `raLoadSuggestions()` ignored hardcoded defaults when API returned empty defaults | Fixed: always merge hardcoded defaults when API `defaults[]` is empty |
 
 ---
 
 ## 8. Test Coverage
 
 ### Automated Tests
-| File | Tests | Status |
-|------|-------|--------|
-| `tests/test_today_and_occasions.js` | 60 cases | ✅ All pass (run in browser console) |
-| `tests/` (backend pytest) | 57 cases | ✅ All pass (as of 2026-06-16) |
+| File | Tests | Status | Login |
+|------|-------|--------|-------|
+| `tests/test_today_and_occasions.js` | 60 cases | ✅ All pass | PMT: `amit.verma@mankind.in` / Test |
+| `tests/test_research_agent.js` | 65 cases | ✅ All pass | MA: `prashant.agarwal@mankind.in` / Test |
+| `tests/` (backend pytest) | 57 cases | ✅ All pass (as of 2026-06-16) | — |
 
 **How to run JS tests:**
-1. Open `http://127.0.0.1:8010/app`, log in as PMT
-2. Open DevTools Console → paste content of `tests/test_today_and_occasions.js`
+1. Start server: `python demo/backend/app.py`, open `http://127.0.0.1:8010/app`
+2. Log in with the role shown above
+3. Open DevTools Console (F12) → paste the test file content → Enter
 
 ### Manual Test Checklist
 - `test_checklist.html` — 280-case interactive checklist (open in browser)
@@ -175,7 +197,9 @@ python demo/backend/app.py
 | `demo/doctors.json` | 100-doctor database |
 | `demo/topics.txt` | Research topics (pipe-delimited) |
 | `start_app.ps1` | One-click launcher (handles port conflicts) |
-| `tests/test_today_and_occasions.js` | 60-case browser console test suite |
+| `demo/filter_suggestions.txt` | Seed file for Research Agent dropdowns (therapy, disease, keywords) |
+| `tests/test_today_and_occasions.js` | 60-case browser console test suite (Today's Tasks + Occasion Hub) |
+| `tests/test_research_agent.js` | 65-case browser console test suite (Research Agent tab) |
 | `test_checklist.html` | 280-case manual checklist |
 | `BRD.md` | Living business requirements document (v1.1, 13 sections) |
 | `.claude/launch.json` | Preview server config (python path + port 8010) |
@@ -205,3 +229,4 @@ python demo/backend/app.py
 | 2026-06-15 | Bug fixes: card deduplication, tag badges, MA approval idempotency. Added PATCH endpoint. 57 backend tests. Created `start_app.ps1`, `test_checklist.html` |
 | 2026-06-16 | UTF-8 encoding crash fix in approval/notification flow. Created BRD.md v1.0 → v1.1 (13 sections). 38 MA workflow tests passing |
 | 2026-06-19 | Occasion Hub: added `/occasions` API, fixed empty grid, fixed broadcast modal duplicate ID bug, fixed Doctors' Day tag (medical→national). 60/60 JS tests passing. Committed all files |
+| 2026-06-19 | Research Agent: seeded `filter_suggestions.txt`, fixed `raLoadSuggestions()` to always merge hardcoded defaults. 65/65 JS tests passing. Login credentials corrected (prashant.agarwal@mankind.in) |
