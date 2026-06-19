@@ -2,8 +2,8 @@
 # Format: value  OR  value [RECENT:timestamp]
 
 [THERAPY_AREA]
-Cardiology [RECENT:20260619085217]
-Diabetology [RECENT:20260619085647]
+Cardiology
+Diabetology
 Endocrinology
 Gynecology
 Gastroenterology
@@ -17,6 +17,7 @@ Orthopaedics
 Paediatrics
 General Medicine
 
+_test_1781863081117 [RECENT:20260619095801]
 [DISEASE]
 Hypertension
 Coronary Artery Disease (CAD)
@@ -45,3 +46,5 @@ randomised controlled trial
 meta-analysis
 drug safety
 real-world evidence
+hypertension [RECENT:20260619095801]
+clinical trials [RECENT:20260619095801]
