@@ -164,6 +164,8 @@ python demo/backend/app.py
 | 2026-06-19 | Holi date was 2026-03-14 (already past) | Corrected to 2027-03-14 |
 | 2026-06-19 | Research Agent dropdowns blank — `filter_suggestions.txt` missing | Created seed file with 14 therapy areas, 14 diseases, 11 keywords |
 | 2026-06-19 | `raLoadSuggestions()` ignored hardcoded defaults when API returned empty defaults | Fixed: always merge hardcoded defaults when API `defaults[]` is empty |
+| 2026-06-19 | Research Agent Disease/Keywords dropdowns didn't open on click | Added `onfocus` handler to all 3 filter inputs (was `oninput` only) |
+| 2026-06-19 | SQLite DB path relative — new empty DB created on every restart from different CWD | Fixed: `app.py` pins `SQLITE_DB_PATH` via `os.environ.setdefault` to `<script_dir>/pinnacleiq_demo.db`; `sqlite_store.py` also uses `__file__`-relative absolute path. Merged 1086-item main repo DB (91 approved) into worktree. |
 
 ---
 
@@ -198,6 +200,8 @@ python demo/backend/app.py
 | `demo/topics.txt` | Research topics (pipe-delimited) |
 | `start_app.ps1` | One-click launcher (handles port conflicts) |
 | `demo/filter_suggestions.txt` | Seed file for Research Agent dropdowns (therapy, disease, keywords) |
+| `demo/backend/pinnacleiq_demo.db` | **Canonical SQLite DB** — 1086 content items (91 approved). Always use this one; path pinned in `app.py` |
+| `research_agent_system/store/sqlite_store.py` | SQLite store — DB path now absolute via `__file__` |
 | `tests/test_today_and_occasions.js` | 60-case browser console test suite (Today's Tasks + Occasion Hub) |
 | `tests/test_research_agent.js` | 65-case browser console test suite (Research Agent tab) |
 | `test_checklist.html` | 280-case manual checklist |
@@ -209,7 +213,7 @@ python demo/backend/app.py
 ## 10. Known Issues / Pending Work
 
 - [ ] Some card titles show mojibake em-dash (`â€"`) — double-encoded UTF-8 in DB (cosmetic, low priority)
-- [ ] Fixes in worktree (`demo/backend/app.py`, `PinnacleIQ_Portal.html`) need to be propagated to main repo
+- [ ] Propagate all worktree fixes to main repo (merge branch `claude/quizzical-hypatia-29e4a0` → `main`)
 - [ ] Real LLM pipeline requires `.env` with `OPENROUTER_API_KEY` and `TAVILY_API_KEY`
 
 ---
@@ -230,3 +234,4 @@ python demo/backend/app.py
 | 2026-06-16 | UTF-8 encoding crash fix in approval/notification flow. Created BRD.md v1.0 → v1.1 (13 sections). 38 MA workflow tests passing |
 | 2026-06-19 | Occasion Hub: added `/occasions` API, fixed empty grid, fixed broadcast modal duplicate ID bug, fixed Doctors' Day tag (medical→national). 60/60 JS tests passing. Committed all files |
 | 2026-06-19 | Research Agent: seeded `filter_suggestions.txt`, fixed `raLoadSuggestions()` to always merge hardcoded defaults. 65/65 JS tests passing. Login credentials corrected (prashant.agarwal@mankind.in) |
+| 2026-06-19 | Research Agent onfocus fix, SQLite DB path fix, Chrome launch. DB now always resolves to `demo/backend/pinnacleiq_demo.db`. 1086-item DB (91 approved) restored from main repo. |

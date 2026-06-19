@@ -2,8 +2,8 @@
 # Format: value  OR  value [RECENT:timestamp]
 
 [THERAPY_AREA]
-Cardiology
-Diabetology
+Cardiology [RECENT:20260619085217]
+Diabetology [RECENT:20260619085647]
 Endocrinology
 Gynecology
 Gastroenterology

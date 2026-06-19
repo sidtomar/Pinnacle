@@ -35,3 +35,4 @@ Chronic Kidney Disease - Oncology | Oncology | Oncology
 Coronary Artery Disease (CAD) - Oncology | Oncology | Oncology
 Type 2 Diabetes - Diabetology (GLP-1 clinical outcomes) | Diabetology | Diabetology
 Type 2 Diabetes - Diabetology (randomized controlled trial) | Diabetology | Diabetology
+General Research - Diabetology | Diabetology | Diabetology
