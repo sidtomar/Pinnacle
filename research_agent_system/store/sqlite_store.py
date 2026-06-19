@@ -30,16 +30,22 @@ import os
 import sqlite3
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 from .base import BaseStore
+
+# Always resolve to demo/backend/pinnacleiq_demo.db regardless of launch CWD.
+# sqlite_store.py lives at research_agent_system/store/ — three parents up is
+# the project root, then down to demo/backend/.
+_DEFAULT_DB = str(Path(__file__).resolve().parent.parent.parent / "demo" / "backend" / "pinnacleiq_demo.db")
 
 
 class SQLiteStore(BaseStore):
     """SQLite-backed store. Used for demos and local development."""
 
     def __init__(self):
-        self.db_path = os.getenv("SQLITE_DB_PATH", "pinnacleiq_demo.db")
+        self.db_path = os.getenv("SQLITE_DB_PATH", _DEFAULT_DB)
 
     def _conn(self) -> sqlite3.Connection:
         """Open a connection with dict-style row access."""

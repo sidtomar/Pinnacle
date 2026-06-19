@@ -2,11 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "pinnacle-backend",
-      "runtimeExecutable": "python3.12",
-      "runtimeArgs": ["-m", "uvicorn", "app:app", "--reload", "--port", "8010"],
+      "name": "pinnacle-app",
+      "runtimeExecutable": "C:\\Users\\siddhartha.tomar_tpr\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe",
+      "runtimeArgs": ["-X", "utf8", "D:\\Codebase\\Pinnacle\\.claude\\worktrees\\quizzical-hypatia-29e4a0\\demo\\backend\\app.py"],
       "port": 8010,
-      "cwd": "demo/backend",
       "autoPort": false
     }
   ]
