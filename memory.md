@@ -1,7 +1,7 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-19 | Worktree: `claude/quizzical-hypatia-29e4a0`
+> **Last updated:** 2026-06-19 (end of day) | All fixes merged to `main` at `D:\Codebase\Pinnacle`
 
 ---
 
@@ -11,16 +11,19 @@
 - Single-file HTML portal: `PinnacleIQ_Portal.html` (served at `http://127.0.0.1:8010/app`)
 - FastAPI backend: `demo/backend/app.py` (port 8010)
 - Real agent pipeline (unused in demo): `research_agent_system/`
-- **Do NOT touch** `react-app/` — legacy, unused
+- `react-app/` — **deleted** (legacy React frontend, removed 2026-06-19)
 
 ---
 
 ## 2. How to Run
 
 ```powershell
-# From worktree root
-python demo/backend/app.py
-# OR use the one-click launcher:
+# Run from MAIN REPO (recommended — all fixes are here)
+cd D:\Codebase\Pinnacle\demo\backend
+python app.py
+
+# OR use the one-click launcher from repo root:
+cd D:\Codebase\Pinnacle
 .\start_app.ps1
 
 # Then open: http://127.0.0.1:8010/app
@@ -28,6 +31,7 @@ python demo/backend/app.py
 
 - Backend serves the HTML at both `/app` and `/portal`
 - `start_app.ps1` handles port conflicts and UTF-8 encoding
+- DB path is now **absolute** — always writes to `demo/backend/pinnacleiq_demo.db` regardless of CWD
 
 ---
 
@@ -35,11 +39,16 @@ python demo/backend/app.py
 
 | Role | Email | Password | Access |
 |------|-------|----------|--------|
-| **Admin** | admin@mankind.in | Admin123 | Role switcher, all views |
-| **Medical Affairs (MA)** | priya@mankind.in | Test | Run pipeline, approve/reject content |
-| **PMT / BU Head** | jijo@mankind.in | Test | Today's Tasks, Occasion Hub, Content Library, Analytics |
+| **Admin** | `admin@mankind.in` | Admin123 | Role switcher, all views |
+| **MA (Medical Affairs)** | `prashant.agarwal@mankind.in` | Test | Research Agent, approve/reject content |
+| **MA** (alt) | `anita.sharma@mankind.in` | Test | Same MA access |
+| **MA** (alt) | `rohit.kumar@mankind.in` | Test | Same MA access |
+| **PMT / BU Head** | `amit.verma@mankind.in` | Test | Today's Tasks, Occasion Hub, Content Library |
+| **PMT** (any) | `rajesh.sharma@mankind.in` … `rahul.agarwal@mankind.in` | Test | Same PMT access |
 
-**Key mapping:** PMT == BU Head (same role). React-app is legacy — ignore it.
+**⚠️ Old credentials (`priya@mankind.in`, `jijo@mankind.in`) do NOT work** — those were from an earlier version. Use the emails above.
+
+**Key mapping:** PMT == BU Head (same role). All passwords are `Test` except Admin (`Admin123`).
 
 ---
 
@@ -166,22 +175,30 @@ python demo/backend/app.py
 | 2026-06-19 | `raLoadSuggestions()` ignored hardcoded defaults when API returned empty defaults | Fixed: always merge hardcoded defaults when API `defaults[]` is empty |
 | 2026-06-19 | Research Agent Disease/Keywords dropdowns didn't open on click | Added `onfocus` handler to all 3 filter inputs (was `oninput` only) |
 | 2026-06-19 | SQLite DB path relative — new empty DB created on every restart from different CWD | Fixed: `app.py` pins `SQLITE_DB_PATH` via `os.environ.setdefault` to `<script_dir>/pinnacleiq_demo.db`; `sqlite_store.py` also uses `__file__`-relative absolute path. Merged 1086-item main repo DB (91 approved) into worktree. |
+| 2026-06-19 | `filter_suggestions.txt` had RECENT markers and `_test_*` entries from test runs | Reset to clean defaults — all 14 therapy/disease entries are plain defaults again |
 
 ---
 
 ## 8. Test Coverage
 
-### Automated Tests
-| File | Tests | Status | Login |
+### Automated Tests — last run 2026-06-19 against `D:\Codebase\Pinnacle` (main)
+
+| File | Cases | Result | Login |
 |------|-------|--------|-------|
-| `tests/test_today_and_occasions.js` | 60 cases | ✅ All pass | PMT: `amit.verma@mankind.in` / Test |
-| `tests/test_research_agent.js` | 65 cases | ✅ All pass | MA: `prashant.agarwal@mankind.in` / Test |
-| `tests/` (backend pytest) | 57 cases | ✅ All pass (as of 2026-06-16) | — |
+| `tests/test_today_and_occasions.js` | 60 | ✅ 60/60 pass | PMT: `amit.verma@mankind.in` / Test |
+| `tests/test_research_agent.js` | 65 | ✅ 65/65 pass | MA: `prashant.agarwal@mankind.in` / Test |
+| `tests/` (backend pytest) | 57 | ✅ All pass (as of 2026-06-16) | — |
+| **Total JS** | **125** | ✅ **125/125** | |
 
 **How to run JS tests:**
-1. Start server: `python demo/backend/app.py`, open `http://127.0.0.1:8010/app`
-2. Log in with the role shown above
-3. Open DevTools Console (F12) → paste the test file content → Enter
+1. `cd D:\Codebase\Pinnacle\demo\backend && python app.py`
+2. Open `http://127.0.0.1:8010/app`, log in with the role above
+3. Open DevTools Console (F12) → paste the test file → Enter
+
+**Note:** After running tests, `filter_suggestions.txt` may get RECENT markers. Reset with:
+```powershell
+git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
+```
 
 ### Manual Test Checklist
 - `test_checklist.html` — 280-case interactive checklist (open in browser)
@@ -213,8 +230,9 @@ python demo/backend/app.py
 ## 10. Known Issues / Pending Work
 
 - [ ] Some card titles show mojibake em-dash (`â€"`) — double-encoded UTF-8 in DB (cosmetic, low priority)
-- [ ] Propagate all worktree fixes to main repo (merge branch `claude/quizzical-hypatia-29e4a0` → `main`)
 - [ ] Real LLM pipeline requires `.env` with `OPENROUTER_API_KEY` and `TAVILY_API_KEY`
+- [ ] After running JS tests, `demo/filter_suggestions.txt` gets RECENT markers — reset with `git checkout demo/filter_suggestions.txt`
+- ✅ ~~Propagate all worktree fixes to main~~ — **Done 2026-06-19** (`claude/quizzical-hypatia-29e4a0` merged → `main`)
 
 ---
 
@@ -235,3 +253,4 @@ python demo/backend/app.py
 | 2026-06-19 | Occasion Hub: added `/occasions` API, fixed empty grid, fixed broadcast modal duplicate ID bug, fixed Doctors' Day tag (medical→national). 60/60 JS tests passing. Committed all files |
 | 2026-06-19 | Research Agent: seeded `filter_suggestions.txt`, fixed `raLoadSuggestions()` to always merge hardcoded defaults. 65/65 JS tests passing. Login credentials corrected (prashant.agarwal@mankind.in) |
 | 2026-06-19 | Research Agent onfocus fix, SQLite DB path fix, Chrome launch. DB now always resolves to `demo/backend/pinnacleiq_demo.db`. 1086-item DB (91 approved) restored from main repo. |
+| 2026-06-19 | **Merged worktree → main.** All fixes in `D:\Codebase\Pinnacle` (main). Ran 125 JS tests against main — 125/125 pass. Cleaned up `filter_suggestions.txt`. App runs from `D:\Codebase\Pinnacle\demo\backend\python app.py`. |
