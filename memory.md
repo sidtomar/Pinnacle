@@ -1,7 +1,7 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-19 (end of day) | All fixes merged to `main` at `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-22 | All fixes merged to `main` at `D:\Codebase\Pinnacle`
 
 ---
 ---
@@ -64,6 +64,8 @@ cd D:\Codebase\Pinnacle
 **⚠️ Old credentials (`priya@mankind.in`, `jijo@mankind.in`) do NOT work** — those were from an earlier version. Use the emails above.
 
 **Key mapping:** PMT == BU Head (same role). All passwords are `Test` except Admin (`Admin123`).
+
+**Login mechanics (verified 2026-06-22):** Login is client-side against `USERS_DB` array in `PinnacleIQ_Portal.html` (~line 7442). Shared password is `const APP_PASSWORD = 'Test'`. A user can override it with a per-user `pwd:` field — the check is `password !== (user.pwd || APP_PASSWORD)`. `admin@mankind.in` carries `pwd:'Admin123'`. Other admin accounts `admin1@mankind.in`…`admin5@mankind.in` also exist (password `Test`).
 
 ---
 
@@ -191,6 +193,7 @@ cd D:\Codebase\Pinnacle
 | 2026-06-19 | Research Agent Disease/Keywords dropdowns didn't open on click | Added `onfocus` handler to all 3 filter inputs (was `oninput` only) |
 | 2026-06-19 | SQLite DB path relative — new empty DB created on every restart from different CWD | Fixed: `app.py` pins `SQLITE_DB_PATH` via `os.environ.setdefault` to `<script_dir>/pinnacleiq_demo.db`; `sqlite_store.py` also uses `__file__`-relative absolute path. Merged 1086-item main repo DB (91 approved) into worktree. |
 | 2026-06-19 | `filter_suggestions.txt` had RECENT markers and `_test_*` entries from test runs | Reset to clean defaults — all 14 therapy/disease entries are plain defaults again |
+| 2026-06-22 | Documented admin login `admin@mankind.in` / `Admin123` failed — "No account found". Only `admin1@mankind.in`…`admin5@mankind.in` existed, and password check used a single shared `APP_PASSWORD='Test'` | Added `admin@mankind.in` account (`pwd:'Admin123'`) to `USERS_DB`; changed login check to `password !== (user.pwd || APP_PASSWORD)` so per-user passwords work while everyone else stays `Test`. Committed on `feat/admin-login-credentials` → merged to `main` |
 
 ---
 
@@ -269,3 +272,4 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-19 | Research Agent: seeded `filter_suggestions.txt`, fixed `raLoadSuggestions()` to always merge hardcoded defaults. 65/65 JS tests passing. Login credentials corrected (prashant.agarwal@mankind.in) |
 | 2026-06-19 | Research Agent onfocus fix, SQLite DB path fix, Chrome launch. DB now always resolves to `demo/backend/pinnacleiq_demo.db`. 1086-item DB (91 approved) restored from main repo. |
 | 2026-06-19 | **Merged worktree → main.** All fixes in `D:\Codebase\Pinnacle` (main). Ran 125 JS tests against main — 125/125 pass. Cleaned up `filter_suggestions.txt`. App runs from `D:\Codebase\Pinnacle\demo\backend\python app.py`. |
+| 2026-06-22 | Ran app (already live on 8010). Fixed admin login: documented `admin@mankind.in`/`Admin123` didn't exist in `USERS_DB` (only `admin1..5`). Added the account + per-user `pwd` support in `PinnacleIQ_Portal.html`. Committed on `feat/admin-login-credentials`, merged to `main` (no-ff). Reset test-polluted `filter_suggestions.txt`. Documented login mechanics in §3. **Note:** `main` is ~50 commits ahead of `origin/main` — not pushed yet (remote: `github.com/sidtomar/Pinnacle.git`). |

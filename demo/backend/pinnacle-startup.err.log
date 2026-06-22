@@ -1,0 +1,6 @@
+INFO:     Started server process [39432]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+D:\Codebase\Pinnacle\demo\backend\app.py:188: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
