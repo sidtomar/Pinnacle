@@ -7441,6 +7441,7 @@ function renderAPIContent() {
 /* ══ USER DATABASE ══ */
 const USERS_DB = [
   // ── Category 1: Admin (Research Pipeline + Research Agent only) ──
+  {id:'admin',  name:'Administrator',    email:'admin@mankind.in',           role:'admin', category:'Admin',            designation:'System Administrator',        initials:'AD', pwd:'Admin123'},
   {id:'admin1', name:'Admin 1',          email:'admin1@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A1'},
   {id:'admin2', name:'Admin 2',          email:'admin2@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A2'},
   {id:'admin3', name:'Admin 3',          email:'admin3@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A3'},
@@ -7479,7 +7480,7 @@ function doLogin() {
 
   const user = USERS_DB.find(u => u.email.toLowerCase() === email);
   if (!user) { errMsg.textContent = 'No account found with that email address.'; errEl.style.display = 'flex'; return; }
-  if (password !== APP_PASSWORD) { errMsg.textContent = 'Incorrect password. Please try again.'; errEl.style.display = 'flex'; return; }
+  if (password !== (user.pwd || APP_PASSWORD)) { errMsg.textContent = 'Incorrect password. Please try again.'; errEl.style.display = 'flex'; return; }
 
   btn.disabled = true;
   btn.innerHTML = '<span class="login-spinner"></span> Signing in…';
