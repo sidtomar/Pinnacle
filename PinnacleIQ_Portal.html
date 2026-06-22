@@ -1557,9 +1557,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="ra-filter-group">
               <label class="ra-filter-label">Publication Date</label>
               <div style="display:flex;align-items:center;gap:8px;">
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2024-01-01">
+                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2020-04-01">
                 <span style="font-size:11px;color:#6b7280;flex-shrink:0;">→</span>
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2" value="2026-06-01">
+                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2">
               </div>
             </div>
             <div class="ra-filter-group" style="justify-content:flex-end;">
@@ -3105,6 +3105,12 @@ let ALL_PAPERS = [
   {id:11,status:'rejected',src:'link',title:'Are Antidepressants Safe in Pregnancy? A Controversial Review',journal:'Medical News Today (Blog)',year:'2025',month:'Feb',authors:'Unknown',date:'2025-02-28',cat:'Gynaecology',therapy:'High-risk Pregnancy',sub:'Review Article',rel:'Low',tags:['Antidepressants','Pregnancy'],rec:'All Gynaecologists',abstract:'Blog post, conflicting opinions, no proper citations.',sum:'Non-peer-reviewed blog. Not suitable.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-28',rejNote:'Not peer-reviewed. Medical News Today is a news aggregator, not a journal.'},
   {id:12,status:'rejected',src:'pubmed',title:'European Hypertension Pharmacotherapy: 2024 Update',journal:'Blood Pressure Journal',year:'2024',month:'Apr',authors:'European Hypertension Society',pmid:'38290123',date:'2025-02-15',cat:'Cardiology',therapy:'Hypertension',sub:'Guideline / Consensus',rel:'Medium',tags:['Hypertension','European Guidelines'],rec:'All Cardiologists',abstract:'European hypertension guideline update. Limited Indian applicability.',sum:'European guideline — limited Indian relevance, different drug availability.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-15',rejNote:'European cohorts, limited Indian relevance. Recommend Indian Hypertension Society guidelines.'},
 ];
+const SEED_PAPERS = ALL_PAPERS.slice()
+let _apiPapers = []
+
+function rebuildAllPapers() {
+  ALL_PAPERS = _apiPapers.length > 0 ? [..._apiPapers, ...SEED_PAPERS.slice()] : SEED_PAPERS.slice();
+}
 
 // Doctors from Pinnacle Content Engine + expanded with DMS / next-action data
 // Populated from API on first visit to Doctor Directory; 12 entries below act as fallback
@@ -3430,6 +3436,7 @@ function switchRole(role, skipHash){
   buildCLTabs();
   buildSidebarFooter();
   buildTopbarActions();
+  rebuildAllPapers();
   if(role !== 'admin') renderCL();
   if(role==='pmt' && targetPage==='today') renderToday();
 }
@@ -7408,24 +7415,15 @@ function mapAPIItemToPaper(item) {
   };
 }
 
-/* ══ LOAD CONTENT FROM API — merges into ALL_PAPERS ══ */
-let _apiContent = [];
+/* ══ LOAD CONTENT FROM API — rebuilds ALL_PAPERS via rebuildAllPapers ══ */
 
 async function loadContentFromAPI() {
   try {
     const res = await fetch(PL_API + '/content');
     if (!res.ok) return;
     const data = await res.json();
-    _apiContent = data.items || [];
-
-    // Remove any previously merged API items to prevent duplicates on re-fetch
-    ALL_PAPERS = ALL_PAPERS.filter(p => !p._apiSource);
-
-    // Convert and prepend so pipeline content appears at the top
-    const mapped = _apiContent.map(mapAPIItemToPaper);
-    ALL_PAPERS = [...mapped, ...ALL_PAPERS];
-
-    // Refresh counts, tabs and the full card list
+    _apiPapers = (data.items || []).map(mapAPIItemToPaper);
+    rebuildAllPapers();
     buildCLTabs();
     buildCLKpis();
     renderCL();
@@ -7513,6 +7511,11 @@ function doLogout() {
 }
 
 function initApp() {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const _ystr = yesterday.toISOString().slice(0, 10);
+  const _dtEl = document.getElementById('ra-date-to-2');
+  if(_dtEl) _dtEl.value = _ystr;
   const loggedIn = localStorage.getItem('pinnacle_logged_in') === 'true';
   const userId   = localStorage.getItem('pinnacle_user_id');
   const savedRole= localStorage.getItem('pinnacle_role') || 'pmt';
@@ -7998,14 +8001,14 @@ async function raDisplayDynamicResults(contentIds) {
 
 function raResetForm(suffix = '') {
   const suffix_str = suffix ? `-${suffix}` : '';
-  // Only clear filter inputs — never hide or remove generated articles
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
   document.getElementById(`ra-therapy${suffix_str}`).value = '';
   document.getElementById(`ra-disease${suffix_str}`).value = '';
   document.getElementById(`ra-keywords${suffix_str}`).value = '';
-  document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
-  document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
+  document.getElementById(`ra-date-from${suffix_str}`).value = '2020-04-01';
+  document.getElementById(`ra-date-to${suffix_str}`).value = yesterday.toISOString().slice(0, 10);
   document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
-  // Clear keyword chips and active filters (UI only, not results)
   raClearAllFilters();
 }
 
