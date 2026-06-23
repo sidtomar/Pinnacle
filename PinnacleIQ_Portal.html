@@ -6016,7 +6016,11 @@ function sendBroadcast(){
 // Auto-detect API base URL:
 // - Local dev (Live Server on :5500 or :7788) → backend on localhost:8010
 // - Deployed (ngrok / cloud VM) → same origin (backend serves both HTML + API)
-const PL_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+// Use SAME-ORIGIN whenever the page is served by the backend (localhost OR
+// 127.0.0.1, any port) — avoids the localhost/127.0.0.1 cross-origin CORS trap
+// that caused "Failed to fetch". Only the Vite dev server (5173/3000) needs to
+// reach the backend on a different port.
+const PL_API = (window.location.port === '5173' || window.location.port === '3000')
   ? 'http://localhost:8010'
   : window.location.origin;
 let PL_TOPICS = [];          // [{topic, specialty, therapy_area}, ...]
@@ -7009,7 +7013,7 @@ async function downloadExcelReport() {
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-dasharray="30" stroke-dashoffset="10"><animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/></circle></svg> Generating...';
 
   try {
-    const resp = await fetch('http://localhost:8010/report/download');
+    const resp = await fetch(PL_API + '/report/download');
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
       throw new Error(err.detail || 'Server returned ' + resp.status);

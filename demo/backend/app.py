@@ -56,7 +56,8 @@ app = FastAPI(title="PinnacleIQ Research API", version="1.0.0")
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else [
     "http://localhost:5173",      # Vite dev server (React frontend)
     "http://localhost:3000",      # Alt dev port
-    "http://localhost:8010",      # Same-origin API requests
+    "http://localhost:8010",      # Same-origin API requests (localhost)
+    "http://127.0.0.1:8010",      # Same-origin API requests (127.0.0.1) — avoids CORS trap
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
 ]
