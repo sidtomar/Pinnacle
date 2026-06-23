@@ -187,6 +187,7 @@ cd D:\Codebase\Pinnacle
 | 2026-06-19 | `/app` returned 404 in worktree | Added `/app` + `/portal` routes to worktree's `app.py` |
 | 2026-06-19 | Occasion Hub showed empty grid | Added `GET /occasions` endpoint (was missing from worktree) |
 | 2026-06-19 | Broadcast modal showed "Diwali Greetings" title for all occasions | Old stale modal `id="bcast-ov"` shadowed new modal's IDs. Renamed old modal to `bcast-ov-removed-placeholder` + `display:none` |
+| 2026-06-23 (session 3) | **Diwali broadcast bug RECURRED** — the rogue-agent file restore reintroduced the duplicate `id="bcast-ov"` modal (the earlier rename was lost). Every occasion's "Broadcast Message" opened the hardcoded Diwali modal. **Permanent fix:** fully DELETED the stale first modal block (was lines ~3048-3128) rather than renaming, so only the canonical dynamic modal remains. Verified inner IDs (`bcast-preview`/`bcast-msg`/`bcast-doc-list`/`bcast-hdr-title`/`bcast-occ-chip`/`bcast-send-btn`/`bcast-recip-pills`) are now unique (1 each). Occasion cards themselves were always dynamic via `renderOccasions()`. |
 | 2026-06-19 | Medical/National filter counts wrong (11/3 instead of 10/4) | Doctors' Day (o6) was tagged `medical`, should be `national` — fixed in both `app.py` and HTML |
 | 2026-06-19 | Holi date was 2026-03-14 (already past) | Corrected to 2027-03-14 |
 | 2026-06-19 | Research Agent dropdowns blank — `filter_suggestions.txt` missing | Created seed file with 14 therapy areas, 14 diseases, 11 keywords |
