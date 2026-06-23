@@ -3835,9 +3835,10 @@ function clBuildSuggest(){
   }
   const ico=`<svg width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><line x1="8.5" y1="8.5" x2="12" y2="12"/></svg>`;
   box.innerHTML=items.map(it=>{
-    const safe=(it.label||'').replace(/'/g,"\\'");
     const disp=it.type==='Article'&&it.label.length>52?it.label.slice(0,52)+'…':it.label;
-    return `<div class="cl-sg-item" onmousedown="clApplySuggest('${safe}')">${ico}<span>${_esc(disp)}</span><span class="cl-sg-type">${it.type}</span></div>`;
+    // Pass the raw label via a data attribute (HTML-escaped) and read it back in
+    // the handler — avoids breaking out of the attribute / JS string on quotes.
+    return `<div class="cl-sg-item" data-val="${_esc(it.label||'')}" onmousedown="clApplySuggest(this.dataset.val)">${ico}<span>${_esc(disp)}</span><span class="cl-sg-type">${_esc(it.type)}</span></div>`;
   }).join('');
   box.style.display='block';
 }
@@ -3939,7 +3940,7 @@ function clCardHTML(p){
       <div class="pc-title">${p.title}</div>
       <div class="pc-j">${p.journal} · ${p.month} ${p.year}</div>
       <div class="pc-sum">${p.sum}</div>
-      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${p.sub}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${t}</span>`).join('')}${relBadge(p.rel)}</div>
+      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${_esc(p.sub)}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${_esc(t)}</span>`).join('')}${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
     <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;flex-shrink:0;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:nowrap;flex-shrink:0;">${actions}</div></div>
@@ -3966,7 +3967,7 @@ function clRowHTML(p){
       <div class="pr-title">${p.title}${v>1?` <span class="ver-badge ver-latest">v${v}</span>`:''}</div>
       <div class="pr-meta"><span>${p.journal}</span><span>${p.authors.split(',')[0]} et al.</span><span>${p.month} ${p.year}</span>${p.pmid?`<span>PMID ${p.pmid}</span>`:''}</div>
       <div class="pr-sum">${p.sum}</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${p.sub}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${t}</span>`).join('')}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${_esc(p.sub)}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${_esc(t)}</span>`).join('')}</div>
     </div>
     <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;

@@ -1282,27 +1282,32 @@ def run_mock_pipeline(topic: str, specialty: str, therapy_area: str,
         _evidence_type = content.get("sub_category", "Review Article")
         _disease = topic.split(" - ")[0].strip() if " - " in topic else topic
         _finding = (src_snippet or "").rstrip(". ")
-        paper_summary = (
-            f"This study ({_evidence_type}), published in {src_journal} (2025), examined "
-            f"{therapy_area} in the context of {_disease}, addressing a clinically "
-            f"important question for {specialty.lower()} practice. "
-            f"The central finding: {_finding}. "
-            f"This result is both statistically significant and clinically meaningful, and it "
-            f"strengthens the 2025 evidence base guiding day-to-day treatment decisions in "
-            f"{therapy_area}. The study population spanned diverse ethnic backgrounds, with "
-            f"sub-group analyses confirming a consistent effect in South Asian patients — a "
-            f"critical consideration given India's distinct disease burden, body-composition "
-            f"profile, and access realities. The reported safety profile was reassuring, with "
-            f"adverse-event rates comparable to existing standard-of-care therapy and no new "
-            f"safety signals over the follow-up period.\n\n"
-            f"For Indian clinicians, the practical takeaway is clear: eligible patients should be "
-            f"reviewed at their next visit and considered for therapy in line with 2025 "
-            f"{specialty} society guidance, supported by structured adherence counselling and "
-            f"outcome monitoring at 3 and 6 months. Where local registry data exist, they "
-            f"corroborate these global findings and reinforce applicability to routine practice. "
-            f"Key takeaway: {_finding[:160]} — a result strong enough to inform treatment "
-            f"selection today, not merely future research."
-        )
+        if _finding:
+            paper_summary = (
+                f"This study ({_evidence_type}), published in {src_journal} (2025), examined "
+                f"{therapy_area} in the context of {_disease}, addressing a clinically "
+                f"important question for {specialty.lower()} practice. "
+                f"The central finding: {_finding}. "
+                f"This result is both statistically significant and clinically meaningful, and it "
+                f"strengthens the 2025 evidence base guiding day-to-day treatment decisions in "
+                f"{therapy_area}. The study population spanned diverse ethnic backgrounds, with "
+                f"sub-group analyses confirming a consistent effect in South Asian patients — a "
+                f"critical consideration given India's distinct disease burden, body-composition "
+                f"profile, and access realities. The reported safety profile was reassuring, with "
+                f"adverse-event rates comparable to existing standard-of-care therapy and no new "
+                f"safety signals over the follow-up period.\n\n"
+                f"For Indian clinicians, the practical takeaway is clear: eligible patients should be "
+                f"reviewed at their next visit and considered for therapy in line with 2025 "
+                f"{specialty} society guidance, supported by structured adherence counselling and "
+                f"outcome monitoring at 3 and 6 months. Where local registry data exist, they "
+                f"corroborate these global findings and reinforce applicability to routine practice. "
+                f"Key takeaway: the evidence is strong enough to inform {therapy_area.lower()} "
+                f"treatment selection in eligible patients today, not merely future research."
+            )
+        else:
+            # No per-paper key finding available — fall back to the rich topic-level
+            # summary so the card never shows malformed "central finding: ." prose.
+            paper_summary = content.get("summary", "") or src_title
 
         card = {
             # Core fields

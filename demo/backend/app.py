@@ -405,6 +405,8 @@ async def upload_doctors(file: UploadFile = File(...)):
         raise HTTPException(400, f"Cannot read Excel file: {exc}")
 
     ws = wb.active
+    if ws is None:
+        raise HTTPException(400, "Excel file has no active/readable sheet")
     rows = list(ws.iter_rows(values_only=True))
     if len(rows) < 2:
         raise HTTPException(400, "Excel file must have a header row and at least one data row")
@@ -559,7 +561,12 @@ async def upload_doctors(file: UploadFile = File(...)):
         "doctors": doctors,
     }
 
-    DOCTORS_FILE.write_text(json.dumps(new_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    # Atomic write: write to a temp file in the same dir, then os.replace() so a
+    # crash or concurrent upload can never leave doctors.json half-written/corrupt.
+    _payload = json.dumps(new_data, indent=2, ensure_ascii=False)
+    _tmp = DOCTORS_FILE.with_suffix(DOCTORS_FILE.suffix + ".tmp")
+    _tmp.write_text(_payload, encoding="utf-8")
+    os.replace(_tmp, DOCTORS_FILE)
 
     return {
         "success": True,
