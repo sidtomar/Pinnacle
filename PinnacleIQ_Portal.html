@@ -1531,111 +1531,6 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         </div>
       </div>
 
-      <!-- ADMIN: Import Doctor Database (visible to admin role only) -->
-      <div id="ra-import-db-card" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2eaf2;box-shadow:0 2px 12px rgba(15,28,46,.08);margin-bottom:24px;overflow:hidden;">
-
-        <!-- Always-visible header row (clickable to toggle) -->
-        <div onclick="raDbToggle()" style="display:flex;align-items:center;gap:10px;padding:14px 20px;cursor:pointer;user-select:none;transition:background .15s;" onmouseover="this.style.background='#f9fbfd'" onmouseout="this.style.background=''">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#0f1c2e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M2 13h12M8 1v9M5 7l3 3 3-3"/></svg>
-          <span style="font-size:14px;font-weight:700;color:#1a2e42;">Import Doctor Database</span>
-          <span style="font-size:9px;font-weight:700;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:5px;padding:1px 7px;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;">Admin Only</span>
-          <!-- Last-upload info (injected by JS) -->
-          <span id="ra-db-last-info" style="font-size:11px;color:#9ca3af;margin-left:4px;flex:1;"></span>
-          <!-- Toggle label + chevron -->
-          <span id="ra-db-toggle-label" style="font-size:11.5px;font-weight:600;color:#4a637a;display:flex;align-items:center;gap:5px;flex-shrink:0;">
-            Show Import Tool
-            <svg id="ra-db-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#4a637a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;"><polyline points="2,4 6.5,9 11,4"/></svg>
-          </span>
-        </div>
-
-        <!-- Collapsible body (hidden by default) -->
-        <div id="ra-import-db-body" style="display:none;padding:0 20px 20px;border-top:1px solid #f0f4f8;">
-
-          <p style="font-size:12.5px;color:#6b7280;margin:14px 0 16px;line-height:1.5;">Upload the DR Master Template (.xlsx) to replace the doctor database across all screens — Doctor Directory, Doctor 360 &amp; Share workflows.</p>
-
-          <!-- Last upload success banner (shown after upload or on revisit) -->
-          <div id="ra-db-last-banner" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px 14px;margin-bottom:16px;display:none;align-items:center;gap:10px;">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="8" cy="8" r="7"/><polyline points="5,8.5 7,10.5 11,6"/></svg>
-            <div>
-              <div id="ra-db-last-banner-title" style="font-size:12.5px;font-weight:700;color:#166534;"></div>
-              <div id="ra-db-last-banner-sub" style="font-size:11px;color:#15803d;margin-top:1px;"></div>
-            </div>
-          </div>
-
-          <!-- Column legend -->
-          <div style="margin-bottom:16px;">
-            <div style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Template Columns</div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
-              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">Doctor Code</span>
-              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">DR Name</span>
-              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">City</span>
-              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">Speciality</span>
-              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">qualification</span>
-              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">clinic address</span>
-              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">category</span>
-              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">DM &amp; DMS</span>
-              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">SOW</span>
-              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">MR name</span>
-              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">Division</span>
-              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Clinical interests</span>
-              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Bday</span>
-              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Anniversary</span>
-              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Spouse name</span>
-              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">No of children</span>
-              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">engagement score</span>
-              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Last engaged</span>
-              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Next engagement</span>
-              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Status</span>
-              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">preferred channel</span>
-            </div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#EBF0F8;"></span>Personal (Upload)</span>
-              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F3F4F6;"></span>Superman CRM</span>
-              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F0FDF4;border:1px solid #BBF7D0;"></span>Field (Upload)</span>
-              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F5F3FF;"></span>PIQ Derived</span>
-            </div>
-          </div>
-
-          <!-- Drop zone -->
-          <div id="ra-db-dropzone"
-               style="border:2px dashed #d1dce8;border-radius:10px;padding:24px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#f9fbfd;"
-               ondragover="event.preventDefault();this.style.borderColor='#0f1c2e';this.style.background='#eef4fb';"
-               ondragleave="this.style.borderColor='#d1dce8';this.style.background='#f9fbfd';"
-               ondrop="raDbOnDrop(event)"
-               onclick="document.getElementById('ra-db-file-input').click()">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 10px;display:block;">
-              <rect x="3" y="3" width="26" height="26" rx="5" stroke-dasharray="4 3"/>
-              <path d="M10 18v5h12v-5M16 9v10M12 13l4-4 4 4"/>
-            </svg>
-            <div style="font-size:13px;color:#4a637a;font-weight:500;"><strong style="color:#1a2e42;">Drag &amp; drop</strong> the DR Master Template here, or <span style="color:#0f1c2e;font-weight:700;text-decoration:underline;cursor:pointer;">browse</span></div>
-            <div style="font-size:11px;color:#9ca3af;margin-top:5px;">.xlsx or .xls only · Row 1 = column headers · Row 2+ = doctor data</div>
-            <input type="file" id="ra-db-file-input" accept=".xlsx,.xls" style="display:none;" onchange="raDbOnFileSelect(event)">
-          </div>
-
-          <!-- Selected file info -->
-          <div id="ra-db-file-info" style="display:none;margin-top:10px;background:#EBF0F8;border:1px solid #c7d7ea;border-radius:8px;padding:9px 14px;align-items:center;gap:10px;">
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#1a2e42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M2.5 2h7.5l3 3v8a.5.5 0 01-.5.5h-10a.5.5 0 01-.5-.5V2.5a.5.5 0 01.5-.5z"/><polyline points="10,2 10,5 13,5"/></svg>
-            <span id="ra-db-file-name" style="font-size:12.5px;color:#1a2e42;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-            <button onclick="raDbClearFile()" style="background:none;border:none;cursor:pointer;font-size:16px;color:#6b7280;padding:0 4px;line-height:1;flex-shrink:0;" title="Remove">✕</button>
-          </div>
-
-          <div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
-            <button id="ra-db-upload-btn" onclick="raDbUpload()"
-                    style="display:none;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:8px;padding:0 22px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;">
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 10v2h11v-2M6.5 1v8M3.5 4l3-3 3 3"/></svg>
-              Upload &amp; Replace Database
-            </button>
-            <span id="ra-db-uploading" style="display:none;font-size:12px;color:#6b7280;align-items:center;gap:8px;">
-              <span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #e2eaf2;border-top-color:#0f1c2e;animation:spin .8s linear infinite;"></span>
-              Uploading and processing…
-            </span>
-          </div>
-
-          <!-- Status message (errors only; success uses banner above) -->
-          <div id="ra-db-status" style="display:none;margin-top:10px;font-size:12px;border-radius:8px;padding:10px 14px;line-height:1.7;"></div>
-        </div><!-- /ra-import-db-body -->
-      </div>
-
       <!-- SEARCH PANEL -->
       <div class="ra-search-panel">
         <div class="ra-panel-header">
@@ -1666,9 +1561,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="ra-filter-group">
               <label class="ra-filter-label">Publication Date</label>
               <div style="display:flex;align-items:center;gap:8px;">
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2020-04-01">
+                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2024-01-01">
                 <span style="font-size:11px;color:#6b7280;flex-shrink:0;">→</span>
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2">
+                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2" value="2026-06-01">
               </div>
             </div>
             <div class="ra-filter-group" style="justify-content:flex-end;">
@@ -2208,7 +2103,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
       <div class="ms" id="abs-header">Complete Article</div>
       <div class="abs-box abs-box-collapsed" id="ma-abstract"></div>
       <button class="abs-toggle" id="ma-abs-toggle" onclick="absToggle('ma-abstract','ma-abs-toggle')">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" id="ma-abs-chevron"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
         View full article
       </button>
       <div class="ms">AI Summary <span class="ai-b"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M4.5 .5l1 3.2H9L6.3 5.5l1 3.2-2.8-2L1.7 8.7l1-3.2L0 3.7h3.5L4.5.5z" fill="#7C3AED"/></svg>AI Generated</span></div>
@@ -2303,7 +2198,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Complete Article</div>
     <div class="abs-box abs-box-collapsed" id="cv-abs"></div>
     <button class="abs-toggle" id="cv-abs-toggle" onclick="absToggle('cv-abs','cv-abs-toggle')">
-      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" id="cv-abs-chevron"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
       View full article
     </button>
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;display:flex;align-items:center;gap:8px;">AI Clinical Summary <span class="ai-b">AI</span></div>
@@ -2331,7 +2226,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="padding:20px 24px;flex:1;overflow-y:auto;">
     <div class="impr-hint">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7"/><circle cx="7" cy="9.5" r=".6" fill="currentColor"/></svg>
-      <div>The AI will revise the content using your notes and reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval.</div>
+      <div>Agent Beta will revise the content using your notes, then Gamma will reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval. Alpha is skipped — research is already done.</div>
     </div>
     <label class="fl">Your Improvement Notes</label>
     <textarea class="impr-ta" id="impr-notes" placeholder="e.g. Fix the empagliflozin dose to 10mg. Reference ESC 2023 HF guidelines specifically. Remove any competitor drug mentions not in our portfolio."></textarea>
@@ -2348,9 +2243,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     </div>
   </div>
   <div class="mf">
-    <div style="font-size:11.5px;color:var(--text3);" id="impr-footer-text">AI revises content · New version → Pending Review</div>
+    <div style="font-size:11.5px;color:var(--text3);">Alpha skipped · Beta rewrites · Gamma reformats · New version → Pending Review</div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
       <button class="btn btn-sm" id="impr-submit-btn"
               style="background:var(--amber);color:#fff;"
               onclick="submitImprovementRequest()">
@@ -3222,12 +3117,6 @@ let ALL_PAPERS = [
   {id:11,status:'rejected',src:'link',title:'Are Antidepressants Safe in Pregnancy? A Controversial Review',journal:'Medical News Today (Blog)',year:'2025',month:'Feb',authors:'Unknown',date:'2025-02-28',cat:'Gynaecology',therapy:'High-risk Pregnancy',sub:'Review Article',rel:'Low',tags:['Antidepressants','Pregnancy'],rec:'All Gynaecologists',abstract:'Blog post, conflicting opinions, no proper citations.',sum:'Non-peer-reviewed blog. Not suitable.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-28',rejNote:'Not peer-reviewed. Medical News Today is a news aggregator, not a journal.'},
   {id:12,status:'rejected',src:'pubmed',title:'European Hypertension Pharmacotherapy: 2024 Update',journal:'Blood Pressure Journal',year:'2024',month:'Apr',authors:'European Hypertension Society',pmid:'38290123',date:'2025-02-15',cat:'Cardiology',therapy:'Hypertension',sub:'Guideline / Consensus',rel:'Medium',tags:['Hypertension','European Guidelines'],rec:'All Cardiologists',abstract:'European hypertension guideline update. Limited Indian applicability.',sum:'European guideline — limited Indian relevance, different drug availability.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-15',rejNote:'European cohorts, limited Indian relevance. Recommend Indian Hypertension Society guidelines.'},
 ];
-const SEED_PAPERS = ALL_PAPERS.slice()
-let _apiPapers = []
-
-function rebuildAllPapers() {
-  ALL_PAPERS = _apiPapers.length > 0 ? [..._apiPapers, ...SEED_PAPERS.slice()] : SEED_PAPERS.slice();
-}
 
 // Doctors from Pinnacle Content Engine + expanded with DMS / next-action data
 // Populated from API on first visit to Doctor Directory; 12 entries below act as fallback
@@ -3476,9 +3365,9 @@ function toggleRoleDropdown(e){
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
 // Valid page IDs for each role — used to validate hash on load/switch
-const PAGES_MA    = ['content','dashboard'];
-const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','research-agent'];
-const PAGES_ADMIN = ['research-agent'];
+const PAGES_MA    = ['content','pipeline','dashboard'];
+const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
+const PAGES_ADMIN = ['research-agent','pipeline'];
 
 function _getHashPage(){
   const h = location.hash.replace('#','');
@@ -3542,13 +3431,6 @@ function switchRole(role, skipHash){
     document.getElementById('sb-badge').className      = 'sb-role-badge rb-pmt';
   }
 
-  // Show/hide admin import card on Research Agent page
-  const importCard = document.getElementById('ra-import-db-card');
-  if (importCard) {
-    importCard.style.display = role === 'admin' ? 'block' : 'none';
-    if (role === 'admin') raDbRefreshLastInfo();
-  }
-
   buildSidebar();
   const hashPage   = _getHashPage();
   const validPages = role==='admin' ? PAGES_ADMIN : role==='ma' ? PAGES_MA : PAGES_PMT;
@@ -3560,7 +3442,6 @@ function switchRole(role, skipHash){
   buildCLTabs();
   buildSidebarFooter();
   buildTopbarActions();
-  rebuildAllPapers();
   if(role !== 'admin') renderCL();
   if(role==='pmt' && targetPage==='today') renderToday();
 }
@@ -3578,7 +3459,7 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>`;
@@ -3592,7 +3473,7 @@ function buildSidebar(){
         Content Library
         <span class="nb nb-amber" id="nb-pend">${ALL_PAPERS.filter(p=>p.status==='pending').length}</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>
@@ -3649,7 +3530,7 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>`;
@@ -3868,7 +3749,7 @@ function clCardHTML(p){
       <div class="pc-title">${p.title}</div>
       <div class="pc-j">${p.journal} · ${p.month} ${p.year}</div>
       <div class="pc-sum">${p.sum}</div>
-      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${relBadge(p.rel)}</div>
+      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span>${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
     <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;flex-shrink:0;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:nowrap;flex-shrink:0;">${actions}</div></div>
@@ -3895,7 +3776,7 @@ function clRowHTML(p){
       <div class="pr-title">${p.title}${v>1?` <span class="ver-badge ver-latest">v${v}</span>`:''}</div>
       <div class="pr-meta"><span>${p.journal}</span><span>${p.authors.split(',')[0]} et al.</span><span>${p.month} ${p.year}</span>${p.pmid?`<span>PMID ${p.pmid}</span>`:''}</div>
       <div class="pr-sum">${p.sum}</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span></div>
     </div>
     <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;
@@ -3911,16 +3792,8 @@ function absToggle(boxId, btnId) {
   const collapsed = box.classList.contains('abs-box-collapsed');
   box.classList.toggle('abs-box-collapsed', !collapsed);
   const chevron = btn.querySelector('svg');
-  if (chevron) chevron.style.transform = collapsed ? 'rotate(180deg)' : '';
-  const label = btn.lastChild;
-  if (label) label.nodeValue = collapsed ? ' View less' : ' View full article';
-}
-
-function _absReset(boxId, btnId) {
-  const box = document.getElementById(boxId);
-  const btn = document.getElementById(btnId);
-  if (box) box.classList.add('abs-box-collapsed');
-  if (btn) { const ch = btn.querySelector('svg'); if (ch) ch.style.transform=''; if (btn.lastChild) btn.lastChild.nodeValue = ' View full article'; }
+  if (chevron) chevron.style.transform = collapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+  btn.childNodes[btn.childNodes.length - 1].nodeValue = collapsed ? ' View less' : ' View full article';
 }
 
 function openMADetail(id){
@@ -3936,7 +3809,11 @@ function openMADetail(id){
   const pdfEl=document.getElementById('ma-pdf-wrap');
   if(p.pdf){pdfEl.style.display='block';document.getElementById('ma-pdf-name').textContent=p.pdf;document.getElementById('ma-pdf-meta').textContent=`PDF · ${p.pdfSz}`;}else pdfEl.style.display='none';
   document.getElementById('ma-abstract').innerHTML = mdToHtml(p.abstract || '');
-  _absReset('ma-abstract','ma-abs-toggle');
+  // Reset abstract expand state
+  const maAbsBox = document.getElementById('ma-abstract');
+  const maAbsBtn = document.getElementById('ma-abs-toggle');
+  if (maAbsBox) maAbsBox.classList.add('abs-box-collapsed');
+  if (maAbsBtn) { const ch = maAbsBtn.querySelector('svg'); if(ch) ch.style.transform='rotate(0deg)'; maAbsBtn.childNodes[maAbsBtn.childNodes.length-1].nodeValue = ' View full article'; }
   document.getElementById('ma-summary').value=p.sum;
 
   // Build Publication Details rows — including a clickable Read More link
@@ -4035,7 +3912,7 @@ function _showSendToAgentsPrompt(apiId, title, rejectionNotes) {
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="8.5"/><line x1="10" y1="6.5" x2="10" y2="11"/><circle cx="10" cy="13.5" r=".8" fill="#F59E0B" stroke="none"/></svg>
     <div style="flex:1;line-height:1.5;">
       <div style="font-weight:700;color:#F8FAFC;margin-bottom:2px;">Content rejected.</div>
-      <div style="color:#94A3B8;font-size:12px;">Send your feedback to the AI for a revised version?</div>
+      <div style="color:#94A3B8;font-size:12px;">Send your feedback to Beta &amp; Gamma agents for a revised version?</div>
     </div>
     <button id="_improve-yes-btn" style="background:#F59E0B;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">⟳ Yes, Revise It</button>
     <button onclick="this.closest('div').remove()" style="background:transparent;border:none;color:#64748B;font-size:20px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;">×</button>`;
@@ -4080,8 +3957,12 @@ function openCVModal(id){
   document.getElementById('cv-title').textContent=p.title;
   document.getElementById('cv-meta').innerHTML=`${srcPill(p.src)}<span class="badge b-green">✅ Approved</span><span class="badge b-gray">${fmtDate(p.date)}</span>`;
   document.getElementById('cv-cats').innerHTML=`<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span><span class="badge b-gray">${p.sub}</span>${relBadge(p.rel)}`;
-  document.getElementById('cv-abs').innerHTML=mdToHtml(p.abstract||p.sum||'');
-  _absReset('cv-abs','cv-abs-toggle');
+  document.getElementById('cv-abs').innerHTML = mdToHtml(p.abstract || p.sum || '');
+  // Reset abstract expand state
+  const cvAbsBox = document.getElementById('cv-abs');
+  const cvAbsBtn = document.getElementById('cv-abs-toggle');
+  if (cvAbsBox) cvAbsBox.classList.add('abs-box-collapsed');
+  if (cvAbsBtn) { const ch = cvAbsBtn.querySelector('svg'); if(ch) ch.style.transform='rotate(0deg)'; cvAbsBtn.childNodes[cvAbsBtn.childNodes.length-1].nodeValue = ' View full article'; }
   document.getElementById('cv-sum').textContent=p.sum;
   document.getElementById('cv-info').innerHTML=[['Journal',p.journal],['Authors',p.authors],['Published',`${p.month} ${p.year}`],p.pmid?['PubMed ID',p.pmid]:null].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
   document.getElementById('cv-rec').innerHTML=`Recommended for: <strong>${p.rec}</strong>`;
@@ -6128,7 +6009,7 @@ function plRenderAgentOutput(agent, output) {
 
     if (summaries.length) {
       html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
-        <span style="background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Insights</span>
+        <span style="background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Beta</span>
         <strong style="font-size:13px;color:#7C3AED;">${summaries.length}</strong> paper${summaries.length!==1?'s':''} summarised
       </div>`;
       summaries.forEach(s => {
@@ -6619,8 +6500,6 @@ function openImprovementModal(contentId, title) {
   btn.textContent = '';
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polygon points="3,2 11,6.5 3,11" fill="currentColor"/></svg> Request Improvement';
   document.getElementById('impr-close-btn').textContent = 'Cancel';
-  const footerTxt = document.getElementById('impr-footer-text');
-  if (footerTxt) footerTxt.textContent = 'AI revises content · New version → Pending Review';
   openOv('impr-ov');
 }
 
@@ -6737,9 +6616,6 @@ function pollImprovementProgress() {
       if (data.status === 'completed') {
         clearInterval(_imprPollTimer);
         document.getElementById('impr-submit-btn').innerHTML = '✅ Done — View in Pending Review';
-        document.getElementById('impr-close-btn').textContent = 'Close';
-        const ft = document.getElementById('impr-footer-text');
-        if (ft) ft.textContent = 'AI revised content · New version → Pending Review';
         toast('✅', 'Improvement complete — new version pending MA review');
         if (typeof loadContentFromAPI === 'function') loadContentFromAPI();
         loadNotifications();
@@ -7567,15 +7443,24 @@ function mapAPIItemToPaper(item) {
   };
 }
 
-/* ══ LOAD CONTENT FROM API — rebuilds ALL_PAPERS via rebuildAllPapers ══ */
+/* ══ LOAD CONTENT FROM API — merges into ALL_PAPERS ══ */
+let _apiContent = [];
 
 async function loadContentFromAPI() {
   try {
     const res = await fetch(PL_API + '/content');
     if (!res.ok) return;
     const data = await res.json();
-    _apiPapers = (data.items || []).map(mapAPIItemToPaper);
-    rebuildAllPapers();
+    _apiContent = data.items || [];
+
+    // Remove any previously merged API items to prevent duplicates on re-fetch
+    ALL_PAPERS = ALL_PAPERS.filter(p => !p._apiSource);
+
+    // Convert and prepend so pipeline content appears at the top
+    const mapped = _apiContent.map(mapAPIItemToPaper);
+    ALL_PAPERS = [...mapped, ...ALL_PAPERS];
+
+    // Refresh counts, tabs and the full card list
     buildCLTabs();
     buildCLKpis();
     renderCL();
@@ -7663,11 +7548,6 @@ function doLogout() {
 }
 
 function initApp() {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const _ystr = yesterday.toISOString().slice(0, 10);
-  const _dtEl = document.getElementById('ra-date-to-2');
-  if(_dtEl) _dtEl.value = _ystr;
   const loggedIn = localStorage.getItem('pinnacle_logged_in') === 'true';
   const userId   = localStorage.getItem('pinnacle_user_id');
   const savedRole= localStorage.getItem('pinnacle_role') || 'pmt';
@@ -7698,149 +7578,6 @@ initApp();
 
 // In-memory cache of suggestions loaded from backend
 // Structure: { therapy_area: { recent: [...], defaults: [...] }, disease: {...}, keywords: {...} }
-// ── Doctor Database Import (Admin only) ────────────────────────────────────
-let RA_DB_FILE = null;
-let RA_DB_EXPANDED = false;
-
-function raDbToggle() {
-  RA_DB_EXPANDED = !RA_DB_EXPANDED;
-  const body    = document.getElementById('ra-import-db-body');
-  const chevron = document.getElementById('ra-db-chevron');
-  const label   = document.getElementById('ra-db-toggle-label');
-  if (body)    body.style.display = RA_DB_EXPANDED ? 'block' : 'none';
-  if (chevron) chevron.style.transform = RA_DB_EXPANDED ? 'rotate(180deg)' : 'rotate(0deg)';
-  if (label)   label.childNodes[0].nodeValue = RA_DB_EXPANDED ? 'Hide Import Tool ' : 'Show Import Tool ';
-  if (RA_DB_EXPANDED) raDbRefreshLastBanner();
-}
-
-// Persist last-upload record to localStorage and refresh UI
-function raDbSaveLastUpload(record) {
-  try { localStorage.setItem('pinnacleiq_last_doctor_upload', JSON.stringify(record)); } catch(_) {}
-  raDbRefreshLastInfo();
-  raDbRefreshLastBanner();
-}
-
-function raDbReadLastUpload() {
-  try { return JSON.parse(localStorage.getItem('pinnacleiq_last_doctor_upload') || 'null'); } catch(_) { return null; }
-}
-
-// Update the compact "Last updated" line in the always-visible header
-function raDbRefreshLastInfo() {
-  const el = document.getElementById('ra-db-last-info');
-  if (!el) return;
-  const rec = raDbReadLastUpload();
-  if (!rec) { el.textContent = ''; return; }
-  const d = new Date(rec.ts);
-  const fmt = d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  el.innerHTML = '· Last updated: <strong style="color:#4a637a;">' + rec.file + '</strong> on ' + fmt + ' (' + rec.total + ' doctors)';
-}
-
-// Update the green success banner inside the collapsed body
-function raDbRefreshLastBanner() {
-  const banner   = document.getElementById('ra-db-last-banner');
-  const titleEl  = document.getElementById('ra-db-last-banner-title');
-  const subEl    = document.getElementById('ra-db-last-banner-sub');
-  if (!banner) return;
-  const rec = raDbReadLastUpload();
-  if (!rec) { banner.style.display = 'none'; return; }
-  const d = new Date(rec.ts);
-  const fmt = d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  if (titleEl) titleEl.textContent = '✓ Doctor database is up to date — ' + rec.total + ' doctors loaded';
-  if (subEl)   subEl.textContent   = 'Last file: ' + rec.file + '  ·  Uploaded on ' + fmt + (rec.specialties?.length ? '  ·  Specialties: ' + rec.specialties.join(', ') : '');
-  banner.style.display = 'flex';
-}
-
-function raDbOnDrop(e) {
-  e.preventDefault();
-  const dz = document.getElementById('ra-db-dropzone');
-  if (dz) { dz.style.borderColor = '#d1dce8'; dz.style.background = '#f9fbfd'; }
-  const f = e.dataTransfer?.files?.[0];
-  if (f) raDbSetFile(f);
-}
-
-function raDbOnFileSelect(e) {
-  const f = e.target.files?.[0];
-  if (f) raDbSetFile(f);
-}
-
-function raDbSetFile(f) {
-  if (!f.name.toLowerCase().match(/\.(xlsx|xls)$/)) {
-    raDbShowStatus('Only .xlsx or .xls files are accepted.', 'error');
-    return;
-  }
-  RA_DB_FILE = f;
-  const nameEl = document.getElementById('ra-db-file-name');
-  const infoEl = document.getElementById('ra-db-file-info');
-  const btnEl  = document.getElementById('ra-db-upload-btn');
-  const statEl = document.getElementById('ra-db-status');
-  if (nameEl) nameEl.textContent = f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB)';
-  if (infoEl) infoEl.style.display = 'flex';
-  if (btnEl)  btnEl.style.display  = 'flex';
-  if (statEl) statEl.style.display = 'none';
-}
-
-function raDbClearFile() {
-  RA_DB_FILE = null;
-  const infoEl = document.getElementById('ra-db-file-info');
-  const btnEl  = document.getElementById('ra-db-upload-btn');
-  const statEl = document.getElementById('ra-db-status');
-  const finput = document.getElementById('ra-db-file-input');
-  if (infoEl) infoEl.style.display = 'none';
-  if (btnEl)  btnEl.style.display  = 'none';
-  if (statEl) statEl.style.display = 'none';
-  if (finput) finput.value = '';
-}
-
-async function raDbUpload() {
-  if (!RA_DB_FILE) return;
-  const btn  = document.getElementById('ra-db-upload-btn');
-  const spin = document.getElementById('ra-db-uploading');
-  if (btn)  btn.style.display  = 'none';
-  if (spin) spin.style.display = 'flex';
-  const statEl = document.getElementById('ra-db-status');
-  if (statEl) statEl.style.display = 'none';
-
-  try {
-    const form = new FormData();
-    form.append('file', RA_DB_FILE);
-    const res  = await fetch(PL_API + '/admin/upload-doctors', { method: 'POST', body: form });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Upload failed');
-
-    // Save record + refresh header info + banner
-    raDbSaveLastUpload({ file: RA_DB_FILE.name, ts: Date.now(), total: data.total, specialties: data.specialties || [] });
-
-    const tb = data.tier_breakdown || {};
-    raDbShowStatus(
-      '✓ <strong>' + data.total + ' doctors imported</strong> · ' +
-      'Tier A: ' + (tb.A||0) + ' · B: ' + (tb.B||0) + ' · C: ' + (tb.C||0) +
-      (data.cities?.length ? ' · Cities: ' + data.cities.slice(0,5).join(', ') + (data.cities.length>5?'…':'') : ''),
-      'success'
-    );
-    raDbClearFile();
-    DOCTORS_LOADED = false;
-    if (typeof loadDoctorsFromAPI === 'function') loadDoctorsFromAPI();
-  } catch(err) {
-    raDbShowStatus('Upload failed: ' + err.message, 'error');
-  } finally {
-    if (btn)  btn.style.display  = 'flex';
-    if (spin) spin.style.display = 'none';
-  }
-}
-
-function raDbShowStatus(msg, type) {
-  const el = document.getElementById('ra-db-status');
-  if (!el) return;
-  const styles = {
-    info:    'background:#EBF0F8;border:1px solid #c7d7ea;color:#1a2e42;',
-    success: 'background:#f0fdf4;border:1px solid #86efac;color:#166534;',
-    error:   'background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;',
-  };
-  el.style.cssText = 'display:block;margin-top:10px;font-size:12px;border-radius:8px;padding:10px 14px;line-height:1.7;' + (styles[type] || styles.info);
-  el.innerHTML = msg;
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
 let RA_SUGGESTIONS_CACHE = null;
 
 // Map frontend filter names to backend section names
@@ -8165,7 +7902,7 @@ async function raRunDynamicSearch() {
       body: JSON.stringify({
         topic: topic,
         specialty: therapyArea || 'General Medicine',
-        therapy_area: disease || therapyArea || 'General',
+        therapy_area: therapyArea || 'General',
         keywords: keywords
       })
     });
@@ -8296,14 +8033,14 @@ async function raDisplayDynamicResults(contentIds) {
 
 function raResetForm(suffix = '') {
   const suffix_str = suffix ? `-${suffix}` : '';
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+  // Only clear filter inputs — never hide or remove generated articles
   document.getElementById(`ra-therapy${suffix_str}`).value = '';
   document.getElementById(`ra-disease${suffix_str}`).value = '';
   document.getElementById(`ra-keywords${suffix_str}`).value = '';
-  document.getElementById(`ra-date-from${suffix_str}`).value = '2020-04-01';
-  document.getElementById(`ra-date-to${suffix_str}`).value = yesterday.toISOString().slice(0, 10);
+  document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
+  document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
   document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
+  // Clear keyword chips and active filters (UI only, not results)
   raClearAllFilters();
 }
 
