@@ -7551,7 +7551,7 @@ function mapAPIItemToPaper(item) {
     sub: item.sub_category || '',
     rec: 'All Specialists',
     rel: 'High',
-    tags: [item.specialty, item.therapy_area, 'AI Pipeline'].filter(Boolean),
+    tags: Array.isArray(item.tags) && item.tags.length ? item.tags : [item.specialty, item.therapy_area].filter(Boolean),
     src: 'AI Pipeline',
     status: statusMap[item.status] || 'pending',
     rev: item.reviewer || '',
