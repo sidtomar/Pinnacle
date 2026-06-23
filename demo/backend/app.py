@@ -25,7 +25,7 @@ import threading
 import uuid
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File
+from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -379,10 +379,32 @@ def get_doctor(doctor_id: str):
     return doc
 
 
+def require_admin(x_admin_token: Optional[str] = Header(default=None)):
+    """
+    Guard for destructive admin endpoints.
+
+    Behaviour is backward-compatible for the demo:
+      - If ADMIN_UPLOAD_TOKEN is NOT set (default), the endpoint stays open so the
+        zero-config demo keeps working — but a warning is logged on each call.
+      - If ADMIN_UPLOAD_TOKEN IS set (recommended for any shared/prod deployment),
+        callers MUST send a matching `X-Admin-Token` header or get HTTP 401.
+    """
+    expected = os.getenv("ADMIN_UPLOAD_TOKEN", "").strip()
+    if not expected:
+        print("[Auth] WARNING: /admin/upload-doctors is UNPROTECTED "
+              "(set ADMIN_UPLOAD_TOKEN to require an X-Admin-Token header).")
+        return
+    if not x_admin_token or x_admin_token.strip() != expected:
+        raise HTTPException(401, "Unauthorized — valid X-Admin-Token header required")
+
+
 @app.post("/admin/upload-doctors")
-async def upload_doctors(file: UploadFile = File(...)):
+async def upload_doctors(file: UploadFile = File(...), _: None = Depends(require_admin)):
     """
     Admin endpoint: upload an Excel file (.xlsx / .xls) using the DR Master Template.
+
+    Protected by `require_admin` — set the ADMIN_UPLOAD_TOKEN env var and send a
+    matching `X-Admin-Token` header to authorise in shared/production deployments.
 
     Template columns (row 1 = headers, row 2+ = data):
       Personal  (Upload):    Doctor Code, DR Name, City, Speciality, qualification, clinic address
