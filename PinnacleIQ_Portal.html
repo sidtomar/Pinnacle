@@ -3462,6 +3462,14 @@ function mdToHtml(text) {
     // Newlines to <br>
     .replace(/\n/g, '<br>');
 }
+function stripRevisionNotes(text) {
+  if (!text) return text;
+  return text
+    .split('\n')
+    .filter(line => !/^\s*\[REVISION\b/i.test(line) && !/^\s*MA Notes?\s*:/i.test(line))
+    .join('\n')
+    .replace(/^\s*\n/, ''); // drop leading blank line left behind
+}
 function fmtMoney(n){return n>=100000?`₹${(n/100000).toFixed(1)}L`:n>=1000?`₹${(n/1000).toFixed(0)}K`:`₹${n}`;}
 function srcPill(s){return s==='pubmed'?'<span class="sp sp-pm">PubMed</span>':s==='upload'?'<span class="sp sp-up">MA Upload</span>':s==='pipeline'?'<span class="sp" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#5B21B6;border:1px solid #DDD6FE;">AI Pipeline</span>':'<span class="sp sp-lk">Link</span>';}
 function stBadge(s){return s==='approved'?'<span class="badge b-green">✅ Approved</span>':s==='pending'?'<span class="badge b-amber">⏳ Pending Review</span>':'<span class="badge b-red">❌ Rejected</span>';}
@@ -3935,7 +3943,7 @@ function openMADetail(id){
   if(p.pmid){pmEl.style.display='block';document.getElementById('ma-pmid').textContent='PMID: '+p.pmid;}else pmEl.style.display='none';
   const pdfEl=document.getElementById('ma-pdf-wrap');
   if(p.pdf){pdfEl.style.display='block';document.getElementById('ma-pdf-name').textContent=p.pdf;document.getElementById('ma-pdf-meta').textContent=`PDF · ${p.pdfSz}`;}else pdfEl.style.display='none';
-  document.getElementById('ma-abstract').innerHTML = mdToHtml(p.abstract || '');
+  document.getElementById('ma-abstract').innerHTML = mdToHtml(stripRevisionNotes(p.abstract || ''));
   _absReset('ma-abstract','ma-abs-toggle');
   document.getElementById('ma-summary').value=p.sum;
 
@@ -4080,7 +4088,7 @@ function openCVModal(id){
   document.getElementById('cv-title').textContent=p.title;
   document.getElementById('cv-meta').innerHTML=`${srcPill(p.src)}<span class="badge b-green">✅ Approved</span><span class="badge b-gray">${fmtDate(p.date)}</span>`;
   document.getElementById('cv-cats').innerHTML=`<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span><span class="badge b-gray">${p.sub}</span>${relBadge(p.rel)}`;
-  document.getElementById('cv-abs').innerHTML=mdToHtml(p.abstract||p.sum||'');
+  document.getElementById('cv-abs').innerHTML=mdToHtml(stripRevisionNotes(p.abstract||p.sum||''));
   _absReset('cv-abs','cv-abs-toggle');
   document.getElementById('cv-sum').textContent=p.sum;
   document.getElementById('cv-info').innerHTML=[['Journal',p.journal],['Authors',p.authors],['Published',`${p.month} ${p.year}`],p.pmid?['PubMed ID',p.pmid]:null].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
