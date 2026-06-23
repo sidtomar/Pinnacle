@@ -25,10 +25,11 @@ import threading
 import uuid
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+import io
 
 from store import get_store
 from mock_runner import run_mock_pipeline
@@ -376,6 +377,131 @@ def get_doctor(doctor_id: str):
     if not doc:
         raise HTTPException(404, f"Doctor {doctor_id} not found")
     return doc
+
+
+@app.post("/admin/upload-doctors")
+async def upload_doctors(file: UploadFile = File(...)):
+    """
+    Admin endpoint: upload an Excel file (.xlsx / .xls) to replace the doctor database.
+    Expected columns (case-insensitive): id, name, designation, specialty, sub_specialty,
+    hospital, city, state, tier, whatsapp, email, patients_per_day, years_experience,
+    preferred_channel, engagement_score, pinnacle_score, content_received,
+    pinnacle_joined, last_contacted, status, notes, birthday, anniversary.
+    Missing columns are filled with sensible defaults.
+    """
+    if not file.filename or not file.filename.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(400, "Only .xlsx or .xls files are accepted")
+
+    try:
+        import openpyxl
+    except ImportError:
+        raise HTTPException(500, "openpyxl not installed — run: pip install openpyxl")
+
+    content = await file.read()
+    try:
+        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+    except Exception as exc:
+        raise HTTPException(400, f"Cannot read Excel file: {exc}")
+
+    ws = wb.active
+    rows = list(ws.iter_rows(values_only=True))
+    if len(rows) < 2:
+        raise HTTPException(400, "Excel file must have a header row and at least one data row")
+
+    # Normalise header names
+    raw_headers = [str(h).strip().lower().replace(" ", "_") if h is not None else "" for h in rows[0]]
+    col = {name: idx for idx, name in enumerate(raw_headers)}
+
+    def _get(row, *keys, default=""):
+        for k in keys:
+            if k in col and col[k] < len(row):
+                v = row[col[k]]
+                if v is not None:
+                    return str(v).strip()
+        return default
+
+    def _get_num(row, *keys, default=0):
+        v = _get(row, *keys, default=None)
+        if v is None:
+            return default
+        try:
+            return int(float(v))
+        except (ValueError, TypeError):
+            return default
+
+    doctors = []
+    specialties_set = set()
+    cities_set = set()
+    tier_count = {"A": 0, "B": 0, "C": 0}
+
+    for i, row in enumerate(rows[1:], start=1):
+        if all(v is None for v in row):
+            continue  # skip blank rows
+
+        doc_id = _get(row, "id", "doctor_id") or f"DOC{i:03d}"
+        if not doc_id.upper().startswith("DOC"):
+            doc_id = f"DOC{i:03d}"
+
+        specialty = _get(row, "specialty") or "General Medicine"
+        city = _get(row, "city") or "Unknown"
+        tier_raw = _get(row, "tier").upper()
+        tier = tier_raw if tier_raw in ("A", "B", "C") else "B"
+
+        specialties_set.add(specialty)
+        cities_set.add(city)
+        tier_count[tier] = tier_count.get(tier, 0) + 1
+
+        doctors.append({
+            "id": doc_id.upper(),
+            "name": _get(row, "name", "doctor_name", "full_name") or f"Dr. Doctor {i}",
+            "designation": _get(row, "designation") or "Consultant",
+            "specialty": specialty,
+            "sub_specialty": _get(row, "sub_specialty", "sub specialty", "subspecialty") or specialty,
+            "hospital": _get(row, "hospital", "hospital_name") or "Unknown Hospital",
+            "city": city,
+            "state": _get(row, "state") or "",
+            "tier": tier,
+            "whatsapp": _get(row, "whatsapp", "whatsapp_number", "phone") or "",
+            "email": _get(row, "email", "email_id") or "",
+            "patients_per_day": _get_num(row, "patients_per_day", "patients/day", "patients"),
+            "years_experience": _get_num(row, "years_experience", "experience", "years"),
+            "preferred_channel": (_get(row, "preferred_channel", "channel") or "whatsapp").lower(),
+            "engagement_score": _get_num(row, "engagement_score", "engagement"),
+            "pinnacle_score": _get_num(row, "pinnacle_score", "score"),
+            "content_received": _get_num(row, "content_received"),
+            "pinnacle_joined": _get(row, "pinnacle_joined", "joined") or "",
+            "last_contacted": _get(row, "last_contacted", "last_contact") or "",
+            "status": (_get(row, "status") or "active").lower(),
+            "notes": _get(row, "notes", "remarks") or "",
+            "birthday": _get(row, "birthday", "dob") or "",
+            "anniversary": _get(row, "anniversary") or "",
+        })
+
+    if not doctors:
+        raise HTTPException(400, "No valid doctor rows found in the uploaded file")
+
+    now = datetime.now().strftime("%Y-%m-%d")
+    new_data = {
+        "generated_at": now,
+        "uploaded_at": now,
+        "uploaded_file": file.filename,
+        "total": len(doctors),
+        "specialties": sorted(specialties_set),
+        "cities": sorted(cities_set),
+        "tier_breakdown": tier_count,
+        "doctors": doctors,
+    }
+
+    DOCTORS_FILE.write_text(json.dumps(new_data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    return {
+        "success": True,
+        "message": f"Doctor database updated — {len(doctors)} doctors imported from '{file.filename}'",
+        "total": len(doctors),
+        "specialties": sorted(specialties_set),
+        "cities": sorted(cities_set),
+        "tier_breakdown": tier_count,
+    }
 
 
 @app.get("/topics")
