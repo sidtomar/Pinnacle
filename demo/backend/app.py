@@ -373,7 +373,7 @@ def get_doctor(doctor_id: str):
     if not DOCTORS_FILE.exists():
         raise HTTPException(404, "doctors.json not found")
     data = json.loads(DOCTORS_FILE.read_text(encoding="utf-8"))
-    doc = next((d for d in data["doctors"] if d["id"] == doctor_id.upper()), None)
+    doc = next((d for d in data.get("doctors", []) if d.get("id") == doctor_id.upper()), None)
     if not doc:
         raise HTTPException(404, f"Doctor {doctor_id} not found")
     return doc

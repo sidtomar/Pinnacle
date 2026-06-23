@@ -3220,7 +3220,12 @@ let DOCTORS_LAST_FETCH = null;  // timestamp of last successful API fetch
 
 /* ── Map API doctor record → portal display format ─────────────────────────── */
 function mapAPIDoctor(d) {
-  const numId = parseInt(d.id.replace('DOC',''), 10);
+  let numId = parseInt(d.id.replace('DOC',''), 10);
+  if (isNaN(numId)) {
+    // Non-numeric CRM code (e.g. 'MH-001') — derive a stable positive number from
+    // the id so the row key, MR fallback and engagement-date math don't become NaN.
+    numId = Math.abs([...String(d.id||'')].reduce((h,c)=>((h<<5)-h+c.charCodeAt(0))|0,0)) % 100000 + 1;
+  }
   const nameParts = d.name.replace(/^Dr\.\s*/,'').split(' ');
   const init = nameParts.filter(p=>p).map(p=>p[0]).join('').substring(0,2).toUpperCase();
   const cat = d.tier === 'A' ? 'A+' : 'A';
@@ -3421,6 +3426,9 @@ function fmtDateTime(iso){
 function mdToHtml(text) {
   if (!text) return '';
   return text
+    // Escape HTML first so raw markup renders as text (not as broken/unsafe tags)
+    // and medical inequalities like "HbA1c <7%" or ">140 mmHg" display correctly.
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     // Markdown links: [text](url)
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">$1 ↗</a>')
@@ -3436,7 +3444,11 @@ function buildReviewHistoryHTML(p) {
   const hasReview = p.status === 'approved' || p.status === 'rejected' || p.rev;
   const reviewer  = p.rev || (hasReview ? 'Medical Affairs' : '—');
   const ts        = p.revDate ? fmtDate(p.revDate) : (hasReview ? 'Date not recorded' : '—');
-  const comments  = (p.rejNote && p.rejNote.trim()) || (p.improvement_notes && p.improvement_notes.trim()) || 'NA';
+  // Rejection reason takes priority; improvement notes only count while the card
+  // is still pending — once approved they are not "approval comments".
+  const comments  = (p.rejNote && p.rejNote.trim())
+    || (p.status !== 'approved' && p.improvement_notes && p.improvement_notes.trim())
+    || 'NA';
   const dotColor  = p.status === 'approved' ? 'var(--green)' : p.status === 'rejected' ? 'var(--red)' : 'var(--amber)';
   const dotLabel  = p.status === 'approved' ? 'Approved' : p.status === 'rejected' ? 'Rejected' : 'Pending Review';
   return `<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Review History</div>
