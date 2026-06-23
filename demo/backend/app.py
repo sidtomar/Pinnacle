@@ -18,6 +18,16 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 os.environ.setdefault("SQLITE_DB_PATH", str(_HERE / "pinnacleiq_demo.db"))
 
+# Load env vars from research_agent_system/.env (keys, RESEARCH_PIPELINE_MODE, …)
+# so the demo backend and the real pipeline share ONE config file. Falls back to
+# a local demo/backend/.env if present. Existing OS env vars always win.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(_HERE.parent.parent / "research_agent_system" / ".env")
+    load_dotenv(_HERE / ".env")
+except Exception:
+    pass  # python-dotenv not installed (mock-only demo) — fine, env stays as-is
+
 # Allow importing from research_agent_system/store/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "research_agent_system"))
 
