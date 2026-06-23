@@ -2215,6 +2215,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
       <div class="ai-sum-wrap"><div style="font-size:11px;color:var(--purple);font-weight:600;margin-bottom:8px;">Editable clinical summary for PMT sharing</div><textarea class="sum-ta" id="ma-summary"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin-top:7px;"><span style="font-size:10.5px;color:var(--purple);">Changes saved on approve</span><button class="btn btn-ghost btn-xs" onclick="regenSummary()" style="color:var(--purple);font-size:11px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 6a4 4 0 10-1.2 2.8"/><path d="M8 6.5l2.3-.8-.5 2.5"/></svg> Regenerate</button></div></div>
       <div class="ms">Publication Details</div>
       <div class="irows" id="ma-inforows"></div>
+      <div id="ma-review-history" style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;"></div>
     </div>
     <div class="mr">
       <div id="ma-notice"></div>
@@ -2310,6 +2311,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     <div class="ai-sum-ro"><div style="font-size:12.5px;line-height:1.75;color:var(--text1);" id="cv-sum"></div></div>
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;">Publication Details</div>
     <div class="irows" id="cv-info"></div>
+    <div id="cv-review-history" style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;"></div>
   </div>
   <div class="mf"><div style="font-size:12px;color:var(--text3);" id="cv-rec"></div><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="closeOv('cv-ov')">Close</button><button class="btn btn-navy" onclick="closeOv('cv-ov');openSend(CV_PAPER_ID)"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>Share with Doctors</button></div></div>
 </div>
@@ -3462,13 +3464,38 @@ function mdToHtml(text) {
     // Newlines to <br>
     .replace(/\n/g, '<br>');
 }
+function buildReviewHistoryHTML(p) {
+  const hasReview = p.status === 'approved' || p.status === 'rejected' || p.rev;
+  const reviewer  = p.rev || (hasReview ? 'Medical Affairs' : '—');
+  const ts        = p.revDate ? fmtDate(p.revDate) : (hasReview ? 'Date not recorded' : '—');
+  const comments  = (p.rejNote && p.rejNote.trim()) || (p.improvement_notes && p.improvement_notes.trim()) || 'NA';
+  const dotColor  = p.status === 'approved' ? 'var(--green)' : p.status === 'rejected' ? 'var(--red)' : 'var(--amber)';
+  const dotLabel  = p.status === 'approved' ? 'Approved' : p.status === 'rejected' ? 'Rejected' : 'Pending Review';
+  return `<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Review History</div>
+<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text2);">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;display:inline-block;"></span>
+    <span style="font-weight:700;color:var(--navy);">${dotLabel}</span>
+  </div>
+  <div style="display:grid;grid-template-columns:100px 1fr;gap:3px 10px;">
+    <span style="color:var(--text3);font-weight:600;">Reviewed by</span><span>${_esc(reviewer)}</span>
+    <span style="color:var(--text3);font-weight:600;">Date</span><span>${_esc(ts)}</span>
+    <span style="color:var(--text3);font-weight:600;">Comments</span><span style="font-style:${comments==='NA'?'italic':'normal'};color:${comments==='NA'?'var(--text4)':'var(--text1)'};">${_esc(comments)}</span>
+  </div>
+</div>`;
+}
 function stripRevisionNotes(text) {
   if (!text) return text;
   return text
     .split('\n')
-    .filter(line => !/^\s*\[REVISION\b/i.test(line) && !/^\s*MA Notes?\s*:/i.test(line))
+    .filter(line =>
+      !/^\s*\[REVISION\b/i.test(line) &&
+      !/^\s*MA Notes?\s*:/i.test(line) &&
+      !/^\s*Reviewer?\s*Comments?\s*:/i.test(line) &&
+      !/^\s*\[MA Feedback/i.test(line)
+    )
     .join('\n')
-    .replace(/^\s*\n/, ''); // drop leading blank line left behind
+    .replace(/^\s*\n/, '');
 }
 function fmtMoney(n){return n>=100000?`₹${(n/100000).toFixed(1)}L`:n>=1000?`₹${(n/1000).toFixed(0)}K`:`₹${n}`;}
 function srcPill(s){return s==='pubmed'?'<span class="sp sp-pm">PubMed</span>':s==='upload'?'<span class="sp sp-up">MA Upload</span>':s==='pipeline'?'<span class="sp" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#5B21B6;border:1px solid #DDD6FE;">AI Pipeline</span>':'<span class="sp sp-lk">Link</span>';}
@@ -3962,6 +3989,7 @@ function openMADetail(id){
     p.pmid ? ['PubMed ID', p.pmid] : null,
     readMoreRow,
   ].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
+  document.getElementById('ma-review-history').innerHTML = buildReviewHistoryHTML(p);
   document.getElementById('ma-cat').value=p.cat;
   document.getElementById('ma-therapy').value=p.therapy;
   document.getElementById('ma-sub').value=p.sub;
@@ -4093,6 +4121,7 @@ function openCVModal(id){
   document.getElementById('cv-sum').textContent=p.sum;
   document.getElementById('cv-info').innerHTML=[['Journal',p.journal],['Authors',p.authors],['Published',`${p.month} ${p.year}`],p.pmid?['PubMed ID',p.pmid]:null].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
   document.getElementById('cv-rec').innerHTML=`Recommended for: <strong>${p.rec}</strong>`;
+  document.getElementById('cv-review-history').innerHTML = buildReviewHistoryHTML(p);
   openOv('cv-ov');
 }
 
