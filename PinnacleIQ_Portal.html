@@ -7592,7 +7592,7 @@ function mapAPIItemToPaper(item) {
     src: 'AI Pipeline',
     status: statusMap[item.status] || 'pending',
     rev: item.reviewer || '',
-    revDate: '',
+    revDate: (item.reviewed_at || '').slice(0, 10),
     rejNote: item.reason || '',
     pmid: null, pdf: null,
     version: item.version || 1,
