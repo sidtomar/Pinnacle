@@ -241,6 +241,10 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 .ms{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:8px;border-top:1px solid var(--border);padding-top:13px;}
 .ms:first-child{border-top:none;padding-top:0;}
 .abs-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:12.5px;line-height:1.75;color:var(--text2);margin-bottom:4px;}
+.abs-box-collapsed{max-height:5.25em;overflow:hidden;position:relative;}
+.abs-box-collapsed::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2em;background:linear-gradient(transparent,var(--surface2));}
+.abs-toggle{background:none;border:none;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--blue);padding:4px 0;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;}
+.abs-toggle:hover{color:var(--navy);}
 .ai-sum-wrap{background:linear-gradient(135deg,#F5F3FF,#F0EDFF);border:1.5px solid #DDD6FE;border-radius:var(--r);padding:14px;margin-bottom:4px;}
 .sum-ta{width:100%;min-height:86px;resize:vertical;background:var(--surface);border:1px solid #DDD6FE;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.7;color:var(--text1);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;}
 .sum-ta:focus{border-color:var(--purple);}
@@ -2201,8 +2205,12 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     <div class="ml">
       <div id="ma-pubmed-wrap" style="display:none;"><div class="ms" style="border-top:none;padding-top:0;">Source</div><div class="plink" onclick="toast('🔬','Opening PubMed…')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M5 10.5V6l2.5 3L10 6v4.5"/></svg><span>View on PubMed — <strong id="ma-pmid"></strong></span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="margin-left:auto;"><path d="M4 2h6v6M10 2L4.5 7.5"/></svg></div></div>
       <div id="ma-pdf-wrap" style="display:none;"><div class="ms">Attached Document</div><div class="pdf-blk" onclick="toast('📄','Opening PDF…')"><div class="pdf-ic"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h7l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M11 2v4h4"/><line x1="6" y1="9" x2="12" y2="9"/><line x1="6" y1="12" x2="10" y2="12"/></svg></div><div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;color:var(--navy);" id="ma-pdf-name">—</div><div style="font-size:11px;color:var(--text3);" id="ma-pdf-meta">PDF</div></div><button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 2v6M3 7l3 3 3-3"/><line x1="1" y1="11" x2="11" y2="11"/></svg>Download</button></div></div>
-      <div class="ms" id="abs-header">Abstract</div>
-      <div class="abs-box" id="ma-abstract"></div>
+      <div class="ms" id="abs-header">Complete Article</div>
+      <div class="abs-box abs-box-collapsed" id="ma-abstract"></div>
+      <button class="abs-toggle" id="ma-abs-toggle" onclick="absToggle('ma-abstract','ma-abs-toggle')">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
+        View full article
+      </button>
       <div class="ms">AI Summary <span class="ai-b"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M4.5 .5l1 3.2H9L6.3 5.5l1 3.2-2.8-2L1.7 8.7l1-3.2L0 3.7h3.5L4.5.5z" fill="#7C3AED"/></svg>AI Generated</span></div>
       <div class="ai-sum-wrap"><div style="font-size:11px;color:var(--purple);font-weight:600;margin-bottom:8px;">Editable clinical summary for PMT sharing</div><textarea class="sum-ta" id="ma-summary"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin-top:7px;"><span style="font-size:10.5px;color:var(--purple);">Changes saved on approve</span><button class="btn btn-ghost btn-xs" onclick="regenSummary()" style="color:var(--purple);font-size:11px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 6a4 4 0 10-1.2 2.8"/><path d="M8 6.5l2.3-.8-.5 2.5"/></svg> Regenerate</button></div></div>
       <div class="ms">Publication Details</div>
@@ -2292,8 +2300,12 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="flex:1;overflow-y:auto;padding:22px 24px;">
     <div class="ro-banner"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="5.5" width="8" height="5.5" rx="1"/><path d="M4 5.5V4a2 2 0 014 0v1.5"/></svg>View only — categorisation managed by Medical Affairs</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;" id="cv-cats"></div>
-    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;">Abstract</div>
-    <div class="abs-box" id="cv-abs"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Complete Article</div>
+    <div class="abs-box abs-box-collapsed" id="cv-abs"></div>
+    <button class="abs-toggle" id="cv-abs-toggle" onclick="absToggle('cv-abs','cv-abs-toggle')">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
+      View full article
+    </button>
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;display:flex;align-items:center;gap:8px;">AI Clinical Summary <span class="ai-b">AI</span></div>
     <div class="ai-sum-ro"><div style="font-size:12.5px;line-height:1.75;color:var(--text1);" id="cv-sum"></div></div>
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;">Publication Details</div>
@@ -3892,6 +3904,25 @@ function clRowHTML(p){
 /* ══ MA DETAIL MODAL ══ */
 const ICON_BG={Gynaecology:'var(--rose-bg)',Cardiology:'var(--red-bg)',Paediatrics:'var(--teal-bg)',Diabetology:'#EBF0F8',Dermatology:'var(--amber-bg)',Oncology:'var(--purple-bg)',Neurology:'var(--blue-bg)'};
 
+function absToggle(boxId, btnId) {
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+  if (!box || !btn) return;
+  const collapsed = box.classList.contains('abs-box-collapsed');
+  box.classList.toggle('abs-box-collapsed', !collapsed);
+  const chevron = btn.querySelector('svg');
+  if (chevron) chevron.style.transform = collapsed ? 'rotate(180deg)' : '';
+  const label = btn.lastChild;
+  if (label) label.nodeValue = collapsed ? ' View less' : ' View full article';
+}
+
+function _absReset(boxId, btnId) {
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+  if (box) box.classList.add('abs-box-collapsed');
+  if (btn) { const ch = btn.querySelector('svg'); if (ch) ch.style.transform=''; if (btn.lastChild) btn.lastChild.nodeValue = ' View full article'; }
+}
+
 function openMADetail(id){
   const p=ALL_PAPERS.find(x=>x.id===id); if(!p) return;
   CUR_ID=id; CUR_TAGS=[...p.tags]; CUR_REL=p.rel;
@@ -3905,6 +3936,7 @@ function openMADetail(id){
   const pdfEl=document.getElementById('ma-pdf-wrap');
   if(p.pdf){pdfEl.style.display='block';document.getElementById('ma-pdf-name').textContent=p.pdf;document.getElementById('ma-pdf-meta').textContent=`PDF · ${p.pdfSz}`;}else pdfEl.style.display='none';
   document.getElementById('ma-abstract').innerHTML = mdToHtml(p.abstract || '');
+  _absReset('ma-abstract','ma-abs-toggle');
   document.getElementById('ma-summary').value=p.sum;
 
   // Build Publication Details rows — including a clickable Read More link
@@ -4048,7 +4080,8 @@ function openCVModal(id){
   document.getElementById('cv-title').textContent=p.title;
   document.getElementById('cv-meta').innerHTML=`${srcPill(p.src)}<span class="badge b-green">✅ Approved</span><span class="badge b-gray">${fmtDate(p.date)}</span>`;
   document.getElementById('cv-cats').innerHTML=`<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span><span class="badge b-gray">${p.sub}</span>${relBadge(p.rel)}`;
-  document.getElementById('cv-abs').textContent=p.abstract;
+  document.getElementById('cv-abs').innerHTML=mdToHtml(p.abstract||p.sum||'');
+  _absReset('cv-abs','cv-abs-toggle');
   document.getElementById('cv-sum').textContent=p.sum;
   document.getElementById('cv-info').innerHTML=[['Journal',p.journal],['Authors',p.authors],['Published',`${p.month} ${p.year}`],p.pmid?['PubMed ID',p.pmid]:null].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
   document.getElementById('cv-rec').innerHTML=`Recommended for: <strong>${p.rec}</strong>`;
@@ -7487,9 +7520,11 @@ function mapAPIItemToPaper(item) {
   // Map backend status strings to the ALL_PAPERS status vocabulary
   const statusMap = {pending_review:'pending', approved:'approved', rejected:'rejected', improvement_requested:'pending'};
   const d = item.created_at ? new Date(item.created_at) : new Date();
-  // Extract a readable summary from the AI-generated content
+  // Prefer the dedicated summary field (200-300 words from Delta); fall back to truncated article
   const rawContent = item.short_article || item.content || item.article || '';
-  const summary = rawContent.replace(/#+\s*/g,'').slice(0,220).trim() || item.topic || '';
+  const summary = item.summary
+    ? item.summary.trim()
+    : rawContent.replace(/#+\s*/g,'').slice(0,300).trim() || item.topic || '';
   // Extract PubMed link: prefer explicit field, fallback to extracting from article text
   let _pubmed_link = item.pubmed_link || '';
   if (!_pubmed_link && rawContent) {

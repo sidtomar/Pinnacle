@@ -11,10 +11,23 @@ MOCK_LIBRARY = {
     "GLP-1": {
         "title": "GLP-1 Receptor Agonists in Type 2 Diabetes: 2025 Real-World Evidence Update",
         "summary": (
-            "A landmark 2025 meta-analysis of 34 RCTs (n=87,420) confirms GLP-1 receptor agonists "
-            "deliver superior glycaemic control (HbA1c reduction: −1.8% vs −1.1% for DPP-4i) alongside "
-            "significant cardiovascular and renal protection benefits. Semaglutide leads the class with "
-            "the strongest evidence in South Asian T2DM populations, including three Indian cohort studies."
+            "A landmark 2025 meta-analysis of 34 randomised controlled trials enrolling 87,420 patients "
+            "confirms that GLP-1 receptor agonists (GLP-1 RAs) deliver superior glycaemic control "
+            "compared to DPP-4 inhibitors, with an HbA1c reduction of −1.8% versus −1.1% (p<0.001). "
+            "Semaglutide 1 mg weekly leads the class, demonstrating a 6.2 kg weight reduction at 52 "
+            "weeks and a 33% reduction in major adverse cardiovascular events (MACE) in SUSTAIN-6 "
+            "extension data.\n\n"
+            "Critically for Indian practice, three Indian cohort studies (combined n=2,840) confirm that "
+            "GLP-1 RAs reduce HbA1c by 1.6% in patients with BMI 23–27 — the lean-overweight range "
+            "common in South Asian T2DM — validating that Western trial efficacy translates to Indian "
+            "populations. Dulaglutide shows particular strength in patients with eGFR 30–60, offering "
+            "renal protection alongside glycaemic benefit.\n\n"
+            "The 2025 ADA/EASD guidelines now recommend GLP-1 RAs as first-line therapy alongside "
+            "metformin for patients with established cardiovascular disease, heart failure, or chronic "
+            "kidney disease. Once-weekly formulations achieve 94% patient adherence versus 71% for daily "
+            "injections. Combination with SGLT2 inhibitors provides additive cardiovascular and renal "
+            "benefit. Key takeaway: for Indian T2DM patients with cardiovascular risk factors, GLP-1 RAs "
+            "should be initiated early — the Indian data is available, and adherence is manageable."
         ),
         "key_findings": [
             "Semaglutide 1 mg weekly reduces HbA1c by 1.8% and body weight by 6.2 kg at 52 weeks",
@@ -98,10 +111,24 @@ MOCK_LIBRARY = {
     "SGLT2": {
         "title": "SGLT2 Inhibitors and Cardiovascular Outcomes in Heart Failure: EMPEROR and DAPA-HF 3-Year Follow-Up",
         "summary": (
-            "Three-year follow-up data from EMPEROR-Reduced and DAPA-HF confirm SGLT2 inhibitors "
-            "reduce hospitalisation for heart failure by 30% and CV mortality by 18% in both HFrEF "
-            "and HFpEF patients, regardless of diabetes status. The 2025 ESC guidelines now give "
-            "SGLT2 inhibitors a Class I, Level A recommendation for all HF patients."
+            "Three-year follow-up data from EMPEROR-Reduced and DAPA-HF confirm SGLT2 inhibitors as "
+            "the most significant advance in heart failure management in a decade. Empagliflozin and "
+            "dapagliflozin together reduce hospitalisation for heart failure by 30% and cardiovascular "
+            "mortality by 18% in both HFrEF (EF <40%) and HFpEF (EF ≥50%) patients, with benefits "
+            "observed irrespective of diabetes status — a landmark finding that transformed HF "
+            "guidelines.\n\n"
+            "The 2025 ESC Heart Failure Guidelines now assign SGLT2 inhibitors a Class I, Level A "
+            "recommendation for all heart failure patients regardless of ejection fraction or diabetes "
+            "status. A meta-analysis of 94,820 patients across T2DM, HF, and CKD populations confirms "
+            "a 30% reduction in first HF hospitalisation (HR 0.70) and 14% reduction in CV death "
+            "(HR 0.86), consistent across all subgroups.\n\n"
+            "For Indian clinicians, the Indian HF Registry 2024 (n=1,240) provides real-world "
+            "validation: empagliflozin and dapagliflozin achieve a 27% reduction in 30-day readmission "
+            "rates. Renal protection is an additional benefit — SGLT2 inhibitors slow eGFR decline by "
+            "1.6 mL/min/year versus placebo. The safety profile is well-characterised: genital "
+            "infections (3.1x risk, manageable with hygiene counselling) and minimal DKA risk in "
+            "non-diabetic HF patients. Key takeaway: every HF patient in your clinic — diabetic or "
+            "not — should now be considered for SGLT2 inhibitor therapy."
         ),
         "key_findings": [
             "Empagliflozin reduces HF hospitalisation by 30% at 3 years (EMPEROR extended follow-up)",
@@ -178,10 +205,24 @@ MOCK_LIBRARY = {
     "PCOS": {
         "title": "Inositol vs Metformin in PCOS: 2025 Systematic Review and Indian Cohort Data",
         "summary": (
-            "A 2025 systematic review of 22 RCTs (n=3,180) demonstrates myo-inositol achieves "
-            "comparable insulin sensitisation to metformin with significantly fewer GI adverse effects "
-            "(12% vs 34%). Combined myo-inositol + d-chiro-inositol (40:1 ratio) shows superior "
-            "menstrual regularity outcomes at 6 months. Indian data confirms efficacy across BMI ranges."
+            "A 2025 systematic review of 22 randomised controlled trials (n=3,180 women) conclusively "
+            "demonstrates that myo-inositol achieves comparable insulin sensitisation to metformin — "
+            "HbA1c and HOMA-IR reductions are statistically equivalent — while delivering significantly "
+            "fewer gastrointestinal adverse effects (12% vs 34%, p<0.001). The 40:1 combination of "
+            "myo-inositol and d-chiro-inositol showed superior menstrual regularity at 6 months "
+            "(78% vs 64% with metformin) and improved pregnancy rates in women seeking fertility "
+            "(34% vs 29%).\n\n"
+            "For Indian gynaecologists, the most clinically relevant finding is efficacy across BMI "
+            "ranges. Lean PCOS — defined as BMI <23 — represents 20–30% of Indian PCOS cases but is "
+            "often undertreated due to perceived contraindication in non-obese patients. Indian cohort "
+            "data confirms myo-inositol efficacy in this specific lean PCOS subgroup, providing a "
+            "high-tolerability alternative for the most common presentation in Indian practice.\n\n"
+            "Current ESHRE 2023 guidelines recommend letrozole as first-line for ovulation induction, "
+            "with inositol gaining formal recognition as a metabolic adjunct. The 2025 data strengthens "
+            "the case for inositol as a frontline option. Key takeaway: for lean PCOS patients and "
+            "those intolerant of metformin's GI side effects, myo-inositol (particularly the 40:1 "
+            "combination) is now supported by high-quality evidence and should be offered as a primary "
+            "therapeutic choice, not a second-line option."
         ),
         "key_findings": [
             "Myo-inositol 4g/day: comparable HbA1c reduction to metformin 1500mg/day at 6 months",
@@ -733,10 +774,23 @@ def _generic_content(topic: str, specialty: str, therapy_area: str) -> dict:
     return {
         "title": f"{topic}: 2025 Evidence Update and Clinical Practice Implications",
         "summary": (
-            f"A comprehensive 2025 review consolidates the latest evidence on {topic}, drawing from "
-            f"14 randomised controlled trials and 8 observational studies. The evidence supports a "
-            f"paradigm shift in {specialty} practice with updated treatment algorithms relevant to "
-            f"Indian patient populations."
+            f"A comprehensive 2025 systematic review consolidates the latest evidence on {topic}, "
+            f"drawing from 14 randomised controlled trials (combined n=21,400 patients) and 8 "
+            f"observational studies. The pooled analysis demonstrates a 40% improvement in primary "
+            f"outcomes with targeted combination therapy versus monotherapy (p<0.001), with benefits "
+            f"sustained at 52-week follow-up across all patient subgroups.\n\n"
+            f"For {specialty} specialists, the most significant advance is the paradigm shift from "
+            f"reactive to proactive management in {therapy_area}. Updated 2025 society guidelines now "
+            f"recommend earlier initiation of evidence-based therapy, with combination approaches "
+            f"preferred over sequential add-on. Patient adherence is markedly improved with simplified "
+            f"once-daily regimens — 92% adherence versus 68% with complex dosing schedules.\n\n"
+            f"A pivotal Indian multi-centre cohort study (ICMR, n=1,840) confirms that the efficacy "
+            f"seen in global trials translates directly to Indian patients, with locally relevant "
+            f"dosing protocols and tolerability data now available. Safety profiles were consistent "
+            f"across South Asian populations. Key takeaway: Indian {specialty.lower()} patients stand "
+            f"to benefit from updated {therapy_area} treatment protocols — review your current patient "
+            f"cohort against 2025 guidelines and identify candidates for guideline-concordant "
+            f"combination therapy."
         ),
         "key_findings": [
             f"Updated 2025 guidelines recommend earlier initiation of targeted therapy in {therapy_area}",

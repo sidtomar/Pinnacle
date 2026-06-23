@@ -72,8 +72,10 @@ class PinnacleContentCard(BaseModel):
 
     # ── Content sections (rendered as UI components in the portal) ────────────
     summary: str = Field(
-        description="2-3 sentence executive summary. Written for a busy doctor. "
-                    "Include the most important statistic or finding."
+        description="200-300 word clinical summary. Written for a busy specialist doctor. "
+                    "Cover: study objective, key findings with specific numbers/percentages, "
+                    "clinical significance for Indian practice, and one key takeaway. "
+                    "Professional tone, evidence-based language."
     )
     key_findings: List[str] = Field(
         description="4-6 specific bullet-point findings. Each must include numbers/data "
@@ -120,7 +122,7 @@ Return a single valid JSON object with EXACTLY these fields:
   "title":             "string — compelling article title, max 15 words",
   "sub_category":      "string — one of: Meta-Analysis / Systematic Review | Clinical Trial / RCT | Observational Study | Review Article | Expert Opinion / Guidelines | Case Series",
   "tags":              ["string", ...],
-  "summary":           "string — 2-3 sentence executive summary with key statistic",
+  "summary":           "string — 200-300 word clinical summary: study objective, key findings with numbers, clinical significance, Indian practice relevance, key takeaway",
   "key_findings":      ["string", ...],
   "clinical_insights": "string — practical takeaway paragraph for the doctor",
   "recommendations":   ["string", ...],
