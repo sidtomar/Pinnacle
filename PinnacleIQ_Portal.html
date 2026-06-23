@@ -3445,9 +3445,9 @@ function toggleRoleDropdown(e){
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
 // Valid page IDs for each role — used to validate hash on load/switch
-const PAGES_MA    = ['content','pipeline','dashboard'];
-const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
-const PAGES_ADMIN = ['research-agent','pipeline'];
+const PAGES_MA    = ['content','dashboard'];
+const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','research-agent'];
+const PAGES_ADMIN = ['research-agent'];
 
 function _getHashPage(){
   const h = location.hash.replace('#','');
@@ -3544,7 +3544,7 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>`;
@@ -3558,7 +3558,7 @@ function buildSidebar(){
         Content Library
         <span class="nb nb-amber" id="nb-pend">${ALL_PAPERS.filter(p=>p.status==='pending').length}</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>
@@ -3615,7 +3615,7 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>`;
