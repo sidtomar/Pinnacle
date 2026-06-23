@@ -1,7 +1,7 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-23 | Active branch: `Researchagent_2306` | Main repo: `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-23 (session 2) | Active branch: `Researchagent_2306` | Main repo: `D:\Codebase\Pinnacle`
 
 ---
 ---
@@ -197,6 +197,8 @@ cd D:\Codebase\Pinnacle
 | 2026-06-22 | Documented admin login `admin@mankind.in` / `Admin123` failed — "No account found". Only `admin1@mankind.in`…`admin5@mankind.in` existed, and password check used a single shared `APP_PASSWORD='Test'` | Added `admin@mankind.in` account (`pwd:'Admin123'`) to `USERS_DB`; changed login check to `password !== (user.pwd || APP_PASSWORD)` so per-user passwords work while everyone else stays `Test`. Committed on `feat/admin-login-credentials` → merged to `main` |
 | 2026-06-23 | Duplicate specialty/therapy tag on article cards (e.g. "Endocrinology · Endocrinology") | Root cause in `raRunDynamicSearch()`: `therapy_area` was set to `therapyArea` (same as `specialty`). Fixed to `disease \|\| therapyArea \|\| 'General'`. Also added render-time guard in `clCardHTML()` and `clRowHTML()`. |
 | 2026-06-23 | Alpha/Beta/Gamma/Delta agent names visible to MA users in improvement/revision modals | Removed all 4 references in `PinnacleIQ_Portal.html`; replaced with generic "AI" wording. "Beta" badge renamed "Insights". |
+| 2026-06-23 | Request Improvement modal Cancel/Close button looked like plain text | Changed from `btn-ghost` (transparent, grey text) to `btn-outline` (bordered). |
+| 2026-06-23 | AI Summary in detail modals was just a 220-char truncation of the article | `mapAPIItemToPaper` now uses `item.summary` (Delta's dedicated 200-300 word field). `delta.py` and `mock_runner.py` updated to produce proper summaries. |
 
 ---
 
@@ -282,3 +284,7 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-23 | **Duplicate specialty/therapy tag bug fixed.** Root cause: `raRunDynamicSearch()` was sending `therapyArea` for both `specialty` and `therapy_area`, so `p.cat` and `p.therapy` were identical. Fix: `therapy_area: disease \|\| therapyArea \|\| 'General'`. Also added HTML-level guard in `clCardHTML()` and `clRowHTML()`: therapy badge only rendered if `p.therapy.toLowerCase() !== p.cat.toLowerCase()`. |
 | 2026-06-23 | **Removed Alpha/Beta/Gamma/Delta agent name references from MA-facing UI.** 4 locations in `PinnacleIQ_Portal.html`: (1) Revision modal info text, (2) Revision modal step labels, (3) Request Improvement modal label, (4) "Beta" badge → renamed to "Insights". |
 | 2026-06-23 | **Research Pipeline menu hidden for all roles.** Removed `research-agent` (pipeline nav item) from `PAGES_MA` and `PAGES_PMT` arrays; removed `pipeline` from `PAGES_ADMIN`. All 3 `ni-pipeline` sidebar `<div>` elements marked `style="display:none;"` across Admin, MA, PMT sidebars. Page HTML retained for potential future use. |
+| 2026-06-23 | **Import Doctor Database card — collapsible + last-upload info.** Card body collapses by default; always-visible header has "Show Import Tool ▼ / Hide Import Tool ▲" toggle with animated chevron. After upload, saves record (filename, timestamp, total, specialties) to `localStorage`. Header always shows compact last-upload line ("Last updated: file.xlsx on DD MMM YYYY, HH:MM — N doctors"). Expanded panel shows green "Doctor database is up to date" banner with full details. State persists across page refreshes and re-logins. |
+| 2026-06-23 | **Request Improvement modal fixes.** Cancel/Close button changed from `btn-ghost` (invisible) to `btn-outline` (bordered, clearly clickable). Footer text changes from "AI revises content" → "AI revised content" (past tense) once pipeline completes; resets to "AI revises content" when modal reopens. |
+| 2026-06-23 | **Complete Article expand/collapse in detail modals.** "Abstract" section renamed "Complete Article" in both MA detail modal and PMT content view modal. Box starts collapsed (3-line preview + gradient fade). "View full article ▼" expands to full text; "View less ▲" collapses. Chevron rotates. Collapse state resets each time a modal opens. `openCVModal` now uses `mdToHtml` rendering. |
+| 2026-06-23 | **AI Summary upgraded to 200-300 words.** `mapAPIItemToPaper()` now uses `item.summary` (Delta's dedicated field) instead of truncating the article to 220 chars. `delta.py` `summary` field upgraded from "2-3 sentence" to "200-300 word clinical summary" covering objective, findings with numbers, Indian practice relevance, key takeaway. `mock_runner.py` all 3 MOCK_LIBRARY entries (GLP-1, SGLT2, PCOS) and the generic fallback now have proper 200-300 word summaries with real statistics and India-specific context. |
