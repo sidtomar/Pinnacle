@@ -382,12 +382,13 @@ def get_doctor(doctor_id: str):
 @app.post("/admin/upload-doctors")
 async def upload_doctors(file: UploadFile = File(...)):
     """
-    Admin endpoint: upload an Excel file (.xlsx / .xls) to replace the doctor database.
-    Expected columns (case-insensitive): id, name, designation, specialty, sub_specialty,
-    hospital, city, state, tier, whatsapp, email, patients_per_day, years_experience,
-    preferred_channel, engagement_score, pinnacle_score, content_received,
-    pinnacle_joined, last_contacted, status, notes, birthday, anniversary.
-    Missing columns are filled with sensible defaults.
+    Admin endpoint: upload an Excel file (.xlsx / .xls) using the DR Master Template.
+
+    Template columns (row 1 = headers, row 2+ = data):
+      Personal  (Upload):    Doctor Code, DR Name, City, Speciality, qualification, clinic address
+      Superman  (CRM sync):  category, DM & DMS, SOW, MR name, Division
+      Field     (Upload):    Clinical interests, Bday, Anniversary, Spouse name, No of children
+      PIQ       (Derived):   engagement score, Last engaged, Next engagement, Status, preferred channel
     """
     if not file.filename or not file.filename.lower().endswith((".xlsx", ".xls")):
         raise HTTPException(400, "Only .xlsx or .xls files are accepted")
@@ -408,15 +409,20 @@ async def upload_doctors(file: UploadFile = File(...)):
     if len(rows) < 2:
         raise HTTPException(400, "Excel file must have a header row and at least one data row")
 
-    # Normalise header names
-    raw_headers = [str(h).strip().lower().replace(" ", "_") if h is not None else "" for h in rows[0]]
+    # Build case-insensitive, stripped column index map
+    raw_headers = [
+        str(h).strip().lower() if h is not None else ""
+        for h in rows[0]
+    ]
     col = {name: idx for idx, name in enumerate(raw_headers)}
 
     def _get(row, *keys, default=""):
+        """Return first non-empty cell value matching any of the given header names."""
         for k in keys:
-            if k in col and col[k] < len(row):
-                v = row[col[k]]
-                if v is not None:
+            k_low = k.lower()
+            if k_low in col and col[k_low] < len(row):
+                v = row[col[k_low]]
+                if v is not None and str(v).strip():
                     return str(v).strip()
         return default
 
@@ -424,57 +430,117 @@ async def upload_doctors(file: UploadFile = File(...)):
         v = _get(row, *keys, default=None)
         if v is None:
             return default
+        # Handle "5000/10000" style DM&DMS — take first number
+        v = str(v).split("/")[0].replace(",", "").strip()
         try:
             return int(float(v))
         except (ValueError, TypeError):
             return default
 
     doctors = []
-    specialties_set = set()
-    cities_set = set()
+    specialties_set: set = set()
+    cities_set: set = set()
     tier_count = {"A": 0, "B": 0, "C": 0}
+    divisions_set: set = set()
 
     for i, row in enumerate(rows[1:], start=1):
         if all(v is None for v in row):
             continue  # skip blank rows
 
-        doc_id = _get(row, "id", "doctor_id") or f"DOC{i:03d}"
-        if not doc_id.upper().startswith("DOC"):
+        # ── Personal fields (Upload) ──────────────────────────────────────────
+        doc_id = _get(row, "doctor code", "id", "doctor_id", "doc_id")
+        if not doc_id:
             doc_id = f"DOC{i:03d}"
+        elif not doc_id.upper().startswith("DOC"):
+            doc_id = f"DOC{doc_id}" if doc_id[:1].isdigit() else doc_id
 
-        specialty = _get(row, "specialty") or "General Medicine"
+        name = _get(row, "dr name", "doctor name", "name", "full_name") or f"Dr. Doctor {i}"
         city = _get(row, "city") or "Unknown"
-        tier_raw = _get(row, "tier").upper()
-        tier = tier_raw if tier_raw in ("A", "B", "C") else "B"
+        specialty = _get(row, "speciality", "specialty") or "General Medicine"
+        qualification = _get(row, "qualification", "designation") or "Consultant"
+        clinic_address = _get(row, "clinic address", "hospital", "hospital_name", "address") or ""
 
+        # ── Superman / CRM fields (DB integration) ────────────────────────────
+        category = _get(row, "category", "tier").upper()
+        tier = category if category in ("A", "B", "C") else "B"
+        dm_dms_raw = _get(row, "dm & dms", "dm&dms", "dm_dms")
+        dm_val = _get_num(row, "dm & dms", "dm&dms", "dm_dms")
+        sow = _get(row, "sow", "share of wallet")
+        mr_name = _get(row, "mr name", "mr_name", "medical rep")
+        division = _get(row, "division")
+
+        # ── Field data (Upload) ───────────────────────────────────────────────
+        clinical_interests = _get(row, "clinical interests", "sub_specialty", "subspecialty")
+        birthday = _get(row, "bday", "birthday", "dob", "date of birth")
+        anniversary = _get(row, "anniversary")
+        spouse_name = _get(row, "spouse name", "spouse_name")
+        children_raw = _get(row, "no of children", "children", "no_of_children")
+        try:
+            num_children = int(float(children_raw)) if children_raw else 0
+        except (ValueError, TypeError):
+            num_children = 0
+
+        # ── PIQ / Derived fields ──────────────────────────────────────────────
+        engagement_score = _get_num(row, "engagement score", "engagement_score")
+        last_engaged = _get(row, "last engaged", "last_contacted", "last_contact")
+        next_engagement = _get(row, "next engagement", "next_engagement")
+        status = (_get(row, "status") or "active").lower()
+        preferred_channel = (_get(row, "preferred channel", "preferred_channel", "channel") or "whatsapp").lower()
+
+        # ── Accumulate metadata ───────────────────────────────────────────────
         specialties_set.add(specialty)
         cities_set.add(city)
         tier_count[tier] = tier_count.get(tier, 0) + 1
+        if division:
+            divisions_set.add(division)
 
         doctors.append({
+            # Core identity
             "id": doc_id.upper(),
-            "name": _get(row, "name", "doctor_name", "full_name") or f"Dr. Doctor {i}",
-            "designation": _get(row, "designation") or "Consultant",
+            "name": name,
+            "designation": qualification,
             "specialty": specialty,
-            "sub_specialty": _get(row, "sub_specialty", "sub specialty", "subspecialty") or specialty,
-            "hospital": _get(row, "hospital", "hospital_name") or "Unknown Hospital",
+            "sub_specialty": clinical_interests or specialty,
+            "hospital": clinic_address,
             "city": city,
             "state": _get(row, "state") or "",
             "tier": tier,
-            "whatsapp": _get(row, "whatsapp", "whatsapp_number", "phone") or "",
+
+            # Contact
+            "whatsapp": _get(row, "whatsapp", "whatsapp_number", "phone", "mobile") or "",
             "email": _get(row, "email", "email_id") or "",
-            "patients_per_day": _get_num(row, "patients_per_day", "patients/day", "patients"),
-            "years_experience": _get_num(row, "years_experience", "experience", "years"),
-            "preferred_channel": (_get(row, "preferred_channel", "channel") or "whatsapp").lower(),
-            "engagement_score": _get_num(row, "engagement_score", "engagement"),
-            "pinnacle_score": _get_num(row, "pinnacle_score", "score"),
-            "content_received": _get_num(row, "content_received"),
-            "pinnacle_joined": _get(row, "pinnacle_joined", "joined") or "",
-            "last_contacted": _get(row, "last_contacted", "last_contact") or "",
-            "status": (_get(row, "status") or "active").lower(),
+            "preferred_channel": preferred_channel,
+
+            # Superman CRM fields
+            "category": category,
+            "dm_dms": dm_dms_raw,
+            "dm": dm_val,
+            "sow": sow,
+            "mr_name": mr_name,
+            "division": division,
+
+            # Clinical
+            "clinical_interests": clinical_interests,
+            "patients_per_day": _get_num(row, "patients per day", "patients_per_day"),
+            "years_experience": _get_num(row, "years experience", "years_experience", "experience"),
+
+            # Personal
+            "birthday": birthday,
+            "anniversary": anniversary,
+            "spouse_name": spouse_name,
+            "num_children": num_children,
+
+            # PIQ / Derived
+            "engagement_score": engagement_score,
+            "pinnacle_score": _get_num(row, "pinnacle score", "pinnacle_score"),
+            "last_contacted": last_engaged,
+            "next_engagement": next_engagement,
+            "status": status,
+
+            # Legacy fields kept for compatibility
+            "content_received": _get_num(row, "content received", "content_received"),
+            "pinnacle_joined": _get(row, "pinnacle joined", "pinnacle_joined", "joined") or "",
             "notes": _get(row, "notes", "remarks") or "",
-            "birthday": _get(row, "birthday", "dob") or "",
-            "anniversary": _get(row, "anniversary") or "",
         })
 
     if not doctors:
@@ -488,6 +554,7 @@ async def upload_doctors(file: UploadFile = File(...)):
         "total": len(doctors),
         "specialties": sorted(specialties_set),
         "cities": sorted(cities_set),
+        "divisions": sorted(divisions_set),
         "tier_breakdown": tier_count,
         "doctors": doctors,
     }
@@ -500,6 +567,7 @@ async def upload_doctors(file: UploadFile = File(...)):
         "total": len(doctors),
         "specialties": sorted(specialties_set),
         "cities": sorted(cities_set),
+        "divisions": sorted(divisions_set),
         "tier_breakdown": tier_count,
     }
 
