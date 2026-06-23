@@ -2300,7 +2300,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="padding:20px 24px;flex:1;overflow-y:auto;">
     <div class="impr-hint">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7"/><circle cx="7" cy="9.5" r=".6" fill="currentColor"/></svg>
-      <div>Agent Beta will revise the content using your notes, then Gamma will reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval. Alpha is skipped — research is already done.</div>
+      <div>The AI will revise the content using your notes and reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval.</div>
     </div>
     <label class="fl">Your Improvement Notes</label>
     <textarea class="impr-ta" id="impr-notes" placeholder="e.g. Fix the empagliflozin dose to 10mg. Reference ESC 2023 HF guidelines specifically. Remove any competitor drug mentions not in our portfolio."></textarea>
@@ -2317,7 +2317,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     </div>
   </div>
   <div class="mf">
-    <div style="font-size:11.5px;color:var(--text3);">Alpha skipped · Beta rewrites · Gamma reformats · New version → Pending Review</div>
+    <div style="font-size:11.5px;color:var(--text3);">AI revises content · New version → Pending Review</div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
       <button class="btn btn-sm" id="impr-submit-btn"
@@ -3981,7 +3981,7 @@ function _showSendToAgentsPrompt(apiId, title, rejectionNotes) {
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="8.5"/><line x1="10" y1="6.5" x2="10" y2="11"/><circle cx="10" cy="13.5" r=".8" fill="#F59E0B" stroke="none"/></svg>
     <div style="flex:1;line-height:1.5;">
       <div style="font-weight:700;color:#F8FAFC;margin-bottom:2px;">Content rejected.</div>
-      <div style="color:#94A3B8;font-size:12px;">Send your feedback to Beta &amp; Gamma agents for a revised version?</div>
+      <div style="color:#94A3B8;font-size:12px;">Send your feedback to the AI for a revised version?</div>
     </div>
     <button id="_improve-yes-btn" style="background:#F59E0B;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">⟳ Yes, Revise It</button>
     <button onclick="this.closest('div').remove()" style="background:transparent;border:none;color:#64748B;font-size:20px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;">×</button>`;
@@ -6073,7 +6073,7 @@ function plRenderAgentOutput(agent, output) {
 
     if (summaries.length) {
       html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
-        <span style="background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Beta</span>
+        <span style="background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Insights</span>
         <strong style="font-size:13px;color:#7C3AED;">${summaries.length}</strong> paper${summaries.length!==1?'s':''} summarised
       </div>`;
       summaries.forEach(s => {
