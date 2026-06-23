@@ -3230,10 +3230,26 @@ function mapAPIDoctor(d) {
     'Orthopaedics':'Future','Dermatology':'Discovery','Ophthalmology':'Life',
     'General Medicine':'Gravitas','Paediatrics':'Life'
   };
-  const div = divMap[d.specialty] || 'Life';
-  const dm = d.patients_per_day * 5000;
-  const dms = Math.round(dm * (d.engagement_score / 100));
-  const real = d.engagement_score;
+  // Division — prefer the uploaded value; derive from specialty only if absent
+  const div = (d.division && String(d.division).trim()) || divMap[d.specialty] || 'Life';
+  // DM / DMS — prefer the uploaded "DM & DMS" figures; else derive from patients/day
+  let dm = (typeof d.dm === 'number' && d.dm > 0) ? d.dm : (d.patients_per_day || 0) * 5000;
+  let dms;
+  const ddRaw = d.dm_dms ? String(d.dm_dms) : '';
+  if (ddRaw.includes('/')) {
+    const parts = ddRaw.split('/');
+    const a = parseInt(parts[0].replace(/[^\d]/g, ''), 10);
+    const b = parseInt(parts[1].replace(/[^\d]/g, ''), 10);
+    if (a) dm = a;
+    if (b) dms = b;
+  }
+  // Share of Wallet % — prefer uploaded SOW; else fall back to engagement score
+  let real = d.engagement_score;
+  if (d.sow !== undefined && d.sow !== null && String(d.sow).trim() !== '') {
+    const sowNum = parseInt(String(d.sow).replace(/[^\d]/g, ''), 10);
+    if (!isNaN(sowNum)) real = sowNum;
+  }
+  if (dms === undefined) dms = Math.round(dm * (real / 100));
   const score = d.pinnacle_score;
   let last = 'Never', days = 999;
   if (d.last_contacted) {
@@ -3246,7 +3262,7 @@ function mapAPIDoctor(d) {
   const status = score >= 70 ? 'high' : score >= 45 ? 'med' : 'low';
   const MRS = ['Ramesh Nair','Amit Verma','Prashant Das','Suresh Raj','Kiran Patel',
                'Neha Shinde','Anjana Pillai','Ravi Kumar','Suman Das','Vijay Mehta'];
-  const mr = MRS[(numId - 1) % MRS.length];
+  const mr = (d.mr_name && String(d.mr_name).trim()) || MRS[(numId - 1) % MRS.length];
   const intMap = {
     'Diabetology':['t2dm','sglt2','glp-1','insulin resistance'],
     'Endocrinology':['thyroid','t2dm','pcos','metabolic syndrome'],
@@ -3260,11 +3276,28 @@ function mapAPIDoctor(d) {
     'General Medicine':['t2dm','hypertension','infections','metabolic syndrome'],
     'Paediatrics':['paediatric nutrition','vaccination','iron deficiency','growth']
   };
-  const interests = intMap[d.specialty] || ['general medicine'];
-  const daysAhead = ((numId - 1) % 14) + 1;
-  const nxtObj = new Date(); nxtObj.setDate(nxtObj.getDate() + daysAhead);
+  // Clinical interests — prefer the uploaded list; else derive from specialty
+  let interests;
+  if (d.clinical_interests && String(d.clinical_interests).trim()) {
+    interests = String(d.clinical_interests).split(/[,;|/]+/).map(s => s.trim()).filter(Boolean);
+  }
+  if (!interests || !interests.length) interests = intMap[d.specialty] || ['General Medicine'];
+  // Next engagement — prefer the uploaded date; else synthesise one
   const NM = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const nextDate = daysAhead === 0 ? 'Today' : `${nxtObj.getDate()} ${NM[nxtObj.getMonth()]} ${nxtObj.getFullYear()}`;
+  let daysAhead = ((numId - 1) % 14) + 1;
+  let nextDate;
+  if (d.next_engagement && String(d.next_engagement).trim()) {
+    const ne = new Date(d.next_engagement);
+    if (!isNaN(ne.getTime())) {
+      nextDate = `${ne.getDate()} ${NM[ne.getMonth()]} ${ne.getFullYear()}`;
+      const today0 = new Date(); today0.setHours(0, 0, 0, 0);
+      daysAhead = Math.round((ne - today0) / 86400000);
+    }
+  }
+  if (!nextDate) {
+    const nxtObj = new Date(); nxtObj.setDate(nxtObj.getDate() + daysAhead);
+    nextDate = daysAhead === 0 ? 'Today' : `${nxtObj.getDate()} ${NM[nxtObj.getMonth()]} ${nxtObj.getFullYear()}`;
+  }
   let nextAction;
   const mod = numId % 10;
   if (days > 30) {
@@ -3281,7 +3314,11 @@ function mapAPIDoctor(d) {
   return {
     id:numId, name:d.name, init, spec:d.specialty, city:d.city,
     cat, div, dm, dms, real, score, last, days, mr, status,
-    interests, clinic:`${d.hospital}, ${d.city}`, nextDate, nextAction
+    interests, clinic:`${d.hospital}, ${d.city}`, nextDate, nextAction,
+    // Pass-through of real uploaded fields (used by Doctor 360 / future views)
+    email:d.email||'', whatsapp:d.whatsapp||'', designation:d.designation||'',
+    subSpecialty:d.sub_specialty||'', sow:d.sow||'', yearsExp:d.years_experience||'',
+    birthday:d.birthday||'', anniversary:d.anniversary||'', nextEngagement:d.next_engagement||''
   };
 }
 
@@ -3298,7 +3335,7 @@ async function loadDoctorsFromAPI() {
 
   try {
     // Cache-bust so browsers never serve stale data
-    const resp = await fetch('http://localhost:8010/doctors?_t=' + Date.now());
+    const resp = await fetch(PL_API + '/doctors?_t=' + Date.now());
     if (!resp.ok) throw new Error('API returned ' + resp.status);
     const data = await resp.json();
     DOCTORS = (data.doctors || []).map(mapAPIDoctor);
@@ -3311,7 +3348,7 @@ async function loadDoctorsFromAPI() {
     if (!DOCTORS_LOADED) {
       // Only show error banner on first load; on refresh failure keep existing table
       if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:28px;">'
-        + '<div style="color:var(--amber);font-size:13px;font-weight:600;margin-bottom:6px;">⚠️ Could not reach backend API on localhost:8000</div>'
+        + '<div style="color:var(--amber);font-size:13px;font-weight:600;margin-bottom:6px;">⚠️ Could not reach backend API on port 8010</div>'
         + '<div style="color:var(--text3);font-size:12px;">Run <strong>START_DEMO.bat</strong> to start the server — showing cached data below.</div>'
         + '</td></tr>';
       renderDocs(); // still renders the 12 fallback doctors
