@@ -1527,6 +1527,92 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         </div>
       </div>
 
+      <!-- ADMIN: Import Doctor Database (visible to admin role only) -->
+      <div id="ra-import-db-card" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2eaf2;box-shadow:0 2px 12px rgba(15,28,46,.08);margin-bottom:24px;padding:20px 24px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#0f1c2e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13h12M8 1v9M5 7l3 3 3-3"/></svg>
+          <span style="font-size:15px;font-weight:700;color:#1a2e42;">Import Doctor Database</span>
+          <span style="margin-left:4px;font-size:9px;font-weight:700;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:5px;padding:1px 8px;text-transform:uppercase;letter-spacing:.4px;">Admin Only</span>
+        </div>
+        <p style="font-size:12.5px;color:#6b7280;margin-bottom:16px;line-height:1.5;">Upload the DR Master Template (.xlsx) to replace the doctor database across all screens — Doctor Directory, Doctor 360 &amp; Share workflows.</p>
+
+        <!-- Column legend -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Template Columns</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+            <!-- Personal / Upload -->
+            <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">Doctor Code</span>
+            <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">DR Name</span>
+            <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">City</span>
+            <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">Speciality</span>
+            <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">qualification</span>
+            <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">clinic address</span>
+            <!-- Superman CRM -->
+            <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">category</span>
+            <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">DM &amp; DMS</span>
+            <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">SOW</span>
+            <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">MR name</span>
+            <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">Division</span>
+            <!-- Field / Upload -->
+            <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Clinical interests</span>
+            <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Bday</span>
+            <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Anniversary</span>
+            <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Spouse name</span>
+            <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">No of children</span>
+            <!-- PIQ Derived -->
+            <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">engagement score</span>
+            <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Last engaged</span>
+            <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Next engagement</span>
+            <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Status</span>
+            <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">preferred channel</span>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#EBF0F8;"></span>Personal (Upload)</span>
+            <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F3F4F6;"></span>Superman CRM</span>
+            <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F0FDF4;border:1px solid #BBF7D0;"></span>Field (Upload)</span>
+            <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F5F3FF;"></span>PIQ Derived</span>
+          </div>
+        </div>
+
+        <!-- Drop zone -->
+        <div id="ra-db-dropzone"
+             style="border:2px dashed #d1dce8;border-radius:10px;padding:24px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#f9fbfd;"
+             ondragover="event.preventDefault();this.style.borderColor='#0f1c2e';this.style.background='#eef4fb';"
+             ondragleave="this.style.borderColor='#d1dce8';this.style.background='#f9fbfd';"
+             ondrop="raDbOnDrop(event)"
+             onclick="document.getElementById('ra-db-file-input').click()">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 10px;display:block;">
+            <rect x="3" y="3" width="26" height="26" rx="5" stroke-dasharray="4 3"/>
+            <path d="M10 18v5h12v-5M16 9v10M12 13l4-4 4 4"/>
+          </svg>
+          <div style="font-size:13px;color:#4a637a;font-weight:500;"><strong style="color:#1a2e42;">Drag &amp; drop</strong> the DR Master Template here, or <span style="color:#0f1c2e;font-weight:700;text-decoration:underline;cursor:pointer;">browse</span></div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:5px;">.xlsx or .xls only · Row 1 = column headers · Row 2+ = doctor data</div>
+          <input type="file" id="ra-db-file-input" accept=".xlsx,.xls" style="display:none;" onchange="raDbOnFileSelect(event)">
+        </div>
+
+        <!-- Selected file info -->
+        <div id="ra-db-file-info" style="display:none;margin-top:10px;background:#EBF0F8;border:1px solid #c7d7ea;border-radius:8px;padding:9px 14px;align-items:center;gap:10px;">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#1a2e42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M2.5 2h7.5l3 3v8a.5.5 0 01-.5.5h-10a.5.5 0 01-.5-.5V2.5a.5.5 0 01.5-.5z"/><polyline points="10,2 10,5 13,5"/></svg>
+          <span id="ra-db-file-name" style="font-size:12.5px;color:#1a2e42;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+          <button onclick="raDbClearFile()" style="background:none;border:none;cursor:pointer;font-size:16px;color:#6b7280;padding:0 4px;line-height:1;flex-shrink:0;" title="Remove">✕</button>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
+          <button id="ra-db-upload-btn" onclick="raDbUpload()"
+                  style="display:none;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:8px;padding:0 22px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 10v2h11v-2M6.5 1v8M3.5 4l3-3 3 3"/></svg>
+            Upload &amp; Replace Database
+          </button>
+          <span id="ra-db-uploading" style="display:none;font-size:12px;color:#6b7280;display:none;align-items:center;gap:8px;">
+            <span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #e2eaf2;border-top-color:#0f1c2e;animation:spin .8s linear infinite;"></span>
+            Uploading and processing…
+          </span>
+        </div>
+
+        <!-- Status message -->
+        <div id="ra-db-status" style="display:none;margin-top:10px;font-size:12px;border-radius:8px;padding:10px 14px;line-height:1.7;"></div>
+      </div>
+
       <!-- SEARCH PANEL -->
       <div class="ra-search-panel">
         <div class="ra-panel-header">
@@ -3424,6 +3510,10 @@ function switchRole(role, skipHash){
     document.getElementById('sb-badge').textContent    = 'PMT';
     document.getElementById('sb-badge').className      = 'sb-role-badge rb-pmt';
   }
+
+  // Show/hide admin import card on Research Agent page
+  const importCard = document.getElementById('ra-import-db-card');
+  if (importCard) importCard.style.display = role === 'admin' ? 'block' : 'none';
 
   buildSidebar();
   const hashPage   = _getHashPage();
@@ -7546,6 +7636,98 @@ initApp();
 
 // In-memory cache of suggestions loaded from backend
 // Structure: { therapy_area: { recent: [...], defaults: [...] }, disease: {...}, keywords: {...} }
+// ── Doctor Database Import (Admin only) ────────────────────────────────────
+let RA_DB_FILE = null;
+
+function raDbOnDrop(e) {
+  e.preventDefault();
+  const dz = document.getElementById('ra-db-dropzone');
+  if (dz) { dz.style.borderColor = '#d1dce8'; dz.style.background = '#f9fbfd'; }
+  const f = e.dataTransfer?.files?.[0];
+  if (f) raDbSetFile(f);
+}
+
+function raDbOnFileSelect(e) {
+  const f = e.target.files?.[0];
+  if (f) raDbSetFile(f);
+}
+
+function raDbSetFile(f) {
+  if (!f.name.toLowerCase().match(/\.(xlsx|xls)$/)) {
+    raDbShowStatus('Only .xlsx or .xls files are accepted.', 'error');
+    return;
+  }
+  RA_DB_FILE = f;
+  const nameEl = document.getElementById('ra-db-file-name');
+  const infoEl = document.getElementById('ra-db-file-info');
+  const btnEl  = document.getElementById('ra-db-upload-btn');
+  const statEl = document.getElementById('ra-db-status');
+  if (nameEl) nameEl.textContent = f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB)';
+  if (infoEl) infoEl.style.display = 'flex';
+  if (btnEl)  btnEl.style.display  = 'flex';
+  if (statEl) statEl.style.display = 'none';
+}
+
+function raDbClearFile() {
+  RA_DB_FILE = null;
+  const infoEl = document.getElementById('ra-db-file-info');
+  const btnEl  = document.getElementById('ra-db-upload-btn');
+  const statEl = document.getElementById('ra-db-status');
+  const finput = document.getElementById('ra-db-file-input');
+  if (infoEl) infoEl.style.display = 'none';
+  if (btnEl)  btnEl.style.display  = 'none';
+  if (statEl) statEl.style.display = 'none';
+  if (finput) finput.value = '';
+}
+
+async function raDbUpload() {
+  if (!RA_DB_FILE) return;
+  const btn  = document.getElementById('ra-db-upload-btn');
+  const spin = document.getElementById('ra-db-uploading');
+  if (btn)  { btn.style.display  = 'none'; }
+  if (spin) { spin.style.display = 'flex'; }
+  raDbShowStatus('Uploading and processing…', 'info');
+
+  try {
+    const form = new FormData();
+    form.append('file', RA_DB_FILE);
+    const res  = await fetch(PL_API + '/admin/upload-doctors', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Upload failed');
+
+    const tb = data.tier_breakdown || {};
+    raDbShowStatus(
+      '<strong>✓ ' + data.total + ' doctors imported</strong> from <em>' + RA_DB_FILE.name + '</em><br>' +
+      'Tier A: ' + (tb.A||0) + ' · Tier B: ' + (tb.B||0) + ' · Tier C: ' + (tb.C||0) +
+      '<br>Specialties: ' + (data.specialties||[]).join(', ') +
+      (data.divisions?.length ? '<br>Divisions: ' + data.divisions.join(', ') : ''),
+      'success'
+    );
+    raDbClearFile();
+    // Reload doctor data so Doctor Directory + 360 refresh
+    DOCTORS_LOADED = false;
+    if (typeof loadDoctorsFromAPI === 'function') loadDoctorsFromAPI();
+  } catch(err) {
+    raDbShowStatus('Upload failed: ' + err.message, 'error');
+  } finally {
+    if (btn)  { btn.style.display  = 'flex'; }
+    if (spin) { spin.style.display = 'none'; }
+  }
+}
+
+function raDbShowStatus(msg, type) {
+  const el = document.getElementById('ra-db-status');
+  if (!el) return;
+  const styles = {
+    info:    'background:#EBF0F8;border:1px solid #c7d7ea;color:#1a2e42;',
+    success: 'background:#f0fdf4;border:1px solid #86efac;color:#166534;',
+    error:   'background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;',
+  };
+  el.style.cssText = 'display:block;margin-top:10px;font-size:12px;border-radius:8px;padding:10px 14px;line-height:1.7;' + (styles[type] || styles.info);
+  el.innerHTML = msg;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 let RA_SUGGESTIONS_CACHE = null;
 
 // Map frontend filter names to backend section names

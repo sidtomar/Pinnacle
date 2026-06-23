@@ -168,6 +168,7 @@ cd D:\Codebase\Pinnacle
 | POST | `/content/{id}/improve` | Request improvement (async) |
 | PATCH | `/content/{id}` | Update content metadata |
 | GET | `/doctors` | Doctor list |
+| POST | `/admin/upload-doctors` | Upload DR Master Template Excel → replace `doctors.json` (admin only) |
 | GET | `/analytics` | Analytics data |
 | GET | `/pipeline/run` | Trigger mock pipeline |
 | GET | `/docs` | FastAPI Swagger UI |
@@ -273,3 +274,4 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-19 | Research Agent onfocus fix, SQLite DB path fix, Chrome launch. DB now always resolves to `demo/backend/pinnacleiq_demo.db`. 1086-item DB (91 approved) restored from main repo. |
 | 2026-06-19 | **Merged worktree → main.** All fixes in `D:\Codebase\Pinnacle` (main). Ran 125 JS tests against main — 125/125 pass. Cleaned up `filter_suggestions.txt`. App runs from `D:\Codebase\Pinnacle\demo\backend\python app.py`. |
 | 2026-06-22 | Ran app (already live on 8010). Fixed admin login: documented `admin@mankind.in`/`Admin123` didn't exist in `USERS_DB` (only `admin1..5`). Added the account + per-user `pwd` support in `PinnacleIQ_Portal.html`. Committed on `feat/admin-login-credentials`, merged to `main` (no-ff). Reset test-polluted `filter_suggestions.txt`. Documented login mechanics in §3. **Note:** `main` is ~50 commits ahead of `origin/main` — not pushed yet (remote: `github.com/sidtomar/Pinnacle.git`). |
+| 2026-06-23 | **DR Master Template import feature** (branch `Researchagent_2306`). Added `POST /admin/upload-doctors` to `demo/backend/app.py` — accepts `.xlsx/.xls`, maps exact DR Master Template columns (Doctor Code, DR Name, City, Speciality, qualification, clinic address, category, DM & DMS, SOW, MR name, Division, Clinical interests, Bday, Anniversary, Spouse name, No of children, engagement score, Last engaged, Next engagement, Status, preferred channel) → writes `demo/doctors.json`. Added "Import Doctor Database" UI card in `PinnacleIQ_Portal.html` on the Research Agent page — visible to **Admin role only** (`admin@mankind.in`). Shows drag-and-drop zone + column legend (colour-coded by Personal/CRM/Field/PIQ). After upload, auto-refreshes Doctor Directory + Doctor 360 via `loadDoctorsFromAPI()`. |
