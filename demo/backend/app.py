@@ -671,9 +671,120 @@ def add_filter_suggestion(req: AddFilterTermRequest):
     }
 
 
+def _build_real_agent_outputs(result) -> dict:
+    """
+    Adapt a real-pipeline PipelineResult into the agent_outputs shape the portal
+    UI renders (matches mock_runner's keys so the agent panels look identical).
+    Defensive: the frontend guards missing keys, so partial data is fine.
+    """
+    ao = {}
+    # ── Alpha — sources list (title/authors/journal/url/snippet) ──
+    sources = []
+    for p in (result.papers or []):
+        sources.append({
+            "title":   p.get("title", ""),
+            "authors": p.get("authors", ""),
+            "journal": p.get("journal", ""),
+            "url":     p.get("pubmed_link") or p.get("link", ""),
+            "snippet": (p.get("abstract", "") or "")[:300],
+        })
+    ao["alpha"] = {
+        "sources": sources, "internal_docs": [], "paper_count": len(sources),
+        "internal_count": 0,
+        "summary": f"✅ {len(sources)} PubMed paper(s) found (real pipeline)",
+    }
+    # ── Beta — per-paper summaries (best-effort) ──
+    summaries = result.summaries or []
+    ao["beta"] = {
+        "findings": [], "per_paper_summaries": summaries,
+        "papers_summarised": len(summaries),
+        "summary": f"✅ {len(summaries)} paper(s) summarised (real LLM)",
+    }
+    # ── Gamma — shareable articles ──
+    articles = result.articles or []
+    ao["gamma"] = {
+        "messages": [], "article_excerpt": (articles[0][:600] if articles and isinstance(articles[0], str) else ""),
+        "messages_count": len(articles),
+        "summary": f"✅ {len(articles)} article(s) generated (real LLM)",
+    }
+    # ── Delta — saved cards ──
+    cards = result.content_cards or []
+    ao["delta"] = {
+        "card_title": (cards[0].get("title", "") if cards else ""),
+        "tags": (cards[0].get("tags", []) if cards else []),
+        "sub_category": (cards[0].get("sub_category", "") if cards else ""),
+        "cards_saved": len(cards),
+        "summary": f"✅ {len(cards)} content card(s) saved · Pending MA Review",
+    }
+    return ao
+
+
+def _run_real_pipeline(req, run_id):
+    """
+    Run the REAL LLM pipeline (research_agent_system/orchestrator.run_pipeline) and
+    adapt its output to the polling run-store contract the portal expects.
+
+    Enabled by RESEARCH_PIPELINE_MODE=real. Delta saves cards to the same store
+    the portal reads, so we collect their ids rather than re-saving. Coarse
+    progress only — run_pipeline is one blocking call (no per-agent hooks).
+    """
+    # research_agent_system is already on sys.path (added near the top of this file)
+    try:
+        from orchestrator import run_pipeline
+    except Exception as exc:
+        pipeline_runs[run_id].update(
+            status="error", progress=0, current_agent="alpha",
+            status_msg=f"Real pipeline unavailable: {exc}")
+        print(f"[App][REAL] import failed: {exc}")
+        return
+
+    pipeline_runs[run_id].update(
+        current_agent="alpha", progress=10,
+        status_msg="Searching PubMed + running real LLM agents — this can take a minute…")
+
+    try:
+        result = run_pipeline(
+            topic=req.topic, specialty=req.specialty,
+            therapy_area=req.therapy_area, save_outputs=False)
+    except Exception as exc:
+        pipeline_runs[run_id].update(
+            status="error", progress=0,
+            status_msg=f"Pipeline error: {exc}")
+        print(f"[App][REAL] run_pipeline raised: {exc}")
+        return
+
+    cards = result.content_cards or []
+    saved_ids = [c.get("id") for c in cards if c.get("id")]
+
+    if not saved_ids:
+        msg = "; ".join(result.errors)[:200] if result.errors else "No content produced"
+        pipeline_runs[run_id].update(status="error", progress=0, status_msg=msg)
+        print(f"[App][REAL] no cards produced — errors: {result.errors}")
+        return
+
+    pipeline_runs[run_id].update(
+        status="completed", progress=100, current_agent="done",
+        status_msg="Pipeline complete. Real content ready for MA review.",
+        content_id=saved_ids[0], all_content_ids=saved_ids,
+        agent_outputs=_build_real_agent_outputs(result))
+    print(f"[App][REAL] pipeline saved {len(saved_ids)} card(s) to store")
+
+    try:
+        notify_ma_new_content(
+            store, saved_ids[0], cards[0].get("title", req.topic),
+            req.specialty, cards[0].get("division", "All"))
+    except Exception as exc:
+        print(f"[App][REAL] notification failed: {exc}")
+
+
 @app.post("/pipeline/run")
 def start_pipeline(req: RunRequest, bg: BackgroundTasks):
-    """Start mock pipeline in background. Returns run_id for polling."""
+    """Start the pipeline in the background. Returns run_id for polling.
+
+    Mode is chosen by the RESEARCH_PIPELINE_MODE env var:
+      - unset / "mock" (default) → mock_runner (zero-config, deterministic)
+      - "real"                   → real LLM pipeline (needs OPENROUTER/TAVILY keys)
+    """
     from datetime import datetime, timezone
 
     # Persist custom topics so they remain available after refreshes and future runs.
@@ -694,7 +805,15 @@ def start_pipeline(req: RunRequest, bg: BackgroundTasks):
             "started_at":    datetime.now(timezone.utc).isoformat(),
         }
 
+    pipeline_mode = os.getenv("RESEARCH_PIPELINE_MODE", "mock").strip().lower()
+
     def _run():
+        # ── REAL LLM pipeline path (opt-in via RESEARCH_PIPELINE_MODE=real) ──
+        if pipeline_mode == "real":
+            _run_real_pipeline(req, run_id)
+            return
+
+        # ── MOCK pipeline path (default — zero-config, deterministic) ──
         run_mock_pipeline(
             topic=req.topic,
             specialty=req.specialty,
