@@ -3868,7 +3868,7 @@ function clCardHTML(p){
       <div class="pc-title">${p.title}</div>
       <div class="pc-j">${p.journal} · ${p.month} ${p.year}</div>
       <div class="pc-sum">${p.sum}</div>
-      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${relBadge(p.rel)}</div>
+      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${p.sub}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${t}</span>`).join('')}${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
     <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;flex-shrink:0;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:nowrap;flex-shrink:0;">${actions}</div></div>
@@ -3895,7 +3895,7 @@ function clRowHTML(p){
       <div class="pr-title">${p.title}${v>1?` <span class="ver-badge ver-latest">v${v}</span>`:''}</div>
       <div class="pr-meta"><span>${p.journal}</span><span>${p.authors.split(',')[0]} et al.</span><span>${p.month} ${p.year}</span>${p.pmid?`<span>PMID ${p.pmid}</span>`:''}</div>
       <div class="pr-sum">${p.sum}</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${p.sub}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${t}</span>`).join('')}</div>
     </div>
     <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;
