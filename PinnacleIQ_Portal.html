@@ -8052,7 +8052,7 @@ async function raRunDynamicSearch() {
       body: JSON.stringify({
         topic: topic,
         specialty: therapyArea || 'General Medicine',
-        therapy_area: therapyArea || 'General',
+        therapy_area: disease || therapyArea || 'General',
         keywords: keywords
       })
     });
