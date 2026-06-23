@@ -3237,23 +3237,21 @@ function mapAPIDoctor(d) {
   };
   // Division — prefer the uploaded value; derive from specialty only if absent
   const div = (d.division && String(d.division).trim()) || divMap[d.specialty] || 'Life';
+  // Parse the leading integer out of a free-form CRM cell ("52,000", "65%", "1.2L"→12).
+  const _digits = (s) => parseInt(String(s == null ? '' : s).replace(/[^\d]/g, ''), 10);
   // DM / DMS — prefer the uploaded "DM & DMS" figures; else derive from patients/day
   let dm = (typeof d.dm === 'number' && d.dm > 0) ? d.dm : (d.patients_per_day || 0) * 5000;
   let dms;
   const ddRaw = d.dm_dms ? String(d.dm_dms) : '';
   if (ddRaw.includes('/')) {
-    const parts = ddRaw.split('/');
-    const a = parseInt(parts[0].replace(/[^\d]/g, ''), 10);
-    const b = parseInt(parts[1].replace(/[^\d]/g, ''), 10);
+    const [a, b] = ddRaw.split('/').map(_digits);
     if (a) dm = a;
     if (b) dms = b;
   }
   // Share of Wallet % — prefer uploaded SOW; else fall back to engagement score
   let real = d.engagement_score;
-  if (d.sow !== undefined && d.sow !== null && String(d.sow).trim() !== '') {
-    const sowNum = parseInt(String(d.sow).replace(/[^\d]/g, ''), 10);
-    if (!isNaN(sowNum)) real = sowNum;
-  }
+  const sowNum = _digits(d.sow);
+  if (!isNaN(sowNum)) real = sowNum;
   if (dms === undefined) dms = Math.round(dm * (real / 100));
   const score = d.pinnacle_score;
   let last = 'Never', days = 999;
@@ -3797,9 +3795,14 @@ function clGetSearchablePapers(){
     return true;
   });
 }
+let _clSearchTimer = null;
 function onCLSearchInput(){
-  renderCL();          // live filter the results as the user types
-  clBuildSuggest();    // refresh the suggestion dropdown
+  clBuildSuggest();    // suggestion dropdown updates instantly (cheap)
+  // Debounce the expensive full-list re-filter+re-render so fast typing doesn't
+  // rebuild the whole grid on every keystroke. Enter / suggestion-click still
+  // call renderCL() directly for an immediate result.
+  clearTimeout(_clSearchTimer);
+  _clSearchTimer = setTimeout(renderCL, 160);
 }
 function clHideSuggest(){
   const box=document.getElementById('cl-suggest');
@@ -3829,16 +3832,18 @@ function clBuildSuggest(){
     seen.add(key);
     cats.push({label,type});
   };
-  papers.forEach(p=>{
+  for(const p of papers){
+    if(cats.length>=6) break;   // already have enough category suggestions
     addCat(p.therapy,'Therapy');
     addCat(p.cat,'Specialty');
     (p.tags||[]).forEach(t=>addCat(t,'Tag'));
-  });
+  }
   // Title matches (cap at 5)
-  const titles=papers
-    .filter(p=>(p.title||'').toLowerCase().includes(q))
-    .slice(0,5)
-    .map(p=>({label:p.title,type:'Article'}));
+  const titles=[];
+  for(const p of papers){
+    if(titles.length>=5) break;
+    if((p.title||'').toLowerCase().includes(q)) titles.push({label:p.title,type:'Article'});
+  }
   const items=[...cats.slice(0,6),...titles].slice(0,10);
   if(!items.length){
     box.innerHTML=`<div class="cl-sg-empty">No matches for “${_esc(q)}”</div>`;
@@ -3908,8 +3913,21 @@ function renderCL(){
   else{c.innerHTML=`<div class="plist">${list.map(clRowHTML).join('')}</div>`;}
 }
 
-function clCardHTML(p){
+// Shared badge row for content cards/rows: specialty + (distinct) therapy + sub
+// category + up to 4 keyword tags. Used by both clCardHTML and clRowHTML so the
+// dedup/escape rules live in one place.
+function _catTherapyTagBadges(p){
   const cc=CAT_COL[p.cat]||'b-gray', tc=TH_COL[p.therapy]||'b-gray';
+  const therapyBadge = (p.therapy && p.therapy.toLowerCase()!==(p.cat||'').toLowerCase())
+    ? `<span class="badge ${tc}">${_esc(p.therapy)}</span>` : '';
+  const subBadge = p.sub ? `<span class="badge b-gray">${_esc(p.sub)}</span>` : '';
+  const tagBadges = (p.tags||[])
+    .filter(t=>t && t!==p.cat && t!==p.therapy && t!=='AI Pipeline')
+    .slice(0,4)
+    .map(t=>`<span class="badge b-gray">${_esc(t)}</span>`).join('');
+  return `<span class="badge ${cc}">${_esc(p.cat)}</span>${therapyBadge}${subBadge}${tagBadges}`;
+}
+function clCardHTML(p){
   const isMA=ROLE==='ma';
   const v = p.version || 1;
   // Handle both numeric (static) and string (API) IDs safely in onclick
@@ -3952,7 +3970,7 @@ function clCardHTML(p){
       <div class="pc-title">${p.title}</div>
       <div class="pc-j">${p.journal} · ${p.month} ${p.year}</div>
       <div class="pc-sum">${p.sum}</div>
-      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${_esc(p.sub)}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${_esc(t)}</span>`).join('')}${relBadge(p.rel)}</div>
+      <div class="pc-tags">${_catTherapyTagBadges(p)}${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
     <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;flex-shrink:0;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:nowrap;flex-shrink:0;">${actions}</div></div>
@@ -3960,7 +3978,6 @@ function clCardHTML(p){
 }
 
 function clRowHTML(p){
-  const cc=CAT_COL[p.cat]||'b-gray', tc=TH_COL[p.therapy]||'b-gray';
   const isMA=ROLE==='ma';
   const v = p.version || 1;
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
@@ -3979,7 +3996,7 @@ function clRowHTML(p){
       <div class="pr-title">${p.title}${v>1?` <span class="ver-badge ver-latest">v${v}</span>`:''}</div>
       <div class="pr-meta"><span>${p.journal}</span><span>${p.authors.split(',')[0]} et al.</span><span>${p.month} ${p.year}</span>${p.pmid?`<span>PMID ${p.pmid}</span>`:''}</div>
       <div class="pr-sum">${p.sum}</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span>${p.therapy && p.therapy.toLowerCase()!==p.cat.toLowerCase()?`<span class="badge ${tc}">${p.therapy}</span>`:''}${p.sub?`<span class="badge b-gray">${_esc(p.sub)}</span>`:''}${(p.tags||[]).filter(t=>t&&t!==p.cat&&t!==p.therapy&&t!=='AI Pipeline').slice(0,4).map(t=>`<span class="badge b-gray">${_esc(t)}</span>`).join('')}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}${_catTherapyTagBadges(p)}</div>
     </div>
     <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;
@@ -3988,23 +4005,26 @@ function clRowHTML(p){
 /* ══ MA DETAIL MODAL ══ */
 const ICON_BG={Gynaecology:'var(--rose-bg)',Cardiology:'var(--red-bg)',Paediatrics:'var(--teal-bg)',Diabetology:'#EBF0F8',Dermatology:'var(--amber-bg)',Oncology:'var(--purple-bg)',Neurology:'var(--blue-bg)'};
 
+// Single source of truth for the collapsed/expanded article box state:
+// chevron rotation + label text are driven off the desired `collapsed` flag.
+function _setAbsState(box, btn, collapsed) {
+  if (box) box.classList.toggle('abs-box-collapsed', collapsed);
+  if (btn) {
+    const chevron = btn.querySelector('svg');
+    if (chevron) chevron.style.transform = collapsed ? '' : 'rotate(180deg)';
+    if (btn.lastChild) btn.lastChild.nodeValue = collapsed ? ' View full article' : ' View less';
+  }
+}
+
 function absToggle(boxId, btnId) {
   const box = document.getElementById(boxId);
   const btn = document.getElementById(btnId);
   if (!box || !btn) return;
-  const collapsed = box.classList.contains('abs-box-collapsed');
-  box.classList.toggle('abs-box-collapsed', !collapsed);
-  const chevron = btn.querySelector('svg');
-  if (chevron) chevron.style.transform = collapsed ? 'rotate(180deg)' : '';
-  const label = btn.lastChild;
-  if (label) label.nodeValue = collapsed ? ' View less' : ' View full article';
+  _setAbsState(box, btn, !box.classList.contains('abs-box-collapsed'));
 }
 
 function _absReset(boxId, btnId) {
-  const box = document.getElementById(boxId);
-  const btn = document.getElementById(btnId);
-  if (box) box.classList.add('abs-box-collapsed');
-  if (btn) { const ch = btn.querySelector('svg'); if (ch) ch.style.transform=''; if (btn.lastChild) btn.lastChild.nodeValue = ' View full article'; }
+  _setAbsState(document.getElementById(boxId), document.getElementById(btnId), true);
 }
 
 function openMADetail(id){
