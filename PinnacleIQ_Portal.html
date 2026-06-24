@@ -3933,11 +3933,8 @@ function clCardHTML(p){
   const v = p.version || 1;
   // Handle both numeric (static) and string (API) IDs safely in onclick
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
-  const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected'))
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openMADetail(${idArg})" title="Review and request improvement">⟳ Improve</button>`
-    : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button><button class="btn btn-xs" style="background:var(--red);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openMADetail(${idArg})" title="Reject">✕ Reject</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>`:''}
        <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
@@ -3983,11 +3980,8 @@ function clRowHTML(p){
   const v = p.version || 1;
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const accClass=p.status==='approved'?'pr-acc-approved':p.status==='pending'?'pr-acc-pending':'pr-acc-rejected';
-  const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected'))
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openMADetail(${idArg})" title="Review and request improvement">⟳ Improve</button>`
-    : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button><button class="btn btn-xs" style="background:var(--red);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openMADetail(${idArg})" title="Reject">✕ Reject</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>`:''}
        <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
