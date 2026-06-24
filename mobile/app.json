@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "PinnacleIQ",
+    "slug": "pinnacleiq-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B1628"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.mankindpharma.pinnacleiq"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B1628"
+      },
+      "package": "com.mankindpharma.pinnacleiq"
+    },
+    "plugins": [
+      "expo-notifications"
+    ],
+    "extra": {
+      "apiUrl": "http://192.168.1.100:8010"
+    }
+  }
+}
