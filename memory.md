@@ -1,13 +1,19 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-24 (session 4 — demo day fixes) | Active branch: `Researchagent_2306` | Main repo: `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-24 (session 4 — demo day, post-demo merge) | Active branch: `ResearchAgent2406` | Main repo: `D:\Codebase\Pinnacle`
 
 ---
 
 ## ⏯️ RESUME HERE (state at end of 2026-06-24 — demo day)
 
-**Session 4 fixes (all committed to `Researchagent_2306`):**
+**Branch state:**
+- `ResearchAgent2406` — NEW active feature branch (created post-demo from `develop`)
+- `develop` — merged at commit `6357a55`, contains all session 3+4 work
+- `Researchagent_2306` — old feature branch, now superseded by `ResearchAgent2406`
+- `main` — untouched (production)
+
+**Session 4 fixes (merged into `develop`, in `ResearchAgent2406`):**
 
 | Commit | Fix |
 |--------|-----|
