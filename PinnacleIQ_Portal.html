@@ -3656,8 +3656,8 @@ function buildSidebar(){
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="6" height="6" rx="1.5"/><rect x="10" y="2" width="6" height="6" rx="1.5"/><rect x="2" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
         Dashboard
       </div>
-      <div class="ng" style="margin-top:8px;">AI Pipeline</div>
-      <div class="ni" id="ni-research-agent" onclick="showPage('research-agent')">
+      <div class="ng" style="margin-top:8px;display:none;">AI Pipeline</div>
+      <div class="ni" id="ni-research-agent" onclick="showPage('research-agent')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
         Research Agent
         <span class="nb nb-gold">New</span>
@@ -3674,7 +3674,13 @@ function buildSidebarFooter(){
   if(ROLE==='admin'){
     foot.innerHTML=`<div class="sync-row"><div class="sdot" style="background:#C4B5FD;"></div>PubMed sync · active</div>`;
   } else if(ROLE==='pmt'){
-    foot.innerHTML=`<div class="sb-stats"><div class="sb-stat"><div class="sb-sv">50</div><div class="sb-sl">Doctors</div></div><div class="sb-stat"><div class="sb-sv">74%</div><div class="sb-sl">Coverage</div></div></div><div class="sync-row"><div class="sdot"></div>PubMed sync · 14 min ago</div>`;
+    // Derive division from CURRENT_USER.division (if set) or from unique divisions in DOCTORS
+    const curDiv = (CURRENT_USER && CURRENT_USER.division) || '';
+    const divDocs = curDiv
+      ? DOCTORS.filter(d=>(d.division||'').toLowerCase()===curDiv.toLowerCase()).length
+      : DOCTORS.length;
+    const divLabel = curDiv || 'All';
+    foot.innerHTML=`<div class="sb-stats"><div class="sb-stat"><div class="sb-sv">${divDocs}</div><div class="sb-sl">Doctors</div></div><div class="sb-stat"><div class="sb-sv" style="font-size:11px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${_esc(divLabel)}">${_esc(divLabel)}</div><div class="sb-sl">Division</div></div></div><div class="sync-row"><div class="sdot"></div>PubMed sync · 14 min ago</div>`;
   } else {
     foot.innerHTML=`<div class="sync-row" style="margin-bottom:6px;"><div class="sdot"></div>PubMed sync · 14 min ago · 3 new</div><div style="font-size:10px;color:rgba(255,255,255,.18);">Last review: Today 11:30 AM</div>`;
   }
@@ -7715,16 +7721,17 @@ const USERS_DB = [
   {id:'admin4', name:'Admin 4',          email:'admin4@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A4'},
   {id:'admin5', name:'Admin 5',          email:'admin5@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A5'},
   // ── Category 2: Business (PMT — full app view) ──
-  {id:'jijo',           name:'Jijo Kumar',        email:'jijo@mankind.in',              role:'pmt', category:'Business', designation:'BU Head · Life Division',         initials:'JK'},
-  {id:'rajesh_sharma',  name:'Rajesh Sharma',     email:'rajesh.sharma@mankind.in',     role:'pmt', category:'Business', designation:'NSM · National Sales Manager',     initials:'RS'},
-  {id:'priya_nair',     name:'Priya Nair',         email:'priya.nair@mankind.in',        role:'pmt', category:'Business', designation:'Marketing Head · Life Division',   initials:'PN'},
-  {id:'amit_verma',     name:'Amit Verma',         email:'amit.verma@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Cardiac Division',       initials:'AV'},
-  {id:'sunita_patel',   name:'Sunita Patel',       email:'sunita.patel@mankind.in',      role:'pmt', category:'Business', designation:'NSM · North Region',               initials:'SP'},
-  {id:'vikram_singh',   name:'Vikram Singh',       email:'vikram.singh@mankind.in',      role:'pmt', category:'Business', designation:'Marketing Head · Oncology',        initials:'VS'},
-  {id:'neha_gupta',     name:'Neha Gupta',         email:'neha.gupta@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Metabolic Division',     initials:'NG'},
-  {id:'arjun_mehta',    name:'Arjun Mehta',        email:'arjun.mehta@mankind.in',       role:'pmt', category:'Business', designation:'NSM · West Region',                initials:'AM'},
-  {id:'deepa_krishnan', name:'Deepa Krishnan',     email:'deepa.krishnan@mankind.in',    role:'pmt', category:'Business', designation:'Marketing Head · Neurology',       initials:'DK'},
-  {id:'rahul_agarwal',  name:'Rahul Agarwal',      email:'rahul.agarwal@mankind.in',     role:'pmt', category:'Business', designation:'BU Head · GI Division',            initials:'RA'},
+  // division must match the "division" field in the uploaded doctors sheet exactly
+  {id:'jijo',           name:'Jijo Kumar',        email:'jijo@mankind.in',              role:'pmt', category:'Business', designation:'BU Head · Life Division',         initials:'JK', division:'3D Mankind'},
+  {id:'rajesh_sharma',  name:'Rajesh Sharma',     email:'rajesh.sharma@mankind.in',     role:'pmt', category:'Business', designation:'NSM · National Sales Manager',     initials:'RS', division:''},
+  {id:'priya_nair',     name:'Priya Nair',         email:'priya.nair@mankind.in',        role:'pmt', category:'Business', designation:'Marketing Head · Life Division',   initials:'PN', division:'3D Mankind'},
+  {id:'amit_verma',     name:'Amit Verma',         email:'amit.verma@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Cardiac Division',       initials:'AV', division:''},
+  {id:'sunita_patel',   name:'Sunita Patel',       email:'sunita.patel@mankind.in',      role:'pmt', category:'Business', designation:'NSM · North Region',               initials:'SP', division:''},
+  {id:'vikram_singh',   name:'Vikram Singh',       email:'vikram.singh@mankind.in',      role:'pmt', category:'Business', designation:'Marketing Head · Oncology',        initials:'VS', division:''},
+  {id:'neha_gupta',     name:'Neha Gupta',         email:'neha.gupta@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Metabolic Division',     initials:'NG', division:''},
+  {id:'arjun_mehta',    name:'Arjun Mehta',        email:'arjun.mehta@mankind.in',       role:'pmt', category:'Business', designation:'NSM · West Region',                initials:'AM', division:''},
+  {id:'deepa_krishnan', name:'Deepa Krishnan',     email:'deepa.krishnan@mankind.in',    role:'pmt', category:'Business', designation:'Marketing Head · Neurology',       initials:'DK', division:''},
+  {id:'rahul_agarwal',  name:'Rahul Agarwal',      email:'rahul.agarwal@mankind.in',     role:'pmt', category:'Business', designation:'BU Head · GI Division',            initials:'RA', division:''},
   // ── Category 3: Medical Affairs ──
   {id:'prashant_agarwal', name:'Dr. Prashant Agarwal', email:'prashant.agarwal@mankind.in', role:'ma', category:'Medical Affairs', designation:'Medical Affairs · MA Lead',    initials:'PA'},
   {id:'anita_sharma',     name:'Dr. Anita Sharma',     email:'anita.sharma@mankind.in',     role:'ma', category:'Medical Affairs', designation:'Medical Affairs · Cardiology', initials:'AS'},
