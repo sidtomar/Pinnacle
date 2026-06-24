@@ -3745,6 +3745,7 @@ function showPage(id, skipHash){
   if(id==='analytics' && typeof renderAnalytics==='function') renderAnalytics();
   if(id==='pipeline' && typeof plInitPage==='function') plInitPage();
   if(id==='doctors') loadDoctorsFromAPI();
+  if(id==='content') loadContentFromAPI();
   if(id==='dashboard') { loadDemoReport(); loadSharingReport(); }
   // Close sidebar on mobile after navigation
   if(window.innerWidth <= 768) closeSidebar();
