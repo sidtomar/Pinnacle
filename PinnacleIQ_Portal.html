@@ -3347,6 +3347,7 @@ async function loadDoctorsFromAPI() {
     updateDoctorKPIs();
     populateDoctorFilters(data);
     renderDocs();
+    buildSidebarFooter(); // Refresh doctor count once real data arrives
   } catch(e) {
     if (!DOCTORS_LOADED) {
       // Only show error banner on first load; on refresh failure keep existing table
