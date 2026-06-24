@@ -4087,10 +4087,13 @@ function setRel(r,el){CUR_REL=r;document.querySelectorAll('#ma-rel-opts .rel-opt
 
 function doApprove(){
   const p=ALL_PAPERS.find(x=>x.id===CUR_ID); if(!p) return;
+  const wasRejected = p.status === 'rejected';
+  const toastMsg = wasRejected
+    ? `"${p.title.slice(0,44)}…" re-approved and live for PMT!`
+    : `"${p.title.slice(0,44)}…" approved and live for PMT!`;
   if(p._apiSource){
-    // API-sourced item: persist approval to backend
     fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})})
-    .then(r=>{if(!r.ok)throw new Error('API error');p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);})
+    .then(r=>{if(!r.ok)throw new Error('API error');p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();closeOv('ma-ov');toast('✅',toastMsg);})
     .catch(()=>toast('❌','Approval failed — check API connection'));
     return;
   }
@@ -4098,7 +4101,7 @@ function doApprove(){
   p.sum=document.getElementById('ma-summary').value;
   p.cat=document.getElementById('ma-cat').value;p.therapy=document.getElementById('ma-therapy').value;
   p.sub=document.getElementById('ma-sub').value;p.rel=CUR_REL||p.rel;p.tags=[...CUR_TAGS];
-  updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);
+  updCounts();renderCL();closeOv('ma-ov');toast('✅',toastMsg);
 }
 function quickApprove(id){
   const p=ALL_PAPERS.find(x=>x.id===id);if(!p)return;
