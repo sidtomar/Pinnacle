@@ -1,35 +1,47 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-24 (session 4 — demo day, post-demo merge) | Active branch: `ResearchAgent2406` | Main repo: `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-24 (session 5 — post-demo fixes) | Active branch: `ResearchAgent2406` | Main repo: `D:\Codebase\Pinnacle`
 
 ---
 
-## ⏯️ RESUME HERE (state at end of 2026-06-24 — demo day)
+## ⏯️ RESUME HERE (state at end of 2026-06-24 — session 5, post-demo)
 
 **Branch state:**
-- `ResearchAgent2406` — NEW active feature branch (created post-demo from `develop`)
+- `ResearchAgent2406` — ACTIVE feature branch (created post-demo from `develop`)
 - `develop` — merged at commit `6357a55`, contains all session 3+4 work
-- `Researchagent_2306` — old feature branch, now superseded by `ResearchAgent2406`
+- `Researchagent_2306` — old feature branch, superseded
 - `main` — untouched (production)
 
-**Session 4 fixes (merged into `develop`, in `ResearchAgent2406`):**
+**Session 5 commits on `ResearchAgent2406`:**
 
 | Commit | Fix |
 |--------|-----|
-| `0a0bfe7` | Content Library now re-fetches from API on every navigation to it (`showPage` calls `loadContentFromAPI()` for `id==='content'`). Previously showed stale cache when switching roles or navigating away and back — newest cards weren't visible without a manual browser refresh. |
-| `a532426` | Reverted Reject + Improve buttons from content card footers — per original design these belong inside the detail modal only. Card footer shows only `✓ Approve` (pending) + `Open →`. |
-| `2c75fe2` | Re-Approve button label in rejected-card detail modal renamed from "Approve" to "Re-Approve" to match design. |
+| `d328a77` | Hide Research Agent menu + "AI Pipeline" group label for PMT users (display:none). Division-aware doctor count logic added to `buildSidebarFooter()` with `USERS_DB` `division` field for Jijo/Priya Nair = "3D Mankind". |
+| `f456c7d` | Fixed PMT sidebar showing 12 doctors (hardcoded fallback) — when `doctors.json` has no `division` field, filter returns 0 → fall back to `DOCTORS.length` (100). |
+| `d3bb2f4` | `buildSidebarFooter()` was called at login before API loaded (showed 12 fallback). Now also called inside `loadDoctorsFromAPI()` after DOCTORS array is populated → shows real count (100). |
+| `58480fe` | AI Recommended in Share modal: removed 6-doctor cap (`slice(0,6)`), now shows ALL specialty-matched doctors sorted by engagement score desc. Improved matching logic (full-string before prefix). Fallback when no specialty match = all doctors with score ≥ 70 (not capped at 4). |
 
-**Confirmed working (design verified during demo session):**
-- PMT library (line 3875): only `approved` cards visible; rejected/pending hidden from PMT ✓
-- MA Rejected tab: rejected cards visible with Re-Approve inside the modal ✓
-- Content Library auto-refreshes on navigation ✓
+**Confirmed design (session 4+5):**
+- PMT library: only `approved` cards visible; rejected/pending hidden ✓
+- MA Rejected tab: rejected cards with Re-Approve inside modal ✓
+- Content Library auto-refreshes on every navigation ✓
+- Research Agent hidden for PMT (Admin/MA only) ✓
+- Doctor count = 100 (all uploaded = 3D Mankind division) ✓
+- Share Content → All Doctors = all 100 division doctors ✓
+- Share Content → AI Recommended = all specialty-matched doctors (no cap) ✓
 
-**Demo setup (run from `Researchagent_2306`):**
-1. `git pull origin Researchagent_2306`
+**PMT division config (USERS_DB):**
+| User | division |
+|------|----------|
+| Jijo Kumar | `3D Mankind` |
+| Priya Nair | `3D Mankind` |
+| Others | `''` (falls back to total DOCTORS.length) |
+
+**Demo setup:**
+1. `git pull origin ResearchAgent2406`
 2. `cd demo/backend && python app.py`
-3. Open `http://localhost:8010/app` (use `localhost`, not `127.0.0.1`)
+3. Open `http://localhost:8010/app`
 4. For real LLM: set `RESEARCH_PIPELINE_MODE=real` + API keys in `research_agent_system/.env`
 
 ---
@@ -258,6 +270,10 @@ cd D:\Codebase\Pinnacle
 | 2026-06-23 | `doctors.json` could be corrupted by a crash/concurrent upload; `get_doctor` 500 on missing key | Atomic write (temp + `os.replace`) + `wb.active` None guard in upload; `get_doctor` uses `.get()` like `get_doctors`. |
 | 2026-06-24 | Content Library showed stale cards (e.g. yesterday's approved content on top) after switching roles or navigating away and back — "Newest First" sort had no effect until manual browser refresh | `showPage()` now calls `loadContentFromAPI()` when navigating to the content page, ensuring fresh data is always fetched from the API on arrival. |
 | 2026-06-24 | Rejected-card detail modal footer button said "Approve" instead of "Re-Approve" | Label changed to "Re-Approve" for clarity. PMT exclusion of rejected cards (line 3875) and MA Rejected tab were already working correctly. |
+| 2026-06-24 (session 5) | PMT sidebar showed "50 Doctors" (hardcoded) instead of division-actual count | `buildSidebarFooter()` was hardcoded to `50`. Replaced with dynamic count: filter `DOCTORS` by `CURRENT_USER.division`; fall back to `DOCTORS.length` when doctors have no `division` field (all 100 belong to user's division). Also added `division` field to USERS_DB PMT entries (Jijo/Priya = "3D Mankind"). |
+| 2026-06-24 (session 5) | PMT sidebar showed 12 doctors (fallback) instead of 100 (API) | Two-part fix: (1) When `doctors.json` has no `division` field, filter returns 0 → fall back to `DOCTORS.length`. (2) `buildSidebarFooter()` was only called at login (before API loaded); now also called at end of `loadDoctorsFromAPI()` so count updates after fetch completes. |
+| 2026-06-24 (session 5) | Research Agent visible to PMT users (should be Admin/MA only) | "AI Pipeline" group label and Research Agent `<div>` in PMT sidebar marked `style="display:none;"`. |
+| 2026-06-24 (session 5) | AI Recommended in Share Content modal capped at 6 doctors regardless of specialty matches | Removed `matched.slice(0,6)` cap. Now shows ALL doctors whose specialty matches the paper category, sorted by engagement score descending. For a Gynaecology paper with 9 gynaecologists, all 9 appear. Fallback (no match) changed from 4-cap to all doctors ≥70 score. |
 
 ---
 
@@ -362,3 +378,6 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-24 (session 4 — demo day) | **Content Library stale cache on role-switch / navigation** (commit `0a0bfe7`). When switching from Admin → MA or navigating away and back, the Content Library rendered from in-memory `ALL_PAPERS` without re-fetching — newest cards not visible without manual browser refresh. Fix: `showPage()` now calls `loadContentFromAPI()` when `id==='content'`, mirroring how Doctors page calls `loadDoctorsFromAPI()` on navigation. |
 | 2026-06-24 (session 4 — demo day) | **Reject + Improve buttons added then reverted from card footers** (commits `0d66556` → `a532426`). Brief experiment adding `✕ Reject` + `⟳ Improve` to card footer; user confirmed original design: these belong inside the detail modal only. Reverted. Card footer: `✓ Approve` (pending only) + `Open →`. |
 | 2026-06-24 (session 4 — demo day) | **Re-Approve button label** (commit `2c75fe2`). Rejected-card detail modal footer button relabelled from "Approve" → "Re-Approve" to match design intent. |
+| 2026-06-24 (session 5 — post-demo) | **Hide Research Agent from PMT sidebar** (commit `d328a77`). AI Pipeline group label + Research Agent nav item both set `display:none` in PMT sidebar. Admin and MA can still access it. |
+| 2026-06-24 (session 5 — post-demo) | **Division-aware doctor count in PMT sidebar** (commits `d328a77`, `f456c7d`, `d3bb2f4`). Replaced hardcoded "50 Doctors" with dynamic count from `DOCTORS` array filtered by `CURRENT_USER.division`. Since `doctors.json` has no `division` field (all 100 are 3D Mankind), filter returns 0 → falls back to `DOCTORS.length` = 100. `buildSidebarFooter()` now also called after `loadDoctorsFromAPI()` so count shows real data (not 12-fallback). Division label replaces the old "74% Coverage" stat slot. |
+| 2026-06-24 (session 5 — post-demo) | **AI Recommended cap removed in Share Content modal** (commit `58480fe`). Hard cap of 6 doctors removed; all specialty-matched doctors now shown sorted by engagement score. For a paper with 9 matching Gynaecologists, all 9 appear. Matching logic improved to use full-string before 6-char prefix. |
