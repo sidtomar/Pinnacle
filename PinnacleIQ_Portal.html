@@ -4661,15 +4661,19 @@ function buildAIRecs(paper){
   // Match doctors by specialty/interests to paper
   let matched = DOCTORS.filter(d=>{
     if(!paper) return d.score>=70;
-    const pCat = paper.cat.toLowerCase();
+    const pCat = (paper.cat||'').toLowerCase();
     const pTh  = (paper.therapy||'').toLowerCase();
     const dIntr = (d.interests||[]).join(' ').toLowerCase();
-    const dSpec = d.spec.toLowerCase();
-    return dSpec.includes(pCat.slice(0,6)) || pCat.includes(dSpec.slice(0,6))
-        || dIntr.includes(pTh.slice(0,6)) || dIntr.includes(pCat.slice(0,6));
+    const dSpec = (d.spec||'').toLowerCase();
+    // Full-word specialty match (avoids false short-prefix collisions)
+    const specMatch = dSpec.includes(pCat) || pCat.includes(dSpec)
+        || dSpec.includes(pCat.slice(0,6)) || pCat.includes(dSpec.slice(0,6));
+    const intrMatch = pTh && (dIntr.includes(pTh.slice(0,6)) || dIntr.includes(pCat.slice(0,6)));
+    return specMatch || intrMatch;
   });
-  if(matched.length===0) matched = DOCTORS.filter(d=>d.score>=70).slice(0,4);
-  matched = matched.slice(0,6);
+  if(matched.length===0) matched = DOCTORS.filter(d=>d.score>=70);
+  // Sort by score descending so highest-engagement doctors appear first
+  matched = matched.slice().sort((a,b)=>b.score-a.score);
   document.getElementById('ai-rec-count').textContent = matched.length;
 
   list.innerHTML = matched.map(d=>{
