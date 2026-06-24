@@ -38,11 +38,17 @@
 | Priya Nair | `3D Mankind` |
 | Others | `''` (falls back to total DOCTORS.length) |
 
-**Demo setup:**
+**Demo setup (for others — always run from `develop`):**
+1. `git clone https://github.com/sidtomar/Pinnacle.git && cd Pinnacle`
+2. `git checkout develop`
+3. `cd demo/backend && pip install -r requirements-demo.txt`
+4. `python app.py`
+5. Open `http://localhost:8010/app`
+6. For real LLM: set `RESEARCH_PIPELINE_MODE=real` + API keys in `research_agent_system/.env`
+
+**Active dev (your machine — stay on `ResearchAgent2406`):**
 1. `git pull origin ResearchAgent2406`
 2. `cd demo/backend && python app.py`
-3. Open `http://localhost:8010/app`
-4. For real LLM: set `RESEARCH_PIPELINE_MODE=real` + API keys in `research_agent_system/.env`
 
 ---
 
