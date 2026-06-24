@@ -60,6 +60,8 @@ allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLO
     "http://127.0.0.1:8010",      # Same-origin API requests (127.0.0.1) — avoids CORS trap
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
+    "http://localhost:8081",        # Expo web dev server (mobile app)
+    "http://127.0.0.1:8081",
 ]
 
 # In production, add Railway deployment URL

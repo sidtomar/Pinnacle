@@ -23,7 +23,7 @@
       "package": "com.mankindpharma.pinnacleiq"
     },
     "extra": {
-      "apiUrl": "http://192.168.1.100:8010"
+      "apiUrl": "http://localhost:8010"
     }
   }
 }
