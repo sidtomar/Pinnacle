@@ -1,7 +1,72 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-24 (session 5 — post-demo fixes) | Active branch: `ResearchAgent2406` | Main repo: `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-24 (session 6 — mobile app scaffold) | Active branches: `ResearchAgent2406` (web), `mobile/pmt-mvp` (mobile) | Main repo: `D:\Codebase\Pinnacle`
+
+---
+
+## ⏯️ RESUME HERE (state at end of 2026-06-24 — session 6, mobile app)
+
+**Branch state:**
+- `ResearchAgent2406` — ACTIVE web feature branch
+- `mobile/pmt-mvp` — ACTIVE mobile feature branch (React Native / Expo)
+- `develop` — stable, merged up to session 5. Others test from here.
+- `main` — untouched (production)
+
+**Mobile app (`mobile/`) — current state:**
+
+| Screen | Status |
+|--------|--------|
+| Login | ✅ Working — `jijo@mankind.in` / `Test` |
+| Today's Tasks | ✅ Working — static task cards |
+| Content Library | ✅ Working — loads approved articles from API |
+| Content Detail | ✅ Working — tap card → full article + sticky WhatsApp/Email share bar |
+| Doctor Directory | ✅ Working — loads 100 doctors, searchable |
+| Doctor 360 | ✅ Working — tap doctor → full profile |
+| Occasion Hub | ✅ Working — loads occasions, Send Wish via WhatsApp |
+
+**Mobile tech stack:**
+- Expo SDK 52 + React Native 0.76.5
+- `@react-navigation/native` — bottom tabs + native stacks
+- `axios` → `http://localhost:8010` (same FastAPI backend)
+- `expo-mail-composer` — email compose
+- `expo-sharing` — native share sheet
+- Web testing: `npx expo start --web` → `http://localhost:8081`
+
+**Mobile run instructions:**
+```powershell
+# Terminal 1 — backend
+cd D:\Codebase\Pinnacle\demo\backend
+python app.py
+
+# Terminal 2 — mobile (web mode)
+cd D:\Codebase\Pinnacle\mobile
+npx expo start --web
+# Open http://localhost:8081 in browser, use mobile dimensions (Ctrl+Shift+M in DevTools)
+```
+
+**Key mobile files:**
+| File | Purpose |
+|------|---------|
+| `mobile/App.jsx` | Entry point — Auth gate |
+| `mobile/src/services/api.js` | Axios client → localhost:8010 |
+| `mobile/src/context/AuthContext.jsx` | Login state, mirrors USERS_DB |
+| `mobile/src/navigation/AppNavigator.jsx` | Bottom tabs + Content/Doctor stacks |
+| `mobile/src/screens/LoginScreen.jsx` | Email/password login |
+| `mobile/src/screens/TodayScreen.jsx` | Today's Tasks (static) |
+| `mobile/src/screens/ContentFeedScreen.jsx` | Approved content list |
+| `mobile/src/screens/ContentDetailScreen.jsx` | Full article + share bar |
+| `mobile/src/screens/DoctorDirectoryScreen.jsx` | Search + 100 doctors |
+| `mobile/src/screens/Doctor360Screen.jsx` | Doctor profile |
+| `mobile/src/screens/OccasionScreen.jsx` | Occasions + Send Wish |
+
+**CORS fix applied:** `demo/backend/app.py` allows `localhost:8081` (Expo web origin).
+
+**Known gaps / next steps for mobile:**
+- Today's Tasks: still static (not fetching from API)
+- Push notifications: `expo-notifications` removed for now (caused startup crash) — add back when building for physical device
+- Physical device testing: change `apiUrl` in `mobile/src/services/api.js` to LAN IP (run `ipconfig` to find it)
+- Android emulator: install Android Studio → AVD Manager → Pixel 7 → `npx expo start --android`
 
 ---
 
@@ -340,6 +405,24 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 
 ---
 
+## 13. Mobile App Status (as of 2026-06-24)
+
+- **Branch:** `mobile/pmt-mvp`
+- **Stack:** Expo 52, React Native 0.76.5, React Navigation 6
+- **Backend:** Shared with web — `demo/backend/app.py` on port 8010
+- **Test mode:** `npx expo start --web` → `http://localhost:8081` (use mobile dimensions in DevTools)
+- **Physical device:** Change `BASE_URL` in `mobile/src/services/api.js` to LAN IP before testing on phone
+
+**Screens complete:** Login, Today's Tasks, Content Library, Content Detail, Doctor Directory, Doctor 360, Occasion Hub
+
+**Pending:**
+- Today's Tasks: connect to API (currently static)
+- Push notifications: add back `expo-notifications` when building for physical device
+- Android emulator testing
+- Merge to `develop` when stable
+
+---
+
 ## 11. BRD Status
 
 `BRD.md` is a **living document** — update it proactively whenever code changes.
@@ -387,3 +470,6 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-24 (session 5 — post-demo) | **Hide Research Agent from PMT sidebar** (commit `d328a77`). AI Pipeline group label + Research Agent nav item both set `display:none` in PMT sidebar. Admin and MA can still access it. |
 | 2026-06-24 (session 5 — post-demo) | **Division-aware doctor count in PMT sidebar** (commits `d328a77`, `f456c7d`, `d3bb2f4`). Replaced hardcoded "50 Doctors" with dynamic count from `DOCTORS` array filtered by `CURRENT_USER.division`. Since `doctors.json` has no `division` field (all 100 are 3D Mankind), filter returns 0 → falls back to `DOCTORS.length` = 100. `buildSidebarFooter()` now also called after `loadDoctorsFromAPI()` so count shows real data (not 12-fallback). Division label replaces the old "74% Coverage" stat slot. |
 | 2026-06-24 (session 5 — post-demo) | **AI Recommended cap removed in Share Content modal** (commit `58480fe`). Hard cap of 6 doctors removed; all specialty-matched doctors now shown sorted by engagement score. For a paper with 9 matching Gynaecologists, all 9 appear. Matching logic improved to use full-string before 6-char prefix. |
+| 2026-06-24 (session 6 — mobile) | **PMT Mobile App scaffolded** (`mobile/pmt-mvp` branch). React Native / Expo 52 app with 7 screens: Login, Today's Tasks, Content Library, Content Detail, Doctor Directory, Doctor 360, Occasion Hub. Axios client hits same FastAPI backend at `localhost:8010`. CORS updated in `app.py` to allow `localhost:8081` (Expo web origin). Content cards now tappable → full article detail screen with sticky WhatsApp + Email share bar. Run with `npx expo start --web` → `http://localhost:8081`. |
+| 2026-06-24 (session 6 — mobile) | **Mobile npm install failures fixed** — `expo-mail-composer@~12.0.1` didn't exist; `npm audit fix --force` downgraded Expo to 46 breaking everything. Fix: upgraded to Expo SDK 52 with correct compatible versions, removed `expo-notifications` from `app.json` plugins (caused startup crash), deleted `node_modules` + `package-lock.json` and fresh-installed. |
+| 2026-06-24 (session 6 — mobile) | **Mobile data not loading (0 doctors, empty content)** — Two causes: (1) CORS: backend didn't allow `localhost:8081`; (2) `app.json` had placeholder IP `192.168.1.100` instead of `localhost`. Fixed both. Added request/response interceptors in `api.js` for console debugging. Added error state display on all screens. |
