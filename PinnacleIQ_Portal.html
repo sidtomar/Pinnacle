@@ -4022,6 +4022,19 @@ function _absReset(boxId, btnId) {
   _setAbsState(document.getElementById(boxId), document.getElementById(btnId), true);
 }
 
+// Sets a <select> value, adding the option dynamically if it's not already present
+function _setSelectVal(selectId, val) {
+  if (!val) return;
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  if (![...sel.options].some(o => o.value === val || o.text === val)) {
+    const opt = document.createElement('option');
+    opt.value = opt.text = val;
+    sel.appendChild(opt);
+  }
+  sel.value = val;
+}
+
 function openMADetail(id){
   const p=ALL_PAPERS.find(x=>x.id===id); if(!p) return;
   CUR_ID=id; CUR_TAGS=[...p.tags]; CUR_REL=p.rel;
@@ -4054,10 +4067,10 @@ function openMADetail(id){
     readMoreRow,
   ].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
   document.getElementById('ma-review-history').innerHTML = buildReviewHistoryHTML(p);
-  document.getElementById('ma-cat').value=p.cat;
-  document.getElementById('ma-therapy').value=p.therapy;
-  document.getElementById('ma-sub').value=p.sub;
-  document.getElementById('ma-rec').value=p.rec;
+  _setSelectVal('ma-cat', p.cat);
+  _setSelectVal('ma-therapy', p.therapy);
+  _setSelectVal('ma-sub', p.sub);
+  _setSelectVal('ma-rec', p.rec);
   document.querySelectorAll('#ma-rel-opts .rel-opt').forEach(o=>{o.className='rel-opt';if(o.textContent.trim()===p.rel)o.classList.add(p.rel==='High'?'rel-h':p.rel==='Medium'?'rel-m':'rel-l');});
   renderTags();
   const n=document.getElementById('ma-notice');
