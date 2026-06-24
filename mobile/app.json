@@ -22,9 +22,6 @@
       },
       "package": "com.mankindpharma.pinnacleiq"
     },
-    "plugins": [
-      "expo-notifications"
-    ],
     "extra": {
       "apiUrl": "http://192.168.1.100:8010"
     }
