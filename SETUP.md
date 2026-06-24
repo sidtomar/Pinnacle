@@ -10,7 +10,7 @@
 ```powershell
 git clone https://github.com/sidtomar/Pinnacle.git
 cd Pinnacle
-git checkout ResearchAgent2406
+git checkout develop
 ```
 
 ---
