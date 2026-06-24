@@ -3676,9 +3676,9 @@ function buildSidebarFooter(){
   } else if(ROLE==='pmt'){
     // Derive division from CURRENT_USER.division (if set) or from unique divisions in DOCTORS
     const curDiv = (CURRENT_USER && CURRENT_USER.division) || '';
-    const divDocs = curDiv
-      ? DOCTORS.filter(d=>(d.division||'').toLowerCase()===curDiv.toLowerCase()).length
-      : DOCTORS.length;
+    const filtered = curDiv ? DOCTORS.filter(d=>(d.division||'').toLowerCase()===curDiv.toLowerCase()) : [];
+    // Doctors may not carry a division field (all uploaded belong to user's division) → show full count
+    const divDocs = filtered.length > 0 ? filtered.length : DOCTORS.length;
     const divLabel = curDiv || 'All';
     foot.innerHTML=`<div class="sb-stats"><div class="sb-stat"><div class="sb-sv">${divDocs}</div><div class="sb-sl">Doctors</div></div><div class="sb-stat"><div class="sb-sv" style="font-size:11px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${_esc(divLabel)}">${_esc(divLabel)}</div><div class="sb-sl">Division</div></div></div><div class="sync-row"><div class="sdot"></div>PubMed sync · 14 min ago</div>`;
   } else {
