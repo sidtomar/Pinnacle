@@ -1,7 +1,30 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-23 (session 3 — code-review + real LLM pipeline + demo prep) | Active branch: `Researchagent_2306` | Main repo: `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-24 (session 4 — demo day fixes) | Active branch: `Researchagent_2306` | Main repo: `D:\Codebase\Pinnacle`
+
+---
+
+## ⏯️ RESUME HERE (state at end of 2026-06-24 — demo day)
+
+**Session 4 fixes (all committed to `Researchagent_2306`):**
+
+| Commit | Fix |
+|--------|-----|
+| `0a0bfe7` | Content Library now re-fetches from API on every navigation to it (`showPage` calls `loadContentFromAPI()` for `id==='content'`). Previously showed stale cache when switching roles or navigating away and back — newest cards weren't visible without a manual browser refresh. |
+| `a532426` | Reverted Reject + Improve buttons from content card footers — per original design these belong inside the detail modal only. Card footer shows only `✓ Approve` (pending) + `Open →`. |
+| `2c75fe2` | Re-Approve button label in rejected-card detail modal renamed from "Approve" to "Re-Approve" to match design. |
+
+**Confirmed working (design verified during demo session):**
+- PMT library (line 3875): only `approved` cards visible; rejected/pending hidden from PMT ✓
+- MA Rejected tab: rejected cards visible with Re-Approve inside the modal ✓
+- Content Library auto-refreshes on navigation ✓
+
+**Demo setup (run from `Researchagent_2306`):**
+1. `git pull origin Researchagent_2306`
+2. `cd demo/backend && python app.py`
+3. Open `http://localhost:8010/app` (use `localhost`, not `127.0.0.1`)
+4. For real LLM: set `RESEARCH_PIPELINE_MODE=real` + API keys in `research_agent_system/.env`
 
 ---
 
@@ -227,6 +250,8 @@ cd D:\Codebase\Pinnacle
 | 2026-06-23 | innerHTML XSS sink + medical inequalities swallowed | `mdToHtml()` now escapes `&<>` before markdown — closes the `cv-abs`/`ma-abstract` injection sink and renders "<7%"/">140" correctly. Also escaped `p.sub`/tags in card renderers and switched the search-suggestion handler to a `data-val` attribute. |
 | 2026-06-23 | Non-numeric CRM doctor codes (e.g. 'MH-001') → `NaN` numId → broken MR/date/row-key | `mapAPIDoctor` derives a stable hash-based `numId` when the code isn't numeric. |
 | 2026-06-23 | `doctors.json` could be corrupted by a crash/concurrent upload; `get_doctor` 500 on missing key | Atomic write (temp + `os.replace`) + `wb.active` None guard in upload; `get_doctor` uses `.get()` like `get_doctors`. |
+| 2026-06-24 | Content Library showed stale cards (e.g. yesterday's approved content on top) after switching roles or navigating away and back — "Newest First" sort had no effect until manual browser refresh | `showPage()` now calls `loadContentFromAPI()` when navigating to the content page, ensuring fresh data is always fetched from the API on arrival. |
+| 2026-06-24 | Rejected-card detail modal footer button said "Approve" instead of "Re-Approve" | Label changed to "Re-Approve" for clarity. PMT exclusion of rejected cards (line 3875) and MA Rejected tab were already working correctly. |
 
 ---
 
@@ -328,3 +353,6 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-23 (session 3) | **Real-pipeline deps fixed + single-file env config** (commit after `e75c1b6`). Verified the real pipeline end-to-end in a clean container and found **two deps missing from `requirements.txt`** that would break a fresh `pip install`: `langgraph` (agents/alpha.py `create_react_agent`) and `langchain-tavily` (tools/search.py `langchain_tavily.TavilySearch`). Both added. Confirmed full import chain (orchestrator→agents→tools→config) resolves and `run_pipeline` fails cleanly without keys ("Alpha: Missing credentials") rather than crashing. Also made `app.py` load `research_agent_system/.env` (then `demo/backend/.env`) at startup so keys + `RESEARCH_PIPELINE_MODE` live in ONE file (OS env still wins; guarded if dotenv absent). **Real-mode setup = (1) `pip install -r research_agent_system/requirements-demo.txt` (lighter, no Databricks), (2) fill `research_agent_system/.env` with `RESEARCH_PIPELINE_MODE=real`+`OPENROUTER_API_KEY`+`TAVILY_API_KEY`, (3) `python app.py`.** Fallback to mock = remove the file or set mode=mock. Added `requirements-demo.txt` (commit `ef8f353`) = the real-pipeline subset WITHOUT the heavy Azure Databricks packages (databricks-sql-connector / databricks-vectorsearch / langchain-databricks — lazy-imported, only needed for STORE_BACKEND=databricks), so the Windows install is fast and won't fail on native builds. Good fast demo topics (Alpha targets 3-5 papers): "Empagliflozin in heart failure with reduced ejection fraction", "Semaglutide for weight management in type 2 diabetes", "Myo-inositol for PCOS" (narrowest/fastest). |
 | 2026-06-23 (session 3) | **Opt-in REAL LLM pipeline for the in-app Research Agent** (commit `e75c1b6`). Previously the portal's Research Agent "Search/Run" always used `mock_runner`. Added `RESEARCH_PIPELINE_MODE` env var: unset/`mock` (default, zero-config) keeps the deterministic mock; `real` makes `/pipeline/run` call `research_agent_system/orchestrator.run_pipeline` (real PubMed + LLM via OpenRouter/Tavily). New `_run_real_pipeline()` + `_build_real_agent_outputs()` in `app.py` adapt the blocking real pipeline to the polling run-store contract (coarse progress — no per-agent hooks; collects card ids saved by Delta, no double-save; maps `PipelineResult`→`agent_outputs` UI shape; notifies MA). Fully guarded: missing deps/keys or run failure → clean `error` status, never a crash; mock stays the fallback. **To enable on the host:** `pip install -r research_agent_system/requirements.txt`, set `OPENROUTER_API_KEY`+`TAVILY_API_KEY`+`RESEARCH_PIPELINE_MODE=real` in the **app.py process env** (config.py's `load_dotenv()` resolves `.env` from CWD=`demo/backend`, NOT `research_agent_system/`). Caveats: real runs are slow (Alpha + Beta/Gamma/Delta per paper, sequential) and network-dependent; UI shows coarse progress. Verified default mock path still completes (10 cards + full animation); real import guarded (langgraph/keys not in this container). |
 | 2026-06-23 (session 3) | **Code cleanup (commit `492f4ea`).** Extracted `_catTherapyTagBadges(p)` — the specialty/therapy/sub/tags badge row was duplicated verbatim in `clCardHTML`+`clRowHTML` (removed now-unused `cc`/`tc` locals). Extracted `_setAbsState(box,btn,collapsed)` — `absToggle`/`_absReset` shared copy-pasted chevron/label logic. Added `_digits()` helper in `mapAPIDoctor` for the 3 repeated digit-strip parses. All 54 unit tests pass; app serves 200. |
+| 2026-06-24 (session 4 — demo day) | **Content Library stale cache on role-switch / navigation** (commit `0a0bfe7`). When switching from Admin → MA or navigating away and back, the Content Library rendered from in-memory `ALL_PAPERS` without re-fetching — newest cards not visible without manual browser refresh. Fix: `showPage()` now calls `loadContentFromAPI()` when `id==='content'`, mirroring how Doctors page calls `loadDoctorsFromAPI()` on navigation. |
+| 2026-06-24 (session 4 — demo day) | **Reject + Improve buttons added then reverted from card footers** (commits `0d66556` → `a532426`). Brief experiment adding `✕ Reject` + `⟳ Improve` to card footer; user confirmed original design: these belong inside the detail modal only. Reverted. Card footer: `✓ Approve` (pending only) + `Open →`. |
+| 2026-06-24 (session 4 — demo day) | **Re-Approve button label** (commit `2c75fe2`). Rejected-card detail modal footer button relabelled from "Approve" → "Re-Approve" to match design intent. |
