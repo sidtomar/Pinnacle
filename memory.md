@@ -1,7 +1,35 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-24 (session 6 — mobile app scaffold) | Active branches: `ResearchAgent2406` (web), `mobile/pmt-mvp` (mobile) | Main repo: `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-25 (session 8 — mobile drawer nav) | Active branches: `ResearchAgent_2606` (web), `mobile/pmt-mvp` (mobile) | Main repo: `D:\Codebase\Pinnacle`
+
+---
+
+## ⏯️ RESUME HERE (state at end of 2026-06-25 — session 8, mobile drawer)
+
+**Branch state:**
+- `ResearchAgent_2606` — ACTIVE web feature branch (renamed from ResearchAgent2406 this session)
+- `mobile/pmt-mvp` — ACTIVE mobile feature branch — latest commit `994731f`
+- `develop` — stable, merged up to session 5
+- `main` — untouched (production)
+
+**Session 8 changes — mobile/pmt-mvp:**
+Replaced bottom-tab navigation with a custom animated drawer (zero new packages — corporate SSL proxy blocks npm registry).
+
+| File | Change |
+|------|--------|
+| `mobile/src/navigation/AppNavigator.jsx` | Rewrote — NativeStack root with `MainLayout` (custom drawer shell). Header: navy bar, hamburger top-left, page title, gold avatar top-right. Screens: Today, ContentFeed, DoctorDirectory, Occasions rendered by state; ContentDetail + Doctor360 as stack pushes. |
+| `mobile/src/navigation/DrawerContent.jsx` | **New** — navy sidebar: PinnacleIQ logo, 4 nav items with gold active indicator + bar, user avatar + Sign Out at bottom. |
+| `mobile/src/screens/TodayScreen.jsx` | Minor: `SafeAreaView` → `View` to avoid double top-inset under new header. |
+
+**Why no `@react-navigation/drawer`:** `npm install` fails with `SELF_SIGNED_CERT_IN_CHAIN` (corporate proxy). Workaround: custom drawer built from `Animated + View + TouchableOpacity` only.
+
+**To install later (when off corporate network or with SSL fix):**
+```powershell
+npm config set strict-ssl false   # run in user terminal first
+cd D:\Codebase\Pinnacle\mobile
+npm install @react-navigation/drawer react-native-gesture-handler react-native-reanimated --legacy-peer-deps
+```
 
 ---
 
@@ -51,7 +79,8 @@ npx expo start --web
 | `mobile/App.jsx` | Entry point — Auth gate |
 | `mobile/src/services/api.js` | Axios client → localhost:8010 |
 | `mobile/src/context/AuthContext.jsx` | Login state, mirrors USERS_DB |
-| `mobile/src/navigation/AppNavigator.jsx` | Bottom tabs + Content/Doctor stacks |
+| `mobile/src/navigation/AppNavigator.jsx` | Custom animated drawer + NativeStack root (no bottom tabs) |
+| `mobile/src/navigation/DrawerContent.jsx` | Navy/gold sidebar UI for drawer |
 | `mobile/src/screens/LoginScreen.jsx` | Email/password login |
 | `mobile/src/screens/TodayScreen.jsx` | Today's Tasks (static) |
 | `mobile/src/screens/ContentFeedScreen.jsx` | Approved content list |
