@@ -1,17 +1,30 @@
-# PinnacleIQ — Project Memory File
+﻿# PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-24 (session 5 — post-demo fixes) | Active branch: `ResearchAgent2406` | Main repo: `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-25 (session 7 — test fixes, branch housekeeping) | Active branch: `ResearchAgent_2606` | Main repo: `D:\Codebase\Pinnacle`
 
 ---
 
-## ⏯️ RESUME HERE (state at end of 2026-06-24 — session 5, post-demo)
+## ⏯️ RESUME HERE (state at end of 2026-06-25 — session 7)
 
 **Branch state:**
-- `ResearchAgent2406` — ACTIVE feature branch (created post-demo from `develop`)
-- `develop` — merged at commit `6357a55`, contains all session 3+4 work
-- `Researchagent_2306` — old feature branch, superseded
-- `main` — untouched (production)
+- `ResearchAgent_2606` — ✅ ACTIVE feature branch (created 2026-06-25 from `develop` at `ce4a34e`)
+- `ResearchAgent2406` — previous cycle, complete. [PR #4](https://github.com/sidtomar/Pinnacle/pull/4) open against `main`.
+- `develop` — merged up to `ce4a34e`, stable. Fast-forward merge target for `ResearchAgent_2606`.
+- `mobile/pmt-mvp` — mobile app branch (Expo 52, 7 screens). Separate from web.
+- `main` — untouched (production baseline).
+
+**Session 7 work (2026-06-25):**
+- Web app (:8010/app) and mobile app (:8081) both healthy
+- Ran 125 JS browser tests: 63/65 Today+Occasions, 64/65 Research Agent pass
+- Fixed `BCAST_SEL_DOCS` test assertion — broadcast modal correctly pre-selects all doctors for null-specialty occasions
+- Cleaned `demo/filter_suggestions.txt` — removed stale `_test_*` + RECENT markers
+- Fixed `.claude/launch.json` — points to main repo `app.py` (was stale worktree path)
+- Merged `ResearchAgent2406` → `develop`, pushed both to origin
+- Created `ResearchAgent_2606` as new active feature branch, pushed to origin
+- PR #4 open: `ResearchAgent2406` → `main` (65 commits, sessions 3–6)
+
+---
 
 **Session 5 commits on `ResearchAgent2406`:**
 
