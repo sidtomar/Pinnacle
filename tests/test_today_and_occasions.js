@@ -351,9 +351,10 @@
       assert('openBroadcast sets BCAST_OCC_ID',
         typeof BCAST_OCC_ID !== 'undefined' && BCAST_OCC_ID === 'o6',
         `BCAST_OCC_ID=${BCAST_OCC_ID}`);
-      assert('BCAST_SEL_DOCS is reset on new broadcast',
-        typeof BCAST_SEL_DOCS !== 'undefined' && BCAST_SEL_DOCS.size === 0,
-        `size=${typeof BCAST_SEL_DOCS !== 'undefined' ? BCAST_SEL_DOCS.size : 'undefined'}`);
+      // Doctors' Day (o6) has no specialty filter -> all doctors pre-selected
+      assert('BCAST_SEL_DOCS pre-selects all doctors for null-specialty occasion',
+        typeof BCAST_SEL_DOCS !== 'undefined' && BCAST_SEL_DOCS.size === DOCTORS.length,
+        `size=${typeof BCAST_SEL_DOCS !== 'undefined' ? BCAST_SEL_DOCS.size : 'undefined'}, expected ${typeof DOCTORS !== 'undefined' ? DOCTORS.length : '?'}`);
     } catch(e) {
       assert('openBroadcast("o6") runs without throwing', false, e.message);
     }
