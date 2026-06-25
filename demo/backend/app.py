@@ -1211,6 +1211,24 @@ async def serve_portal():
     return {"error": "Portal HTML not found at " + str(PORTAL_HTML)}
 
 
+# ── Serve test suites (dev/QA) ────────────────────────────────────────────────
+_TESTS_DIR = Path(__file__).parent.parent.parent / "tests"
+
+@app.get("/tests/today-occasions.js", include_in_schema=False)
+async def serve_test_today():
+    f = _TESTS_DIR / "test_today_and_occasions.js"
+    if f.exists():
+        return _FileResponse(str(f), media_type="application/javascript")
+    return {"error": "test file not found"}
+
+@app.get("/tests/research-agent.js", include_in_schema=False)
+async def serve_test_ra():
+    f = _TESTS_DIR / "test_research_agent.js"
+    if f.exists():
+        return _FileResponse(str(f), media_type="application/javascript")
+    return {"error": "test file not found"}
+
+
 # ── Serve React SPA (for production/Railway deployment) ───────────────────────
 from fastapi.staticfiles import StaticFiles
 
