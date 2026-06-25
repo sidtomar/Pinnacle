@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 
 const TASKS = [
@@ -17,7 +17,7 @@ export default function TodayScreen() {
   const { user } = useAuth();
 
   return (
-    <SafeAreaView style={s.container}>
+    <View style={s.container}>
       <View style={s.header}>
         <Text style={s.greeting}>Good morning, {user?.name?.split(' ')[0]} 👋</Text>
         <Text style={s.date}>{new Date().toDateString()}</Text>
@@ -39,7 +39,7 @@ export default function TodayScreen() {
           </View>
         )}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -56,3 +56,4 @@ const s = StyleSheet.create({
   actionRow:  { marginTop: 10, borderTopWidth: 1, borderTopColor: '#F3F4F6', paddingTop: 10 },
   actionTxt:  { fontSize: 13, color: '#F59E0B', fontWeight: '600' },
 });
+
