@@ -1,7 +1,85 @@
-# PinnacleIQ — Project Memory File
+﻿# PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-22 | All fixes merged to `main` at `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-25 (session 7 — test fixes, branch housekeeping) | Active branch: `ResearchAgent_2606` | Main repo: `D:\Codebase\Pinnacle`
+
+---
+
+## ⏯️ RESUME HERE (state at end of 2026-06-25 — session 7)
+
+**Branch state:**
+- `ResearchAgent_2606` — ✅ ACTIVE feature branch (created 2026-06-25 from `develop` at `ce4a34e`)
+- `ResearchAgent2406` — previous cycle, complete. [PR #4](https://github.com/sidtomar/Pinnacle/pull/4) open against `main`.
+- `develop` — merged up to `ce4a34e`, stable. Fast-forward merge target for `ResearchAgent_2606`.
+- `mobile/pmt-mvp` — mobile app branch (Expo 52, 7 screens). Separate from web.
+- `main` — untouched (production baseline).
+
+**Session 7 work (2026-06-25):**
+- Web app (:8010/app) and mobile app (:8081) both healthy
+- Ran 125 JS browser tests: 63/65 Today+Occasions, 64/65 Research Agent pass
+- Fixed `BCAST_SEL_DOCS` test assertion — broadcast modal correctly pre-selects all doctors for null-specialty occasions
+- Cleaned `demo/filter_suggestions.txt` — removed stale `_test_*` + RECENT markers
+- Fixed `.claude/launch.json` — points to main repo `app.py` (was stale worktree path)
+- Merged `ResearchAgent2406` → `develop`, pushed both to origin
+- Created `ResearchAgent_2606` as new active feature branch, pushed to origin
+- PR #4 open: `ResearchAgent2406` → `main` (65 commits, sessions 3–6)
+
+---
+
+**Session 5 commits on `ResearchAgent2406`:**
+
+| Commit | Fix |
+|--------|-----|
+| `d328a77` | Hide Research Agent menu + "AI Pipeline" group label for PMT users (display:none). Division-aware doctor count logic added to `buildSidebarFooter()` with `USERS_DB` `division` field for Jijo/Priya Nair = "3D Mankind". |
+| `f456c7d` | Fixed PMT sidebar showing 12 doctors (hardcoded fallback) — when `doctors.json` has no `division` field, filter returns 0 → fall back to `DOCTORS.length` (100). |
+| `d3bb2f4` | `buildSidebarFooter()` was called at login before API loaded (showed 12 fallback). Now also called inside `loadDoctorsFromAPI()` after DOCTORS array is populated → shows real count (100). |
+| `58480fe` | AI Recommended in Share modal: removed 6-doctor cap (`slice(0,6)`), now shows ALL specialty-matched doctors sorted by engagement score desc. Improved matching logic (full-string before prefix). Fallback when no specialty match = all doctors with score ≥ 70 (not capped at 4). |
+
+**Confirmed design (session 4+5):**
+- PMT library: only `approved` cards visible; rejected/pending hidden ✓
+- MA Rejected tab: rejected cards with Re-Approve inside modal ✓
+- Content Library auto-refreshes on every navigation ✓
+- Research Agent hidden for PMT (Admin/MA only) ✓
+- Doctor count = 100 (all uploaded = 3D Mankind division) ✓
+- Share Content → All Doctors = all 100 division doctors ✓
+- Share Content → AI Recommended = all specialty-matched doctors (no cap) ✓
+
+**PMT division config (USERS_DB):**
+| User | division |
+|------|----------|
+| Jijo Kumar | `3D Mankind` |
+| Priya Nair | `3D Mankind` |
+| Others | `''` (falls back to total DOCTORS.length) |
+
+**Demo setup (for others — always run from `develop`):**
+1. `git clone https://github.com/sidtomar/Pinnacle.git && cd Pinnacle`
+2. `git checkout develop`
+3. `cd demo/backend && pip install -r requirements-demo.txt`
+4. `python app.py`
+5. Open `http://localhost:8010/app`
+6. For real LLM: set `RESEARCH_PIPELINE_MODE=real` + API keys in `research_agent_system/.env`
+
+**Active dev (your machine — stay on `ResearchAgent2406`):**
+1. `git pull origin ResearchAgent2406`
+2. `cd demo/backend && python app.py`
+
+---
+
+## ⏯️ RESUME HERE (state at end of 2026-06-23)
+
+**Branches (all pushed to origin):**
+- `Researchagent_2306` (feature) and `develop` are **identical** and contain all session-3 work.
+- `develop` is **~40 commits ahead of `main`**; `main` (production) is untouched.
+- Established flow (user-approved): commit on feature → fast-forward merge into `develop` → push both. Promote `develop`→`main` only on explicit request.
+
+**Demo tomorrow (2026-06-24):** user runs the app from VS Code on `develop`, wants the **Research Agent to use the REAL LLM pipeline** (live PubMed + OpenRouter). Setup: `pip install -r research_agent_system/requirements-demo.txt` → fill `research_agent_system/.env` (`RESEARCH_PIPELINE_MODE=real` + `OPENROUTER_API_KEY` + `TAVILY_API_KEY`) → `python app.py` → `:8010/app`. Safe fallback: set mode=`mock` (default) — same UI, instant.
+
+**Verified this session:** 54 JS unit tests + live API smoke pass; real pipeline import chain resolves and fails cleanly without keys; mock path completes (10 cards). Real LLM round-trip itself NOT tested here (no keys in the dev container) — user tests on their machine.
+
+**Still open / not done:**
+- The 2 browser-console DOM suites (`tests/test_*.js`, ~125 cases) need a **local Chrome** run before promoting `develop`→`main` (couldn't run headless here).
+- Databricks intentionally **deferred** (demo uses SQLite; `requirements-demo.txt` omits Databricks pkgs).
+- `/admin/upload-doctors` auth is opt-in via `ADMIN_UPLOAD_TOKEN` (unset = open for demo).
 
 ---
 ---
@@ -168,6 +246,7 @@ cd D:\Codebase\Pinnacle
 | POST | `/content/{id}/improve` | Request improvement (async) |
 | PATCH | `/content/{id}` | Update content metadata |
 | GET | `/doctors` | Doctor list |
+| POST | `/admin/upload-doctors` | Upload DR Master Template Excel → replace `doctors.json` (admin only) |
 | GET | `/analytics` | Analytics data |
 | GET | `/pipeline/run` | Trigger mock pipeline |
 | GET | `/docs` | FastAPI Swagger UI |
@@ -186,6 +265,8 @@ cd D:\Codebase\Pinnacle
 | 2026-06-19 | `/app` returned 404 in worktree | Added `/app` + `/portal` routes to worktree's `app.py` |
 | 2026-06-19 | Occasion Hub showed empty grid | Added `GET /occasions` endpoint (was missing from worktree) |
 | 2026-06-19 | Broadcast modal showed "Diwali Greetings" title for all occasions | Old stale modal `id="bcast-ov"` shadowed new modal's IDs. Renamed old modal to `bcast-ov-removed-placeholder` + `display:none` |
+| 2026-06-23 (session 3) | **Doctor Directory + Doctor 360 showed fallback instead of uploaded data.** Two causes: (1) `loadDoctorsFromAPI()` hardcoded `http://localhost:8010/doctors` instead of `PL_API`, so off-localhost access (127.0.0.1 / LAN IP / ngrok / deployed) made the fetch cross-origin → silently fell back to the 12 hardcoded doctors. Fixed to use `PL_API` (same-origin). (2) `mapAPIDoctor()` synthesised division/MR/interests/DM-DMS/SOW/next-engagement, ignoring the rich uploaded fields. Now prefers real uploaded values (`division`, `mr_name`, `clinical_interests`, `dm_dms`, `sow`, `next_engagement`) with synthesis only as fallback; also passes through email/whatsapp/designation/sub_specialty/birthday/anniversary. Doctor 360 reads the same `DOCTORS` array so it inherits the fix. Verified with 17 JS unit tests (uploaded-style + default record). |
+| 2026-06-23 (session 3) | **Diwali broadcast bug RECURRED** — the rogue-agent file restore reintroduced the duplicate `id="bcast-ov"` modal (the earlier rename was lost). Every occasion's "Broadcast Message" opened the hardcoded Diwali modal. **Permanent fix:** fully DELETED the stale first modal block (was lines ~3048-3128) rather than renaming, so only the canonical dynamic modal remains. Verified inner IDs (`bcast-preview`/`bcast-msg`/`bcast-doc-list`/`bcast-hdr-title`/`bcast-occ-chip`/`bcast-send-btn`/`bcast-recip-pills`) are now unique (1 each). Occasion cards themselves were always dynamic via `renderOccasions()`. |
 | 2026-06-19 | Medical/National filter counts wrong (11/3 instead of 10/4) | Doctors' Day (o6) was tagged `medical`, should be `national` — fixed in both `app.py` and HTML |
 | 2026-06-19 | Holi date was 2026-03-14 (already past) | Corrected to 2027-03-14 |
 | 2026-06-19 | Research Agent dropdowns blank — `filter_suggestions.txt` missing | Created seed file with 14 therapy areas, 14 diseases, 11 keywords |
@@ -194,6 +275,24 @@ cd D:\Codebase\Pinnacle
 | 2026-06-19 | SQLite DB path relative — new empty DB created on every restart from different CWD | Fixed: `app.py` pins `SQLITE_DB_PATH` via `os.environ.setdefault` to `<script_dir>/pinnacleiq_demo.db`; `sqlite_store.py` also uses `__file__`-relative absolute path. Merged 1086-item main repo DB (91 approved) into worktree. |
 | 2026-06-19 | `filter_suggestions.txt` had RECENT markers and `_test_*` entries from test runs | Reset to clean defaults — all 14 therapy/disease entries are plain defaults again |
 | 2026-06-22 | Documented admin login `admin@mankind.in` / `Admin123` failed — "No account found". Only `admin1@mankind.in`…`admin5@mankind.in` existed, and password check used a single shared `APP_PASSWORD='Test'` | Added `admin@mankind.in` account (`pwd:'Admin123'`) to `USERS_DB`; changed login check to `password !== (user.pwd || APP_PASSWORD)` so per-user passwords work while everyone else stays `Test`. Committed on `feat/admin-login-credentials` → merged to `main` |
+| 2026-06-23 | Duplicate specialty/therapy tag on article cards (e.g. "Endocrinology · Endocrinology") | Root cause in `raRunDynamicSearch()`: `therapy_area` was set to `therapyArea` (same as `specialty`). Fixed to `disease \|\| therapyArea \|\| 'General'`. Also added render-time guard in `clCardHTML()` and `clRowHTML()`. |
+| 2026-06-23 | Alpha/Beta/Gamma/Delta agent names visible to MA users in improvement/revision modals | Removed all 4 references in `PinnacleIQ_Portal.html`; replaced with generic "AI" wording. "Beta" badge renamed "Insights". |
+| 2026-06-23 | Request Improvement modal Cancel/Close button looked like plain text | Changed from `btn-ghost` (transparent, grey text) to `btn-outline` (bordered). |
+| 2026-06-23 | AI Summary in detail modals was just a 220-char truncation of the article | `mapAPIItemToPaper` now uses `item.summary` (Delta's dedicated 200-300 word field). `delta.py` and `mock_runner.py` updated to produce proper summaries. |
+| 2026-06-23 | Metadata tags (sub-category + keyword chips) not visible on content cards | Two-part fix: (1) `clCardHTML()` + `clRowHTML()` now render `p.sub` and `p.tags` as gray badges (dedup'd, 'AI Pipeline' filtered, capped at 4). (2) Root cause — `mapAPIItemToPaper()` hardcoded `tags` to `[specialty, therapy_area, 'AI Pipeline']`, discarding the real backend tags array; now uses `item.tags` when present. |
+| 2026-06-23 | Internal `[REVISION vN]` / `MA Notes:` annotations leaking into the article body shown to users | New `stripRevisionNotes()` filters those lines (also `[MA Feedback…]`, `Reviewer Comments:`) before rendering in both `openMADetail` and `openCVModal`. |
+| 2026-06-23 | Review history (reviewer/date/comments) not surfaced; date always blank | Added `buildReviewHistoryHTML()` — a "Review History" footer in both detail modals showing reviewer, date, comments (italic "NA" when none) + colour-coded status dot. `mapAPIItemToPaper()` now maps `item.reviewed_at` → `p.revDate` (backend sets it on approve/reject). |
+| 2026-06-23 | Content Library search returned 0 results for partial terms like "antihyp"; only matched on Enter; no suggestions | Search now runs live (`oninput`), matches across title/journal/author/therapy/specialty/sub/summary/tags, and shows an in-app suggestion dropdown (`clBuildSuggest`) after 2+ chars with type labels (Therapy/Specialty/Tag/Article). Browser native autofill was the old "dropdown". |
+| 2026-06-23 | Doctor Directory + Doctor 360 showed synthesised/fallback data, not the uploaded DB | `loadDoctorsFromAPI()` hardcoded `localhost:8010` (cross-origin fail off-localhost → 12-doctor fallback) → now uses `PL_API`. `mapAPIDoctor()` synthesised division/MR/interests/DM-DMS/SOW/next-engagement → now prefers real uploaded fields. |
+| 2026-06-23 | innerHTML XSS sink + medical inequalities swallowed | `mdToHtml()` now escapes `&<>` before markdown — closes the `cv-abs`/`ma-abstract` injection sink and renders "<7%"/">140" correctly. Also escaped `p.sub`/tags in card renderers and switched the search-suggestion handler to a `data-val` attribute. |
+| 2026-06-23 | Non-numeric CRM doctor codes (e.g. 'MH-001') → `NaN` numId → broken MR/date/row-key | `mapAPIDoctor` derives a stable hash-based `numId` when the code isn't numeric. |
+| 2026-06-23 | `doctors.json` could be corrupted by a crash/concurrent upload; `get_doctor` 500 on missing key | Atomic write (temp + `os.replace`) + `wb.active` None guard in upload; `get_doctor` uses `.get()` like `get_doctors`. |
+| 2026-06-24 | Content Library showed stale cards (e.g. yesterday's approved content on top) after switching roles or navigating away and back — "Newest First" sort had no effect until manual browser refresh | `showPage()` now calls `loadContentFromAPI()` when navigating to the content page, ensuring fresh data is always fetched from the API on arrival. |
+| 2026-06-24 | Rejected-card detail modal footer button said "Approve" instead of "Re-Approve" | Label changed to "Re-Approve" for clarity. PMT exclusion of rejected cards (line 3875) and MA Rejected tab were already working correctly. |
+| 2026-06-24 (session 5) | PMT sidebar showed "50 Doctors" (hardcoded) instead of division-actual count | `buildSidebarFooter()` was hardcoded to `50`. Replaced with dynamic count: filter `DOCTORS` by `CURRENT_USER.division`; fall back to `DOCTORS.length` when doctors have no `division` field (all 100 belong to user's division). Also added `division` field to USERS_DB PMT entries (Jijo/Priya = "3D Mankind"). |
+| 2026-06-24 (session 5) | PMT sidebar showed 12 doctors (fallback) instead of 100 (API) | Two-part fix: (1) When `doctors.json` has no `division` field, filter returns 0 → fall back to `DOCTORS.length`. (2) `buildSidebarFooter()` was only called at login (before API loaded); now also called at end of `loadDoctorsFromAPI()` so count updates after fetch completes. |
+| 2026-06-24 (session 5) | Research Agent visible to PMT users (should be Admin/MA only) | "AI Pipeline" group label and Research Agent `<div>` in PMT sidebar marked `style="display:none;"`. |
+| 2026-06-24 (session 5) | AI Recommended in Share Content modal capped at 6 doctors regardless of specialty matches | Removed `matched.slice(0,6)` cap. Now shows ALL doctors whose specialty matches the paper category, sorted by engagement score descending. For a Gynaecology paper with 9 gynaecologists, all 9 appear. Fallback (no match) changed from 4-cap to all doctors ≥70 score. |
 
 ---
 
@@ -272,4 +371,32 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-19 | Research Agent: seeded `filter_suggestions.txt`, fixed `raLoadSuggestions()` to always merge hardcoded defaults. 65/65 JS tests passing. Login credentials corrected (prashant.agarwal@mankind.in) |
 | 2026-06-19 | Research Agent onfocus fix, SQLite DB path fix, Chrome launch. DB now always resolves to `demo/backend/pinnacleiq_demo.db`. 1086-item DB (91 approved) restored from main repo. |
 | 2026-06-19 | **Merged worktree → main.** All fixes in `D:\Codebase\Pinnacle` (main). Ran 125 JS tests against main — 125/125 pass. Cleaned up `filter_suggestions.txt`. App runs from `D:\Codebase\Pinnacle\demo\backend\python app.py`. |
-| 2026-06-22 | Ran app (already live on 8010). Fixed admin login: documented `admin@mankind.in`/`Admin123` didn't exist in `USERS_DB` (only `admin1..5`). Added the account + per-user `pwd` support in `PinnacleIQ_Portal.html`. Committed on `feat/admin-login-credentials`, merged to `main` (no-ff). Reset test-polluted `filter_suggestions.txt`. Documented login mechanics in §3. **Note:** `main` is ~50 commits ahead of `origin/main` — not pushed yet (remote: `github.com/sidtomar/Pinnacle.git`). |
+| 2026-06-22 | Ran app (already live on 8010). Fixed admin login: `admin@mankind.in`/`Admin123` didn't exist in `USERS_DB` (only `admin1..5`). Added the account + per-user `pwd` support in `PinnacleIQ_Portal.html`. Committed on `feat/admin-login-credentials`, merged to `main`. Reset test-polluted `filter_suggestions.txt`. Documented login mechanics in §3. **Note:** `main` is ~50 commits ahead of `origin/main` — not pushed (remote: `github.com/sidtomar/Pinnacle.git`). |
+| 2026-06-23 | **Branch `Researchagent_2306` created** for all work below. |
+| 2026-06-23 | **DR Master Template import feature.** Added `POST /admin/upload-doctors` to `demo/backend/app.py` — accepts `.xlsx/.xls`, maps all 21 DR Master Template columns (Doctor Code, DR Name, City, Speciality, qualification, clinic address, category, DM & DMS, SOW, MR name, Division, Clinical interests, Bday, Anniversary, Spouse name, No of children, engagement score, Last engaged, Next engagement, Status, preferred channel) → writes `demo/doctors.json`. Added "Import Doctor Database" UI card in `PinnacleIQ_Portal.html` on the Research Agent page — visible to **Admin role only**. Shows colour-coded column legend (4 categories: Personal/Upload, Superman CRM, Field/Upload, PIQ Derived), drag-and-drop zone, file info display, upload button, status messages. After upload, frontend calls `loadDoctorsFromAPI()` which refreshes `DOCTORS` array so Doctor Directory + Doctor 360 reflect new data immediately. `switchRole()` updated to show/hide the card. |
+| 2026-06-23 | **Dummy Excel file** `demo/3D_Mankind_DR_Master_Database.xlsx` created — 100 doctors, Division = "3D Mankind", 10 specialties × 10 doctors, realistic Indian names/hospitals/cities. 3 sheets: DR Master Database (data), Column Legend, Summary. All 26 columns including bonus fields (whatsapp, email, patients_per_day, years_experience, pinnacle_score). |
+| 2026-06-23 | **Duplicate specialty/therapy tag bug fixed.** Root cause: `raRunDynamicSearch()` was sending `therapyArea` for both `specialty` and `therapy_area`, so `p.cat` and `p.therapy` were identical. Fix: `therapy_area: disease \|\| therapyArea \|\| 'General'`. Also added HTML-level guard in `clCardHTML()` and `clRowHTML()`: therapy badge only rendered if `p.therapy.toLowerCase() !== p.cat.toLowerCase()`. |
+| 2026-06-23 | **Removed Alpha/Beta/Gamma/Delta agent name references from MA-facing UI.** 4 locations in `PinnacleIQ_Portal.html`: (1) Revision modal info text, (2) Revision modal step labels, (3) Request Improvement modal label, (4) "Beta" badge → renamed to "Insights". |
+| 2026-06-23 | **Research Pipeline menu hidden for all roles.** Removed `research-agent` (pipeline nav item) from `PAGES_MA` and `PAGES_PMT` arrays; removed `pipeline` from `PAGES_ADMIN`. All 3 `ni-pipeline` sidebar `<div>` elements marked `style="display:none;"` across Admin, MA, PMT sidebars. Page HTML retained for potential future use. |
+| 2026-06-23 | **Import Doctor Database card — collapsible + last-upload info.** Card body collapses by default; always-visible header has "Show Import Tool ▼ / Hide Import Tool ▲" toggle with animated chevron. After upload, saves record (filename, timestamp, total, specialties) to `localStorage`. Header always shows compact last-upload line ("Last updated: file.xlsx on DD MMM YYYY, HH:MM — N doctors"). Expanded panel shows green "Doctor database is up to date" banner with full details. State persists across page refreshes and re-logins. |
+| 2026-06-23 | **Request Improvement modal fixes.** Cancel/Close button changed from `btn-ghost` (invisible) to `btn-outline` (bordered, clearly clickable). Footer text changes from "AI revises content" → "AI revised content" (past tense) once pipeline completes; resets to "AI revises content" when modal reopens. |
+| 2026-06-23 | **Complete Article expand/collapse in detail modals.** "Abstract" section renamed "Complete Article" in both MA detail modal and PMT content view modal. Box starts collapsed (3-line preview + gradient fade). "View full article ▼" expands to full text; "View less ▲" collapses. Chevron rotates. Collapse state resets each time a modal opens. `openCVModal` now uses `mdToHtml` rendering. |
+| 2026-06-23 | **AI Summary upgraded to 200-300 words.** `mapAPIItemToPaper()` now uses `item.summary` (Delta's dedicated field) instead of truncating the article to 220 chars. `delta.py` `summary` field upgraded from "2-3 sentence" to "200-300 word clinical summary" covering objective, findings with numbers, Indian practice relevance, key takeaway. `mock_runner.py` all 3 MOCK_LIBRARY entries (GLP-1, SGLT2, PCOS) and the generic fallback now have proper 200-300 word summaries with real statistics and India-specific context. |
+| 2026-06-23 (session 3) | **Metadata tags now visible on content cards.** `clCardHTML()` (grid) + `clRowHTML()` (list) render `p.sub` (sub-category) and `p.tags` keyword chips as gray badges — dedup'd vs cat/therapy, internal 'AI Pipeline' tag filtered, capped at 4. Root cause also fixed: `mapAPIItemToPaper()` was discarding the backend `item.tags` array (hardcoded `[specialty, therapy_area, 'AI Pipeline']`); now uses `item.tags` when present. |
+| 2026-06-23 (session 3) | **Review comments stripped from article body + Review History footer added.** New `stripRevisionNotes()` removes `[REVISION vN]`, `MA Notes:`, `[MA Feedback…]`, `Reviewer Comments:` lines before rendering the Complete Article. New `buildReviewHistoryHTML()` renders a separate "Review History" section at the bottom of both MA detail and PMT content-view modals: reviewer name (fallback "Medical Affairs"), date, comments (italic "NA" if none), colour-coded status dot (green/red/amber). `mapAPIItemToPaper()` maps `item.reviewed_at` → `p.revDate` so the first-review date shows correctly (backend writes `reviewed_at` on approve/reject in `sqlite_store.py`). |
+| 2026-06-23 (session 3) | **AI Summary now 200-300 words per paper (mock pipeline).** Found during thorough testing: every per-paper card's `summary` was set to the short `src_snippet` (~16 words) in `mock_runner.py:1287`, so the session-2 200-300 word `content["summary"]` was dead code. Fixed by building a distinct ~220-word clinical summary per card anchored on that paper's unique `src_snippet` (objective, finding, Indian-practice significance, safety, key takeaway). Verified: fresh cards produce 200-300 word, fully distinct summaries. |
+| 2026-06-23 (session 3) | **Content Library live search + suggestions.** Search box now filters live on `oninput` (not just Enter) and matches across title/journal/author/therapy/specialty/sub-category/summary/tags — so partial queries like "antihyp" find "Antihypertensives". Added in-app suggestion dropdown (`clBuildSuggest`/`clApplySuggest`/`clHideSuggest`, CSS `.cl-suggest`/`.cl-sg-item`) showing matching therapy areas, specialties, tags and titles (type-labelled) after 2+ chars; dismisses on Esc/blur/clear. The old "dropdown" was browser native autofill. Key fns near `getCLFiltered()`. |
+| 2026-06-23 (session 3) | **From/To date filter separation (Content Library).** The two date inputs sat in one box with only a thin dash and blended together. Added uppercase "From"/"To" labels and a vertical divider line between the start and end date inputs so they read as distinct fields. |
+| 2026-06-23 (session 3) | **Thorough test pass of all session-3 work.** Ran app on :8010, seeded DB via mock pipeline, validated at three levels: live API (tags/sub_category present 27/27; approve+reject set `reviewed_at`+`reviewer`; "antihyp" search returns matches vs 0 before), 49 JS unit tests (32 for strip/review-history/search/suggest/tag-mapping + 17 for doctor mapper) all passing, and full inline `<script>` syntax check (0 errors). Test harnesses extract real functions from the HTML and run them in Node with DOM stubs. |
+| 2026-06-23 (session 3) | **Code-review pass #1 — fixes before promoting to `develop`** (commit `3075cd6`). (1) `clBuildSuggest`: suggestion label was injected into a double-quoted attr + JS single-quoted string but only `'`-escaped — a title/tag with `"` or `\` broke the click handler / allowed attribute injection. Now passed via an HTML-escaped `data-val` attribute read with `this.dataset.val`. (2) `clCardHTML`/`clRowHTML`: `p.sub` + API tags rendered into innerHTML unescaped (new XSS surface since tags now come from the API) → wrapped in `_esc()`. (3) `mock_runner.py`: empty `src_snippet` produced malformed "central finding: ." and dropped the topic-level fallback → now falls back to `content["summary"]`; de-duplicated the "Key takeaway" sentence. (4) `app.py` upload-doctors: guard `wb.active is None`; write `doctors.json` atomically (temp file + `os.replace`) so a crash/concurrent upload can't corrupt the DB. 5 new XSS-escaping unit tests + live 3D-Mankind upload (100 doctors) verified. |
+| 2026-06-23 (session 3) | **Code-review pass #2 — XSS hardening + edge-case correctness** (commit `26c50ca`). (1) `mdToHtml()` now HTML-escapes `&<>` BEFORE markdown — closes the innerHTML injection sink in the PMT viewer (`cv-abs`) and MA detail (`ma-abstract`), AND fixes medical inequalities like "HbA1c <7%" / ">140 mmHg" previously swallowed as broken tags; links/bold/newlines still render (verified). (2) `buildReviewHistoryHTML`: stop surfacing stale `improvement_notes` as approval "comments" on an approved card (only shown while pending). (3) `mapAPIDoctor`: derive a stable `numId` from a hash of the id for non-numeric CRM codes (e.g. 'MH-001') instead of `NaN`, which previously corrupted row key/MR fallback/engagement-date math. (4) `get_doctor` uses `data.get("doctors",[])` + `d.get("id")` to match `get_doctors` and avoid a `KeyError` 500. All 54 unit tests pass. |
+| 2026-06-23 (session 3) | **Code-review pass #3 — ALL open items resolved.** (a) Deleted the orphan `pinnacle_pv/` directory entirely (commit `c76d1e7`) — was ~7,250 lines + a committed `node_modules` (3,404 tracked files), unreferenced by any code/build/backend; backend serves `react-app/dist`. (b) Added `require_admin` guard on `/admin/upload-doctors` (commit `c752fdb`): `ADMIN_UPLOAD_TOKEN` unset → open + warning (demo); set → requires matching `X-Admin-Token` header else 401. Documented in `.env.example`. Verified open=200, set+no/wrong header=401, set+correct=200. (c) `onCLSearchInput` now debounces the full-list `renderCL()` (160ms) while suggestions stay instant; `clBuildSuggest` early-outs after 6 cats / 5 titles (commit `492f4ea`). (d) Non-numeric doctor codes already fixed in pass #2 (stable hash `numId`). |
+| 2026-06-23 (session 3) | **Real-pipeline deps fixed + single-file env config** (commit after `e75c1b6`). Verified the real pipeline end-to-end in a clean container and found **two deps missing from `requirements.txt`** that would break a fresh `pip install`: `langgraph` (agents/alpha.py `create_react_agent`) and `langchain-tavily` (tools/search.py `langchain_tavily.TavilySearch`). Both added. Confirmed full import chain (orchestrator→agents→tools→config) resolves and `run_pipeline` fails cleanly without keys ("Alpha: Missing credentials") rather than crashing. Also made `app.py` load `research_agent_system/.env` (then `demo/backend/.env`) at startup so keys + `RESEARCH_PIPELINE_MODE` live in ONE file (OS env still wins; guarded if dotenv absent). **Real-mode setup = (1) `pip install -r research_agent_system/requirements-demo.txt` (lighter, no Databricks), (2) fill `research_agent_system/.env` with `RESEARCH_PIPELINE_MODE=real`+`OPENROUTER_API_KEY`+`TAVILY_API_KEY`, (3) `python app.py`.** Fallback to mock = remove the file or set mode=mock. Added `requirements-demo.txt` (commit `ef8f353`) = the real-pipeline subset WITHOUT the heavy Azure Databricks packages (databricks-sql-connector / databricks-vectorsearch / langchain-databricks — lazy-imported, only needed for STORE_BACKEND=databricks), so the Windows install is fast and won't fail on native builds. Good fast demo topics (Alpha targets 3-5 papers): "Empagliflozin in heart failure with reduced ejection fraction", "Semaglutide for weight management in type 2 diabetes", "Myo-inositol for PCOS" (narrowest/fastest). |
+| 2026-06-23 (session 3) | **Opt-in REAL LLM pipeline for the in-app Research Agent** (commit `e75c1b6`). Previously the portal's Research Agent "Search/Run" always used `mock_runner`. Added `RESEARCH_PIPELINE_MODE` env var: unset/`mock` (default, zero-config) keeps the deterministic mock; `real` makes `/pipeline/run` call `research_agent_system/orchestrator.run_pipeline` (real PubMed + LLM via OpenRouter/Tavily). New `_run_real_pipeline()` + `_build_real_agent_outputs()` in `app.py` adapt the blocking real pipeline to the polling run-store contract (coarse progress — no per-agent hooks; collects card ids saved by Delta, no double-save; maps `PipelineResult`→`agent_outputs` UI shape; notifies MA). Fully guarded: missing deps/keys or run failure → clean `error` status, never a crash; mock stays the fallback. **To enable on the host:** `pip install -r research_agent_system/requirements.txt`, set `OPENROUTER_API_KEY`+`TAVILY_API_KEY`+`RESEARCH_PIPELINE_MODE=real` in the **app.py process env** (config.py's `load_dotenv()` resolves `.env` from CWD=`demo/backend`, NOT `research_agent_system/`). Caveats: real runs are slow (Alpha + Beta/Gamma/Delta per paper, sequential) and network-dependent; UI shows coarse progress. Verified default mock path still completes (10 cards + full animation); real import guarded (langgraph/keys not in this container). |
+| 2026-06-23 (session 3) | **Code cleanup (commit `492f4ea`).** Extracted `_catTherapyTagBadges(p)` — the specialty/therapy/sub/tags badge row was duplicated verbatim in `clCardHTML`+`clRowHTML` (removed now-unused `cc`/`tc` locals). Extracted `_setAbsState(box,btn,collapsed)` — `absToggle`/`_absReset` shared copy-pasted chevron/label logic. Added `_digits()` helper in `mapAPIDoctor` for the 3 repeated digit-strip parses. All 54 unit tests pass; app serves 200. |
+| 2026-06-24 (session 4 — demo day) | **Content Library stale cache on role-switch / navigation** (commit `0a0bfe7`). When switching from Admin → MA or navigating away and back, the Content Library rendered from in-memory `ALL_PAPERS` without re-fetching — newest cards not visible without manual browser refresh. Fix: `showPage()` now calls `loadContentFromAPI()` when `id==='content'`, mirroring how Doctors page calls `loadDoctorsFromAPI()` on navigation. |
+| 2026-06-24 (session 4 — demo day) | **Reject + Improve buttons added then reverted from card footers** (commits `0d66556` → `a532426`). Brief experiment adding `✕ Reject` + `⟳ Improve` to card footer; user confirmed original design: these belong inside the detail modal only. Reverted. Card footer: `✓ Approve` (pending only) + `Open →`. |
+| 2026-06-24 (session 4 — demo day) | **Re-Approve button label** (commit `2c75fe2`). Rejected-card detail modal footer button relabelled from "Approve" → "Re-Approve" to match design intent. |
+| 2026-06-24 (session 5 — post-demo) | **Hide Research Agent from PMT sidebar** (commit `d328a77`). AI Pipeline group label + Research Agent nav item both set `display:none` in PMT sidebar. Admin and MA can still access it. |
+| 2026-06-24 (session 5 — post-demo) | **Division-aware doctor count in PMT sidebar** (commits `d328a77`, `f456c7d`, `d3bb2f4`). Replaced hardcoded "50 Doctors" with dynamic count from `DOCTORS` array filtered by `CURRENT_USER.division`. Since `doctors.json` has no `division` field (all 100 are 3D Mankind), filter returns 0 → falls back to `DOCTORS.length` = 100. `buildSidebarFooter()` now also called after `loadDoctorsFromAPI()` so count shows real data (not 12-fallback). Division label replaces the old "74% Coverage" stat slot. |
+| 2026-06-24 (session 5 — post-demo) | **AI Recommended cap removed in Share Content modal** (commit `58480fe`). Hard cap of 6 doctors removed; all specialty-matched doctors now shown sorted by engagement score. For a paper with 9 matching Gynaecologists, all 9 appear. Matching logic improved to use full-string before 6-char prefix. |

@@ -4,7 +4,7 @@
     {
       "name": "pinnacle-app",
       "runtimeExecutable": "C:\\Users\\siddhartha.tomar_tpr\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe",
-      "runtimeArgs": ["-X", "utf8", "D:\\Codebase\\Pinnacle\\.claude\\worktrees\\quizzical-hypatia-29e4a0\\demo\\backend\\app.py"],
+      "runtimeArgs": ["-X", "utf8", "D:\\Codebase\\Pinnacle\\demo\\backend\\app.py"],
       "port": 8010,
       "autoPort": false
     }

@@ -18,6 +18,16 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 os.environ.setdefault("SQLITE_DB_PATH", str(_HERE / "pinnacleiq_demo.db"))
 
+# Load env vars from research_agent_system/.env (keys, RESEARCH_PIPELINE_MODE, …)
+# so the demo backend and the real pipeline share ONE config file. Falls back to
+# a local demo/backend/.env if present. Existing OS env vars always win.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(_HERE.parent.parent / "research_agent_system" / ".env")
+    load_dotenv(_HERE / ".env")
+except Exception:
+    pass  # python-dotenv not installed (mock-only demo) — fine, env stays as-is
+
 # Allow importing from research_agent_system/store/
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "research_agent_system"))
 
@@ -25,10 +35,11 @@ import threading
 import uuid
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, UploadFile, File, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+import io
 
 from store import get_store
 from mock_runner import run_mock_pipeline
@@ -45,7 +56,8 @@ app = FastAPI(title="PinnacleIQ Research API", version="1.0.0")
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else [
     "http://localhost:5173",      # Vite dev server (React frontend)
     "http://localhost:3000",      # Alt dev port
-    "http://localhost:8010",      # Same-origin API requests
+    "http://localhost:8010",      # Same-origin API requests (localhost)
+    "http://127.0.0.1:8010",      # Same-origin API requests (127.0.0.1) — avoids CORS trap
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
 ]
@@ -372,10 +384,232 @@ def get_doctor(doctor_id: str):
     if not DOCTORS_FILE.exists():
         raise HTTPException(404, "doctors.json not found")
     data = json.loads(DOCTORS_FILE.read_text(encoding="utf-8"))
-    doc = next((d for d in data["doctors"] if d["id"] == doctor_id.upper()), None)
+    doc = next((d for d in data.get("doctors", []) if d.get("id") == doctor_id.upper()), None)
     if not doc:
         raise HTTPException(404, f"Doctor {doctor_id} not found")
     return doc
+
+
+def require_admin(x_admin_token: Optional[str] = Header(default=None)):
+    """
+    Guard for destructive admin endpoints.
+
+    Behaviour is backward-compatible for the demo:
+      - If ADMIN_UPLOAD_TOKEN is NOT set (default), the endpoint stays open so the
+        zero-config demo keeps working — but a warning is logged on each call.
+      - If ADMIN_UPLOAD_TOKEN IS set (recommended for any shared/prod deployment),
+        callers MUST send a matching `X-Admin-Token` header or get HTTP 401.
+    """
+    expected = os.getenv("ADMIN_UPLOAD_TOKEN", "").strip()
+    if not expected:
+        print("[Auth] WARNING: /admin/upload-doctors is UNPROTECTED "
+              "(set ADMIN_UPLOAD_TOKEN to require an X-Admin-Token header).")
+        return
+    if not x_admin_token or x_admin_token.strip() != expected:
+        raise HTTPException(401, "Unauthorized — valid X-Admin-Token header required")
+
+
+@app.post("/admin/upload-doctors")
+async def upload_doctors(file: UploadFile = File(...), _: None = Depends(require_admin)):
+    """
+    Admin endpoint: upload an Excel file (.xlsx / .xls) using the DR Master Template.
+
+    Protected by `require_admin` — set the ADMIN_UPLOAD_TOKEN env var and send a
+    matching `X-Admin-Token` header to authorise in shared/production deployments.
+
+    Template columns (row 1 = headers, row 2+ = data):
+      Personal  (Upload):    Doctor Code, DR Name, City, Speciality, qualification, clinic address
+      Superman  (CRM sync):  category, DM & DMS, SOW, MR name, Division
+      Field     (Upload):    Clinical interests, Bday, Anniversary, Spouse name, No of children
+      PIQ       (Derived):   engagement score, Last engaged, Next engagement, Status, preferred channel
+    """
+    if not file.filename or not file.filename.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(400, "Only .xlsx or .xls files are accepted")
+
+    try:
+        import openpyxl
+    except ImportError:
+        raise HTTPException(500, "openpyxl not installed — run: pip install openpyxl")
+
+    content = await file.read()
+    try:
+        wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+    except Exception as exc:
+        raise HTTPException(400, f"Cannot read Excel file: {exc}")
+
+    ws = wb.active
+    if ws is None:
+        raise HTTPException(400, "Excel file has no active/readable sheet")
+    rows = list(ws.iter_rows(values_only=True))
+    if len(rows) < 2:
+        raise HTTPException(400, "Excel file must have a header row and at least one data row")
+
+    # Build case-insensitive, stripped column index map
+    raw_headers = [
+        str(h).strip().lower() if h is not None else ""
+        for h in rows[0]
+    ]
+    col = {name: idx for idx, name in enumerate(raw_headers)}
+
+    def _get(row, *keys, default=""):
+        """Return first non-empty cell value matching any of the given header names."""
+        for k in keys:
+            k_low = k.lower()
+            if k_low in col and col[k_low] < len(row):
+                v = row[col[k_low]]
+                if v is not None and str(v).strip():
+                    return str(v).strip()
+        return default
+
+    def _get_num(row, *keys, default=0):
+        v = _get(row, *keys, default=None)
+        if v is None:
+            return default
+        # Handle "5000/10000" style DM&DMS — take first number
+        v = str(v).split("/")[0].replace(",", "").strip()
+        try:
+            return int(float(v))
+        except (ValueError, TypeError):
+            return default
+
+    doctors = []
+    specialties_set: set = set()
+    cities_set: set = set()
+    tier_count = {"A": 0, "B": 0, "C": 0}
+    divisions_set: set = set()
+
+    for i, row in enumerate(rows[1:], start=1):
+        if all(v is None for v in row):
+            continue  # skip blank rows
+
+        # ── Personal fields (Upload) ──────────────────────────────────────────
+        doc_id = _get(row, "doctor code", "id", "doctor_id", "doc_id")
+        if not doc_id:
+            doc_id = f"DOC{i:03d}"
+        elif not doc_id.upper().startswith("DOC"):
+            doc_id = f"DOC{doc_id}" if doc_id[:1].isdigit() else doc_id
+
+        name = _get(row, "dr name", "doctor name", "name", "full_name") or f"Dr. Doctor {i}"
+        city = _get(row, "city") or "Unknown"
+        specialty = _get(row, "speciality", "specialty") or "General Medicine"
+        qualification = _get(row, "qualification", "designation") or "Consultant"
+        clinic_address = _get(row, "clinic address", "hospital", "hospital_name", "address") or ""
+
+        # ── Superman / CRM fields (DB integration) ────────────────────────────
+        category = _get(row, "category", "tier").upper()
+        tier = category if category in ("A", "B", "C") else "B"
+        dm_dms_raw = _get(row, "dm & dms", "dm&dms", "dm_dms")
+        dm_val = _get_num(row, "dm & dms", "dm&dms", "dm_dms")
+        sow = _get(row, "sow", "share of wallet")
+        mr_name = _get(row, "mr name", "mr_name", "medical rep")
+        division = _get(row, "division")
+
+        # ── Field data (Upload) ───────────────────────────────────────────────
+        clinical_interests = _get(row, "clinical interests", "sub_specialty", "subspecialty")
+        birthday = _get(row, "bday", "birthday", "dob", "date of birth")
+        anniversary = _get(row, "anniversary")
+        spouse_name = _get(row, "spouse name", "spouse_name")
+        children_raw = _get(row, "no of children", "children", "no_of_children")
+        try:
+            num_children = int(float(children_raw)) if children_raw else 0
+        except (ValueError, TypeError):
+            num_children = 0
+
+        # ── PIQ / Derived fields ──────────────────────────────────────────────
+        engagement_score = _get_num(row, "engagement score", "engagement_score")
+        last_engaged = _get(row, "last engaged", "last_contacted", "last_contact")
+        next_engagement = _get(row, "next engagement", "next_engagement")
+        status = (_get(row, "status") or "active").lower()
+        preferred_channel = (_get(row, "preferred channel", "preferred_channel", "channel") or "whatsapp").lower()
+
+        # ── Accumulate metadata ───────────────────────────────────────────────
+        specialties_set.add(specialty)
+        cities_set.add(city)
+        tier_count[tier] = tier_count.get(tier, 0) + 1
+        if division:
+            divisions_set.add(division)
+
+        doctors.append({
+            # Core identity
+            "id": doc_id.upper(),
+            "name": name,
+            "designation": qualification,
+            "specialty": specialty,
+            "sub_specialty": clinical_interests or specialty,
+            "hospital": clinic_address,
+            "city": city,
+            "state": _get(row, "state") or "",
+            "tier": tier,
+
+            # Contact
+            "whatsapp": _get(row, "whatsapp", "whatsapp_number", "phone", "mobile") or "",
+            "email": _get(row, "email", "email_id") or "",
+            "preferred_channel": preferred_channel,
+
+            # Superman CRM fields
+            "category": category,
+            "dm_dms": dm_dms_raw,
+            "dm": dm_val,
+            "sow": sow,
+            "mr_name": mr_name,
+            "division": division,
+
+            # Clinical
+            "clinical_interests": clinical_interests,
+            "patients_per_day": _get_num(row, "patients per day", "patients_per_day"),
+            "years_experience": _get_num(row, "years experience", "years_experience", "experience"),
+
+            # Personal
+            "birthday": birthday,
+            "anniversary": anniversary,
+            "spouse_name": spouse_name,
+            "num_children": num_children,
+
+            # PIQ / Derived
+            "engagement_score": engagement_score,
+            "pinnacle_score": _get_num(row, "pinnacle score", "pinnacle_score"),
+            "last_contacted": last_engaged,
+            "next_engagement": next_engagement,
+            "status": status,
+
+            # Legacy fields kept for compatibility
+            "content_received": _get_num(row, "content received", "content_received"),
+            "pinnacle_joined": _get(row, "pinnacle joined", "pinnacle_joined", "joined") or "",
+            "notes": _get(row, "notes", "remarks") or "",
+        })
+
+    if not doctors:
+        raise HTTPException(400, "No valid doctor rows found in the uploaded file")
+
+    now = datetime.now().strftime("%Y-%m-%d")
+    new_data = {
+        "generated_at": now,
+        "uploaded_at": now,
+        "uploaded_file": file.filename,
+        "total": len(doctors),
+        "specialties": sorted(specialties_set),
+        "cities": sorted(cities_set),
+        "divisions": sorted(divisions_set),
+        "tier_breakdown": tier_count,
+        "doctors": doctors,
+    }
+
+    # Atomic write: write to a temp file in the same dir, then os.replace() so a
+    # crash or concurrent upload can never leave doctors.json half-written/corrupt.
+    _payload = json.dumps(new_data, indent=2, ensure_ascii=False)
+    _tmp = DOCTORS_FILE.with_suffix(DOCTORS_FILE.suffix + ".tmp")
+    _tmp.write_text(_payload, encoding="utf-8")
+    os.replace(_tmp, DOCTORS_FILE)
+
+    return {
+        "success": True,
+        "message": f"Doctor database updated — {len(doctors)} doctors imported from '{file.filename}'",
+        "total": len(doctors),
+        "specialties": sorted(specialties_set),
+        "cities": sorted(cities_set),
+        "divisions": sorted(divisions_set),
+        "tier_breakdown": tier_count,
+    }
 
 
 @app.get("/topics")
@@ -448,9 +682,120 @@ def add_filter_suggestion(req: AddFilterTermRequest):
     }
 
 
+def _build_real_agent_outputs(result) -> dict:
+    """
+    Adapt a real-pipeline PipelineResult into the agent_outputs shape the portal
+    UI renders (matches mock_runner's keys so the agent panels look identical).
+    Defensive: the frontend guards missing keys, so partial data is fine.
+    """
+    ao = {}
+    # ── Alpha — sources list (title/authors/journal/url/snippet) ──
+    sources = []
+    for p in (result.papers or []):
+        sources.append({
+            "title":   p.get("title", ""),
+            "authors": p.get("authors", ""),
+            "journal": p.get("journal", ""),
+            "url":     p.get("pubmed_link") or p.get("link", ""),
+            "snippet": (p.get("abstract", "") or "")[:300],
+        })
+    ao["alpha"] = {
+        "sources": sources, "internal_docs": [], "paper_count": len(sources),
+        "internal_count": 0,
+        "summary": f"✅ {len(sources)} PubMed paper(s) found (real pipeline)",
+    }
+    # ── Beta — per-paper summaries (best-effort) ──
+    summaries = result.summaries or []
+    ao["beta"] = {
+        "findings": [], "per_paper_summaries": summaries,
+        "papers_summarised": len(summaries),
+        "summary": f"✅ {len(summaries)} paper(s) summarised (real LLM)",
+    }
+    # ── Gamma — shareable articles ──
+    articles = result.articles or []
+    ao["gamma"] = {
+        "messages": [], "article_excerpt": (articles[0][:600] if articles and isinstance(articles[0], str) else ""),
+        "messages_count": len(articles),
+        "summary": f"✅ {len(articles)} article(s) generated (real LLM)",
+    }
+    # ── Delta — saved cards ──
+    cards = result.content_cards or []
+    ao["delta"] = {
+        "card_title": (cards[0].get("title", "") if cards else ""),
+        "tags": (cards[0].get("tags", []) if cards else []),
+        "sub_category": (cards[0].get("sub_category", "") if cards else ""),
+        "cards_saved": len(cards),
+        "summary": f"✅ {len(cards)} content card(s) saved · Pending MA Review",
+    }
+    return ao
+
+
+def _run_real_pipeline(req, run_id):
+    """
+    Run the REAL LLM pipeline (research_agent_system/orchestrator.run_pipeline) and
+    adapt its output to the polling run-store contract the portal expects.
+
+    Enabled by RESEARCH_PIPELINE_MODE=real. Delta saves cards to the same store
+    the portal reads, so we collect their ids rather than re-saving. Coarse
+    progress only — run_pipeline is one blocking call (no per-agent hooks).
+    """
+    # research_agent_system is already on sys.path (added near the top of this file)
+    try:
+        from orchestrator import run_pipeline
+    except Exception as exc:
+        pipeline_runs[run_id].update(
+            status="error", progress=0, current_agent="alpha",
+            status_msg=f"Real pipeline unavailable: {exc}")
+        print(f"[App][REAL] import failed: {exc}")
+        return
+
+    pipeline_runs[run_id].update(
+        current_agent="alpha", progress=10,
+        status_msg="Searching PubMed + running real LLM agents — this can take a minute…")
+
+    try:
+        result = run_pipeline(
+            topic=req.topic, specialty=req.specialty,
+            therapy_area=req.therapy_area, save_outputs=False)
+    except Exception as exc:
+        pipeline_runs[run_id].update(
+            status="error", progress=0,
+            status_msg=f"Pipeline error: {exc}")
+        print(f"[App][REAL] run_pipeline raised: {exc}")
+        return
+
+    cards = result.content_cards or []
+    saved_ids = [c.get("id") for c in cards if c.get("id")]
+
+    if not saved_ids:
+        msg = "; ".join(result.errors)[:200] if result.errors else "No content produced"
+        pipeline_runs[run_id].update(status="error", progress=0, status_msg=msg)
+        print(f"[App][REAL] no cards produced — errors: {result.errors}")
+        return
+
+    pipeline_runs[run_id].update(
+        status="completed", progress=100, current_agent="done",
+        status_msg="Pipeline complete. Real content ready for MA review.",
+        content_id=saved_ids[0], all_content_ids=saved_ids,
+        agent_outputs=_build_real_agent_outputs(result))
+    print(f"[App][REAL] pipeline saved {len(saved_ids)} card(s) to store")
+
+    try:
+        notify_ma_new_content(
+            store, saved_ids[0], cards[0].get("title", req.topic),
+            req.specialty, cards[0].get("division", "All"))
+    except Exception as exc:
+        print(f"[App][REAL] notification failed: {exc}")
+
+
 @app.post("/pipeline/run")
 def start_pipeline(req: RunRequest, bg: BackgroundTasks):
-    """Start mock pipeline in background. Returns run_id for polling."""
+    """Start the pipeline in the background. Returns run_id for polling.
+
+    Mode is chosen by the RESEARCH_PIPELINE_MODE env var:
+      - unset / "mock" (default) → mock_runner (zero-config, deterministic)
+      - "real"                   → real LLM pipeline (needs OPENROUTER/TAVILY keys)
+    """
     from datetime import datetime, timezone
 
     # Persist custom topics so they remain available after refreshes and future runs.
@@ -471,7 +816,15 @@ def start_pipeline(req: RunRequest, bg: BackgroundTasks):
             "started_at":    datetime.now(timezone.utc).isoformat(),
         }
 
+    pipeline_mode = os.getenv("RESEARCH_PIPELINE_MODE", "mock").strip().lower()
+
     def _run():
+        # ── REAL LLM pipeline path (opt-in via RESEARCH_PIPELINE_MODE=real) ──
+        if pipeline_mode == "real":
+            _run_real_pipeline(req, run_id)
+            return
+
+        # ── MOCK pipeline path (default — zero-config, deterministic) ──
         run_mock_pipeline(
             topic=req.topic,
             specialty=req.specialty,
@@ -856,6 +1209,24 @@ async def serve_portal():
     if PORTAL_HTML.exists():
         return _FileResponse(str(PORTAL_HTML), media_type="text/html")
     return {"error": "Portal HTML not found at " + str(PORTAL_HTML)}
+
+
+# ── Serve test suites (dev/QA) ────────────────────────────────────────────────
+_TESTS_DIR = Path(__file__).parent.parent.parent / "tests"
+
+@app.get("/tests/today-occasions.js", include_in_schema=False)
+async def serve_test_today():
+    f = _TESTS_DIR / "test_today_and_occasions.js"
+    if f.exists():
+        return _FileResponse(str(f), media_type="application/javascript")
+    return {"error": "test file not found"}
+
+@app.get("/tests/research-agent.js", include_in_schema=False)
+async def serve_test_ra():
+    f = _TESTS_DIR / "test_research_agent.js"
+    if f.exists():
+        return _FileResponse(str(f), media_type="application/javascript")
+    return {"error": "test file not found"}
 
 
 # ── Serve React SPA (for production/Railway deployment) ───────────────────────

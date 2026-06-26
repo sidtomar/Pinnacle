@@ -159,6 +159,12 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 .sbox:focus-within{border-color:var(--navy);}
 .sbox input{border:none;outline:none;font-size:12.5px;color:var(--text1);background:transparent;width:100%;}
 .sbox input::placeholder{color:var(--text4);}
+.cl-suggest{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:60;max-height:280px;overflow-y:auto;padding:4px;}
+.cl-sg-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12.5px;color:var(--text1);}
+.cl-sg-item:hover,.cl-sg-item.active{background:var(--surface2);}
+.cl-sg-item .cl-sg-type{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text4);margin-left:auto;white-space:nowrap;}
+.cl-sg-item svg{flex-shrink:0;}
+.cl-sg-empty{padding:10px;font-size:12px;color:var(--text4);text-align:center;}
 .fsel{background:var(--surface);border:1.5px solid var(--border);color:var(--text2);padding:7px 12px;border-radius:9px;font-size:12.5px;cursor:pointer;outline:none;transition:border-color .15s;}
 .fsel:focus{border-color:var(--navy);}
 .vtog{display:flex;gap:2px;background:var(--surface3);border-radius:9px;padding:3px;border:1px solid var(--border);}
@@ -241,6 +247,10 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 .ms{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;padding-bottom:8px;border-top:1px solid var(--border);padding-top:13px;}
 .ms:first-child{border-top:none;padding-top:0;}
 .abs-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:12.5px;line-height:1.75;color:var(--text2);margin-bottom:4px;}
+.abs-box-collapsed{max-height:5.25em;overflow:hidden;position:relative;}
+.abs-box-collapsed::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2em;background:linear-gradient(transparent,var(--surface2));}
+.abs-toggle{background:none;border:none;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--blue);padding:4px 0;display:inline-flex;align-items:center;gap:4px;margin-bottom:8px;}
+.abs-toggle:hover{color:var(--navy);}
 .ai-sum-wrap{background:linear-gradient(135deg,#F5F3FF,#F0EDFF);border:1.5px solid #DDD6FE;border-radius:var(--r);padding:14px;margin-bottom:4px;}
 .sum-ta{width:100%;min-height:86px;resize:vertical;background:var(--surface);border:1px solid #DDD6FE;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.7;color:var(--text1);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;}
 .sum-ta:focus{border-color:var(--purple);}
@@ -855,12 +865,18 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
 
       <!-- Filters -->
       <div class="fr">
-        <div class="sbox"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><line x1="8.5" y1="8.5" x2="12" y2="12"/></svg><input type="text" placeholder="Search title, journal, author…" id="cl-q" onkeydown="if(event.key==='Enter')renderCL()"></div>
-        <div style="display:flex;align-items:center;gap:5px;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:6px 12px;">
+        <div class="sbox" style="position:relative;"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><line x1="8.5" y1="8.5" x2="12" y2="12"/></svg><input type="text" autocomplete="off" placeholder="Search title, therapy, author, tags…" id="cl-q" oninput="onCLSearchInput()" onkeydown="if(event.key==='Enter'){clHideSuggest();renderCL();}else if(event.key==='Escape')clHideSuggest();" onfocus="onCLSearchInput()" onblur="setTimeout(clHideSuggest,150)"><div id="cl-suggest" class="cl-suggest" style="display:none;"></div></div>
+        <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:6px 12px;">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#9CA3AF" stroke-width="1.4" stroke-linecap="round"><rect x="1" y="1.5" width="10" height="9.5" rx="1.5"/><line x1="1" y1="4.5" x2="11" y2="4.5"/><line x1="3.5" y1="0.5" x2="3.5" y2="2.5"/><line x1="8.5" y1="0.5" x2="8.5" y2="2.5"/></svg>
-          <input type="date" id="cl-from" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="From date">
-          <span style="color:var(--border2);">–</span>
-          <input type="date" id="cl-to" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="To date">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text4);">From</span>
+            <input type="date" id="cl-from" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="From date">
+          </div>
+          <span style="width:1px;height:18px;background:var(--border);flex-shrink:0;"></span>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text4);">To</span>
+            <input type="date" id="cl-to" style="border:none;outline:none;font-size:12px;color:var(--text2);background:transparent;font-family:'DM Sans',sans-serif;" title="To date">
+          </div>
         </div>
         <select class="fsel" id="cl-cat"><option value="">All Specialties</option><option>Gynaecology</option><option>Cardiology</option><option>Paediatrics</option><option>Oncology</option><option>Dermatology</option><option>Diabetology</option></select>
         <select class="fsel" id="cl-th"><option value="">All Therapy Areas</option><option>PCOS</option><option>Heart Failure</option><option>Paediatric Nutrition</option><option>Dyslipidaemia</option><option>GLP-1 Therapy</option><option>Acne &amp; Skin</option><option>Hypertension</option><option>Immunisation</option></select>
@@ -1527,6 +1543,111 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
         </div>
       </div>
 
+      <!-- ADMIN: Import Doctor Database (visible to admin role only) -->
+      <div id="ra-import-db-card" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2eaf2;box-shadow:0 2px 12px rgba(15,28,46,.08);margin-bottom:24px;overflow:hidden;">
+
+        <!-- Always-visible header row (clickable to toggle) -->
+        <div onclick="raDbToggle()" style="display:flex;align-items:center;gap:10px;padding:14px 20px;cursor:pointer;user-select:none;transition:background .15s;" onmouseover="this.style.background='#f9fbfd'" onmouseout="this.style.background=''">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#0f1c2e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M2 13h12M8 1v9M5 7l3 3 3-3"/></svg>
+          <span style="font-size:14px;font-weight:700;color:#1a2e42;">Import Doctor Database</span>
+          <span style="font-size:9px;font-weight:700;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:5px;padding:1px 7px;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;">Admin Only</span>
+          <!-- Last-upload info (injected by JS) -->
+          <span id="ra-db-last-info" style="font-size:11px;color:#9ca3af;margin-left:4px;flex:1;"></span>
+          <!-- Toggle label + chevron -->
+          <span id="ra-db-toggle-label" style="font-size:11.5px;font-weight:600;color:#4a637a;display:flex;align-items:center;gap:5px;flex-shrink:0;">
+            Show Import Tool
+            <svg id="ra-db-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="#4a637a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;"><polyline points="2,4 6.5,9 11,4"/></svg>
+          </span>
+        </div>
+
+        <!-- Collapsible body (hidden by default) -->
+        <div id="ra-import-db-body" style="display:none;padding:0 20px 20px;border-top:1px solid #f0f4f8;">
+
+          <p style="font-size:12.5px;color:#6b7280;margin:14px 0 16px;line-height:1.5;">Upload the DR Master Template (.xlsx) to replace the doctor database across all screens — Doctor Directory, Doctor 360 &amp; Share workflows.</p>
+
+          <!-- Last upload success banner (shown after upload or on revisit) -->
+          <div id="ra-db-last-banner" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:10px 14px;margin-bottom:16px;display:none;align-items:center;gap:10px;">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="8" cy="8" r="7"/><polyline points="5,8.5 7,10.5 11,6"/></svg>
+            <div>
+              <div id="ra-db-last-banner-title" style="font-size:12.5px;font-weight:700;color:#166534;"></div>
+              <div id="ra-db-last-banner-sub" style="font-size:11px;color:#15803d;margin-top:1px;"></div>
+            </div>
+          </div>
+
+          <!-- Column legend -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:10.5px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Template Columns</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">Doctor Code</span>
+              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">DR Name</span>
+              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">City</span>
+              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">Speciality</span>
+              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">qualification</span>
+              <span style="font-size:10.5px;background:#EBF0F8;color:#0f1c2e;border-radius:4px;padding:2px 8px;font-weight:600;">clinic address</span>
+              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">category</span>
+              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">DM &amp; DMS</span>
+              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">SOW</span>
+              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">MR name</span>
+              <span style="font-size:10.5px;background:#F3F4F6;color:#4b5563;border-radius:4px;padding:2px 8px;">Division</span>
+              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Clinical interests</span>
+              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Bday</span>
+              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Anniversary</span>
+              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">Spouse name</span>
+              <span style="font-size:10.5px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;">No of children</span>
+              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">engagement score</span>
+              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Last engaged</span>
+              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Next engagement</span>
+              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">Status</span>
+              <span style="font-size:10.5px;background:#F5F3FF;color:#5b21b6;border-radius:4px;padding:2px 8px;">preferred channel</span>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#EBF0F8;"></span>Personal (Upload)</span>
+              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F3F4F6;"></span>Superman CRM</span>
+              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F0FDF4;border:1px solid #BBF7D0;"></span>Field (Upload)</span>
+              <span style="font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#F5F3FF;"></span>PIQ Derived</span>
+            </div>
+          </div>
+
+          <!-- Drop zone -->
+          <div id="ra-db-dropzone"
+               style="border:2px dashed #d1dce8;border-radius:10px;padding:24px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#f9fbfd;"
+               ondragover="event.preventDefault();this.style.borderColor='#0f1c2e';this.style.background='#eef4fb';"
+               ondragleave="this.style.borderColor='#d1dce8';this.style.background='#f9fbfd';"
+               ondrop="raDbOnDrop(event)"
+               onclick="document.getElementById('ra-db-file-input').click()">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 10px;display:block;">
+              <rect x="3" y="3" width="26" height="26" rx="5" stroke-dasharray="4 3"/>
+              <path d="M10 18v5h12v-5M16 9v10M12 13l4-4 4 4"/>
+            </svg>
+            <div style="font-size:13px;color:#4a637a;font-weight:500;"><strong style="color:#1a2e42;">Drag &amp; drop</strong> the DR Master Template here, or <span style="color:#0f1c2e;font-weight:700;text-decoration:underline;cursor:pointer;">browse</span></div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:5px;">.xlsx or .xls only · Row 1 = column headers · Row 2+ = doctor data</div>
+            <input type="file" id="ra-db-file-input" accept=".xlsx,.xls" style="display:none;" onchange="raDbOnFileSelect(event)">
+          </div>
+
+          <!-- Selected file info -->
+          <div id="ra-db-file-info" style="display:none;margin-top:10px;background:#EBF0F8;border:1px solid #c7d7ea;border-radius:8px;padding:9px 14px;align-items:center;gap:10px;">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#1a2e42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M2.5 2h7.5l3 3v8a.5.5 0 01-.5.5h-10a.5.5 0 01-.5-.5V2.5a.5.5 0 01.5-.5z"/><polyline points="10,2 10,5 13,5"/></svg>
+            <span id="ra-db-file-name" style="font-size:12.5px;color:#1a2e42;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+            <button onclick="raDbClearFile()" style="background:none;border:none;cursor:pointer;font-size:16px;color:#6b7280;padding:0 4px;line-height:1;flex-shrink:0;" title="Remove">✕</button>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:12px;align-items:center;">
+            <button id="ra-db-upload-btn" onclick="raDbUpload()"
+                    style="display:none;align-items:center;gap:8px;background:#0f1c2e;color:#fff;border:none;border-radius:8px;padding:0 22px;height:40px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 10v2h11v-2M6.5 1v8M3.5 4l3-3 3 3"/></svg>
+              Upload &amp; Replace Database
+            </button>
+            <span id="ra-db-uploading" style="display:none;font-size:12px;color:#6b7280;align-items:center;gap:8px;">
+              <span style="display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid #e2eaf2;border-top-color:#0f1c2e;animation:spin .8s linear infinite;"></span>
+              Uploading and processing…
+            </span>
+          </div>
+
+          <!-- Status message (errors only; success uses banner above) -->
+          <div id="ra-db-status" style="display:none;margin-top:10px;font-size:12px;border-radius:8px;padding:10px 14px;line-height:1.7;"></div>
+        </div><!-- /ra-import-db-body -->
+      </div>
+
       <!-- SEARCH PANEL -->
       <div class="ra-search-panel">
         <div class="ra-panel-header">
@@ -1557,9 +1678,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
             <div class="ra-filter-group">
               <label class="ra-filter-label">Publication Date</label>
               <div style="display:flex;align-items:center;gap:8px;">
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2024-01-01">
+                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-from-2" value="2020-04-01">
                 <span style="font-size:11px;color:#6b7280;flex-shrink:0;">→</span>
-                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2" value="2026-06-01">
+                <input class="ra-fuzzy-input" style="height:38px;" type="date" id="ra-date-to-2">
               </div>
             </div>
             <div class="ra-filter-group" style="justify-content:flex-end;">
@@ -2096,12 +2217,17 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     <div class="ml">
       <div id="ma-pubmed-wrap" style="display:none;"><div class="ms" style="border-top:none;padding-top:0;">Source</div><div class="plink" onclick="toast('🔬','Opening PubMed…')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M5 10.5V6l2.5 3L10 6v4.5"/></svg><span>View on PubMed — <strong id="ma-pmid"></strong></span><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="margin-left:auto;"><path d="M4 2h6v6M10 2L4.5 7.5"/></svg></div></div>
       <div id="ma-pdf-wrap" style="display:none;"><div class="ms">Attached Document</div><div class="pdf-blk" onclick="toast('📄','Opening PDF…')"><div class="pdf-ic"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h7l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M11 2v4h4"/><line x1="6" y1="9" x2="12" y2="9"/><line x1="6" y1="12" x2="10" y2="12"/></svg></div><div><div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;color:var(--navy);" id="ma-pdf-name">—</div><div style="font-size:11px;color:var(--text3);" id="ma-pdf-meta">PDF</div></div><button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="event.stopPropagation()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 2v6M3 7l3 3 3-3"/><line x1="1" y1="11" x2="11" y2="11"/></svg>Download</button></div></div>
-      <div class="ms" id="abs-header">Abstract</div>
-      <div class="abs-box" id="ma-abstract"></div>
+      <div class="ms" id="abs-header">Complete Article</div>
+      <div class="abs-box abs-box-collapsed" id="ma-abstract"></div>
+      <button class="abs-toggle" id="ma-abs-toggle" onclick="absToggle('ma-abstract','ma-abs-toggle')">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
+        View full article
+      </button>
       <div class="ms">AI Summary <span class="ai-b"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M4.5 .5l1 3.2H9L6.3 5.5l1 3.2-2.8-2L1.7 8.7l1-3.2L0 3.7h3.5L4.5.5z" fill="#7C3AED"/></svg>AI Generated</span></div>
       <div class="ai-sum-wrap"><div style="font-size:11px;color:var(--purple);font-weight:600;margin-bottom:8px;">Editable clinical summary for PMT sharing</div><textarea class="sum-ta" id="ma-summary"></textarea><div style="display:flex;justify-content:space-between;align-items:center;margin-top:7px;"><span style="font-size:10.5px;color:var(--purple);">Changes saved on approve</span><button class="btn btn-ghost btn-xs" onclick="regenSummary()" style="color:var(--purple);font-size:11px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 6a4 4 0 10-1.2 2.8"/><path d="M8 6.5l2.3-.8-.5 2.5"/></svg> Regenerate</button></div></div>
       <div class="ms">Publication Details</div>
       <div class="irows" id="ma-inforows"></div>
+      <div id="ma-review-history" style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;"></div>
     </div>
     <div class="mr">
       <div id="ma-notice"></div>
@@ -2187,12 +2313,17 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="flex:1;overflow-y:auto;padding:22px 24px;">
     <div class="ro-banner"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="5.5" width="8" height="5.5" rx="1"/><path d="M4 5.5V4a2 2 0 014 0v1.5"/></svg>View only — categorisation managed by Medical Affairs</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;" id="cv-cats"></div>
-    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;">Abstract</div>
-    <div class="abs-box" id="cv-abs"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Complete Article</div>
+    <div class="abs-box abs-box-collapsed" id="cv-abs"></div>
+    <button class="abs-toggle" id="cv-abs-toggle" onclick="absToggle('cv-abs','cv-abs-toggle')">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,3.5 5.5,7.5 9,3.5"/></svg>
+      View full article
+    </button>
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;display:flex;align-items:center;gap:8px;">AI Clinical Summary <span class="ai-b">AI</span></div>
     <div class="ai-sum-ro"><div style="font-size:12.5px;line-height:1.75;color:var(--text1);" id="cv-sum"></div></div>
     <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px;">Publication Details</div>
     <div class="irows" id="cv-info"></div>
+    <div id="cv-review-history" style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;"></div>
   </div>
   <div class="mf"><div style="font-size:12px;color:var(--text3);" id="cv-rec"></div><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="closeOv('cv-ov')">Close</button><button class="btn btn-navy" onclick="closeOv('cv-ov');openSend(CV_PAPER_ID)"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>Share with Doctors</button></div></div>
 </div>
@@ -2214,7 +2345,7 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
   <div style="padding:20px 24px;flex:1;overflow-y:auto;">
     <div class="impr-hint">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="7" cy="7" r="6"/><line x1="7" y1="4.5" x2="7" y2="7"/><circle cx="7" cy="9.5" r=".6" fill="currentColor"/></svg>
-      <div>Agent Beta will revise the content using your notes, then Gamma will reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval. Alpha is skipped — research is already done.</div>
+      <div>The AI will revise the content using your notes and reformat it. A new version (v2, v3…) will appear in <strong>Pending Review</strong> for your second-round approval.</div>
     </div>
     <label class="fl">Your Improvement Notes</label>
     <textarea class="impr-ta" id="impr-notes" placeholder="e.g. Fix the empagliflozin dose to 10mg. Reference ESC 2023 HF guidelines specifically. Remove any competitor drug mentions not in our portfolio."></textarea>
@@ -2231,9 +2362,9 @@ nav{padding:10px 8px;flex:1;overflow-y:auto;position:relative;z-index:2;}
     </div>
   </div>
   <div class="mf">
-    <div style="font-size:11.5px;color:var(--text3);">Alpha skipped · Beta rewrites · Gamma reformats · New version → Pending Review</div>
+    <div style="font-size:11.5px;color:var(--text3);" id="impr-footer-text">AI revises content · New version → Pending Review</div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
+      <button class="btn btn-outline btn-sm" onclick="closeOv('impr-ov')" id="impr-close-btn">Cancel</button>
       <button class="btn btn-sm" id="impr-submit-btn"
               style="background:var(--amber);color:#fff;"
               onclick="submitImprovementRequest()">
@@ -2914,87 +3045,6 @@ Would love your thoughts at your convenience!
 .wa-bbl-prev{background:white;border-radius:10px 10px 10px 0;padding:12px 14px;font-size:12.5px;line-height:1.7;color:var(--text1);box-shadow:0 1px 3px rgba(0,0,0,.1);max-width:96%;white-space:pre-wrap;}
 </style>
 
-<div class="ov" id="bcast-ov" onclick="if(event.target===this)closeOv('bcast-ov')">
-<div class="modal bcast-modal">
-  <div class="bcast-hdr">
-    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;position:relative;z-index:1;" id="bcast-icon-hdr">🪔</div>
-    <div style="flex:1;position:relative;z-index:1;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.38);text-transform:uppercase;margin-bottom:4px;" id="bcast-occ-type">Festival Broadcast</div>
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:#fff;margin-bottom:3px;" id="bcast-occ-name">Diwali Greetings</div>
-      <div style="font-size:11.5px;color:rgba(255,255,255,.55);" id="bcast-occ-date">October 2026</div>
-    </div>
-    <button onclick="closeOv('bcast-ov')" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;transition:background .15s;" onmouseenter="this.style.background='rgba(255,255,255,.22)'" onmouseleave="this.style.background='rgba(255,255,255,.12)'">
-      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="10" y2="10"/><line x1="10" y1="1" x2="1" y2="10"/></svg>
-    </button>
-  </div>
-
-  <div class="bcast-body">
-    <!-- Left: Doctor selection -->
-    <div class="bcast-left">
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;">Select Recipients</div>
-      <!-- Quick segments -->
-      <div style="margin-bottom:14px;">
-        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">Quick Select by Segment</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="bcast-segs">
-          <button class="seg-btn sb-on" onclick="toggleBcastSeg('all',this)">All Pinnacle (50)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('gynaec',this)">Gynaecologists (8)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('cardio',this)">Cardiologists (6)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('paeds',this)">Paediatricians (5)</button>
-          <button class="seg-btn" onclick="toggleBcastSeg('aplus',this)">A+ Only (22)</button>
-        </div>
-      </div>
-      <!-- Doctor chips -->
-      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-        <span>Individual Doctors</span>
-        <span style="font-size:11px;font-weight:600;color:var(--purple);cursor:pointer;" onclick="clearBcastDocs()">Clear all</span>
-      </div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;min-height:60px;margin-bottom:10px;" id="bcast-doc-chips"></div>
-      <!-- Mini doctor selector -->
-      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;margin-top:12px;">Add Doctor</div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;max-height:180px;overflow-y:auto;">
-        <div id="bcast-doc-list" style="display:flex;flex-direction:column;"></div>
-      </div>
-    </div>
-
-    <!-- Right: Message -->
-    <div class="bcast-right">
-      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;">Message</div>
-      <!-- Channel -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <div class="mcb on" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">💬</div><div class="mcb-lbl">WhatsApp</div></div>
-        <div class="mcb" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">✉️</div><div class="mcb-lbl">Email</div></div>
-        <div class="mcb" onclick="selMCh(this)" style="flex:1;"><div class="mcb-icon">📱</div><div class="mcb-lbl">Both</div></div>
-      </div>
-      <!-- AI drafted preview -->
-      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:7px;"><span>Message Preview</span><span class="ai-b">AI Drafted</span></div>
-      <div style="background:#E8F5E9;border-radius:12px;padding:12px;border:1px solid #C8E6C9;margin-bottom:12px;">
-        <div class="wa-bbl-prev" id="bcast-preview">Loading…</div>
-      </div>
-      <!-- Edit -->
-      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">Edit Message</div>
-      <textarea class="fta" id="bcast-msg" style="min-height:96px;width:100%;margin-bottom:10px;" oninput="document.getElementById('bcast-preview').textContent=this.value"></textarea>
-      <div style="background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--blue);display:flex;gap:7px;align-items:flex-start;">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;"><circle cx="6.5" cy="6.5" r="5.5"/><line x1="6.5" y1="4" x2="6.5" y2="6.5"/><circle cx="6.5" cy="9" r=".6" fill="currentColor"/></svg>
-        <span>Each message will be personalised with the doctor's name. Use {name} as a placeholder if not already present.</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <div class="mf" style="border-top:1px solid var(--border);background:var(--surface);">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div id="bcast-count-chip" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;color:var(--navy);"></div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline btn-sm" onclick="closeOv('bcast-ov')">Cancel</button>
-      <button class="btn" onclick="sendBroadcast()" style="background:linear-gradient(135deg,#4C1D95,#6D28D9);color:#fff;font-weight:700;">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 1L1 5l4 2 2 4 4.5-10z"/></svg>
-        <span id="bcast-send-lbl">Send Broadcast</span>
-      </button>
-    </div>
-  </div>
-</div>
-</div>
 
 <!-- ════ BROADCAST MODAL ════ -->
 <style>
@@ -3105,6 +3155,12 @@ let ALL_PAPERS = [
   {id:11,status:'rejected',src:'link',title:'Are Antidepressants Safe in Pregnancy? A Controversial Review',journal:'Medical News Today (Blog)',year:'2025',month:'Feb',authors:'Unknown',date:'2025-02-28',cat:'Gynaecology',therapy:'High-risk Pregnancy',sub:'Review Article',rel:'Low',tags:['Antidepressants','Pregnancy'],rec:'All Gynaecologists',abstract:'Blog post, conflicting opinions, no proper citations.',sum:'Non-peer-reviewed blog. Not suitable.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-28',rejNote:'Not peer-reviewed. Medical News Today is a news aggregator, not a journal.'},
   {id:12,status:'rejected',src:'pubmed',title:'European Hypertension Pharmacotherapy: 2024 Update',journal:'Blood Pressure Journal',year:'2024',month:'Apr',authors:'European Hypertension Society',pmid:'38290123',date:'2025-02-15',cat:'Cardiology',therapy:'Hypertension',sub:'Guideline / Consensus',rel:'Medium',tags:['Hypertension','European Guidelines'],rec:'All Cardiologists',abstract:'European hypertension guideline update. Limited Indian applicability.',sum:'European guideline — limited Indian relevance, different drug availability.',rev:'Dr. Prashant Agarwal',revDate:'2025-02-15',rejNote:'European cohorts, limited Indian relevance. Recommend Indian Hypertension Society guidelines.'},
 ];
+const SEED_PAPERS = ALL_PAPERS.slice()
+let _apiPapers = []
+
+function rebuildAllPapers() {
+  ALL_PAPERS = _apiPapers.length > 0 ? [..._apiPapers, ...SEED_PAPERS.slice()] : SEED_PAPERS.slice();
+}
 
 // Doctors from Pinnacle Content Engine + expanded with DMS / next-action data
 // Populated from API on first visit to Doctor Directory; 12 entries below act as fallback
@@ -3164,7 +3220,12 @@ let DOCTORS_LAST_FETCH = null;  // timestamp of last successful API fetch
 
 /* ── Map API doctor record → portal display format ─────────────────────────── */
 function mapAPIDoctor(d) {
-  const numId = parseInt(d.id.replace('DOC',''), 10);
+  let numId = parseInt(d.id.replace('DOC',''), 10);
+  if (isNaN(numId)) {
+    // Non-numeric CRM code (e.g. 'MH-001') — derive a stable positive number from
+    // the id so the row key, MR fallback and engagement-date math don't become NaN.
+    numId = Math.abs([...String(d.id||'')].reduce((h,c)=>((h<<5)-h+c.charCodeAt(0))|0,0)) % 100000 + 1;
+  }
   const nameParts = d.name.replace(/^Dr\.\s*/,'').split(' ');
   const init = nameParts.filter(p=>p).map(p=>p[0]).join('').substring(0,2).toUpperCase();
   const cat = d.tier === 'A' ? 'A+' : 'A';
@@ -3174,10 +3235,24 @@ function mapAPIDoctor(d) {
     'Orthopaedics':'Future','Dermatology':'Discovery','Ophthalmology':'Life',
     'General Medicine':'Gravitas','Paediatrics':'Life'
   };
-  const div = divMap[d.specialty] || 'Life';
-  const dm = d.patients_per_day * 5000;
-  const dms = Math.round(dm * (d.engagement_score / 100));
-  const real = d.engagement_score;
+  // Division — prefer the uploaded value; derive from specialty only if absent
+  const div = (d.division && String(d.division).trim()) || divMap[d.specialty] || 'Life';
+  // Parse the leading integer out of a free-form CRM cell ("52,000", "65%", "1.2L"→12).
+  const _digits = (s) => parseInt(String(s == null ? '' : s).replace(/[^\d]/g, ''), 10);
+  // DM / DMS — prefer the uploaded "DM & DMS" figures; else derive from patients/day
+  let dm = (typeof d.dm === 'number' && d.dm > 0) ? d.dm : (d.patients_per_day || 0) * 5000;
+  let dms;
+  const ddRaw = d.dm_dms ? String(d.dm_dms) : '';
+  if (ddRaw.includes('/')) {
+    const [a, b] = ddRaw.split('/').map(_digits);
+    if (a) dm = a;
+    if (b) dms = b;
+  }
+  // Share of Wallet % — prefer uploaded SOW; else fall back to engagement score
+  let real = d.engagement_score;
+  const sowNum = _digits(d.sow);
+  if (!isNaN(sowNum)) real = sowNum;
+  if (dms === undefined) dms = Math.round(dm * (real / 100));
   const score = d.pinnacle_score;
   let last = 'Never', days = 999;
   if (d.last_contacted) {
@@ -3190,7 +3265,7 @@ function mapAPIDoctor(d) {
   const status = score >= 70 ? 'high' : score >= 45 ? 'med' : 'low';
   const MRS = ['Ramesh Nair','Amit Verma','Prashant Das','Suresh Raj','Kiran Patel',
                'Neha Shinde','Anjana Pillai','Ravi Kumar','Suman Das','Vijay Mehta'];
-  const mr = MRS[(numId - 1) % MRS.length];
+  const mr = (d.mr_name && String(d.mr_name).trim()) || MRS[(numId - 1) % MRS.length];
   const intMap = {
     'Diabetology':['t2dm','sglt2','glp-1','insulin resistance'],
     'Endocrinology':['thyroid','t2dm','pcos','metabolic syndrome'],
@@ -3204,11 +3279,28 @@ function mapAPIDoctor(d) {
     'General Medicine':['t2dm','hypertension','infections','metabolic syndrome'],
     'Paediatrics':['paediatric nutrition','vaccination','iron deficiency','growth']
   };
-  const interests = intMap[d.specialty] || ['general medicine'];
-  const daysAhead = ((numId - 1) % 14) + 1;
-  const nxtObj = new Date(); nxtObj.setDate(nxtObj.getDate() + daysAhead);
+  // Clinical interests — prefer the uploaded list; else derive from specialty
+  let interests;
+  if (d.clinical_interests && String(d.clinical_interests).trim()) {
+    interests = String(d.clinical_interests).split(/[,;|/]+/).map(s => s.trim()).filter(Boolean);
+  }
+  if (!interests || !interests.length) interests = intMap[d.specialty] || ['General Medicine'];
+  // Next engagement — prefer the uploaded date; else synthesise one
   const NM = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const nextDate = daysAhead === 0 ? 'Today' : `${nxtObj.getDate()} ${NM[nxtObj.getMonth()]} ${nxtObj.getFullYear()}`;
+  let daysAhead = ((numId - 1) % 14) + 1;
+  let nextDate;
+  if (d.next_engagement && String(d.next_engagement).trim()) {
+    const ne = new Date(d.next_engagement);
+    if (!isNaN(ne.getTime())) {
+      nextDate = `${ne.getDate()} ${NM[ne.getMonth()]} ${ne.getFullYear()}`;
+      const today0 = new Date(); today0.setHours(0, 0, 0, 0);
+      daysAhead = Math.round((ne - today0) / 86400000);
+    }
+  }
+  if (!nextDate) {
+    const nxtObj = new Date(); nxtObj.setDate(nxtObj.getDate() + daysAhead);
+    nextDate = daysAhead === 0 ? 'Today' : `${nxtObj.getDate()} ${NM[nxtObj.getMonth()]} ${nxtObj.getFullYear()}`;
+  }
   let nextAction;
   const mod = numId % 10;
   if (days > 30) {
@@ -3225,7 +3317,11 @@ function mapAPIDoctor(d) {
   return {
     id:numId, name:d.name, init, spec:d.specialty, city:d.city,
     cat, div, dm, dms, real, score, last, days, mr, status,
-    interests, clinic:`${d.hospital}, ${d.city}`, nextDate, nextAction
+    interests, clinic:`${d.hospital}, ${d.city}`, nextDate, nextAction,
+    // Pass-through of real uploaded fields (used by Doctor 360 / future views)
+    email:d.email||'', whatsapp:d.whatsapp||'', designation:d.designation||'',
+    subSpecialty:d.sub_specialty||'', sow:d.sow||'', yearsExp:d.years_experience||'',
+    birthday:d.birthday||'', anniversary:d.anniversary||'', nextEngagement:d.next_engagement||''
   };
 }
 
@@ -3242,7 +3338,7 @@ async function loadDoctorsFromAPI() {
 
   try {
     // Cache-bust so browsers never serve stale data
-    const resp = await fetch('http://localhost:8010/doctors?_t=' + Date.now());
+    const resp = await fetch(PL_API + '/doctors?_t=' + Date.now());
     if (!resp.ok) throw new Error('API returned ' + resp.status);
     const data = await resp.json();
     DOCTORS = (data.doctors || []).map(mapAPIDoctor);
@@ -3251,11 +3347,12 @@ async function loadDoctorsFromAPI() {
     updateDoctorKPIs();
     populateDoctorFilters(data);
     renderDocs();
+    buildSidebarFooter(); // Refresh doctor count once real data arrives
   } catch(e) {
     if (!DOCTORS_LOADED) {
       // Only show error banner on first load; on refresh failure keep existing table
       if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:28px;">'
-        + '<div style="color:var(--amber);font-size:13px;font-weight:600;margin-bottom:6px;">⚠️ Could not reach backend API on localhost:8000</div>'
+        + '<div style="color:var(--amber);font-size:13px;font-weight:600;margin-bottom:6px;">⚠️ Could not reach backend API on port 8010</div>'
         + '<div style="color:var(--text3);font-size:12px;">Run <strong>START_DEMO.bat</strong> to start the server — showing cached data below.</div>'
         + '</td></tr>';
       renderDocs(); // still renders the 12 fallback doctors
@@ -3328,6 +3425,9 @@ function fmtDateTime(iso){
 function mdToHtml(text) {
   if (!text) return '';
   return text
+    // Escape HTML first so raw markup renders as text (not as broken/unsafe tags)
+    // and medical inequalities like "HbA1c <7%" or ">140 mmHg" display correctly.
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     // Markdown links: [text](url)
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">$1 ↗</a>')
@@ -3338,6 +3438,43 @@ function mdToHtml(text) {
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     // Newlines to <br>
     .replace(/\n/g, '<br>');
+}
+function buildReviewHistoryHTML(p) {
+  const hasReview = p.status === 'approved' || p.status === 'rejected' || p.rev;
+  const reviewer  = p.rev || (hasReview ? 'Medical Affairs' : '—');
+  const ts        = p.revDate ? fmtDate(p.revDate) : (hasReview ? 'Date not recorded' : '—');
+  // Rejection reason takes priority; improvement notes only count while the card
+  // is still pending — once approved they are not "approval comments".
+  const comments  = (p.rejNote && p.rejNote.trim())
+    || (p.status !== 'approved' && p.improvement_notes && p.improvement_notes.trim())
+    || 'NA';
+  const dotColor  = p.status === 'approved' ? 'var(--green)' : p.status === 'rejected' ? 'var(--red)' : 'var(--amber)';
+  const dotLabel  = p.status === 'approved' ? 'Approved' : p.status === 'rejected' ? 'Rejected' : 'Pending Review';
+  return `<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Review History</div>
+<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text2);">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;display:inline-block;"></span>
+    <span style="font-weight:700;color:var(--navy);">${dotLabel}</span>
+  </div>
+  <div style="display:grid;grid-template-columns:100px 1fr;gap:3px 10px;">
+    <span style="color:var(--text3);font-weight:600;">Reviewed by</span><span>${_esc(reviewer)}</span>
+    <span style="color:var(--text3);font-weight:600;">Date</span><span>${_esc(ts)}</span>
+    <span style="color:var(--text3);font-weight:600;">Comments</span><span style="font-style:${comments==='NA'?'italic':'normal'};color:${comments==='NA'?'var(--text4)':'var(--text1)'};">${_esc(comments)}</span>
+  </div>
+</div>`;
+}
+function stripRevisionNotes(text) {
+  if (!text) return text;
+  return text
+    .split('\n')
+    .filter(line =>
+      !/^\s*\[REVISION\b/i.test(line) &&
+      !/^\s*MA Notes?\s*:/i.test(line) &&
+      !/^\s*Reviewer?\s*Comments?\s*:/i.test(line) &&
+      !/^\s*\[MA Feedback/i.test(line)
+    )
+    .join('\n')
+    .replace(/^\s*\n/, '');
 }
 function fmtMoney(n){return n>=100000?`₹${(n/100000).toFixed(1)}L`:n>=1000?`₹${(n/1000).toFixed(0)}K`:`₹${n}`;}
 function srcPill(s){return s==='pubmed'?'<span class="sp sp-pm">PubMed</span>':s==='upload'?'<span class="sp sp-up">MA Upload</span>':s==='pipeline'?'<span class="sp" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#5B21B6;border:1px solid #DDD6FE;">AI Pipeline</span>':'<span class="sp sp-lk">Link</span>';}
@@ -3353,9 +3490,9 @@ function toggleRoleDropdown(e){
 document.addEventListener('click',()=>document.getElementById('role-switcher').classList.remove('open'));
 
 // Valid page IDs for each role — used to validate hash on load/switch
-const PAGES_MA    = ['content','pipeline','dashboard'];
-const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','pipeline','research-agent'];
-const PAGES_ADMIN = ['research-agent','pipeline'];
+const PAGES_MA    = ['content','dashboard'];
+const PAGES_PMT   = ['today','content','doctors','360','occasions','analytics','dashboard','research-agent'];
+const PAGES_ADMIN = ['research-agent'];
 
 function _getHashPage(){
   const h = location.hash.replace('#','');
@@ -3419,6 +3556,13 @@ function switchRole(role, skipHash){
     document.getElementById('sb-badge').className      = 'sb-role-badge rb-pmt';
   }
 
+  // Show/hide admin import card on Research Agent page
+  const importCard = document.getElementById('ra-import-db-card');
+  if (importCard) {
+    importCard.style.display = role === 'admin' ? 'block' : 'none';
+    if (role === 'admin') raDbRefreshLastInfo();
+  }
+
   buildSidebar();
   const hashPage   = _getHashPage();
   const validPages = role==='admin' ? PAGES_ADMIN : role==='ma' ? PAGES_MA : PAGES_PMT;
@@ -3430,6 +3574,7 @@ function switchRole(role, skipHash){
   buildCLTabs();
   buildSidebarFooter();
   buildTopbarActions();
+  rebuildAllPapers();
   if(role !== 'admin') renderCL();
   if(role==='pmt' && targetPage==='today') renderToday();
 }
@@ -3447,7 +3592,7 @@ function buildSidebar(){
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>`;
@@ -3461,7 +3606,7 @@ function buildSidebar(){
         Content Library
         <span class="nb nb-amber" id="nb-pend">${ALL_PAPERS.filter(p=>p.status==='pending').length}</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>
@@ -3512,13 +3657,13 @@ function buildSidebar(){
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="6" height="6" rx="1.5"/><rect x="10" y="2" width="6" height="6" rx="1.5"/><rect x="2" y="10" width="6" height="6" rx="1.5"/><rect x="10" y="10" width="6" height="6" rx="1.5"/></svg>
         Dashboard
       </div>
-      <div class="ng" style="margin-top:8px;">AI Pipeline</div>
-      <div class="ni" id="ni-research-agent" onclick="showPage('research-agent')">
+      <div class="ng" style="margin-top:8px;display:none;">AI Pipeline</div>
+      <div class="ni" id="ni-research-agent" onclick="showPage('research-agent')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="15" y2="15"/></svg>
         Research Agent
         <span class="nb nb-gold">New</span>
       </div>
-      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')">
+      <div class="ni" id="ni-pipeline" onclick="showPage('pipeline')" style="display:none;">
         <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="6.5" width="4" height="5" rx="1"/><rect x="7" y="6.5" width="4" height="5" rx="1"/><rect x="12.5" y="6.5" width="4" height="5" rx="1"/><line x1="5.5" y1="9" x2="7" y2="9"/><line x1="11" y1="9" x2="12.5" y2="9"/></svg>
         Research Pipeline
       </div>`;
@@ -3530,7 +3675,13 @@ function buildSidebarFooter(){
   if(ROLE==='admin'){
     foot.innerHTML=`<div class="sync-row"><div class="sdot" style="background:#C4B5FD;"></div>PubMed sync · active</div>`;
   } else if(ROLE==='pmt'){
-    foot.innerHTML=`<div class="sb-stats"><div class="sb-stat"><div class="sb-sv">50</div><div class="sb-sl">Doctors</div></div><div class="sb-stat"><div class="sb-sv">74%</div><div class="sb-sl">Coverage</div></div></div><div class="sync-row"><div class="sdot"></div>PubMed sync · 14 min ago</div>`;
+    // Derive division from CURRENT_USER.division (if set) or from unique divisions in DOCTORS
+    const curDiv = (CURRENT_USER && CURRENT_USER.division) || '';
+    const filtered = curDiv ? DOCTORS.filter(d=>(d.division||'').toLowerCase()===curDiv.toLowerCase()) : [];
+    // Doctors may not carry a division field (all uploaded belong to user's division) → show full count
+    const divDocs = filtered.length > 0 ? filtered.length : DOCTORS.length;
+    const divLabel = curDiv || 'All';
+    foot.innerHTML=`<div class="sb-stats"><div class="sb-stat"><div class="sb-sv">${divDocs}</div><div class="sb-sl">Doctors</div></div><div class="sb-stat"><div class="sb-sv" style="font-size:11px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${_esc(divLabel)}">${_esc(divLabel)}</div><div class="sb-sl">Division</div></div></div><div class="sync-row"><div class="sdot"></div>PubMed sync · 14 min ago</div>`;
   } else {
     foot.innerHTML=`<div class="sync-row" style="margin-bottom:6px;"><div class="sdot"></div>PubMed sync · 14 min ago · 3 new</div><div style="font-size:10px;color:rgba(255,255,255,.18);">Last review: Today 11:30 AM</div>`;
   }
@@ -3601,6 +3752,7 @@ function showPage(id, skipHash){
   if(id==='analytics' && typeof renderAnalytics==='function') renderAnalytics();
   if(id==='pipeline' && typeof plInitPage==='function') plInitPage();
   if(id==='doctors') loadDoctorsFromAPI();
+  if(id==='content') loadContentFromAPI();
   if(id==='dashboard') { loadDemoReport(); loadSharingReport(); }
   // Close sidebar on mobile after navigation
   if(window.innerWidth <= 768) closeSidebar();
@@ -3640,7 +3792,80 @@ function setCLView(v){
 function clearCLFilters(){
   ['cl-q','cl-cat','cl-th','cl-src','cl-from','cl-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const sort=document.getElementById('cl-sort'); if(sort) sort.value='new';
+  clHideSuggest();
   renderCL();
+}
+
+/* ══ CONTENT LIBRARY SEARCH — live filter + suggestions ══ */
+function clGetSearchablePapers(){
+  return ALL_PAPERS.filter(p=>{
+    if(ROLE==='pmt' && p.status!=='approved') return false;
+    return true;
+  });
+}
+let _clSearchTimer = null;
+function onCLSearchInput(){
+  clBuildSuggest();    // suggestion dropdown updates instantly (cheap)
+  // Debounce the expensive full-list re-filter+re-render so fast typing doesn't
+  // rebuild the whole grid on every keystroke. Enter / suggestion-click still
+  // call renderCL() directly for an immediate result.
+  clearTimeout(_clSearchTimer);
+  _clSearchTimer = setTimeout(renderCL, 160);
+}
+function clHideSuggest(){
+  const box=document.getElementById('cl-suggest');
+  if(box){box.style.display='none';box.innerHTML='';}
+}
+function clApplySuggest(val){
+  const inp=document.getElementById('cl-q');
+  if(inp) inp.value=val;
+  clHideSuggest();
+  renderCL();
+}
+function clBuildSuggest(){
+  const box=document.getElementById('cl-suggest');
+  if(!box) return;
+  const q=(document.getElementById('cl-q').value||'').trim().toLowerCase();
+  // Only start suggesting after the user has typed at least 2 characters
+  if(q.length<2){clHideSuggest();return;}
+  const papers=clGetSearchablePapers();
+  // Collect distinct category-style matches (therapy, specialty, tags) + title matches
+  const seen=new Set();
+  const cats=[];   // {label, type}
+  const addCat=(label,type)=>{
+    if(!label) return;
+    const key=type+'|'+label.toLowerCase();
+    if(seen.has(key)) return;
+    if(!label.toLowerCase().includes(q)) return;
+    seen.add(key);
+    cats.push({label,type});
+  };
+  for(const p of papers){
+    if(cats.length>=6) break;   // already have enough category suggestions
+    addCat(p.therapy,'Therapy');
+    addCat(p.cat,'Specialty');
+    (p.tags||[]).forEach(t=>addCat(t,'Tag'));
+  }
+  // Title matches (cap at 5)
+  const titles=[];
+  for(const p of papers){
+    if(titles.length>=5) break;
+    if((p.title||'').toLowerCase().includes(q)) titles.push({label:p.title,type:'Article'});
+  }
+  const items=[...cats.slice(0,6),...titles].slice(0,10);
+  if(!items.length){
+    box.innerHTML=`<div class="cl-sg-empty">No matches for “${_esc(q)}”</div>`;
+    box.style.display='block';
+    return;
+  }
+  const ico=`<svg width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="#9CA3AF" stroke-width="1.6" stroke-linecap="round"><circle cx="5" cy="5" r="4"/><line x1="8.5" y1="8.5" x2="12" y2="12"/></svg>`;
+  box.innerHTML=items.map(it=>{
+    const disp=it.type==='Article'&&it.label.length>52?it.label.slice(0,52)+'…':it.label;
+    // Pass the raw label via a data attribute (HTML-escaped) and read it back in
+    // the handler — avoids breaking out of the attribute / JS string on quotes.
+    return `<div class="cl-sg-item" data-val="${_esc(it.label||'')}" onmousedown="clApplySuggest(this.dataset.val)">${ico}<span>${_esc(disp)}</span><span class="cl-sg-type">${_esc(it.type)}</span></div>`;
+  }).join('');
+  box.style.display='block';
 }
 
 function getCLFiltered(){
@@ -3664,7 +3889,10 @@ function getCLFiltered(){
         if(CL_TAB!=='other' && p.cat!==CL_TAB) return false;
       }
     }
-    if(q && !p.title.toLowerCase().includes(q) && !p.journal.toLowerCase().includes(q) && !(p.authors||'').toLowerCase().includes(q)) return false;
+    if(q){
+      const hay=[p.title,p.journal,p.authors,p.therapy,p.cat,p.sub,p.sum,...(p.tags||[])].filter(Boolean).join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
     if(cat && p.cat!==cat) return false;
     if(th && p.therapy!==th) return false;
     if(src && p.src!==src) return false;
@@ -3693,17 +3921,27 @@ function renderCL(){
   else{c.innerHTML=`<div class="plist">${list.map(clRowHTML).join('')}</div>`;}
 }
 
-function clCardHTML(p){
+// Shared badge row for content cards/rows: specialty + (distinct) therapy + sub
+// category + up to 4 keyword tags. Used by both clCardHTML and clRowHTML so the
+// dedup/escape rules live in one place.
+function _catTherapyTagBadges(p){
   const cc=CAT_COL[p.cat]||'b-gray', tc=TH_COL[p.therapy]||'b-gray';
+  const therapyBadge = (p.therapy && p.therapy.toLowerCase()!==(p.cat||'').toLowerCase())
+    ? `<span class="badge ${tc}">${_esc(p.therapy)}</span>` : '';
+  const subBadge = p.sub ? `<span class="badge b-gray">${_esc(p.sub)}</span>` : '';
+  const tagBadges = (p.tags||[])
+    .filter(t=>t && t!==p.cat && t!==p.therapy && t!=='AI Pipeline')
+    .slice(0,4)
+    .map(t=>`<span class="badge b-gray">${_esc(t)}</span>`).join('');
+  return `<span class="badge ${cc}">${_esc(p.cat)}</span>${therapyBadge}${subBadge}${tagBadges}`;
+}
+function clCardHTML(p){
   const isMA=ROLE==='ma';
   const v = p.version || 1;
   // Handle both numeric (static) and string (API) IDs safely in onclick
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
-  const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
-    : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">✓ Approve</button>`:''}
        <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
@@ -3737,7 +3975,7 @@ function clCardHTML(p){
       <div class="pc-title">${p.title}</div>
       <div class="pc-j">${p.journal} · ${p.month} ${p.year}</div>
       <div class="pc-sum">${p.sum}</div>
-      <div class="pc-tags"><span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span>${relBadge(p.rel)}</div>
+      <div class="pc-tags">${_catTherapyTagBadges(p)}${relBadge(p.rel)}</div>
       ${pubBlock}
     </div>
     <div class="pc-foot"><div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;flex-shrink:0;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:nowrap;flex-shrink:0;">${actions}</div></div>
@@ -3745,16 +3983,12 @@ function clCardHTML(p){
 }
 
 function clRowHTML(p){
-  const cc=CAT_COL[p.cat]||'b-gray', tc=TH_COL[p.therapy]||'b-gray';
   const isMA=ROLE==='ma';
   const v = p.version || 1;
   const idArg = typeof p.id === 'string' ? `'${p.id}'` : p.id;
   const accClass=p.status==='approved'?'pr-acc-approved':p.status==='pending'?'pr-acc-pending':'pr-acc-rejected';
-  const improveBtn = (isMA && (p.status==='pending' || p.status==='rejected') && p._apiSource)
-    ? `<button class="btn btn-xs" style="background:var(--amber);color:#fff;padding:3px 7px;font-size:10px;" onclick="event.stopPropagation();openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Send back to agents for revision">⟳ Improve</button>`
-    : '';
   const actions=isMA
-    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>${improveBtn}`:p.status==='rejected'?improveBtn:''}
+    ? `${p.status==='pending'?`<button class="btn btn-green btn-xs" onclick="event.stopPropagation();quickApprove(${idArg})">Approve</button>`:''}
        <button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openMADetail(${idArg})">Open →</button>`
     : `<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();openCVModal(${idArg})">View</button>
        <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();openSend(${idArg})">Share</button>`;
@@ -3764,7 +3998,7 @@ function clRowHTML(p){
       <div class="pr-title">${p.title}${v>1?` <span class="ver-badge ver-latest">v${v}</span>`:''}</div>
       <div class="pr-meta"><span>${p.journal}</span><span>${p.authors.split(',')[0]} et al.</span><span>${p.month} ${p.year}</span>${p.pmid?`<span>PMID ${p.pmid}</span>`:''}</div>
       <div class="pr-sum">${p.sum}</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span></div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">${srcPill(p.src)}${_catTherapyTagBadges(p)}</div>
     </div>
     <div class="pr-right">${stBadge(p.status)}<div style="font-size:10.5px;color:var(--text4);font-weight:600;white-space:nowrap;">${p._createdAt ? fmtDateTime(p._createdAt) : fmtDate(p.date)}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">${actions}</div></div>
   </div>`;
@@ -3772,6 +4006,41 @@ function clRowHTML(p){
 
 /* ══ MA DETAIL MODAL ══ */
 const ICON_BG={Gynaecology:'var(--rose-bg)',Cardiology:'var(--red-bg)',Paediatrics:'var(--teal-bg)',Diabetology:'#EBF0F8',Dermatology:'var(--amber-bg)',Oncology:'var(--purple-bg)',Neurology:'var(--blue-bg)'};
+
+// Single source of truth for the collapsed/expanded article box state:
+// chevron rotation + label text are driven off the desired `collapsed` flag.
+function _setAbsState(box, btn, collapsed) {
+  if (box) box.classList.toggle('abs-box-collapsed', collapsed);
+  if (btn) {
+    const chevron = btn.querySelector('svg');
+    if (chevron) chevron.style.transform = collapsed ? '' : 'rotate(180deg)';
+    if (btn.lastChild) btn.lastChild.nodeValue = collapsed ? ' View full article' : ' View less';
+  }
+}
+
+function absToggle(boxId, btnId) {
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+  if (!box || !btn) return;
+  _setAbsState(box, btn, !box.classList.contains('abs-box-collapsed'));
+}
+
+function _absReset(boxId, btnId) {
+  _setAbsState(document.getElementById(boxId), document.getElementById(btnId), true);
+}
+
+// Sets a <select> value, adding the option dynamically if it's not already present
+function _setSelectVal(selectId, val) {
+  if (!val) return;
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  if (![...sel.options].some(o => o.value === val || o.text === val)) {
+    const opt = document.createElement('option');
+    opt.value = opt.text = val;
+    sel.appendChild(opt);
+  }
+  sel.value = val;
+}
 
 function openMADetail(id){
   const p=ALL_PAPERS.find(x=>x.id===id); if(!p) return;
@@ -3785,7 +4054,8 @@ function openMADetail(id){
   if(p.pmid){pmEl.style.display='block';document.getElementById('ma-pmid').textContent='PMID: '+p.pmid;}else pmEl.style.display='none';
   const pdfEl=document.getElementById('ma-pdf-wrap');
   if(p.pdf){pdfEl.style.display='block';document.getElementById('ma-pdf-name').textContent=p.pdf;document.getElementById('ma-pdf-meta').textContent=`PDF · ${p.pdfSz}`;}else pdfEl.style.display='none';
-  document.getElementById('ma-abstract').innerHTML = mdToHtml(p.abstract || '');
+  document.getElementById('ma-abstract').innerHTML = mdToHtml(stripRevisionNotes(p.abstract || ''));
+  _absReset('ma-abstract','ma-abs-toggle');
   document.getElementById('ma-summary').value=p.sum;
 
   // Build Publication Details rows — including a clickable Read More link
@@ -3803,10 +4073,11 @@ function openMADetail(id){
     p.pmid ? ['PubMed ID', p.pmid] : null,
     readMoreRow,
   ].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
-  document.getElementById('ma-cat').value=p.cat;
-  document.getElementById('ma-therapy').value=p.therapy;
-  document.getElementById('ma-sub').value=p.sub;
-  document.getElementById('ma-rec').value=p.rec;
+  document.getElementById('ma-review-history').innerHTML = buildReviewHistoryHTML(p);
+  _setSelectVal('ma-cat', p.cat);
+  _setSelectVal('ma-therapy', p.therapy);
+  _setSelectVal('ma-sub', p.sub);
+  _setSelectVal('ma-rec', p.rec);
   document.querySelectorAll('#ma-rel-opts .rel-opt').forEach(o=>{o.className='rel-opt';if(o.textContent.trim()===p.rel)o.classList.add(p.rel==='High'?'rel-h':p.rel==='Medium'?'rel-m':'rel-l');});
   renderTags();
   const n=document.getElementById('ma-notice');
@@ -3814,14 +4085,10 @@ function openMADetail(id){
   else if(p.status==='rejected'){n.innerHTML=`<div class="notice-red"><div class="notice-red-t">Rejected by ${p.rev||'MA'} on ${fmtDate(p.revDate)}</div><div class="notice-red-r">"${p.rejNote}"</div></div>`;}
   else if(p.improvement_notes){n.innerHTML=`<div style="background:var(--amber-bg);border-left:3px solid var(--amber);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--text2);"><strong style="color:var(--amber);">MA Improvement Notes:</strong> ${_esc(p.improvement_notes)}</div>`;}
   else n.innerHTML='';
-  // Improve button shown for pending API items
-  const improveHtml = (p._apiSource && p.status !== 'approved')
-    ? `<button class="btn btn-sm" style="background:var(--amber);color:#fff;" onclick="openImprovementModal('${p._apiId||''}','${(p.title||'').replace(/'/g,"\\'").slice(0,60)}')" title="Request AI improvement with MA notes"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 2.5L5.5 6M9 2.5H6.5M9 2.5V5"/><circle cx="4" cy="7" r="3" stroke-dasharray="2 1"/></svg> Improve</button>`
-    : '';
   const btns=document.getElementById('ma-action-btns');
   if(p.status==='approved'){btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button><button class="btn btn-sm" style="background:var(--blue);color:#fff;" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6.5h9M7 3l4 3.5L7 10" stroke-linejoin="round"/></svg>Save Changes</button>`;}
-  else if(p.status==='rejected'){btns.innerHTML=`${improveHtml}<button class="btn btn-green btn-sm" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Approve</button>`;}
-  else{btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button>${improveHtml}<button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Approve &amp; Save</button>`;}
+  else if(p.status==='rejected'){btns.innerHTML=`<button class="btn btn-green btn-sm" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Re-Approve</button>`;}
+  else{btns.innerHTML=`<button class="btn btn-red btn-sm" id="btn-rej" onclick="toggleReject()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>Reject</button><button class="btn btn-green" onclick="doApprove()"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7l3.5 3.5 5.5-6.5"/></svg>Approve &amp; Save</button>`;}
   document.getElementById('rej-wrap').classList.remove('show');
   openOv('ma-ov');
 }
@@ -3836,10 +4103,13 @@ function setRel(r,el){CUR_REL=r;document.querySelectorAll('#ma-rel-opts .rel-opt
 
 function doApprove(){
   const p=ALL_PAPERS.find(x=>x.id===CUR_ID); if(!p) return;
+  const wasRejected = p.status === 'rejected';
+  const toastMsg = wasRejected
+    ? `"${p.title.slice(0,44)}…" re-approved and live for PMT!`
+    : `"${p.title.slice(0,44)}…" approved and live for PMT!`;
   if(p._apiSource){
-    // API-sourced item: persist approval to backend
     fetch(PL_API+'/content/'+p._apiId+'/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer:'Dr. Prashant Agarwal (MA)'})})
-    .then(r=>{if(!r.ok)throw new Error('API error');p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);})
+    .then(r=>{if(!r.ok)throw new Error('API error');p.status='approved';p.rev='Dr. Prashant Agarwal';p.revDate=new Date().toISOString().slice(0,10);updCounts();renderCL();closeOv('ma-ov');toast('✅',toastMsg);})
     .catch(()=>toast('❌','Approval failed — check API connection'));
     return;
   }
@@ -3847,7 +4117,7 @@ function doApprove(){
   p.sum=document.getElementById('ma-summary').value;
   p.cat=document.getElementById('ma-cat').value;p.therapy=document.getElementById('ma-therapy').value;
   p.sub=document.getElementById('ma-sub').value;p.rel=CUR_REL||p.rel;p.tags=[...CUR_TAGS];
-  updCounts();renderCL();closeOv('ma-ov');toast('✅',`"${p.title.slice(0,44)}…" approved and live for PMT!`);
+  updCounts();renderCL();closeOv('ma-ov');toast('✅',toastMsg);
 }
 function quickApprove(id){
   const p=ALL_PAPERS.find(x=>x.id===id);if(!p)return;
@@ -3884,7 +4154,7 @@ function _showSendToAgentsPrompt(apiId, title, rejectionNotes) {
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="8.5"/><line x1="10" y1="6.5" x2="10" y2="11"/><circle cx="10" cy="13.5" r=".8" fill="#F59E0B" stroke="none"/></svg>
     <div style="flex:1;line-height:1.5;">
       <div style="font-weight:700;color:#F8FAFC;margin-bottom:2px;">Content rejected.</div>
-      <div style="color:#94A3B8;font-size:12px;">Send your feedback to Beta &amp; Gamma agents for a revised version?</div>
+      <div style="color:#94A3B8;font-size:12px;">Send your feedback to the AI for a revised version?</div>
     </div>
     <button id="_improve-yes-btn" style="background:#F59E0B;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">⟳ Yes, Revise It</button>
     <button onclick="this.closest('div').remove()" style="background:transparent;border:none;color:#64748B;font-size:20px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;">×</button>`;
@@ -3929,10 +4199,12 @@ function openCVModal(id){
   document.getElementById('cv-title').textContent=p.title;
   document.getElementById('cv-meta').innerHTML=`${srcPill(p.src)}<span class="badge b-green">✅ Approved</span><span class="badge b-gray">${fmtDate(p.date)}</span>`;
   document.getElementById('cv-cats').innerHTML=`<span class="badge ${cc}">${p.cat}</span><span class="badge ${tc}">${p.therapy}</span><span class="badge b-gray">${p.sub}</span>${relBadge(p.rel)}`;
-  document.getElementById('cv-abs').textContent=p.abstract;
+  document.getElementById('cv-abs').innerHTML=mdToHtml(stripRevisionNotes(p.abstract||p.sum||''));
+  _absReset('cv-abs','cv-abs-toggle');
   document.getElementById('cv-sum').textContent=p.sum;
   document.getElementById('cv-info').innerHTML=[['Journal',p.journal],['Authors',p.authors],['Published',`${p.month} ${p.year}`],p.pmid?['PubMed ID',p.pmid]:null].filter(Boolean).map(([l,v])=>`<div class="irow"><div class="il">${l}</div><div class="iv">${v}</div></div>`).join('');
   document.getElementById('cv-rec').innerHTML=`Recommended for: <strong>${p.rec}</strong>`;
+  document.getElementById('cv-review-history').innerHTML = buildReviewHistoryHTML(p);
   openOv('cv-ov');
 }
 
@@ -4389,15 +4661,19 @@ function buildAIRecs(paper){
   // Match doctors by specialty/interests to paper
   let matched = DOCTORS.filter(d=>{
     if(!paper) return d.score>=70;
-    const pCat = paper.cat.toLowerCase();
+    const pCat = (paper.cat||'').toLowerCase();
     const pTh  = (paper.therapy||'').toLowerCase();
     const dIntr = (d.interests||[]).join(' ').toLowerCase();
-    const dSpec = d.spec.toLowerCase();
-    return dSpec.includes(pCat.slice(0,6)) || pCat.includes(dSpec.slice(0,6))
-        || dIntr.includes(pTh.slice(0,6)) || dIntr.includes(pCat.slice(0,6));
+    const dSpec = (d.spec||'').toLowerCase();
+    // Full-word specialty match (avoids false short-prefix collisions)
+    const specMatch = dSpec.includes(pCat) || pCat.includes(dSpec)
+        || dSpec.includes(pCat.slice(0,6)) || pCat.includes(dSpec.slice(0,6));
+    const intrMatch = pTh && (dIntr.includes(pTh.slice(0,6)) || dIntr.includes(pCat.slice(0,6)));
+    return specMatch || intrMatch;
   });
-  if(matched.length===0) matched = DOCTORS.filter(d=>d.score>=70).slice(0,4);
-  matched = matched.slice(0,6);
+  if(matched.length===0) matched = DOCTORS.filter(d=>d.score>=70);
+  // Sort by score descending so highest-engagement doctors appear first
+  matched = matched.slice().sort((a,b)=>b.score-a.score);
   document.getElementById('ai-rec-count').textContent = matched.length;
 
   list.innerHTML = matched.map(d=>{
@@ -5758,7 +6034,11 @@ function sendBroadcast(){
 // Auto-detect API base URL:
 // - Local dev (Live Server on :5500 or :7788) → backend on localhost:8010
 // - Deployed (ngrok / cloud VM) → same origin (backend serves both HTML + API)
-const PL_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+// Use SAME-ORIGIN whenever the page is served by the backend (localhost OR
+// 127.0.0.1, any port) — avoids the localhost/127.0.0.1 cross-origin CORS trap
+// that caused "Failed to fetch". Only the Vite dev server (5173/3000) needs to
+// reach the backend on a different port.
+const PL_API = (window.location.port === '5173' || window.location.port === '3000')
   ? 'http://localhost:8010'
   : window.location.origin;
 let PL_TOPICS = [];          // [{topic, specialty, therapy_area}, ...]
@@ -5976,7 +6256,7 @@ function plRenderAgentOutput(agent, output) {
 
     if (summaries.length) {
       html += `<div class="pl-out-hdr" style="margin-bottom:10px;">
-        <span style="background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Beta</span>
+        <span style="background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;padding:2px 8px;border-radius:5px;font-size:9.5px;font-weight:700;margin-right:6px;">Insights</span>
         <strong style="font-size:13px;color:#7C3AED;">${summaries.length}</strong> paper${summaries.length!==1?'s':''} summarised
       </div>`;
       summaries.forEach(s => {
@@ -6467,6 +6747,8 @@ function openImprovementModal(contentId, title) {
   btn.textContent = '';
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polygon points="3,2 11,6.5 3,11" fill="currentColor"/></svg> Request Improvement';
   document.getElementById('impr-close-btn').textContent = 'Cancel';
+  const footerTxt = document.getElementById('impr-footer-text');
+  if (footerTxt) footerTxt.textContent = 'AI revises content · New version → Pending Review';
   openOv('impr-ov');
 }
 
@@ -6583,6 +6865,9 @@ function pollImprovementProgress() {
       if (data.status === 'completed') {
         clearInterval(_imprPollTimer);
         document.getElementById('impr-submit-btn').innerHTML = '✅ Done — View in Pending Review';
+        document.getElementById('impr-close-btn').textContent = 'Close';
+        const ft = document.getElementById('impr-footer-text');
+        if (ft) ft.textContent = 'AI revised content · New version → Pending Review';
         toast('✅', 'Improvement complete — new version pending MA review');
         if (typeof loadContentFromAPI === 'function') loadContentFromAPI();
         loadNotifications();
@@ -6746,7 +7031,7 @@ async function downloadExcelReport() {
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6" stroke-dasharray="30" stroke-dashoffset="10"><animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.8s" repeatCount="indefinite"/></circle></svg> Generating...';
 
   try {
-    const resp = await fetch('http://localhost:8010/report/download');
+    const resp = await fetch(PL_API + '/report/download');
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
       throw new Error(err.detail || 'Server returned ' + resp.status);
@@ -7363,9 +7648,11 @@ function mapAPIItemToPaper(item) {
   // Map backend status strings to the ALL_PAPERS status vocabulary
   const statusMap = {pending_review:'pending', approved:'approved', rejected:'rejected', improvement_requested:'pending'};
   const d = item.created_at ? new Date(item.created_at) : new Date();
-  // Extract a readable summary from the AI-generated content
+  // Prefer the dedicated summary field (200-300 words from Delta); fall back to truncated article
   const rawContent = item.short_article || item.content || item.article || '';
-  const summary = rawContent.replace(/#+\s*/g,'').slice(0,220).trim() || item.topic || '';
+  const summary = item.summary
+    ? item.summary.trim()
+    : rawContent.replace(/#+\s*/g,'').slice(0,300).trim() || item.topic || '';
   // Extract PubMed link: prefer explicit field, fallback to extracting from article text
   let _pubmed_link = item.pubmed_link || '';
   if (!_pubmed_link && rawContent) {
@@ -7392,11 +7679,11 @@ function mapAPIItemToPaper(item) {
     sub: item.sub_category || '',
     rec: 'All Specialists',
     rel: 'High',
-    tags: [item.specialty, item.therapy_area, 'AI Pipeline'].filter(Boolean),
+    tags: Array.isArray(item.tags) && item.tags.length ? item.tags : [item.specialty, item.therapy_area].filter(Boolean),
     src: 'AI Pipeline',
     status: statusMap[item.status] || 'pending',
     rev: item.reviewer || '',
-    revDate: '',
+    revDate: (item.reviewed_at || '').slice(0, 10),
     rejNote: item.reason || '',
     pmid: null, pdf: null,
     version: item.version || 1,
@@ -7408,24 +7695,15 @@ function mapAPIItemToPaper(item) {
   };
 }
 
-/* ══ LOAD CONTENT FROM API — merges into ALL_PAPERS ══ */
-let _apiContent = [];
+/* ══ LOAD CONTENT FROM API — rebuilds ALL_PAPERS via rebuildAllPapers ══ */
 
 async function loadContentFromAPI() {
   try {
     const res = await fetch(PL_API + '/content');
     if (!res.ok) return;
     const data = await res.json();
-    _apiContent = data.items || [];
-
-    // Remove any previously merged API items to prevent duplicates on re-fetch
-    ALL_PAPERS = ALL_PAPERS.filter(p => !p._apiSource);
-
-    // Convert and prepend so pipeline content appears at the top
-    const mapped = _apiContent.map(mapAPIItemToPaper);
-    ALL_PAPERS = [...mapped, ...ALL_PAPERS];
-
-    // Refresh counts, tabs and the full card list
+    _apiPapers = (data.items || []).map(mapAPIItemToPaper);
+    rebuildAllPapers();
     buildCLTabs();
     buildCLKpis();
     renderCL();
@@ -7448,16 +7726,17 @@ const USERS_DB = [
   {id:'admin4', name:'Admin 4',          email:'admin4@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A4'},
   {id:'admin5', name:'Admin 5',          email:'admin5@mankind.in',          role:'admin', category:'Admin',            designation:'System Administrator',        initials:'A5'},
   // ── Category 2: Business (PMT — full app view) ──
-  {id:'jijo',           name:'Jijo Kumar',        email:'jijo@mankind.in',              role:'pmt', category:'Business', designation:'BU Head · Life Division',         initials:'JK'},
-  {id:'rajesh_sharma',  name:'Rajesh Sharma',     email:'rajesh.sharma@mankind.in',     role:'pmt', category:'Business', designation:'NSM · National Sales Manager',     initials:'RS'},
-  {id:'priya_nair',     name:'Priya Nair',         email:'priya.nair@mankind.in',        role:'pmt', category:'Business', designation:'Marketing Head · Life Division',   initials:'PN'},
-  {id:'amit_verma',     name:'Amit Verma',         email:'amit.verma@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Cardiac Division',       initials:'AV'},
-  {id:'sunita_patel',   name:'Sunita Patel',       email:'sunita.patel@mankind.in',      role:'pmt', category:'Business', designation:'NSM · North Region',               initials:'SP'},
-  {id:'vikram_singh',   name:'Vikram Singh',       email:'vikram.singh@mankind.in',      role:'pmt', category:'Business', designation:'Marketing Head · Oncology',        initials:'VS'},
-  {id:'neha_gupta',     name:'Neha Gupta',         email:'neha.gupta@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Metabolic Division',     initials:'NG'},
-  {id:'arjun_mehta',    name:'Arjun Mehta',        email:'arjun.mehta@mankind.in',       role:'pmt', category:'Business', designation:'NSM · West Region',                initials:'AM'},
-  {id:'deepa_krishnan', name:'Deepa Krishnan',     email:'deepa.krishnan@mankind.in',    role:'pmt', category:'Business', designation:'Marketing Head · Neurology',       initials:'DK'},
-  {id:'rahul_agarwal',  name:'Rahul Agarwal',      email:'rahul.agarwal@mankind.in',     role:'pmt', category:'Business', designation:'BU Head · GI Division',            initials:'RA'},
+  // division must match the "division" field in the uploaded doctors sheet exactly
+  {id:'jijo',           name:'Jijo Kumar',        email:'jijo@mankind.in',              role:'pmt', category:'Business', designation:'BU Head · Life Division',         initials:'JK', division:'3D Mankind'},
+  {id:'rajesh_sharma',  name:'Rajesh Sharma',     email:'rajesh.sharma@mankind.in',     role:'pmt', category:'Business', designation:'NSM · National Sales Manager',     initials:'RS', division:''},
+  {id:'priya_nair',     name:'Priya Nair',         email:'priya.nair@mankind.in',        role:'pmt', category:'Business', designation:'Marketing Head · Life Division',   initials:'PN', division:'3D Mankind'},
+  {id:'amit_verma',     name:'Amit Verma',         email:'amit.verma@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Cardiac Division',       initials:'AV', division:''},
+  {id:'sunita_patel',   name:'Sunita Patel',       email:'sunita.patel@mankind.in',      role:'pmt', category:'Business', designation:'NSM · North Region',               initials:'SP', division:''},
+  {id:'vikram_singh',   name:'Vikram Singh',       email:'vikram.singh@mankind.in',      role:'pmt', category:'Business', designation:'Marketing Head · Oncology',        initials:'VS', division:''},
+  {id:'neha_gupta',     name:'Neha Gupta',         email:'neha.gupta@mankind.in',        role:'pmt', category:'Business', designation:'BU Head · Metabolic Division',     initials:'NG', division:''},
+  {id:'arjun_mehta',    name:'Arjun Mehta',        email:'arjun.mehta@mankind.in',       role:'pmt', category:'Business', designation:'NSM · West Region',                initials:'AM', division:''},
+  {id:'deepa_krishnan', name:'Deepa Krishnan',     email:'deepa.krishnan@mankind.in',    role:'pmt', category:'Business', designation:'Marketing Head · Neurology',       initials:'DK', division:''},
+  {id:'rahul_agarwal',  name:'Rahul Agarwal',      email:'rahul.agarwal@mankind.in',     role:'pmt', category:'Business', designation:'BU Head · GI Division',            initials:'RA', division:''},
   // ── Category 3: Medical Affairs ──
   {id:'prashant_agarwal', name:'Dr. Prashant Agarwal', email:'prashant.agarwal@mankind.in', role:'ma', category:'Medical Affairs', designation:'Medical Affairs · MA Lead',    initials:'PA'},
   {id:'anita_sharma',     name:'Dr. Anita Sharma',     email:'anita.sharma@mankind.in',     role:'ma', category:'Medical Affairs', designation:'Medical Affairs · Cardiology', initials:'AS'},
@@ -7513,6 +7792,11 @@ function doLogout() {
 }
 
 function initApp() {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const _ystr = yesterday.toISOString().slice(0, 10);
+  const _dtEl = document.getElementById('ra-date-to-2');
+  if(_dtEl) _dtEl.value = _ystr;
   const loggedIn = localStorage.getItem('pinnacle_logged_in') === 'true';
   const userId   = localStorage.getItem('pinnacle_user_id');
   const savedRole= localStorage.getItem('pinnacle_role') || 'pmt';
@@ -7543,6 +7827,149 @@ initApp();
 
 // In-memory cache of suggestions loaded from backend
 // Structure: { therapy_area: { recent: [...], defaults: [...] }, disease: {...}, keywords: {...} }
+// ── Doctor Database Import (Admin only) ────────────────────────────────────
+let RA_DB_FILE = null;
+let RA_DB_EXPANDED = false;
+
+function raDbToggle() {
+  RA_DB_EXPANDED = !RA_DB_EXPANDED;
+  const body    = document.getElementById('ra-import-db-body');
+  const chevron = document.getElementById('ra-db-chevron');
+  const label   = document.getElementById('ra-db-toggle-label');
+  if (body)    body.style.display = RA_DB_EXPANDED ? 'block' : 'none';
+  if (chevron) chevron.style.transform = RA_DB_EXPANDED ? 'rotate(180deg)' : 'rotate(0deg)';
+  if (label)   label.childNodes[0].nodeValue = RA_DB_EXPANDED ? 'Hide Import Tool ' : 'Show Import Tool ';
+  if (RA_DB_EXPANDED) raDbRefreshLastBanner();
+}
+
+// Persist last-upload record to localStorage and refresh UI
+function raDbSaveLastUpload(record) {
+  try { localStorage.setItem('pinnacleiq_last_doctor_upload', JSON.stringify(record)); } catch(_) {}
+  raDbRefreshLastInfo();
+  raDbRefreshLastBanner();
+}
+
+function raDbReadLastUpload() {
+  try { return JSON.parse(localStorage.getItem('pinnacleiq_last_doctor_upload') || 'null'); } catch(_) { return null; }
+}
+
+// Update the compact "Last updated" line in the always-visible header
+function raDbRefreshLastInfo() {
+  const el = document.getElementById('ra-db-last-info');
+  if (!el) return;
+  const rec = raDbReadLastUpload();
+  if (!rec) { el.textContent = ''; return; }
+  const d = new Date(rec.ts);
+  const fmt = d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  el.innerHTML = '· Last updated: <strong style="color:#4a637a;">' + rec.file + '</strong> on ' + fmt + ' (' + rec.total + ' doctors)';
+}
+
+// Update the green success banner inside the collapsed body
+function raDbRefreshLastBanner() {
+  const banner   = document.getElementById('ra-db-last-banner');
+  const titleEl  = document.getElementById('ra-db-last-banner-title');
+  const subEl    = document.getElementById('ra-db-last-banner-sub');
+  if (!banner) return;
+  const rec = raDbReadLastUpload();
+  if (!rec) { banner.style.display = 'none'; return; }
+  const d = new Date(rec.ts);
+  const fmt = d.toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  if (titleEl) titleEl.textContent = '✓ Doctor database is up to date — ' + rec.total + ' doctors loaded';
+  if (subEl)   subEl.textContent   = 'Last file: ' + rec.file + '  ·  Uploaded on ' + fmt + (rec.specialties?.length ? '  ·  Specialties: ' + rec.specialties.join(', ') : '');
+  banner.style.display = 'flex';
+}
+
+function raDbOnDrop(e) {
+  e.preventDefault();
+  const dz = document.getElementById('ra-db-dropzone');
+  if (dz) { dz.style.borderColor = '#d1dce8'; dz.style.background = '#f9fbfd'; }
+  const f = e.dataTransfer?.files?.[0];
+  if (f) raDbSetFile(f);
+}
+
+function raDbOnFileSelect(e) {
+  const f = e.target.files?.[0];
+  if (f) raDbSetFile(f);
+}
+
+function raDbSetFile(f) {
+  if (!f.name.toLowerCase().match(/\.(xlsx|xls)$/)) {
+    raDbShowStatus('Only .xlsx or .xls files are accepted.', 'error');
+    return;
+  }
+  RA_DB_FILE = f;
+  const nameEl = document.getElementById('ra-db-file-name');
+  const infoEl = document.getElementById('ra-db-file-info');
+  const btnEl  = document.getElementById('ra-db-upload-btn');
+  const statEl = document.getElementById('ra-db-status');
+  if (nameEl) nameEl.textContent = f.name + ' (' + (f.size / 1024).toFixed(0) + ' KB)';
+  if (infoEl) infoEl.style.display = 'flex';
+  if (btnEl)  btnEl.style.display  = 'flex';
+  if (statEl) statEl.style.display = 'none';
+}
+
+function raDbClearFile() {
+  RA_DB_FILE = null;
+  const infoEl = document.getElementById('ra-db-file-info');
+  const btnEl  = document.getElementById('ra-db-upload-btn');
+  const statEl = document.getElementById('ra-db-status');
+  const finput = document.getElementById('ra-db-file-input');
+  if (infoEl) infoEl.style.display = 'none';
+  if (btnEl)  btnEl.style.display  = 'none';
+  if (statEl) statEl.style.display = 'none';
+  if (finput) finput.value = '';
+}
+
+async function raDbUpload() {
+  if (!RA_DB_FILE) return;
+  const btn  = document.getElementById('ra-db-upload-btn');
+  const spin = document.getElementById('ra-db-uploading');
+  if (btn)  btn.style.display  = 'none';
+  if (spin) spin.style.display = 'flex';
+  const statEl = document.getElementById('ra-db-status');
+  if (statEl) statEl.style.display = 'none';
+
+  try {
+    const form = new FormData();
+    form.append('file', RA_DB_FILE);
+    const res  = await fetch(PL_API + '/admin/upload-doctors', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Upload failed');
+
+    // Save record + refresh header info + banner
+    raDbSaveLastUpload({ file: RA_DB_FILE.name, ts: Date.now(), total: data.total, specialties: data.specialties || [] });
+
+    const tb = data.tier_breakdown || {};
+    raDbShowStatus(
+      '✓ <strong>' + data.total + ' doctors imported</strong> · ' +
+      'Tier A: ' + (tb.A||0) + ' · B: ' + (tb.B||0) + ' · C: ' + (tb.C||0) +
+      (data.cities?.length ? ' · Cities: ' + data.cities.slice(0,5).join(', ') + (data.cities.length>5?'…':'') : ''),
+      'success'
+    );
+    raDbClearFile();
+    DOCTORS_LOADED = false;
+    if (typeof loadDoctorsFromAPI === 'function') loadDoctorsFromAPI();
+  } catch(err) {
+    raDbShowStatus('Upload failed: ' + err.message, 'error');
+  } finally {
+    if (btn)  btn.style.display  = 'flex';
+    if (spin) spin.style.display = 'none';
+  }
+}
+
+function raDbShowStatus(msg, type) {
+  const el = document.getElementById('ra-db-status');
+  if (!el) return;
+  const styles = {
+    info:    'background:#EBF0F8;border:1px solid #c7d7ea;color:#1a2e42;',
+    success: 'background:#f0fdf4;border:1px solid #86efac;color:#166534;',
+    error:   'background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;',
+  };
+  el.style.cssText = 'display:block;margin-top:10px;font-size:12px;border-radius:8px;padding:10px 14px;line-height:1.7;' + (styles[type] || styles.info);
+  el.innerHTML = msg;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 let RA_SUGGESTIONS_CACHE = null;
 
 // Map frontend filter names to backend section names
@@ -7635,10 +8062,10 @@ function raShowDropdown(filterType) {
   const allSuggestions = raGetSuggestions(filterType);
   const filtered = raFuzzyMatch(query, allSuggestions);
 
-  // How many recent items exist (to show a separator)
-  const recentCount = RA_SUGGESTIONS_CACHE
-    ? (RA_SUGGESTIONS_CACHE[section]?.recent?.length || 0)
-    : 0;
+  // Cap recent items at 2
+  const MAX_RECENT = 2;
+  const rawRecent = RA_SUGGESTIONS_CACHE ? (RA_SUGGESTIONS_CACHE[section]?.recent || []) : [];
+  const recentCount = Math.min(rawRecent.length, MAX_RECENT);
 
   dropdown.classList.remove('hidden');
 
@@ -7650,19 +8077,20 @@ function raShowDropdown(filterType) {
   } else if (filtered.length === 0) {
     dropdown.innerHTML = '<div class="ra-dropdown-empty">No suggestions available</div>';
   } else {
+    // When not filtering, cap the recent items shown at MAX_RECENT
+    const displayList = !query
+      ? [...filtered.slice(0, recentCount), ...filtered.slice(recentCount)]
+      : filtered;
     let html = '';
-    // If not filtering (empty query), show recent header
     if (!query && recentCount > 0) {
-      html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;">Recent Searches</div>';
+      html += '<div style="padding:5px 12px 4px;font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;">Recent</div>';
     }
-    filtered.forEach((item, idx) => {
-      // Add separator between recent and defaults when showing full list
+    displayList.forEach((item, idx) => {
       if (!query && idx === recentCount && recentCount > 0) {
-        html += '<div style="padding:6px 12px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;background:#f9fbfd;border-top:1.5px solid #e2eaf2;">All Suggestions</div>';
+        html += '<div style="height:1px;background:#e5e7eb;margin:4px 0;"></div>';
       }
-      const isRecent = !query && idx < recentCount;
-      html += `<div class="ra-dropdown-item${isRecent ? ' selected' : ''}" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
-        ${isRecent ? '🕐 ' : ''}${item}
+      html += `<div class="ra-dropdown-item" onmousedown="event.preventDefault()" onclick="raSelectFilterOption('${filterType}', '${item.replace(/'/g, "\\'")}')">
+        ${item}
       </div>`;
     });
     dropdown.innerHTML = html;
@@ -7867,7 +8295,7 @@ async function raRunDynamicSearch() {
       body: JSON.stringify({
         topic: topic,
         specialty: therapyArea || 'General Medicine',
-        therapy_area: therapyArea || 'General',
+        therapy_area: disease || therapyArea || 'General',
         keywords: keywords
       })
     });
@@ -7998,14 +8426,14 @@ async function raDisplayDynamicResults(contentIds) {
 
 function raResetForm(suffix = '') {
   const suffix_str = suffix ? `-${suffix}` : '';
-  // Only clear filter inputs — never hide or remove generated articles
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
   document.getElementById(`ra-therapy${suffix_str}`).value = '';
   document.getElementById(`ra-disease${suffix_str}`).value = '';
   document.getElementById(`ra-keywords${suffix_str}`).value = '';
-  document.getElementById(`ra-date-from${suffix_str}`).value = '2024-01-01';
-  document.getElementById(`ra-date-to${suffix_str}`).value = '2026-06-01';
+  document.getElementById(`ra-date-from${suffix_str}`).value = '2020-04-01';
+  document.getElementById(`ra-date-to${suffix_str}`).value = yesterday.toISOString().slice(0, 10);
   document.getElementById(`ra-search-btn${suffix_str}`).disabled = false;
-  // Clear keyword chips and active filters (UI only, not results)
   raClearAllFilters();
 }
 

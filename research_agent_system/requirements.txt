@@ -4,9 +4,13 @@ langchain-core>=0.3.0
 langchain-community>=0.3.0
 langchain-anthropic>=0.3.0
 langchain-openai>=0.2.0
+# LangGraph — provides create_react_agent used by Agent Alpha (required)
+langgraph>=0.2.0
 
 # Search
 tavily-python>=0.3.0
+# LangChain Tavily integration — provides langchain_tavily.TavilySearch (required by tools/search.py)
+langchain-tavily>=0.1.0
 
 # Microsoft OneDrive / Graph API
 msal>=1.28.0

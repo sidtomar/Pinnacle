@@ -31,3 +31,4 @@ research_agent_system/outputs/
 # OS
 .DS_Store
 Thumbs.db
+.claude/worktrees/

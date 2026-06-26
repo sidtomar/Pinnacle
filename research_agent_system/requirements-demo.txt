@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# DEMO / real-pipeline requirements (SQLite store, no Databricks).
+#
+# Use this for running the in-app Research Agent in REAL mode without the heavy
+# Azure Databricks packages (which can be slow/fail to build on Windows and are
+# only needed when STORE_BACKEND=databricks or Databricks vector search is used —
+# both imported lazily, so unnecessary for the SQLite demo).
+#
+#   pip install -r requirements-demo.txt
+#
+# For the full production set (incl. Databricks), use requirements.txt instead.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Core LangChain
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-anthropic>=0.3.0
+langchain-openai>=0.2.0
+# LangGraph — provides create_react_agent used by Agent Alpha (required)
+langgraph>=0.2.0
+
+# Search
+tavily-python>=0.3.0
+# LangChain Tavily integration — langchain_tavily.TavilySearch (required by tools/search.py)
+langchain-tavily>=0.1.0
+
+# Document tools (tools/__init__.py imports these eagerly)
+msal>=1.28.0
+requests>=2.31.0
+python-docx>=1.1.0
+PyPDF2>=3.0.0
+openpyxl>=3.1.0
+
+# Delivery stubs (imported eagerly by tools/__init__.py even if unused in the demo)
+twilio>=9.0.0
+sendgrid>=6.11.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+tenacity>=8.2.0
+
+# Scheduling (daily doctor sync + content generation)
+apscheduler>=3.10.4
