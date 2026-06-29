@@ -1,14 +1,14 @@
 # PinnacleIQ — Project Memory File
 
 > **Purpose:** Single source of truth for Claude sessions. Pick this up at the start of every session.
-> **Last updated:** 2026-06-22 | All fixes merged to `main` at `D:\Codebase\Pinnacle`
+> **Last updated:** 2026-06-22 | All fixes merged to `main` at `D:\Codebase_Azure\Pinnacle`
 
 ---
 ---
 
 ## 0. Development Workflow (ALWAYS FOLLOW)
 
-**Rule 1 — All code changes go in `D:\Codebase\Pinnacle` only.**
+**Rule 1 — All code changes go in `D:\Codebase_Azure\Pinnacle` only.**
 Never edit the worktree or any other location unless explicitly asked.
 User reviews code in VSCode from the local repo — changes elsewhere are invisible.
 
@@ -34,11 +34,11 @@ User reviews code in VSCode from the local repo — changes elsewhere are invisi
 
 ```powershell
 # Run from MAIN REPO (recommended — all fixes are here)
-cd D:\Codebase\Pinnacle\demo\backend
+cd D:\Codebase_Azure\Pinnacle\demo\backend
 python app.py
 
 # OR use the one-click launcher from repo root:
-cd D:\Codebase\Pinnacle
+cd D:\Codebase_Azure\Pinnacle
 .\start_app.ps1
 
 # Then open: http://127.0.0.1:8010/app
@@ -199,7 +199,7 @@ cd D:\Codebase\Pinnacle
 
 ## 8. Test Coverage
 
-### Automated Tests — last run 2026-06-19 against `D:\Codebase\Pinnacle` (main)
+### Automated Tests — last run 2026-06-19 against `D:\Codebase_Azure\Pinnacle` (main)
 
 | File | Cases | Result | Login |
 |------|-------|--------|-------|
@@ -209,13 +209,13 @@ cd D:\Codebase\Pinnacle
 | **Total JS** | **125** | ✅ **125/125** | |
 
 **How to run JS tests:**
-1. `cd D:\Codebase\Pinnacle\demo\backend && python app.py`
+1. `cd D:\Codebase_Azure\Pinnacle\demo\backend && python app.py`
 2. Open `http://127.0.0.1:8010/app`, log in with the role above
 3. Open DevTools Console (F12) → paste the test file → Enter
 
 **Note:** After running tests, `filter_suggestions.txt` may get RECENT markers. Reset with:
 ```powershell
-git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
+git checkout demo/filter_suggestions.txt   # from D:\Codebase_Azure\Pinnacle
 ```
 
 ### Manual Test Checklist
@@ -271,5 +271,5 @@ git checkout demo/filter_suggestions.txt   # from D:\Codebase\Pinnacle
 | 2026-06-19 | Occasion Hub: added `/occasions` API, fixed empty grid, fixed broadcast modal duplicate ID bug, fixed Doctors' Day tag (medical→national). 60/60 JS tests passing. Committed all files |
 | 2026-06-19 | Research Agent: seeded `filter_suggestions.txt`, fixed `raLoadSuggestions()` to always merge hardcoded defaults. 65/65 JS tests passing. Login credentials corrected (prashant.agarwal@mankind.in) |
 | 2026-06-19 | Research Agent onfocus fix, SQLite DB path fix, Chrome launch. DB now always resolves to `demo/backend/pinnacleiq_demo.db`. 1086-item DB (91 approved) restored from main repo. |
-| 2026-06-19 | **Merged worktree → main.** All fixes in `D:\Codebase\Pinnacle` (main). Ran 125 JS tests against main — 125/125 pass. Cleaned up `filter_suggestions.txt`. App runs from `D:\Codebase\Pinnacle\demo\backend\python app.py`. |
+| 2026-06-19 | **Merged worktree → main.** All fixes in `D:\Codebase_Azure\Pinnacle` (main). Ran 125 JS tests against main — 125/125 pass. Cleaned up `filter_suggestions.txt`. App runs from `D:\Codebase_Azure\Pinnacle\demo\backend\python app.py`. |
 | 2026-06-22 | Ran app (already live on 8010). Fixed admin login: documented `admin@mankind.in`/`Admin123` didn't exist in `USERS_DB` (only `admin1..5`). Added the account + per-user `pwd` support in `PinnacleIQ_Portal.html`. Committed on `feat/admin-login-credentials`, merged to `main` (no-ff). Reset test-polluted `filter_suggestions.txt`. Documented login mechanics in §3. **Note:** `main` is ~50 commits ahead of `origin/main` — not pushed yet (remote: `github.com/sidtomar/Pinnacle.git`). |
