@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#c8a84e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/pwa/manifest.json">
+<link rel="icon" href="/pwa/icon-192.svg">
+<link rel="apple-touch-icon" href="/pwa/icon-192.svg">
+<title>PinnacleIQ Share</title>
+<style>
+:root {
+  --navy: #0a1628;
+  --navy-light: #132038;
+  --navy-mid: #1a2d4a;
+  --gold: #c8a84e;
+  --gold-light: #e8d392;
+  --green: #27ae60;
+  --red: #e74c3c;
+  --amber: #f39c12;
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --text-sec: #666;
+  --radius: 14px;
+  --shadow: 0 2px 12px rgba(0,0,0,.08);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+  min-height: 100dvh;
+}
+button { font-family: inherit; cursor: pointer; border: none; }
+input, select, textarea { font-family: inherit; font-size: 16px; }
+
+/* ── Login ─────────────────────────────────────────── */
+.login-wrap {
+  min-height: 100dvh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(145deg, var(--navy) 0%, var(--navy-light) 100%);
+  padding: 24px;
+}
+.login-logo { color: var(--gold); font-size: 32px; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; }
+.login-sub { color: rgba(255,255,255,.5); font-size: 13px; margin-bottom: 32px; }
+.login-card {
+  background: var(--card); border-radius: var(--radius); padding: 28px 24px;
+  width: 100%; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,.25);
+}
+.login-card h2 { font-size: 18px; margin-bottom: 20px; text-align: center; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-sec); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.form-group input {
+  width: 100%; padding: 12px 14px; border: 1.5px solid #dde; border-radius: 10px;
+  background: #f8f9fb; font-size: 15px; transition: border-color .2s;
+}
+.form-group input:focus { outline: none; border-color: var(--gold); background: #fff; }
+.login-btn {
+  width: 100%; padding: 14px; background: var(--gold); color: var(--navy);
+  font-size: 15px; font-weight: 700; border-radius: 10px;
+  transition: opacity .2s;
+}
+.login-btn:active { opacity: .8; }
+.login-err { color: var(--red); font-size: 13px; text-align: center; margin-top: 12px; min-height: 18px; }
+
+/* ── App Shell ─────────────────────────────────────── */
+.app-shell { display: none; flex-direction: column; min-height: 100dvh; }
+.app-shell.on { display: flex; }
+
+/* Top Bar */
+.top-bar {
+  background: var(--navy); color: #fff; padding: calc(12px + var(--safe-top)) 16px 12px;
+  display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100;
+}
+.top-bar-logo { color: var(--gold); font-weight: 800; font-size: 18px; }
+.top-bar-spacer { flex: 1; }
+.top-bar-user {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--navy-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--gold); cursor: pointer;
+}
+
+/* Tab Bar */
+.tab-bar {
+  display: flex; background: var(--card); border-bottom: 1px solid #eee;
+  position: sticky; top: calc(58px + var(--safe-top)); z-index: 99;
+}
+.tab-item {
+  flex: 1; text-align: center; padding: 10px 0 8px; font-size: 12px; font-weight: 600;
+  color: var(--text-sec); border-bottom: 2.5px solid transparent; transition: all .2s;
+  cursor: pointer;
+}
+.tab-item.on { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* Content area */
+.content-area { flex: 1; padding: 12px 12px calc(12px + var(--safe-bottom)); }
+
+/* ── Search Bar ────────────────────────────────────── */
+.search-bar {
+  display: flex; gap: 8px; margin-bottom: 12px; position: sticky;
+  top: calc(98px + var(--safe-top)); z-index: 50; background: var(--bg); padding: 4px 0 8px;
+}
+.search-input {
+  flex: 1; padding: 10px 14px 10px 36px; border: 1.5px solid #dde;
+  border-radius: 10px; font-size: 14px; background: var(--card);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 12px center;
+}
+.search-input:focus { outline: none; border-color: var(--gold); }
+.filter-btn {
+  padding: 10px 14px; border-radius: 10px; background: var(--card);
+  border: 1.5px solid #dde; font-size: 13px; font-weight: 600; color: var(--text-sec);
+  white-space: nowrap;
+}
+.filter-btn.active { border-color: var(--gold); color: var(--gold); }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.filter-chip {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  background: var(--card); border: 1.5px solid #dde; color: var(--text-sec); cursor: pointer;
+}
+.filter-chip.on { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+
+/* ── Article Card ──────────────────────────────────── */
+.article-card {
+  background: var(--card); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 10px; box-shadow: var(--shadow);
+  transition: transform .15s; position: relative;
+}
+.article-card:active { transform: scale(.985); }
+.ac-badge {
+  display: inline-block; padding: 3px 8px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.ac-badge.high { background: #e8f5e9; color: #2e7d32; }
+.ac-badge.medium { background: #fff8e1; color: #f57f17; }
+.ac-badge.low { background: #fce4ec; color: #c62828; }
+.ac-title { font-size: 15px; font-weight: 700; line-height: 1.35; margin-bottom: 6px; }
+.ac-journal { font-size: 12px; color: var(--text-sec); margin-bottom: 4px; }
+.ac-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ac-tag {
+  padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  background: #f0f2f5; color: var(--text-sec);
+}
+.ac-summary {
+  font-size: 13px; color: var(--text-sec); line-height: 1.5;
+  max-height: 60px; overflow: hidden; position: relative;
+  transition: max-height .3s;
+}
+.ac-summary.expanded { max-height: 2000px; }
+.ac-summary-fade {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 30px;
+  background: linear-gradient(transparent, var(--card));
+}
+.ac-expand {
+  font-size: 12px; color: var(--gold); font-weight: 600; margin-top: 4px;
+  background: none; padding: 4px 0;
+}
+.ac-footer { display: flex; gap: 8px; margin-top: 12px; }
+.ac-btn {
+  flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 700;
+  text-align: center; transition: opacity .15s;
+}
+.ac-btn:active { opacity: .7; }
+.ac-btn-share { background: var(--gold); color: var(--navy); }
+.ac-btn-view { background: var(--navy-light); color: #fff; }
+
+/* ── Article Detail Modal ──────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.on { display: flex; }
+.modal-sheet {
+  background: var(--card); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px;
+  max-height: 90dvh; overflow-y: auto; padding: 20px 16px calc(20px + var(--safe-bottom));
+  animation: sheetUp .25s ease-out;
+}
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: #ccc; margin: 0 auto 16px; }
+.modal-close {
+  position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;
+  border-radius: 50%; background: #f0f2f5; font-size: 16px; color: var(--text-sec);
+  display: flex; align-items: center; justify-content: center;
+}
+.md-title { font-size: 17px; font-weight: 700; line-height: 1.35; margin-bottom: 8px; padding-right: 40px; }
+.md-journal { font-size: 12px; color: var(--text-sec); margin-bottom: 12px; }
+.md-section { margin-bottom: 16px; }
+.md-section-title { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.md-body { font-size: 14px; line-height: 1.6; color: var(--text); }
+.md-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ── Share Flow ────────────────────────────────────── */
+.share-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.share-overlay.on { display: flex; }
+.share-sheet {
+  background: var(--card); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px;
+  max-height: 92dvh; overflow-y: auto; padding: 0;
+  animation: sheetUp .25s ease-out;
+}
+.share-header {
+  padding: 16px; border-bottom: 1px solid #eee; position: sticky; top: 0;
+  background: var(--card); border-radius: 20px 20px 0 0; z-index: 10;
+}
+.share-header h3 { font-size: 16px; }
+.share-header .step-dots { display: flex; gap: 6px; margin-top: 8px; }
+.step-dot { width: 8px; height: 8px; border-radius: 50%; background: #dde; }
+.step-dot.on { background: var(--gold); width: 24px; border-radius: 4px; }
+.share-body { padding: 12px 16px; }
+.share-footer {
+  padding: 12px 16px calc(12px + var(--safe-bottom));
+  border-top: 1px solid #eee; display: flex; gap: 10px;
+  position: sticky; bottom: 0; background: var(--card);
+}
+.share-footer button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700; }
+.sf-back { background: #f0f2f5; color: var(--text); }
+.sf-next { background: var(--gold); color: var(--navy); }
+.sf-next:disabled { opacity: .4; }
+
+/* Doctor select */
+.doc-tabs { display: flex; gap: 0; margin-bottom: 12px; border-radius: 10px; overflow: hidden; border: 1.5px solid #dde; }
+.doc-tab {
+  flex: 1; padding: 9px; text-align: center; font-size: 13px; font-weight: 600;
+  color: var(--text-sec); background: var(--card); cursor: pointer; transition: all .2s;
+}
+.doc-tab.on { background: var(--navy); color: #fff; }
+.doc-search {
+  width: 100%; padding: 10px 14px; border: 1.5px solid #dde; border-radius: 10px;
+  font-size: 14px; margin-bottom: 10px; background: #f8f9fb;
+}
+.doc-search:focus { outline: none; border-color: var(--gold); }
+.doc-list { max-height: 340px; overflow-y: auto; }
+.doc-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 8px;
+  border-bottom: 1px solid #f5f5f5; cursor: pointer; transition: background .15s;
+  border-radius: 8px;
+}
+.doc-row:active { background: #f8f9fb; }
+.doc-row.selected { background: #fdf8ea; }
+.doc-chk {
+  width: 22px; height: 22px; border-radius: 6px; border: 2px solid #ccc;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s; font-size: 13px; color: #fff;
+}
+.doc-row.selected .doc-chk { background: var(--gold); border-color: var(--gold); }
+.doc-avatar {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--navy-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--gold); flex-shrink: 0;
+}
+.doc-info { flex: 1; min-width: 0; }
+.doc-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-spec { font-size: 12px; color: var(--text-sec); }
+.doc-score {
+  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+  background: #f0f2f5; color: var(--text-sec); flex-shrink: 0;
+}
+.doc-count { font-size: 13px; color: var(--text-sec); font-weight: 600; padding: 8px 0; }
+
+/* Channel selection */
+.channel-btns { display: flex; gap: 8px; margin: 12px 0; }
+.ch-btn {
+  flex: 1; padding: 14px 10px; border-radius: 12px; text-align: center;
+  border: 2px solid #eee; background: var(--card); transition: all .2s; cursor: pointer;
+}
+.ch-btn.on { border-color: var(--gold); background: #fdf8ea; }
+.ch-icon { font-size: 24px; margin-bottom: 4px; }
+.ch-label { font-size: 12px; font-weight: 700; color: var(--text); }
+
+/* Message preview */
+.msg-preview-label { font-size: 11px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.msg-bubble {
+  background: #dcf8c6; border-radius: 12px 12px 12px 0; padding: 12px 14px;
+  font-size: 13px; line-height: 1.5; color: var(--text); white-space: pre-line;
+  margin-bottom: 8px;
+}
+.msg-edit {
+  width: 100%; min-height: 100px; padding: 12px; border: 1.5px solid #dde;
+  border-radius: 10px; font-size: 14px; line-height: 1.5; resize: vertical;
+}
+.msg-edit:focus { outline: none; border-color: var(--gold); }
+.recip-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.recip-pill {
+  display: flex; align-items: center; gap: 4px; padding: 4px 10px 4px 6px;
+  border-radius: 20px; background: var(--navy-light); color: #fff; font-size: 12px; font-weight: 600;
+}
+.recip-pill-init {
+  width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: var(--navy);
+  display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800;
+}
+.recip-pill-x { margin-left: 4px; cursor: pointer; opacity: .6; font-size: 14px; }
+
+/* Success */
+.success-overlay {
+  position: fixed; inset: 0; background: rgba(10,22,40,.9); z-index: 400;
+  display: none; align-items: center; justify-content: center; flex-direction: column;
+  padding: 24px;
+}
+.success-overlay.on { display: flex; }
+.success-check { width: 80px; height: 80px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #fff; margin-bottom: 20px; animation: popIn .3s ease-out; }
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+.success-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: rgba(255,255,255,.7); text-align: center; line-height: 1.5; margin-bottom: 24px; }
+.success-btn { padding: 14px 40px; border-radius: 10px; background: var(--gold); color: var(--navy); font-size: 15px; font-weight: 700; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: calc(24px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+  background: var(--navy); color: #fff; padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; z-index: 500; opacity: 0;
+  transition: opacity .3s; pointer-events: none; max-width: 90%;
+}
+.toast.on { opacity: 1; }
+
+/* User menu */
+.user-menu {
+  position: fixed; top: calc(56px + var(--safe-top)); right: 8px;
+  background: var(--card); border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.15);
+  padding: 8px; z-index: 150; display: none; min-width: 180px;
+}
+.user-menu.on { display: block; }
+.um-item { padding: 10px 14px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.um-item:active { background: #f0f2f5; }
+.um-name { font-weight: 700; font-size: 13px; color: var(--text-sec); padding: 8px 14px 4px; }
+
+/* Loading */
+.loading { text-align: center; padding: 40px; color: var(--text-sec); }
+.spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid #dde; border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-sec); }
+.empty-icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+.empty-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.empty-sub { font-size: 13px; line-height: 1.5; }
+
+/* Shared history tab */
+.history-row {
+  display: flex; align-items: center; gap: 10px; padding: 12px;
+  background: var(--card); border-radius: var(--radius); margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+.hr-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.hr-icon.wa { background: #dcf8c6; }
+.hr-icon.em { background: #e3f2fd; }
+.hr-info { flex: 1; min-width: 0; }
+.hr-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hr-sub { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+.hr-time { font-size: 11px; color: var(--text-sec); flex-shrink: 0; }
+
+/* Warning badge */
+.freq-warn { background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #e65100; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-page" class="login-wrap">
+  <div class="login-logo">PinnacleIQ</div>
+  <div class="login-sub">Mankind Pharma &middot; Share Portal</div>
+  <div class="login-card">
+    <h2>Business Login</h2>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="inp-email" placeholder="your.email@mankind.in" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="inp-pwd" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ═══ APP SHELL ═══ -->
+<div id="app-shell" class="app-shell">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-logo">PinnacleIQ</div>
+    <div class="top-bar-spacer"></div>
+    <div class="top-bar-user" id="user-avatar" onclick="toggleUserMenu()"></div>
+  </div>
+
+  <!-- User menu dropdown -->
+  <div class="user-menu" id="user-menu">
+    <div class="um-name" id="um-name"></div>
+    <div class="um-item" onclick="doLogout()">Sign Out</div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <div class="tab-item on" data-tab="articles" onclick="switchTab('articles')">Articles</div>
+    <div class="tab-item" data-tab="history" onclick="switchTab('history')">Shared</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area" id="content-area"></div>
+</div>
+
+<!-- ═══ ARTICLE DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal-sheet" id="detail-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeDetail()">&times;</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- ═══ SHARE FLOW ═══ -->
+<div class="share-overlay" id="share-modal">
+  <div class="share-sheet" id="share-sheet">
+    <div class="share-header">
+      <h3 id="share-title">Select Doctors</h3>
+      <div class="step-dots"><div class="step-dot on" id="sd1"></div><div class="step-dot" id="sd2"></div></div>
+    </div>
+    <div class="share-body" id="share-body"></div>
+    <div class="share-footer">
+      <button class="sf-back" id="sf-back" onclick="shareBack()" style="display:none">Back</button>
+      <button class="sf-next" id="sf-next" onclick="shareNext()" disabled>Select Doctors</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS ═══ -->
+<div class="success-overlay" id="success-ov">
+  <div class="success-check">&#10003;</div>
+  <div class="success-title" id="suc-title">Shared Successfully!</div>
+  <div class="success-sub" id="suc-sub"></div>
+  <button class="success-btn" onclick="closeSuccess()">Done</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Config ────────────────────────────────────────── */
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:8010'
+  : location.origin;
+
+/* ── State ─────────────────────────────────────────── */
+let USER = null;
+let ARTICLES = [];
+let DOCTORS = [];
+let SHARE_LOGS = [];
+let CURRENT_TAB = 'articles';
+let SEARCH_Q = '';
+let FILTER_SPEC = '';
+let SHARE_PAPER = null;
+let SHARE_STEP = 1;
+let SHARE_SEL = new Set();
+let SHARE_CHANNEL = 'whatsapp';
+let SHARE_DOC_TAB = 'ai';
+let SHARE_DOC_Q = '';
+
+/* ── PMT Users (same as portal USERS_DB, PMT only) ── */
+const PMT_USERS = [
+  { email: 'amit.verma@mankind.in', name: 'Amit Verma', role: 'pmt', init: 'AV' },
+  { email: 'jijo@mankind.in', name: 'Jijo Kumar', role: 'pmt', init: 'JK', division: '3D Mankind' },
+  { email: 'rajesh.sharma@mankind.in', name: 'Rajesh Sharma', role: 'pmt', init: 'RS' },
+  { email: 'sunita.patel@mankind.in', name: 'Sunita Patel', role: 'pmt', init: 'SP' },
+  { email: 'vikram.singh@mankind.in', name: 'Vikram Singh', role: 'pmt', init: 'VS' },
+  { email: 'deepika.gupta@mankind.in', name: 'Deepika Gupta', role: 'pmt', init: 'DG' },
+  { email: 'suresh.menon@mankind.in', name: 'Suresh Menon', role: 'pmt', init: 'SM' },
+  { email: 'kavita.reddy@mankind.in', name: 'Kavita Reddy', role: 'pmt', init: 'KR' },
+  { email: 'rahul.agarwal@mankind.in', name: 'Rahul Agarwal', role: 'pmt', init: 'RA' },
+];
+const APP_PASSWORD = 'Test';
+
+/* ── Helpers ───────────────────────────────────────── */
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function $(id) { return document.getElementById(id); }
+function toast(msg, ms) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), ms || 2500);
+}
+function initials(name) {
+  return (name || '').split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+}
+
+/* ── Login ─────────────────────────────────────────── */
+function doLogin() {
+  const email = $('inp-email').value.trim().toLowerCase();
+  const pwd = $('inp-pwd').value;
+  const user = PMT_USERS.find(u => u.email === email);
+  if (!user) { $('login-err').textContent = 'No Business account found for this email'; return; }
+  if (pwd !== APP_PASSWORD) { $('login-err').textContent = 'Incorrect password'; return; }
+  USER = user;
+  localStorage.setItem('piq_pwa_user', JSON.stringify(user));
+  enterApp();
+}
+
+function doLogout() {
+  localStorage.removeItem('piq_pwa_user');
+  USER = null;
+  $('app-shell').classList.remove('on');
+  $('login-page').style.display = '';
+  $('user-menu').classList.remove('on');
+}
+
+function tryAutoLogin() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('piq_pwa_user'));
+    if (saved && saved.email) { USER = saved; enterApp(); }
+  } catch(e) {}
+}
+
+function enterApp() {
+  $('login-page').style.display = 'none';
+  $('app-shell').classList.add('on');
+  $('user-avatar').textContent = USER.init;
+  $('um-name').textContent = USER.name + ' (Business)';
+  loadData();
+}
+
+function toggleUserMenu() {
+  $('user-menu').classList.toggle('on');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#user-menu') && !e.target.closest('#user-avatar'))
+    $('user-menu').classList.remove('on');
+});
+
+/* ── Data Loading ──────────────────────────────────── */
+async function loadData() {
+  $('content-area').innerHTML = '<div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading articles...</div></div>';
+  try {
+    const [contentRes, doctorsRes] = await Promise.all([
+      fetch(API + '/content?status=approved').then(r => r.json()),
+      fetch(API + '/doctors').then(r => r.json()),
+    ]);
+    ARTICLES = (contentRes.items || []).map(mapArticle).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    DOCTORS = (doctorsRes.doctors || []).map(mapDoctor);
+    loadShareLogs();
+    renderTab();
+  } catch (e) {
+    $('content-area').innerHTML = '<div class="empty-state"><div class="empty-icon">&#9888;</div><div class="empty-title">Connection Error</div><div class="empty-sub">Could not reach the server.<br>Make sure the backend is running.</div></div>';
+  }
+}
+
+async function loadShareLogs() {
+  try {
+    const res = await fetch(API + '/share-logs').then(r => r.json());
+    SHARE_LOGS = (res.logs || []).sort((a, b) => (b.shared_at || '').localeCompare(a.shared_at || ''));
+  } catch(e) { SHARE_LOGS = []; }
+}
+
+function mapArticle(item) {
+  return {
+    id: item.id,
+    title: item.title || 'Untitled',
+    journal: item.journal_name || item.journal || '',
+    authors: item.authors || '',
+    date: item.created_at ? item.created_at.substring(0, 10) : '',
+    specialty: item.specialty || '',
+    therapy: item.therapy_area || '',
+    sub: item.sub_category || '',
+    relevance: item.evidence_quality || item.relevance || 'Medium',
+    summary: item.summary || '',
+    abstract: item.article_content || item.abstract || item.summary || '',
+    tags: item.tags || [],
+    source: item.source || '',
+    pmid: item.pubmed_id || item.pmid || '',
+  };
+}
+
+function mapDoctor(d) {
+  return {
+    id: d.id || d.doctor_code || '',
+    name: d.name || d.dr_name || '',
+    init: initials(d.name || d.dr_name || ''),
+    spec: d.specialty || d.speciality || '',
+    city: d.city || '',
+    score: d.pinnacle_score || d.engagement_score || 0,
+    hospital: d.hospital || '',
+    whatsapp: d.whatsapp || '',
+    email: d.email || '',
+    channel: d.preferred_channel || 'whatsapp',
+    interests: d.clinical_interests || '',
+  };
+}
+
+/* ── Tab switching ─────────────────────────────────── */
+function switchTab(tab) {
+  CURRENT_TAB = tab;
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+  if (tab === 'history') loadShareLogs().then(renderTab);
+  else renderTab();
+}
+
+function renderTab() {
+  if (CURRENT_TAB === 'articles') renderArticles();
+  else renderHistory();
+}
+
+/* ── Articles Tab ──────────────────────────────────── */
+function renderArticles() {
+  const specs = [...new Set(ARTICLES.map(a => a.specialty).filter(Boolean))].sort();
+  let filtered = ARTICLES;
+  if (SEARCH_Q) {
+    const q = SEARCH_Q.toLowerCase();
+    filtered = filtered.filter(a =>
+      a.title.toLowerCase().includes(q) || a.specialty.toLowerCase().includes(q) ||
+      a.therapy.toLowerCase().includes(q) || a.journal.toLowerCase().includes(q) ||
+      a.authors.toLowerCase().includes(q) || (a.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+  if (FILTER_SPEC) filtered = filtered.filter(a => a.specialty === FILTER_SPEC);
+
+  let html = `<div class="search-bar">
+    <input class="search-input" type="search" placeholder="Search articles..." value="${esc(SEARCH_Q)}" oninput="onSearch(this.value)">
+  </div>`;
+
+  if (specs.length > 1) {
+    html += '<div class="filter-chips">';
+    html += `<div class="filter-chip ${FILTER_SPEC ? '' : 'on'}" onclick="setFilter('')">All</div>`;
+    specs.forEach(s => {
+      html += `<div class="filter-chip ${FILTER_SPEC === s ? 'on' : ''}" onclick="setFilter('${esc(s)}')">${esc(s)}</div>`;
+    });
+    html += '</div>';
+  }
+
+  if (filtered.length === 0) {
+    html += '<div class="empty-state"><div class="empty-icon">&#128196;</div><div class="empty-title">No Articles Found</div><div class="empty-sub">No approved articles match your search.</div></div>';
+  } else {
+    filtered.forEach((a, i) => {
+      const relClass = (a.relevance || '').toLowerCase().includes('high') ? 'high' : (a.relevance || '').toLowerCase().includes('low') ? 'low' : 'medium';
+      const sumPreview = (a.summary || '').substring(0, 150);
+      html += `<div class="article-card">
+        <span class="ac-badge ${relClass}">${esc(a.relevance || 'N/A')}</span>
+        <div class="ac-title">${esc(a.title)}</div>
+        <div class="ac-journal">${esc(a.journal)}${a.date ? ' &middot; ' + esc(a.date) : ''}</div>
+        <div class="ac-meta">
+          ${a.specialty ? `<span class="ac-tag">${esc(a.specialty)}</span>` : ''}
+          ${a.therapy && a.therapy.toLowerCase() !== a.specialty.toLowerCase() ? `<span class="ac-tag">${esc(a.therapy)}</span>` : ''}
+          ${a.sub && a.sub !== 'NA (Not applicable)' ? `<span class="ac-tag">${esc(a.sub)}</span>` : ''}
+        </div>
+        ${sumPreview ? `<div class="ac-summary" id="sum-${i}">${esc(sumPreview)}${a.summary.length > 150 ? '...' : ''}<div class="ac-summary-fade"></div></div>` : ''}
+        <div class="ac-footer">
+          <button class="ac-btn ac-btn-view" onclick="openDetail(${i})">View</button>
+          <button class="ac-btn ac-btn-share" onclick="openShare(${i})">Share</button>
+        </div>
+      </div>`;
+    });
+  }
+  $('content-area').innerHTML = html;
+}
+
+function onSearch(v) { SEARCH_Q = v; renderArticles(); }
+function setFilter(s) { FILTER_SPEC = s; renderArticles(); }
+
+/* ── Detail Modal ──────────────────────────────────── */
+function openDetail(idx) {
+  const a = ARTICLES[idx];
+  if (!a) return;
+  let html = `<div class="md-title">${esc(a.title)}</div>
+    <div class="md-journal">${esc(a.journal)}${a.authors ? ' &middot; ' + esc(a.authors) : ''}${a.date ? ' &middot; ' + esc(a.date) : ''}</div>
+    <div class="md-section"><div class="md-section-title">Specialty</div><div class="md-tags">
+      ${a.specialty ? `<span class="ac-tag">${esc(a.specialty)}</span>` : ''}
+      ${a.therapy && a.therapy.toLowerCase() !== a.specialty.toLowerCase() ? `<span class="ac-tag">${esc(a.therapy)}</span>` : ''}
+      ${a.sub && a.sub !== 'NA (Not applicable)' ? `<span class="ac-tag">${esc(a.sub)}</span>` : ''}
+    </div></div>`;
+  if (a.summary) html += `<div class="md-section"><div class="md-section-title">AI Summary</div><div class="md-body">${esc(a.summary)}</div></div>`;
+  if (a.abstract && a.abstract !== a.summary) html += `<div class="md-section"><div class="md-section-title">Complete Article</div><div class="md-body" style="font-size:13px;">${esc(a.abstract)}</div></div>`;
+  if (a.tags && a.tags.length) html += `<div class="md-section"><div class="md-section-title">Tags</div><div class="md-tags">${a.tags.map(t => `<span class="ac-tag">${esc(t)}</span>`).join('')}</div></div>`;
+  html += `<div style="margin-top:16px"><button class="ac-btn ac-btn-share" style="width:100%" onclick="closeDetail();openShare(${idx})">Share This Article</button></div>`;
+  $('detail-content').innerHTML = html;
+  $('detail-modal').classList.add('on');
+}
+function closeDetail() { $('detail-modal').classList.remove('on'); }
+
+/* ── Share Flow ────────────────────────────────────── */
+function openShare(idx) {
+  SHARE_PAPER = ARTICLES[idx];
+  if (!SHARE_PAPER) return;
+  SHARE_STEP = 1;
+  SHARE_SEL = new Set();
+  SHARE_CHANNEL = 'whatsapp';
+  SHARE_DOC_TAB = 'ai';
+  SHARE_DOC_Q = '';
+  renderShareStep();
+  $('share-modal').classList.add('on');
+}
+function closeShare() { $('share-modal').classList.remove('on'); }
+
+function renderShareStep() {
+  if (SHARE_STEP === 1) renderShareDoctors();
+  else renderShareMessage();
+  $('sd1').className = SHARE_STEP === 1 ? 'step-dot on' : 'step-dot';
+  $('sd2').className = SHARE_STEP === 2 ? 'step-dot on' : 'step-dot';
+  $('sf-back').style.display = SHARE_STEP === 1 ? 'none' : '';
+  $('sf-next').textContent = SHARE_STEP === 1 ? `Continue (${SHARE_SEL.size})` : 'Send Now';
+  $('sf-next').disabled = SHARE_STEP === 1 ? SHARE_SEL.size === 0 : false;
+  $('share-title').textContent = SHARE_STEP === 1 ? 'Select Doctors' : 'Message & Channel';
+}
+
+function getAIRecs() {
+  if (!SHARE_PAPER) return [];
+  const pSpec = (SHARE_PAPER.specialty || '').toLowerCase();
+  const pTherapy = (SHARE_PAPER.therapy || '').toLowerCase();
+  let matched = DOCTORS.filter(d => {
+    const ds = (d.spec || '').toLowerCase();
+    const di = (d.interests || '').toLowerCase();
+    return ds.includes(pSpec) || ds.includes(pTherapy) || di.includes(pSpec) || di.includes(pTherapy);
+  });
+  if (matched.length === 0) matched = DOCTORS.filter(d => d.score >= 70);
+  return matched.sort((a, b) => b.score - a.score);
+}
+
+function renderShareDoctors() {
+  const aiRecs = getAIRecs();
+  const docs = SHARE_DOC_TAB === 'ai' ? aiRecs : DOCTORS;
+  let filtered = docs;
+  if (SHARE_DOC_Q) {
+    const q = SHARE_DOC_Q.toLowerCase();
+    filtered = docs.filter(d => d.name.toLowerCase().includes(q) || d.spec.toLowerCase().includes(q) || d.city.toLowerCase().includes(q));
+  }
+
+  let html = `<div class="doc-tabs">
+    <div class="doc-tab ${SHARE_DOC_TAB === 'ai' ? 'on' : ''}" onclick="setDocTab('ai')">AI Recommended (${aiRecs.length})</div>
+    <div class="doc-tab ${SHARE_DOC_TAB === 'all' ? 'on' : ''}" onclick="setDocTab('all')">All Doctors (${DOCTORS.length})</div>
+  </div>
+  <input class="doc-search" type="search" placeholder="Search by name, specialty, city..." value="${esc(SHARE_DOC_Q)}" oninput="onDocSearch(this.value)">
+  <div class="doc-count">${SHARE_SEL.size} doctor${SHARE_SEL.size !== 1 ? 's' : ''} selected</div>
+  <div class="doc-list">`;
+
+  filtered.forEach(d => {
+    const sel = SHARE_SEL.has(String(d.id));
+    html += `<div class="doc-row ${sel ? 'selected' : ''}" onclick="toggleDoc('${esc(String(d.id))}')">
+      <div class="doc-chk">${sel ? '&#10003;' : ''}</div>
+      <div class="doc-avatar">${esc(d.init)}</div>
+      <div class="doc-info"><div class="doc-name">${esc(d.name)}</div><div class="doc-spec">${esc(d.spec)}${d.city ? ' &middot; ' + esc(d.city) : ''}</div></div>
+      <div class="doc-score">${d.score}</div>
+    </div>`;
+  });
+  if (filtered.length === 0) html += '<div class="empty-state" style="padding:30px"><div class="empty-sub">No doctors found</div></div>';
+  html += '</div>';
+  $('share-body').innerHTML = html;
+}
+
+function setDocTab(t) { SHARE_DOC_TAB = t; SHARE_DOC_Q = ''; renderShareStep(); }
+function onDocSearch(v) { SHARE_DOC_Q = v; renderShareDoctors(); }
+
+function toggleDoc(id) {
+  if (SHARE_SEL.has(id)) SHARE_SEL.delete(id);
+  else SHARE_SEL.add(id);
+  renderShareStep();
+}
+
+function renderShareMessage() {
+  const selDocs = DOCTORS.filter(d => SHARE_SEL.has(String(d.id)));
+  const firstName = selDocs.length === 1 ? selDocs[0].name.replace(/^Dr\.?\s*/i, '').split(/\s/)[0] : '';
+  const greeting = selDocs.length === 1 ? `Dear Dr. ${firstName}` : 'Dear Doctor';
+  const defaultMsg = `${greeting},\n\nI wanted to share this recent research article with you:\n\n"${SHARE_PAPER.title}"\n${SHARE_PAPER.journal ? '(' + SHARE_PAPER.journal + ')' : ''}\n\nThis article covers key findings in ${SHARE_PAPER.specialty || SHARE_PAPER.therapy || 'medical research'} that may be relevant to your practice.\n\nBest regards,\n${USER.name}\nMankind Pharma`;
+
+  let html = '<div class="recip-pills">';
+  selDocs.forEach(d => {
+    html += `<div class="recip-pill"><span class="recip-pill-init">${esc(d.init)}</span>${esc(d.name)}<span class="recip-pill-x" onclick="removeRecip('${esc(String(d.id))}')">&times;</span></div>`;
+  });
+  html += '</div>';
+
+  html += `<div class="msg-preview-label">Share via</div>
+  <div class="channel-btns">
+    <div class="ch-btn ${SHARE_CHANNEL === 'whatsapp' ? 'on' : ''}" onclick="setChannel('whatsapp')"><div class="ch-icon">&#128172;</div><div class="ch-label">WhatsApp</div></div>
+    <div class="ch-btn ${SHARE_CHANNEL === 'email' ? 'on' : ''}" onclick="setChannel('email')"><div class="ch-icon">&#9993;</div><div class="ch-label">Email</div></div>
+    <div class="ch-btn ${SHARE_CHANNEL === 'both' ? 'on' : ''}" onclick="setChannel('both')"><div class="ch-icon">&#128241;</div><div class="ch-label">Both</div></div>
+  </div>`;
+
+  html += `<div class="msg-preview-label">Message Preview</div>
+  <div class="msg-bubble" id="msg-preview">${esc(defaultMsg)}</div>
+  <div class="msg-preview-label" style="margin-top:12px">Edit Message</div>
+  <textarea class="msg-edit" id="msg-edit" oninput="updatePreview()">${esc(defaultMsg)}</textarea>`;
+
+  $('share-body').innerHTML = html;
+}
+
+function setChannel(ch) { SHARE_CHANNEL = ch; renderShareMessage(); }
+function removeRecip(id) {
+  SHARE_SEL.delete(id);
+  if (SHARE_SEL.size === 0) { SHARE_STEP = 1; }
+  renderShareStep();
+}
+function updatePreview() {
+  const ta = $('msg-edit');
+  if (ta) $('msg-preview').textContent = ta.value;
+}
+
+function shareBack() {
+  if (SHARE_STEP > 1) { SHARE_STEP = 1; renderShareStep(); }
+}
+
+async function shareNext() {
+  if (SHARE_STEP === 1) {
+    if (SHARE_SEL.size === 0) return;
+    SHARE_STEP = 2;
+    renderShareStep();
+    return;
+  }
+  // Step 2 — Send
+  const selDocs = DOCTORS.filter(d => SHARE_SEL.has(String(d.id)));
+  const btn = $('sf-next');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  const channel = SHARE_CHANNEL === 'both' ? 'whatsapp' : SHARE_CHANNEL;
+  const warnings = [];
+
+  for (const doc of selDocs) {
+    try {
+      const res = await fetch(API + '/content/' + encodeURIComponent(SHARE_PAPER.id) + '/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          doctor_id: String(doc.id),
+          doctor_name: doc.name,
+          specialty: doc.spec,
+          channel: channel,
+          shared_by: USER.name + ' (BU Head · PMT)',
+        }),
+      });
+      const data = await res.json();
+      if (data.warning) warnings.push({ doc: doc.name, warning: data.warning });
+    } catch (e) {
+      console.error('Share failed for', doc.name, e);
+    }
+  }
+
+  closeShare();
+  $('suc-title').textContent = 'Shared Successfully!';
+  $('suc-sub').textContent = `Article shared with ${selDocs.length} doctor${selDocs.length !== 1 ? 's' : ''} via ${SHARE_CHANNEL === 'both' ? 'WhatsApp & Email' : SHARE_CHANNEL}.`;
+  if (warnings.length) {
+    $('suc-sub').textContent += '\n\n' + warnings.map(w => w.warning).join('\n');
+  }
+  $('success-ov').classList.add('on');
+  loadShareLogs();
+}
+
+function closeSuccess() { $('success-ov').classList.remove('on'); }
+
+/* ── History Tab ───────────────────────────────────── */
+function renderHistory() {
+  if (SHARE_LOGS.length === 0) {
+    $('content-area').innerHTML = '<div class="empty-state"><div class="empty-icon">&#128203;</div><div class="empty-title">No Shares Yet</div><div class="empty-sub">Articles you share with doctors will appear here.</div></div>';
+    return;
+  }
+  let html = '';
+  SHARE_LOGS.forEach(log => {
+    const isWA = (log.channel || '').toLowerCase() === 'whatsapp';
+    const title = getArticleTitleById(log.content_id);
+    const time = log.shared_at ? formatTime(log.shared_at) : '';
+    html += `<div class="history-row">
+      <div class="hr-icon ${isWA ? 'wa' : 'em'}">${isWA ? '&#128172;' : '&#9993;'}</div>
+      <div class="hr-info">
+        <div class="hr-title">${esc(title)}</div>
+        <div class="hr-sub">${esc(log.doctor_name || '')} &middot; ${esc(log.specialty || '')}</div>
+      </div>
+      <div class="hr-time">${esc(time)}</div>
+    </div>`;
+  });
+  $('content-area').innerHTML = html;
+}
+
+function getArticleTitleById(id) {
+  const a = ARTICLES.find(a => a.id === id);
+  return a ? a.title : (id || '').substring(0, 20) + '...';
+}
+
+function formatTime(iso) {
+  try {
+    const d = new Date(iso);
+    const now = new Date();
+    const diff = now - d;
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  } catch(e) { return ''; }
+}
+
+/* ── Swipe-to-close modals ─────────────────────────── */
+$('detail-modal').addEventListener('click', e => { if (e.target === $('detail-modal')) closeDetail(); });
+$('share-modal').addEventListener('click', e => { if (e.target === $('share-modal')) closeShare(); });
+
+/* ── Service Worker ────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/pwa/sw.js').catch(() => {});
+}
+
+/* ── Boot ──────────────────────────────────────────── */
+tryAutoLogin();
+</script>
+</body>
+</html>

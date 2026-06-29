@@ -48,6 +48,7 @@ allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLO
     "http://localhost:8010",      # Same-origin API requests
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:8010",
 ]
 
 # In production, add Railway deployment URL
@@ -856,6 +857,29 @@ async def serve_portal():
     if PORTAL_HTML.exists():
         return _FileResponse(str(PORTAL_HTML), media_type="text/html")
     return {"error": "Portal HTML not found at " + str(PORTAL_HTML)}
+
+
+# ── Serve PWA (Business user mobile app) ─────────────────────────────────────
+PWA_DIR = Path(__file__).parent.parent.parent / "pwa"
+
+@app.get("/pwa", include_in_schema=False)
+async def serve_pwa():
+    pwa_html = PWA_DIR / "index.html"
+    if pwa_html.exists():
+        return _FileResponse(str(pwa_html), media_type="text/html")
+    return {"error": "PWA not found at " + str(pwa_html)}
+
+@app.get("/pwa/{file_path:path}", include_in_schema=False)
+async def serve_pwa_assets(file_path: str):
+    target = PWA_DIR / file_path
+    if target.exists() and target.is_file():
+        media = "application/json" if file_path.endswith(".json") else \
+                "application/javascript" if file_path.endswith(".js") else \
+                "image/svg+xml" if file_path.endswith(".svg") else \
+                "text/plain"
+        return _FileResponse(str(target), media_type=media)
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"error": "Not found"}, status_code=404)
 
 
 # ── Serve React SPA (for production/Railway deployment) ───────────────────────
