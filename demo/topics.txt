@@ -38,3 +38,4 @@ Type 2 Diabetes - Diabetology (randomized controlled trial) | Diabetology | Diab
 General Research - Diabetology | Diabetology | Diabetology
 General Research - Cardiology | Cardiology | Cardiology
 Hypertension - Endocrinology (antihypertensive therapy advances) | Endocrinology | Endocrinology
+GLP-1 receptor agonists in Type 2 Diabetes | Endocrinology | Diabetes
